@@ -18,9 +18,10 @@ class Group(db.Model):
     type = db.Column(db.Enum("online", "in-person"), default="indoor", nullable=False)
     city = db.Column(db.String(30), nullable=False)
     state = db.Column(db.String(2), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now())
-    updated_at = db.Column(db.DateTime, default=datetime.now(), onupdate=datetime.now())
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
+    # Relationship attributes
     organizers = db.relationship("User", back_populates="groups")
     events = db.relationship("Event", back_populates="groups")
     venues = db.relationship("Venue", back_populates="groups")

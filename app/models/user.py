@@ -5,6 +5,7 @@ from datetime import datetime
 from .like import likes
 from .member import members
 from .attendance import attendances
+from .user_tag import user_tags
 
 
 class User(db.Model, UserMixin):
@@ -21,10 +22,10 @@ class User(db.Model, UserMixin):
     hashed_password = db.Column(db.String(255), nullable=False)
     bio = db.Column(db.String(500), nullable=False)
     profile_image_url = db.Column(db.String(500), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now())
-    updated_at = db.Column(db.DateTime, default=datetime.now(), onupdate=datetime.now())
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    # Relationship attributed
+    # Relationship attributes
     posts = db.relationship(
         "Post",
         back_populates="user",
@@ -57,6 +58,13 @@ class User(db.Model, UserMixin):
         cascade="all, delete-orphan",
     )
 
+    users_tags = db.relationship(
+        "Tag",
+        secondary=user_tags,
+        back_populates="tags_users",
+        cascade="all, delete-orphan",
+    )
+
     groups = db.relationship("Group", back_populates="organizers")
 
     @property
@@ -80,6 +88,7 @@ class User(db.Model, UserMixin):
         user_comments=False,
         user_memberships=False,
         user_attendances=False,
+        users_tags=False,
     ):
         dict_user = {
             "id": self.id,
@@ -108,9 +117,18 @@ class User(db.Model, UserMixin):
             dict_user["user_attendances"] = [
                 user_attendance.to_dict() for user_attendance in self.user_attendances
             ]
+        if users_tags:
+            dict_user["users_tags"] = [
+                user_tag.to_dict() for user_tag in self.users_tags
+            ]
         return dict_user
 
-    def to_dict_no_posts(self, user_memberships=False, user_attendances=False):
+    def to_dict_no_posts(
+        self,
+        user_memberships=False,
+        user_attendances=False,
+        users_tags=False,
+    ):
 
         dict_user = {
             "id": self.id,
@@ -132,5 +150,9 @@ class User(db.Model, UserMixin):
         if user_attendances:
             dict_user["user_attendances"] = [
                 user_attendance.to_dict() for user_attendance in self.user_attendances
+            ]
+        if users_tags:
+            dict_user["users_tags"] = [
+                user_tag.to_dict() for user_tag in self.users_tags
             ]
         return dict_user

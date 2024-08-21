@@ -22,9 +22,10 @@ class Event(db.Model):
     capacity = db.Column(db.Integer, nullable=False)
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now())
-    updated_at = db.Column(db.DateTime, default=datetime.now(), onupdate=datetime.now())
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
+    # Relationship attributes
     venues = db.relationship("Venue", back_populates="events")
     groups = db.relationship("Group", back_populates="events")
     event_images = db.relationship(

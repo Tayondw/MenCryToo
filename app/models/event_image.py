@@ -13,8 +13,8 @@ class EventImage(db.Model):
         db.Integer, db.ForeignKey(add_prefix_for_prod("events.id")), nullable=False
     )
     event_image = db.Column(db.String(500), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now())
-    updated_at = db.Column(db.DateTime, default=datetime.now())
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     event = db.relationship("Event", back_populates="event_images")
 
