@@ -15,11 +15,11 @@ class Comment(db.Model):
     post_id = db.Column(
         db.Integer, db.ForeignKey(add_prefix_for_prod("posts.id")), nullable=False
     )
-    message = db.Column(db.String(255), nullable=True)
+    comment = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now())
-    updated_at = db.Column(db.DateTime, default=datetime.now())
+    updated_at = db.Column(db.DateTime, default=datetime.now(), onupdate=datetime.now())
 
-    user = db.relationship("User", back_populates="comments")
+    commenter = db.relationship("User", back_populates="comments")
     post = db.relationship("Post", back_populates="comments")
 
     def __repr__(self):

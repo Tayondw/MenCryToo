@@ -23,17 +23,17 @@ class Event(db.Model):
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now())
-    updated_at = db.Column(db.DateTime, default=datetime.now())
+    updated_at = db.Column(db.DateTime, default=datetime.now(), onupdate=datetime.now())
 
-    venue = db.relationship("Venue", back_populates="events")
-    group = db.relationship("Group", back_populates="events")
-    images = db.relationship(
-        "EventImage", back_populates="events", cascade="all, delete-orphan"
+    venues = db.relationship("Venue", back_populates="events")
+    groups = db.relationship("Group", back_populates="events")
+    event_images = db.relationship(
+        "EventImage", back_populates="event", cascade="all, delete-orphan"
     )
-    attendances = db.relationship(
-        "Attendance",
+    event_attendances = db.relationship(
+        "User",
         secondary=attendances,
-        back_populates="events",
+        back_populates="user_attendances",
         cascade="all, delete-orphan",
     )
 
@@ -42,14 +42,12 @@ class Event(db.Model):
         organizer = self.group.organizer.to_dict()
         #   group = [group.to_dict() for group in self.groups]
         #   venue = [venue.to_dict() for venue in self.venues]
-        image = {event_image.id: event_image.to_dict() for event_image in self.images}
-        attendance = {
-            attendance.id: attendance.to_dict() for attendance in self.attendances
-        }
+        image = {event_image.id: event_image.to_dict() for event_image in self.event_images}
 
         organizerInfo = {
             "firstName": organizer["first_name"],
             "lastName": organizer["last_name"],
+            "email": organizer["email"],
             "profileImage": organizer["profileImage"],
         }
 
@@ -74,6 +72,7 @@ class Event(db.Model):
 
         return {
             "id": self.id,
+            "eventImage": image,
             "venueId": self.venue_id,
             "venueInfo": venueInfo,
             "groupId": self.group_id,
@@ -86,6 +85,7 @@ class Event(db.Model):
             "capacity": self.capacity,
             "startDate": self.start_date,
             "endDate": self.end_date,
+            "attendees": len(self.event_attendances),
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }

@@ -17,7 +17,7 @@ class Post(db.Model):
     )
     image = db.Column(db.String(500), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now())
-    updated_at = db.Column(db.DateTime, default=datetime.now())
+    updated_at = db.Column(db.DateTime, default=datetime.now(), onupdate=datetime.now())
 
     # Relationship attributes
     user = db.relationship(
@@ -31,11 +31,15 @@ class Post(db.Model):
         back_populates="user_likes",
     )
 
+    post_comments = db.relationship(
+        "Comment", back_populates="post", cascade="all, delete-orphan"
+    )
+
     def __repr__(self):
         return f"< Post id: {self.id} by: {self.user.username} >"
 
-    def to_dict(self):
-        return {
+    def to_dict(self, post_comments=False):
+        dict_post = {
             "id": self.id,
             "title": self.title,
             "caption": self.caption,
@@ -46,3 +50,8 @@ class Post(db.Model):
             "createdAt": self.created_at,
             "updatedAt": self.updated_at,
         }
+        if post_comments:
+            dict_post["postComments"] = [
+                post_comment.to_dict() for post_comment in self.post_comments
+            ]
+        return dict_post
