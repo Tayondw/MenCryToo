@@ -11,7 +11,7 @@ class Event(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     venue_id = db.Column(
-        db.Integer, db.ForeignKey(add_prefix_for_prod("venues.id")), nullable=False
+        db.Integer, db.ForeignKey(add_prefix_for_prod("venues.id")), nullable=True
     )
     group_id = db.Column(
         db.Integer, db.ForeignKey(add_prefix_for_prod("groups.id")), nullable=False
@@ -20,8 +20,8 @@ class Event(db.Model):
     description = db.Column(db.String(150), nullable=False)
     type = db.Column(db.Enum("outdoor", "indoor"), default="indoor", nullable=False)
     capacity = db.Column(db.Integer, nullable=False)
-    start_date = db.Column(db.Date, nullable=False)
-    end_date = db.Column(db.Date, nullable=False)
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
