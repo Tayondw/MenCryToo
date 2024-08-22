@@ -53,14 +53,25 @@ def seed_user_tags():
 # it will reset the primary keys for you as well.
 def undo_users():
     if environment == "production":
+        db.session.execute(f"TRUNCATE table {SCHEMA}.users RESTART IDENTITY CASCADE;")
+    else:
+        db.session.execute(text("DELETE FROM users"))
+    db.session.commit()
+
+
+def undo_tags():
+    if environment == "production":
+        db.session.execute(f"TRUNCATE table {SCHEMA}.tags RESTART IDENTITY CASCADE;")
+    else:
+        db.session.execute(text("DELETE FROM tags"))
+    db.session.commit()
+
+
+def undo_user_tags():
+    if environment == "production":
         db.session.execute(
             f"TRUNCATE table {SCHEMA}.user_tags RESTART IDENTITY CASCADE;"
         )
-        db.session.execute(f"TRUNCATE table {SCHEMA}.users RESTART IDENTITY CASCADE;")
-        db.session.execute(f"TRUNCATE table {SCHEMA}.tags RESTART IDENTITY CASCADE;")
     else:
         db.session.execute(text("DELETE FROM user_tags"))
-        db.session.execute(text("DELETE FROM users"))
-        db.session.execute(text("DELETE FROM tags"))
-
     db.session.commit()
