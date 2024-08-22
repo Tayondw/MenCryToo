@@ -1,19 +1,47 @@
-from app.models import db, User, environment, SCHEMA
+from app.models import db, User, Tag, environment, SCHEMA
 from sqlalchemy.sql import text
+from .data.users import users
+from .data.tags import tags
 
 
 # Adds a demo user, you can add other users here if you want
 def seed_users():
-    demo = User(
-        username='Demo', email='demo@aa.io', password='password')
-    marnie = User(
-        username='marnie', email='marnie@aa.io', password='password')
-    bobbie = User(
-        username='bobbie', email='bobbie@aa.io', password='password')
+    for user_data in users:
+        user = User(**user_data)
+        db.session.add(user)
+    db.session.commit()
 
-    db.session.add(demo)
-    db.session.add(marnie)
-    db.session.add(bobbie)
+
+# Seed tags
+def seed_tags():
+    for tag_data in tags:
+        tag = Tag(**tag_data)
+        db.session.add(tag)
+    db.session.commit()
+
+
+# Seed tags for users - predefined
+user_tag_associations = {
+    "demo-user": ["ANGER"],
+    "demo-lition": ["ANXIETY"],
+    "charley": ["DEPRESSION"],
+    "spongebob": ["SUBSTANCE ABUSE"],
+    "eye-zik": ["STRESS", "SUBSTANCE ABUSE"],
+    "iggy": ["RELATIONSHIPS", "ANGER"],
+    "juana-banana": ["TRAUMA", "ANGER"],
+    "zak-attack": ["COMING OUT", "DEPRESSION", "ANXIETY"],
+    "donny-boy": ["GRIEF", "DEPRESSION"],
+    "laustiNfound": ["SUICIDAL THOUGHTS", "DEPRESSION"],
+}
+
+
+def seed_user_tags():
+    for username, tag_names in user_tag_associations.items():
+        user = User.query.filter_by(username=username).first()
+        for tag_name in tag_names:
+            tag = Tag.query.filter_by(name=tag_name).first()
+            if user and tag:
+                user.users_tags.append(tag)
     db.session.commit()
 
 
@@ -25,8 +53,14 @@ def seed_users():
 # it will reset the primary keys for you as well.
 def undo_users():
     if environment == "production":
+        db.session.execute(
+            f"TRUNCATE table {SCHEMA}.user_tags RESTART IDENTITY CASCADE;"
+        )
         db.session.execute(f"TRUNCATE table {SCHEMA}.users RESTART IDENTITY CASCADE;")
+        db.session.execute(f"TRUNCATE table {SCHEMA}.tags RESTART IDENTITY CASCADE;")
     else:
+        db.session.execute(text("DELETE FROM user_tags"))
         db.session.execute(text("DELETE FROM users"))
-        
+        db.session.execute(text("DELETE FROM tags"))
+
     db.session.commit()
