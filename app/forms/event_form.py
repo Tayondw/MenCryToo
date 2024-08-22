@@ -7,6 +7,7 @@ types = ["outdoor", "indoor"]
 
 class EventForm(FlaskForm):
     group_id = IntegerField("group id", validators=[DataRequired()])
+    venue_id = IntegerField("venue id", validators=[DataRequired()])
     name = StringField(
         "Event Name",
         validators=[

@@ -1,5 +1,6 @@
 venues = [
     {
+        "group_id": 1,
         "address": "4898 Lavista Rd",
         "city": "Tucker",
         "state": "GA",
@@ -8,6 +9,7 @@ venues = [
         "longitude": -84.2207957862,
     },
     {
+        "group_id": 2,
         "address": "2201 Lawton St",
         "city": "San Francisco",
         "state": "CA",
@@ -16,6 +18,7 @@ venues = [
         "longitude": -122.4859641066,
     },
     {
+        "group_id": 3,
         "address": "1301 Shoal Creek Blvd",
         "city": "Austin",
         "state": "TX ",
@@ -24,6 +27,7 @@ venues = [
         "longitude": -97.7381640743,
     },
     {
+        "group_id": 4,
         "address": "901 Wythe St",
         "city": "Alexandria",
         "state": "VA",
@@ -32,6 +36,7 @@ venues = [
         "longitude": -77.0566453633,
     },
     {
+        "group_id": 5,
         "address": "2235 Briarwood Way NE",
         "city": "Atlanta",
         "state": "GA",
@@ -40,6 +45,7 @@ venues = [
         "longitude": -84.326783956,
     },
     {
+        "group_id": 6,
         "address": "10510 5th Ave NE",
         "city": "Seattle",
         "state": "WA",

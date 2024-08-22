@@ -4,6 +4,8 @@ from wtforms.validators import DataRequired, Length
 
 
 class CommentForm(FlaskForm):
+    user_id = IntegerField("user id", validators=[DataRequired()])
+    post_id = IntegerField("post id", validators=[DataRequired()])
     comment = StringField(
         "comment",
         validators=[

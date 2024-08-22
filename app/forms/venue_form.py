@@ -4,6 +4,7 @@ from wtforms.validators import DataRequired, Length
 
 
 class VenueForm(FlaskForm):
+    group_id = IntegerField("group id", validators=[DataRequired()])
     address = StringField("address", validators=[DataRequired()])
     city = StringField(
         "city",

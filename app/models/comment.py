@@ -16,6 +16,7 @@ class Comment(db.Model):
         db.Integer, db.ForeignKey(add_prefix_for_prod("posts.id")), nullable=False
     )
     comment = db.Column(db.String(255), nullable=False)
+    parent = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
@@ -24,14 +25,16 @@ class Comment(db.Model):
     post = db.relationship("Post", back_populates="comments")
 
     def __repr__(self):
-        return f"< Comment id: {self.id} by: {self.user.username} >"
+        return f"< Comment id: {self.id} by: {self.commenter.username} >"
 
     def to_dict(self):
         return {
             "id": self.id,
             "userId": self.user_id,
             "postId": self.post_id,
-            "message": self.message,
+            "comment": self.comment,
+            "username": self.commenter.username,
+            "parent": self.parent,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }
