@@ -4,7 +4,6 @@ from wtforms.validators import DataRequired, Length
 
 
 class VenueForm(FlaskForm):
-    group_id = IntegerField("group id", validators=[DataRequired()])
     address = StringField("address", validators=[DataRequired()])
     city = StringField(
         "city",
@@ -23,6 +22,9 @@ class VenueForm(FlaskForm):
                 min=2, max=2, message="Please enter the abbreviated form of the state"
             ),
         ],
+    )
+    zip_code = StringField(
+        "zip code", validators=[DataRequired(), Length(min=5, max=5)]
     )
     latitude = StringField("lat", validators=[DataRequired()])
     longtitude = StringField("lng", validators=[DataRequired()])
