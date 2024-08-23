@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, TextAreaField, SelectField, DateField
+from wtforms import StringField, IntegerField, TextAreaField, SelectField, DateField, SubmitField
 from wtforms.validators import DataRequired, Length, NumberRange, ValidationError
 
 types = ["online", "in-person"]
@@ -46,3 +46,4 @@ class GroupForm(FlaskForm):
             ),
         ],
     )
+#     submit = SubmitField("submit")

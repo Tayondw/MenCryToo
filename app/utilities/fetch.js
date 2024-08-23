@@ -1,15 +1,16 @@
-// Create a portfolio
-fetch("api/portfolios", {
+// Create a group
+fetch("api/groups/new", {
 	method: "POST",
 	headers: {
 		"content-type": "application/json",
 	},
 	body: JSON.stringify({
-		portfolio_name: "New Portfolio",
-		cash_balance: 100,
-		total_amount: 200,
-		is_active: true,
-		user_id: 1,
+		name: "New Group",
+		about: "This is to test and to verify if the new group is added via fetch",
+		type: "online",
+            city: "city",
+            state: "state",
+		organizer_id: 1,
 	}),
 });
 
@@ -21,8 +22,8 @@ fetch("api/groups/", {
 	},
 });
 
-// Read all portfolios by user_id
-fetch("api/portfolios/1", {
+// Read all groups by group_id
+fetch("api/groups/1", {
 	method: "GET",
 	headers: {
 		"content-type": "application/json",

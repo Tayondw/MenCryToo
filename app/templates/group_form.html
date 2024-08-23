@@ -1,0 +1,30 @@
+{% block content %}
+<div class="feed-container">
+      <h2>Create a Group Post</h2>
+      {% if errors != None %}
+      {% for error in errors %}
+      <p style="color: red;">{{ error }}</p>
+      {% endfor %}
+      {% endif %}
+      {% if type == "update"%}
+      <form action="/api/groups/{{id}}/edit" method="POST">
+            {% else %}
+            <form action="/api/groups/new" method="POST">
+                  {% endif %}
+                  {{ form.csrf_token }}
+                  <p>{{ form.organizer_id.label }}: {{ form.organizer_id}}</p>
+                  <p>{{ form.name.label }}: {{ form.name }}</p>
+                  <p>{{ form.about.label }}: {{ form.about }}</p>
+                  <p>{{ form.type.label }}: {{ form.type }}</p>
+                  <p>{{ form.city.label }}: {{ form.city }}</p>
+                  <p>{{ form.state.label }}: {{ form.state }}</p>
+                  {% if type == "update"%}
+                  <button type="submit">Update Group</button>
+                  {% else %}
+                  <button type="submit">Create Group</button>
+                  {% endif %}
+
+            </form>
+      </form>
+</div>
+{% endblock %}
