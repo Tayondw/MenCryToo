@@ -1,0 +1,30 @@
+{% block content3 %}
+<div class="feed-container">
+      <h2>Create a Event Post</h2>
+      {% if errors != None %}
+      {% for error in errors %}
+      <p style="color: red;">{{ error }}</p>
+      {% endfor %}
+      {% endif %}
+      {% if type == "update"%}
+      <form action="/api/events/{{id}}/edit" method="POST">
+            {% else %}
+            <form action="/api/events/new" method="POST">
+                  {% endif %}
+                  {{ form.csrf_token }}
+                  <p>{{ form.name.label }}: {{ form.name }}</p>
+                  <p>{{ form.description.label }}: {{ form.description }}</p>
+                  <p>{{ form.type.label }}: {{ form.type }}</p>
+                  <p>{{ form.capacity.label }}: {{ form.capacity }}</p>
+                  <p>{{ form.start_date.label }}: {{ form.start_date }}</p>
+                  <p>{{ form.end_date.label }}: {{ form.end_date }}</p>
+                  {% if type == "update"%}
+                  <button type="submit">Update Event</button>
+                  {% else %}
+                  <button type="submit">Create Event</button>
+                  {% endif %}
+
+            </form>
+      </form>
+</div>
+{% endblock %}

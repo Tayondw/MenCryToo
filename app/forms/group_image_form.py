@@ -12,4 +12,4 @@ class GroupImageForm(FlaskForm):
         "Group Image File",
         validators=[FileRequired(), FileAllowed(list(ALLOWED_EXTENSIONS))],
     )
-    submit = SubmitField()
+#     submit = SubmitField()

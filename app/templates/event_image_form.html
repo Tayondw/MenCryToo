@@ -1,0 +1,25 @@
+{% block content4 %}
+<div class="feed-container">
+      <h2>Create a Event Image Post</h2>
+      {% if errors != None %}
+      {% for error in errors %}
+      <p style="color: red;">{{ error }}</p>
+      {% endfor %}
+      {% endif %}
+      {% if type == "update"%}
+      <form action="/api/events/{{eventId}}/images/{{event_image.id}}/edit" method="POST" enctype="multipart/form-data">
+            {% else %}
+            <form action="/api/events/{{id}}/images" method="POST" enctype="multipart/form-data">
+                  {% endif %}
+                  {{ form.csrf_token }}
+                  <p>{{ form.event_image.label }}: {{ form.event_image }}</p>
+                  {% if type == "update"%}
+                  <button type="submit">Update Event Image</button>
+                  {% else %}
+                  <button type="submit">Create Event Image</button>
+                  {% endif %}
+
+            </form>
+      </form>
+</div>
+{% endblock content4 %}

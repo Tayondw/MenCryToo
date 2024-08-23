@@ -45,4 +45,4 @@ class GroupForm(FlaskForm):
             ),
         ],
     )
-    submit = SubmitField("submit")
+#     submit = SubmitField("submit")
