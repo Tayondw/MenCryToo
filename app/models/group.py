@@ -15,7 +15,7 @@ class Group(db.Model):
     )
     name = db.Column(db.String(50), nullable=False)
     about = db.Column(db.String(150), nullable=False)
-    type = db.Column(db.Enum("online", "in-person"), default="online", nullable=False)
+    type = db.Column(db.Enum("online", "in-person", name="group_location"), default="online", nullable=False)
     city = db.Column(db.String(30), nullable=False)
     state = db.Column(db.String(2), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now)

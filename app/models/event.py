@@ -18,7 +18,7 @@ class Event(db.Model):
     )
     name = db.Column(db.String(50), nullable=False)
     description = db.Column(db.String(150), nullable=False)
-    type = db.Column(db.Enum("online", "in-person"), default="online", nullable=False)
+    type = db.Column(db.Enum("online", "in-person", name="event_location"), default="online", nullable=False)
     capacity = db.Column(db.Integer, nullable=False)
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
