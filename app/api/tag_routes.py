@@ -1,5 +1,5 @@
 from flask import Blueprint, request, abort
 from flask_login import login_required, current_user
-from app.models import db, User, Post, Comment, Likes
+from app.models import db, User, Tag
 
-post_routes = Blueprint("posts", __name__)
+tag_routes = Blueprint("tags", __name__)
