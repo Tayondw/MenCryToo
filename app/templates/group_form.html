@@ -12,7 +12,6 @@
             <form action="/api/groups/new" method="POST">
                   {% endif %}
                   {{ form.csrf_token }}
-                  <p>{{ form.organizer_id.label }}: {{ form.organizer_id}}</p>
                   <p>{{ form.name.label }}: {{ form.name }}</p>
                   <p>{{ form.about.label }}: {{ form.about }}</p>
                   <p>{{ form.type.label }}: {{ form.type }}</p>

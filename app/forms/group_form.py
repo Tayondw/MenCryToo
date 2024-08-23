@@ -6,7 +6,6 @@ types = ["online", "in-person"]
 
 
 class GroupForm(FlaskForm):
-    organizer_id = IntegerField("organizer id", validators=[DataRequired()])
     name = StringField(
         "Group Name",
         validators=[
@@ -46,4 +45,4 @@ class GroupForm(FlaskForm):
             ),
         ],
     )
-#     submit = SubmitField("submit")
+    submit = SubmitField("submit")

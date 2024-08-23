@@ -1,0 +1,27 @@
+
+{% block content2 %}
+      <div class="feed-container">
+            <h2>Create a Group Image Post</h2>
+            {% if errors != None %}
+            {% for error in errors %}
+            <p style="color: red;">{{ error }}</p>
+            {% endfor %}
+            {% endif %}
+            {% if type == "update"%}
+            <form action="/api/groups/{{groupId}}/images/{{group_image.id}}/edit" method="POST" enctype="multipart/form-data">
+                  {% else %}
+                  <form action="/api/groups/{{id}}/images" method="POST" enctype="multipart/form-data">
+                        {% endif %}
+                        {{ form.csrf_token }}
+                        <p>{{ form.group_image.label }}: {{ form.group_image }}</p>
+                        {% if type == "update"%}
+                        <button type="submit">Update Group</button>
+                        {% else %}
+                        <button type="submit">Create Group</button>
+                        {% endif %}
+      
+                  </form>
+            </form>
+      </div>
+{% endblock content2 %}
+      
