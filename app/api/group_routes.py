@@ -75,6 +75,10 @@ def edit_group(group_id):
     """
     group_to_edit = Group.query.get(group_id)
 
+    # check if there is a group to edit
+    if group_to_edit is None:
+        return {"errors": {"message": "Not Found"}}, 404
+
     # check if current user is group organizer - group organizer is only allowed to update
     if current_user.id is not group_to_edit.organizer_id:
         return {"errors": {"message": "Unauthorized"}}, 401
@@ -87,8 +91,8 @@ def edit_group(group_id):
         group_to_edit.name = form.data["name"]
         group_to_edit.about = form.data["about"]
         group_to_edit.type = form.data["type"]
-        group_to_edit.city=form.data["city"]
-        group_to_edit.state=form.data["state"]
+        group_to_edit.city = form.data["city"]
+        group_to_edit.state = form.data["state"]
         db.session.commit()
         return redirect(f"/api/groups/{group_id}")
 
@@ -107,5 +111,22 @@ def edit_group(group_id):
         )
 
 
-@group_routes.route("delete/<int:group_id>", methods=["GET", "POST"])
+@group_routes.route("<int:group_id>/delete", methods=["DELETE"])
 @login_required
+def delete_group(group_id):
+    """will delete a given group by its id"""
+    group_to_delete = Group.query.get(group_id)
+    
+    # check if there is a group to delete
+    if group_to_delete is None:
+        return {"errors": {"message": "Not Found"}}, 404
+  
+    # check if current user is group organizer - group organizer is only allowed to update
+    if current_user.id is not group_to_delete.organizer_id:
+        return {"errors": {"message": "Unauthorized"}}, 401
+
+
+    if group_to_delete:
+          db.session.delete(group_to_delete)
+          db.session.commit()
+          
