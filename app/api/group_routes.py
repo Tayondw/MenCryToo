@@ -4,3 +4,8 @@ from app.models import db, Group, GroupImage, User, Memberships, Attendances, Ve
 
 group_routes = Blueprint("groups", __name__)
 
+@group_routes.route("/")
+def all_groups():
+      groups = Group.query.all()
+      print("this is groups",groups)
+      return {"groups": [group.to_dict() for group in groups]}

@@ -15,7 +15,7 @@ class Group(db.Model):
     )
     name = db.Column(db.String(50), nullable=False)
     about = db.Column(db.String(150), nullable=False)
-    type = db.Column(db.Enum("online", "in-person"), default="indoor", nullable=False)
+    type = db.Column(db.Enum("online", "in-person"), default="online", nullable=False)
     city = db.Column(db.String(30), nullable=False)
     state = db.Column(db.String(2), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now)
@@ -36,8 +36,8 @@ class Group(db.Model):
     )
 
     def to_dict(self):
-        events = [event for event in self.events if event.groupId == Group.id].to_dict()
-        venues = [venue for venue in self.venues if venue.groupId == Group.id].to_dict()
+        events = [event for event in self.events if event.group_id == Group.id].to_dict()
+        venues = [venue for venue in self.venues if venue.group_id == Group.id].to_dict()
         organizer = [
             organizer
             for organizer in self.organizers

@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, TextAreaField, SelectField, DateField
 from wtforms.validators import DataRequired, Length, NumberRange, ValidationError
 
-types = ["outdoor", "indoor"]
+types = ["online", "in-person"]
 
 
 class EventForm(FlaskForm):
