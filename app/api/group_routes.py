@@ -116,17 +116,18 @@ def edit_group(group_id):
 def delete_group(group_id):
     """will delete a given group by its id"""
     group_to_delete = Group.query.get(group_id)
-    
+
     # check if there is a group to delete
     if group_to_delete is None:
         return {"errors": {"message": "Not Found"}}, 404
-  
+
     # check if current user is group organizer - group organizer is only allowed to update
     if current_user.id is not group_to_delete.organizer_id:
         return {"errors": {"message": "Unauthorized"}}, 401
 
-
     if group_to_delete:
-          db.session.delete(group_to_delete)
-          db.session.commit()
-          
+        db.session.delete(group_to_delete)
+        db.session.commit()
+        return {"message": "Group deleted"}
+
+    return redirect("/api/groups/")
