@@ -16,7 +16,6 @@ class Tag(db.Model):
         "User",
         secondary=user_tags,
         back_populates="users_tags",
-        cascade="all, delete-orphan",
     )
 
     def to_dict(self):

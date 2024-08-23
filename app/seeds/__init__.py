@@ -29,6 +29,15 @@ def seed():
         # command, which will  truncate all tables prefixed with
         # the schema name (see comment in users.py undo_users function).
         # Make sure to add all your other model's undo functions below
+        undo_event_images()
+        undo_events()
+        undo_venues()
+        undo_group_images()
+        undo_groups()
+        undo_comments()
+        undo_posts()
+        undo_user_tags()
+        undo_tags()
         undo_users()
     seed_users()
     seed_tags()

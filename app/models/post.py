@@ -25,15 +25,9 @@ class Post(db.Model):
         back_populates="posts",
     )
 
-    post_likes = db.relationship(
-        "User",
-        secondary=likes,
-        back_populates="user_likes",
-    )
+    post_likes = db.relationship("User", secondary=likes, back_populates="user_likes")
 
-    post_comments = db.relationship(
-        "Comment", back_populates="post", cascade="all, delete-orphan"
-    )
+    post_comments = db.relationship("Comment", back_populates="post")
 
     def __repr__(self):
         return f"< Post id: {self.id} by: {self.user.username} >"

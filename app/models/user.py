@@ -35,34 +35,29 @@ class User(db.Model, UserMixin):
         "Post",
         secondary=likes,
         back_populates="post_likes",
-        cascade="all, delete-orphan",
     )
 
     user_comments = db.relationship(
         "Comment",
         back_populates="commenter",
-        cascade="all, delete-orphan",
     )
 
     user_attendances = db.relationship(
         "Event",
         secondary=attendances,
         back_populates="event_attendances",
-        cascade="all, delete-orphan",
     )
 
     user_memberships = db.relationship(
         "Group",
         secondary=members,
         back_populates="group_memberships",
-        cascade="all, delete-orphan",
     )
 
     users_tags = db.relationship(
         "Tag",
         secondary=user_tags,
         back_populates="tags_users",
-        cascade="all, delete-orphan",
     )
 
     groups = db.relationship("Group", back_populates="organizers")
@@ -137,7 +132,7 @@ class User(db.Model, UserMixin):
             "username": self.username,
             "email": self.email,
             "bio": self.bio,
-            "profileImage": self.profile_pic,
+            "profileImage": self.profile_image_url,
             "likes": len(self.user_likes),
             "createdAt": self.created_at,
             "updatedAt": self.updated_at,

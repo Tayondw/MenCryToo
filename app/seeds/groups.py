@@ -1,7 +1,7 @@
 from app.models import db, Group, GroupImage, environment, SCHEMA
 from sqlalchemy.sql import text
-from .data.groups import groups
-from .data.group_images import group_images
+from app.seeds.data.groups import groups
+from app.seeds.data.group_images import group_images
 
 
 def seed_groups():

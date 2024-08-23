@@ -29,13 +29,12 @@ class Event(db.Model):
     venues = db.relationship("Venue", back_populates="events")
     groups = db.relationship("Group", back_populates="events")
     event_images = db.relationship(
-        "EventImage", back_populates="event", cascade="all, delete-orphan"
+        "EventImage", back_populates="event"
     )
     event_attendances = db.relationship(
         "User",
         secondary=attendances,
         back_populates="user_attendances",
-        cascade="all, delete-orphan",
     )
 
     def to_dict(self):

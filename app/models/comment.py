@@ -23,8 +23,8 @@ class Comment(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Relationship attributes
-    commenter = db.relationship("User", back_populates="comments")
-    post = db.relationship("Post", back_populates="comments")
+    commenter = db.relationship("User", back_populates="user_comments")
+    post = db.relationship("Post", back_populates="post_comments")
 
     # Self-referencing relationship for nested comments (replies)
     replies = db.relationship("Comment", backref=db.backref("parent", remote_side=[id]))

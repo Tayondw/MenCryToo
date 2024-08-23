@@ -1,7 +1,7 @@
 from app.models import db, Event, EventImage, environment, SCHEMA
 from sqlalchemy.sql import text
-from .data.events import events
-from .data.event_images import event_images
+from app.seeds.data.events import events
+from app.seeds.data.event_images import event_images
 
 def seed_events():
       for event_data in events:

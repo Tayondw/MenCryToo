@@ -1,6 +1,6 @@
 from app.models import db, Venue, environment, SCHEMA
 from sqlalchemy.sql import text
-from .data.venues import venues
+from app.seeds.data.venues import venues
 
 
 def seed_venues():

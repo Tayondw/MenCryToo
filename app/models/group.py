@@ -29,10 +29,10 @@ class Group(db.Model):
         "User",
         secondary=members,
         back_populates="user_memberships",
-        cascade="all, delete-orphan",
     )
     group_images = db.relationship(
-        "GroupImage", back_populates="group", cascade="all, delete-orphan"
+        "GroupImage",
+        back_populates="group",
     )
 
     def to_dict(self):

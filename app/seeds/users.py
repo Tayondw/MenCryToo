@@ -1,14 +1,23 @@
 from app.models import db, User, Tag, environment, SCHEMA
 from sqlalchemy.sql import text
-from .data.users import users
-from .data.tags import tags
+from app.seeds.data.users import users
+from app.seeds.data.tags import tags
 
 
 # Adds a demo user, you can add other users here if you want
 def seed_users():
-    for user_data in users:
-        user = User(**user_data)
-        db.session.add(user)
+    for user in users:
+        db.session.add(
+            User(
+                first_name=user["first_name"],
+                last_name=user["last_name"],
+                username=user["username"],
+                email=user["email"],
+                password=user["password"],
+                bio=user["bio"],
+                profile_image_url=user["profile_image_url"],
+            )
+        )
     db.session.commit()
 
 

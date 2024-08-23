@@ -23,7 +23,7 @@ class Venue(db.Model):
 
     # Relationship attributes
     events = db.relationship("Event", back_populates="venues")
-    groups = db.relationship("Group", back_populates="groups")
+    groups = db.relationship("Group", back_populates="venues")
 
     def to_dict(self):
         return {

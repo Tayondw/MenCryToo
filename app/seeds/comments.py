@@ -1,6 +1,6 @@
 from app.models import db, Comment, User, Post, environment, SCHEMA
 from sqlalchemy.sql import text
-from .data.comments import comments
+from app.seeds.data.comments import comments
 
 
 def seed_comments():

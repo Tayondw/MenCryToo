@@ -1,9 +1,15 @@
 from app.models import db, User, Post, environment, SCHEMA
 from sqlalchemy.sql import text
-from .data.posts import posts
+from app.seeds.data.posts import posts
+from random import sample, randint
+
+# from sqlalchemy.exc import IntegrityError
 
 
 def seed_posts():
+    # Retrieve all users once for later lookup
+    all_users = User.query.all()
+    user_map = {user.username: user for user in all_users}
     for post_data in posts:
         post = Post(
             creator=post_data["creator"],
@@ -11,11 +17,18 @@ def seed_posts():
             caption=post_data["caption"],
             image=post_data["image"],
         )
-        for user_id in post_data["post_likes"]:
-            user = User.query.get(user_id)  # Adjust according to how you're querying
-            post.post_likes.append(user)
+        # Add predefined likes to the post
+        for username in post_data["post_likes"]:
+            user = user_map.get(username)
+            if user:
+                post.post_likes.append(user)
+            else:
+                print(f"User with username {username} not found")
+        print(f"Post: {post.title}, Likes: {len(post.post_likes)}")  # Debugging line
         db.session.add(post)
     db.session.commit()
+
+
 
 
 # Uses a raw SQL query to TRUNCATE or DELETE the users table. SQLAlchemy doesn't
@@ -26,9 +39,7 @@ def seed_posts():
 # it will reset the primary keys for you as well.
 def undo_posts():
     if environment == "production":
-        db.session.execute(
-            f"TRUNCATE table {SCHEMA}.likes RESTART IDENTITY CASCADE;"
-        )
+        db.session.execute(f"TRUNCATE table {SCHEMA}.likes RESTART IDENTITY CASCADE;")
         db.session.execute(f"TRUNCATE table {SCHEMA}.posts RESTART IDENTITY CASCADE;")
         db.session.execute(f"TRUNCATE table {SCHEMA}.users RESTART IDENTITY CASCADE;")
     else:
