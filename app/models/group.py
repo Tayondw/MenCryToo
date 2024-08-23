@@ -36,13 +36,10 @@ class Group(db.Model):
     )
 
     def to_dict(self):
-        events = [event for event in self.events if event.group_id == Group.id].to_dict()
-        venues = [venue for venue in self.venues if venue.group_id == Group.id].to_dict()
-        organizer = [
-            organizer
-            for organizer in self.organizers
-            if organizer.id == Group.organizer_id
-        ]
+        events = [event.to_dict() for event in self.events if event.group_id == self.id]
+        venues = [venue.to_dict() for venue in self.venues if venue.group_id == self.id]
+        organizer = self.organizers.to_dict()
+        members = {member.id: member.to_dict() for member in self.group_memberships}
         image = {
             group_image.id: group_image.to_dict() for group_image in self.group_images
         }
@@ -58,4 +55,6 @@ class Group(db.Model):
             "venues": venues,
             "organizer": organizer,
             "groupImage": image,
+            "numMembers": len(self.group_memberships),
+            "members": members,
         }

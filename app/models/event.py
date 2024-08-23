@@ -39,7 +39,7 @@ class Event(db.Model):
 
     def to_dict(self):
 
-        organizer = self.group.organizer.to_dict()
+        organizer = self.groups.organizers.to_dict()
         #   group = [group.to_dict() for group in self.groups]
         #   venue = [venue.to_dict() for venue in self.venues]
         image = {event_image.id: event_image.to_dict() for event_image in self.event_images}
@@ -52,22 +52,22 @@ class Event(db.Model):
         }
 
         groupInfo = {
-            "id": self.group.id,
-            "name": self.group.name,
-            "organizerId": self.group.organizerId,
-            "type": self.group.type,
-            "city": self.group.city,
-            "state": self.group.state,
+            "id": self.groups.id,
+            "name": self.groups.name,
+            "organizerId": self.groups.organizer_id,
+            "type": self.groups.type,
+            "city": self.groups.city,
+            "state": self.groups.state,
         }
 
         venueInfo = {
-            "id": self.venue.id,
-            "groupId": self.venue.groupId,
-            "address": self.venue.address,
-            "city": self.venue.city,
-            "state": self.venue.state,
-            "latitude": self.venue.latitude,
-            "longitude": self.venue.longitude,
+            "id": self.venues.id if self.venues and self.venues.id else None,
+            "groupId": self.venues.group_id if self.venues else None,
+            "address": self.venues.address if self.venues else None,
+            "city": self.venues.city if self.venues else None,
+            "state": self.venues.state if self.venues else None,
+            "latitude": self.venues.latitude if self.venues else None,
+            "longitude": self.venues.longitude if self.venues else None,
         }
 
         return {

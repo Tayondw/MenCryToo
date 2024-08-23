@@ -1,3 +1,6 @@
+from random import sample, randint
+from app.seeds.data.users import users
+
 groups = [
     {
         "organizer_id": 1,
@@ -6,6 +9,9 @@ groups = [
         "type": "in-person",
         "city": "Tucker",
         "state": "GA",
+        "group_memberships": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "organizer_id": 2,
@@ -14,6 +20,9 @@ groups = [
         "type": "in-person",
         "city": "San Francisco",
         "state": "CA",
+        "group_memberships": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "organizer_id": 3,
@@ -22,6 +31,9 @@ groups = [
         "type": "in-person",
         "city": "Austin",
         "state": "TX ",
+        "group_memberships": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "organizer_id": 4,
@@ -30,6 +42,9 @@ groups = [
         "type": "in-person",
         "city": "Alexandria",
         "state": "VA",
+        "group_memberships": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "organizer_id": 5,
@@ -38,6 +53,9 @@ groups = [
         "type": "in-person",
         "city": "Atlanta",
         "state": "GA",
+        "group_memberships": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "organizer_id": 6,
@@ -46,6 +64,9 @@ groups = [
         "type": "in-person",
         "city": "Seattle",
         "state": "WA",
+        "group_memberships": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "organizer_id": 7,
@@ -54,6 +75,9 @@ groups = [
         "type": "online",
         "city": "New York City",
         "state": "NY",
+        "group_memberships": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "organizer_id": 8,
@@ -62,6 +86,9 @@ groups = [
         "type": "online",
         "city": "Petaluma",
         "state": "CA",
+        "group_memberships": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "organizer_id": 9,
@@ -70,6 +97,9 @@ groups = [
         "type": "online",
         "city": "Boston",
         "state": "MA",
+        "group_memberships": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "organizer_id": 10,
@@ -78,5 +108,8 @@ groups = [
         "type": "online",
         "city": "Chicago",
         "state": "MI",
+        "group_memberships": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
 ]
