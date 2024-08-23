@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 0de62fb2ec01
+Revision ID: 1c9710d356b4
 Revises: 
-Create Date: 2024-08-22 20:56:53.946205
+Create Date: 2024-08-23 12:54:20.533730
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '0de62fb2ec01'
+revision = '1c9710d356b4'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -43,7 +43,7 @@ def upgrade():
     sa.Column('organizer_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=50), nullable=False),
     sa.Column('about', sa.String(length=150), nullable=False),
-    sa.Column('type', sa.Enum('online', 'in-person'), nullable=False),
+    sa.Column('type', sa.Enum('online', 'in-person', name='group_location'), nullable=False),
     sa.Column('city', sa.String(length=30), nullable=False),
     sa.Column('state', sa.String(length=2), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
@@ -125,7 +125,7 @@ def upgrade():
     sa.Column('group_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=50), nullable=False),
     sa.Column('description', sa.String(length=150), nullable=False),
-    sa.Column('type', sa.Enum('outdoor', 'indoor'), nullable=False),
+    sa.Column('type', sa.Enum('online', 'in-person', name='event_location'), nullable=False),
     sa.Column('capacity', sa.Integer(), nullable=False),
     sa.Column('start_date', sa.DateTime(), nullable=False),
     sa.Column('end_date', sa.DateTime(), nullable=False),
