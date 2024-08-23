@@ -12,7 +12,7 @@ from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
 
 group_image_routes = Blueprint("group_images", __name__)
 
-
+# ! GROUP IMAGES
 @group_image_routes.route("<int:imageId>", methods=["DELETE"])
 @login_required
 def delete_group_image(imageId):
