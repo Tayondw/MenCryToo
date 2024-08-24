@@ -21,7 +21,7 @@ event_routes = Blueprint("events", __name__)
 @event_routes.route("/")
 def all_events():
     """
-    Query for all events and returns them in a list of user dictionaries
+    Query for all events and returns them in a list of event dictionaries
     """
     events = Event.query.all()
     return {"events": [event.to_dict() for event in events]}

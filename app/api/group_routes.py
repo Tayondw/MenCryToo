@@ -10,7 +10,7 @@ from app.models import (
     Venue,
     Event,
 )
-from app.forms import GroupForm, GroupImageForm, EventForm
+from app.forms import GroupForm, GroupImageForm, EventForm, VenueForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
 
 group_routes = Blueprint("groups", __name__)
@@ -20,9 +20,11 @@ group_routes = Blueprint("groups", __name__)
 @group_routes.route("/")
 def all_groups():
     """
-    Query for all groups and returns them in a list of user dictionaries
+    Query for all groups and returns them in a list of group dictionaries
     """
     groups = Group.query.all()
+    if not groups:
+        return {"errors": {"message": "Not Found"}}, 404
     return {"groups": [group.to_dict() for group in groups]}
 
 
@@ -32,6 +34,8 @@ def group(groupId):
     Query for group by id and returns that group in a dictionary
     """
     group = Group.query.get(groupId)
+    if not group:
+        return {"errors": {"message": "Not Found"}}, 404
     return group.to_dict()
 
 
@@ -384,5 +388,54 @@ def edit_event(groupId, eventId):
             errors=None,
         )
 
+
+#     return form.errors, 400
+
+# ! GROUP - VENUES
+
+@group_routes.route("/<int:groupId>/venues", methods=["GET", "POST"])
+@login_required
+def create_venue(groupId):
+    """
+    Create a venue linked to a group and submit to the database
+
+    renders an empty form on get requests, validates and submits form on post requests
+
+    The commented out code was to test if the post request works
+    """
+    # query for the group you want to add the venue to
+    group = Group.query.get(groupId)
+
+    # check if there is a group
+    if not group:
+        return {"errors": {"message": "Not Found"}}, 404
+
+    # check if current user is group organizer - group organizer is only allowed to update
+    if current_user.id != group.organizer_id:
+        return {"errors": {"message": "Unauthorized"}}, 401
+
+    form = VenueForm()
+    form["csrf_token"].data = request.cookies["csrf_token"]
+
+    if form.validate_on_submit():
+        new_venue = Venue(
+            group_id=groupId,
+            address=form.data["address"],
+            city=form.data["city"],
+            state=form.data["state"],
+            zip_code=form.data["zip_code"],
+            latitude=form.data["latitude"],
+            longitude=form.data["longitude"],
+        )
+        db.session.add(new_venue)
+        db.session.commit()
+        return redirect("/api/venues/")
+      #   return new_venue.to_dict()
+    if form.errors:
+                print(form.errors)
+                return render_template(
+                    "venue_form.html", id=groupId, form=form, errors=form.errors
+                )
+    return render_template("venue_form.html", id=groupId, form=form, errors=None)
 
 #     return form.errors, 400
