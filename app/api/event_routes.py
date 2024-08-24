@@ -51,7 +51,7 @@ def delete_event(eventId):
     The commented out code was to test if the delete request works
     """
     event_to_delete = Event.query.get(eventId)
-    group = Group.query.get(event_to_delete.groupId)
+    group = Group.query.get(event_to_delete.group_id)
 
     # check if there is an event to delete
     if not event_to_delete:
@@ -60,6 +60,9 @@ def delete_event(eventId):
     # check if current user is group organizer - group organizer is only allowed to update
     if current_user.id != group.organizer_id:
         return {"errors": {"message": "Unauthorized"}}, 401
+
+    # Delete associated event images
+    EventImage.query.filter_by(event_id=eventId).delete()
 
     db.session.delete(event_to_delete)
     db.session.commit()

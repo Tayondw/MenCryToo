@@ -32,34 +32,6 @@ def seed_groups():
     db.session.commit()
 
 
-# def seed_groups():
-#     # Retrieve all users once for later lookup
-#     all_users = User.query.all()
-#     user_map = {user.username: user for user in all_users}
-#     for group_data in groups:
-#         group = Group(
-#             organizer_id=group_data["organizer_id"],
-#             name=group_data["name"],
-#             about=group_data["about"],
-#             type=group_data["type"],
-#             city=group_data["city"],
-#             state=group_data["state"],
-#         )
-
-#         # Track memberships to avoid duplicates
-#         existing_memberships = set()
-
-#         for username in group_data["group_memberships"]:
-#             user = user_map.get(username)
-#             if user and (user.id, group.id) not in existing_memberships:
-#                 group.group_memberships.append(user)
-#                 existing_memberships.add((user.id, group.id))
-#             elif not user:
-#                 print(f"User with username {username} not found")
-#         db.session.add(group)
-#     db.session.commit()
-
-
 def seed_group_images():
     for group_image_data in group_images:
         group_image = GroupImage(**group_image_data)

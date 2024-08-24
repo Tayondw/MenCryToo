@@ -18,7 +18,11 @@ class Event(db.Model):
     )
     name = db.Column(db.String(50), nullable=False)
     description = db.Column(db.String(150), nullable=False)
-    type = db.Column(db.Enum("online", "in-person", name="event_location"), default="online", nullable=False)
+    type = db.Column(
+        db.Enum("online", "in-person", name="event_location"),
+        default="online",
+        nullable=False,
+    )
     capacity = db.Column(db.Integer, nullable=False)
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
@@ -29,7 +33,7 @@ class Event(db.Model):
     venues = db.relationship("Venue", back_populates="events")
     groups = db.relationship("Group", back_populates="events")
     event_images = db.relationship(
-        "EventImage", back_populates="event"
+        "EventImage", back_populates="event", cascade="all, delete-orphan"
     )
     event_attendances = db.relationship(
         "User",
@@ -42,7 +46,9 @@ class Event(db.Model):
         organizer = self.groups.organizers.to_dict()
         #   group = [group.to_dict() for group in self.groups]
         #   venue = [venue.to_dict() for venue in self.venues]
-        image = {event_image.id: event_image.to_dict() for event_image in self.event_images}
+        image = {
+            event_image.id: event_image.to_dict() for event_image in self.event_images
+        }
 
         organizerInfo = {
             "firstName": organizer["first_name"],
