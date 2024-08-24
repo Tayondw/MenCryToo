@@ -49,6 +49,9 @@ class Event(db.Model):
         image = {
             event_image.id: event_image.to_dict() for event_image in self.event_images
         }
+        attendees = {
+            attendee.id: attendee.to_dict() for attendee in self.event_attendances
+        }
 
         organizerInfo = {
             "firstName": organizer["first_name"],

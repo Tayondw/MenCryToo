@@ -1,4 +1,7 @@
 from datetime import datetime
+from random import sample, randint
+from app.seeds.data.users import users
+
 
 events = [
     {
@@ -10,6 +13,9 @@ events = [
         "capacity": 20,
         "start_date": datetime(2024, 6, 5, 9, 0),
         "end_date": datetime(2024, 6, 5, 17, 0),
+        "event_attendances": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "group_id": 2,
@@ -20,6 +26,9 @@ events = [
         "capacity": 20,
         "start_date": datetime(2024, 7, 5, 9, 0),
         "end_date": datetime(2024, 7, 5, 17, 0),
+        "event_attendances": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "group_id": 3,
@@ -30,6 +39,9 @@ events = [
         "capacity": 20,
         "start_date": datetime(2024, 12, 5, 9, 0),
         "end_date": datetime(2024, 12, 5, 17, 0),
+        "event_attendances": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "group_id": 4,
@@ -40,6 +52,9 @@ events = [
         "capacity": 25,
         "start_date": datetime(2024, 11, 5, 9, 0),
         "end_date": datetime(2024, 11, 5, 17, 0),
+        "event_attendances": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "group_id": 5,
@@ -50,6 +65,9 @@ events = [
         "capacity": 30,
         "start_date": datetime(2024, 9, 5, 9, 0),
         "end_date": datetime(2024, 9, 5, 17, 0),
+        "event_attendances": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "group_id": 6,
@@ -60,6 +78,9 @@ events = [
         "capacity": 35,
         "start_date": datetime(2024, 8, 12, 9, 0),
         "end_date": datetime(2024, 8, 12, 17, 0),
+        "event_attendances": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "group_id": 7,
@@ -70,6 +91,9 @@ events = [
         "capacity": 50,
         "start_date": datetime(2024, 8, 5, 9, 0),
         "end_date": datetime(2024, 8, 5, 17, 0),
+        "event_attendances": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "group_id": 8,
@@ -80,6 +104,9 @@ events = [
         "capacity": 75,
         "start_date": datetime(2024, 10, 3, 9, 0),
         "end_date": datetime(2024, 10, 3, 17, 0),
+        "event_attendances": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "group_id": 9,
@@ -90,6 +117,9 @@ events = [
         "capacity": 100,
         "start_date": datetime(2024, 10, 4, 9, 0),
         "end_date": datetime(2024, 10, 4, 17, 0),
+        "event_attendances": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
     {
         "group_id": 10,
@@ -100,5 +130,8 @@ events = [
         "capacity": 10,
         "start_date": datetime(2024, 10, 5, 9, 0),
         "end_date": datetime(2024, 10, 5, 17, 0),
+        "event_attendances": [
+            user["username"] for user in sample(users, randint(0, len(users)))
+        ],
     },
 ]
