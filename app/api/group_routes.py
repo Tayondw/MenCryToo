@@ -9,7 +9,6 @@ from app.models import (
     Attendances,
     Venue,
     Event,
-    EventImage,
 )
 from app.forms import GroupForm, GroupImageForm, EventForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
@@ -208,7 +207,7 @@ def add_group_image(groupId):
 @login_required
 def edit_group_images(groupId, imageId):
     """
-    will generate an update group image form on get requests and validate/save on put requests
+    will generate an update group image form on get requests and validate/save on post requests
 
     Returns 401 Unauthorized if the current user's id does not match the groups' organizer id
 
@@ -218,7 +217,6 @@ def edit_group_images(groupId, imageId):
     """
 
     group_image = GroupImage.query.get(imageId)
-    print("this is the images here", group_image)
 
     group = Group.query.get(groupId)
 
@@ -303,10 +301,10 @@ def create_event(groupId):
         #   return redirect("/api/events/")
         return new_event.to_dict()
     #     if form.errors:
-    #         print(form.errors)
-    #         return render_template(
-    #             "event_form.html", id=groupId, form=form, errors=form.errors
-    #         )
+    #             print(form.errors)
+    #             return render_template(
+    #                 "event_form.html", id=groupId, form=form, errors=form.errors
+    #             )
     #     return render_template("event_form.html", id=groupId, form=form, errors=None)
 
     return form.errors, 400
@@ -362,7 +360,12 @@ def edit_event(groupId, eventId):
     elif form.errors:
         print(form.errors)
         return render_template(
-            "event_form.html", form=form, type="update", id=groupId, eventId=eventId, errors=form.errors
+            "event_form.html",
+            form=form,
+            type="update",
+            id=groupId,
+            eventId=eventId,
+            errors=form.errors,
         )
 
     else:
@@ -370,7 +373,12 @@ def edit_event(groupId, eventId):
         print(current_data)
         form.process(obj=current_data)
         return render_template(
-            "event_form.html", form=form, type="update", id=groupId, eventId=eventId, errors=None
+            "event_form.html",
+            form=form,
+            type="update",
+            id=groupId,
+            eventId=eventId,
+            errors=None,
         )
 
 

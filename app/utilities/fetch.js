@@ -23,7 +23,7 @@ fetch("api/events/11", {
 });
 
 // Delete an event image by its id
-fetch("api/event-images/14", {
+fetch("api/event-images/11", {
 	method: "DELETE",
 	headers: {
 		"content-type": "application/json",
