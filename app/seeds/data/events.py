@@ -4,7 +4,7 @@ events = [
     {
         "group_id": 1,
         "venue_id": 1,
-        "name": "I NEED MORE THAN A SNICKERS",
+        "name": "EVENT 1",
         "description": "what we will be doing is assisting those with anger management issues",
         "type": "in-person",
         "capacity": 20,
@@ -14,7 +14,7 @@ events = [
     {
         "group_id": 2,
         "venue_id": 2,
-        "name": "FREE ME FROM MY THOUGHTS",
+        "name": "EVENT 2",
         "description": "what we will be doing is assisting those with anxiety disorder",
         "type": "in-person",
         "capacity": 20,
@@ -24,7 +24,7 @@ events = [
     {
         "group_id": 3,
         "venue_id": 3,
-        "name": "I WANT TO FEEL BETTER",
+        "name": "EVENT 3",
         "description": "what we will be doing is assisting those who are battling depression",
         "type": "in-person",
         "capacity": 20,
@@ -34,7 +34,7 @@ events = [
     {
         "group_id": 4,
         "venue_id": 4,
-        "name": "AND NOW THAT I'M OLDER, I'LL NEVER BE SOBER",
+        "name": "EVENT 4",
         "description": "what we will be doing is assisting those with substance abuse issues",
         "type": "in-person",
         "capacity": 25,
@@ -44,7 +44,7 @@ events = [
     {
         "group_id": 5,
         "venue_id": 5,
-        "name": "THAT ONE DIANA ROSS SONG",
+        "name": "EVENT 5",
         "description": "what we will be doing is assisting those who need guidance in coming out to loved ones and being their authentic selves",
         "type": "in-person",
         "capacity": 30,
@@ -54,7 +54,7 @@ events = [
     {
         "group_id": 6,
         "venue_id": 6,
-        "name": "WOO-SAH!",
+        "name": "EVENT 6",
         "description": "what we will be doing is assisting those with stress",
         "type": "in-person",
         "capacity": 35,
@@ -64,7 +64,7 @@ events = [
     {
         "group_id": 7,
         "venue_id": None,
-        "name": "THE PAST IS IN FRONT OF ME",
+        "name": "EVENT 7",
         "description": "what we will be doing is assisting those with trauma from the past",
         "type": "online",
         "capacity": 50,
@@ -74,7 +74,7 @@ events = [
     {
         "group_id": 8,
         "venue_id": None,
-        "name": "WHAT DO THE LONELY DO AT CHRISTMAS TIME?",
+        "name": "EVENT 8",
         "description": "what we will be doing is assisting those with trouble maintaing healthy relationships",
         "type": "online",
         "capacity": 75,
@@ -84,7 +84,7 @@ events = [
     {
         "group_id": 9,
         "venue_id": None,
-        "name": "LET IT GO!",
+        "name": "EVENT 9",
         "description": "what we will be doing is assisting those with grief",
         "type": "online",
         "capacity": 100,
@@ -94,7 +94,7 @@ events = [
     {
         "group_id": 10,
         "venue_id": None,
-        "name": "NOT GETTING ANY PENNIES FOR THESE THOUGHTS",
+        "name": "EVENT 10",
         "description": "twhat we will be doing is assisting those with suicidal thoughts",
         "type": "online",
         "capacity": 10,
