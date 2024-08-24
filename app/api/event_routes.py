@@ -27,6 +27,7 @@ def all_events():
     events = Event.query.all()
     return {"events": [event.to_dict() for event in events]}
 
+
 @event_routes.route("/<int:eventId>")
 def event(eventId):
     """
@@ -36,3 +37,30 @@ def event(eventId):
     event = Event.query.get(eventId)
     return event.to_dict()
 
+
+@event_routes.route("/<int:eventId>", methods=["DELETE"])
+@login_required
+def delete_event(eventId):
+    """
+    will delete a given event by its id
+
+    Returns 401 Unauthorized if the current user's id does not match the groups' organizer id
+
+    Returns 404 Not Found if the group is not in the database
+
+    The commented out code was to test if the delete request works
+    """
+    event_to_delete = Event.query.get(eventId)
+    group = Group.query.get(event_to_delete.groupId)
+
+    # check if there is an event to delete
+    if not event_to_delete:
+        return {"errors": {"message": "Not Found"}}, 404
+
+    # check if current user is group organizer - group organizer is only allowed to update
+    if current_user.id != group.organizer_id:
+        return {"errors": {"message": "Unauthorized"}}, 401
+
+    db.session.delete(event_to_delete)
+    db.session.commit()
+    return {"message": "Event deleted"}
