@@ -94,7 +94,8 @@ class Event(db.Model):
             "capacity": self.capacity,
             "startDate": self.start_date,
             "endDate": self.end_date,
-            "attendees": len(self.event_attendances),
+            "attendees": attendees,
+            "numAttendees": len(self.event_attendances),
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }
