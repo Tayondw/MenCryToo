@@ -361,37 +361,38 @@ def edit_event(groupId, eventId):
         event_to_edit.start_date = form.data["start_date"] or event_to_edit.start_date
         event_to_edit.end_date = form.data["end_date"] or event_to_edit.end_date
         db.session.commit()
-        #   return event_to_edit.to_dict()
-        return redirect(f"/api/groups/{groupId}")
+        return event_to_edit.to_dict()
+    #   return redirect(f"/api/groups/{groupId}")
 
-    elif form.errors:
-        print(form.errors)
-        return render_template(
-            "event_form.html",
-            form=form,
-            type="update",
-            id=groupId,
-            eventId=eventId,
-            errors=form.errors,
-        )
+    #     elif form.errors:
+    #         print(form.errors)
+    #         return render_template(
+    #             "event_form.html",
+    #             form=form,
+    #             type="update",
+    #             id=groupId,
+    #             eventId=eventId,
+    #             errors=form.errors,
+    #         )
 
-    else:
-        current_data = Group.query.get(groupId)
-        print(current_data)
-        form.process(obj=current_data)
-        return render_template(
-            "event_form.html",
-            form=form,
-            type="update",
-            id=groupId,
-            eventId=eventId,
-            errors=None,
-        )
+    #     else:
+    #         current_data = Group.query.get(groupId)
+    #         print(current_data)
+    #         form.process(obj=current_data)
+    #         return render_template(
+    #             "event_form.html",
+    #             form=form,
+    #             type="update",
+    #             id=groupId,
+    #             eventId=eventId,
+    #             errors=None,
+    #         )
 
+    return form.errors, 400
 
-#     return form.errors, 400
 
 # ! GROUP - VENUES
+
 
 @group_routes.route("/<int:groupId>/venues", methods=["GET", "POST"])
 @login_required
@@ -430,12 +431,13 @@ def create_venue(groupId):
         db.session.add(new_venue)
         db.session.commit()
         return redirect("/api/venues/")
-      #   return new_venue.to_dict()
+    #   return new_venue.to_dict()
     if form.errors:
-                print(form.errors)
-                return render_template(
-                    "venue_form.html", id=groupId, form=form, errors=form.errors
-                )
+        print(form.errors)
+        return render_template(
+            "venue_form.html", id=groupId, form=form, errors=form.errors
+        )
     return render_template("venue_form.html", id=groupId, form=form, errors=None)
+
 
 #     return form.errors, 400

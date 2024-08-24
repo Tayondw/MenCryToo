@@ -7,7 +7,7 @@
       {% endfor %}
       {% endif %}
       {% if type == "update"%}
-      <form action="/api/venues/{{id}}" method="POST">
+      <form action="/api/venues/{{id}}/edit" method="POST">
             {% else %}
             <form action="/api/groups/{{id}}/venues" method="POST">
                   {% endif %}
