@@ -1,5 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, TextAreaField, SelectField, DateField, SubmitField
+from wtforms import (
+    StringField,
+    IntegerField,
+    TextAreaField,
+    SelectField,
+    SubmitField,
+    DateTimeLocalField
+)
 from wtforms.validators import DataRequired, Length, NumberRange, ValidationError
 
 types = ["online", "in-person"]
@@ -32,8 +39,12 @@ class EventForm(FlaskForm):
     capacity = IntegerField(
         "Event capacity", validators=[DataRequired(), NumberRange(min=2, max=300)]
     )
-    start_date = DateField("start_date", format="%Y-%m-%d", validators=[DataRequired()])
-    end_date = DateField("end_date", format="%Y-%m-%d", validators=[DataRequired()])
+    start_date = DateTimeLocalField(
+        "start_date", format="%Y-%m-%dT%H:%M", validators=[DataRequired()]
+    )
+    end_date = DateTimeLocalField(
+        "end_date", format="%Y-%m-%dT%H:%M", validators=[DataRequired()]
+    )
     submit = SubmitField("")
 
     def validate_date_range(self):
