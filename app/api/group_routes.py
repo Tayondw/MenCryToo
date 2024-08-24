@@ -143,6 +143,9 @@ def delete_group(groupId):
     if current_user.id != group_to_delete.organizer_id:
         return {"errors": {"message": "Unauthorized"}}, 401
 
+    # Delete associated group images
+    GroupImage.query.filter_by(group_id=groupId).delete()
+
     db.session.delete(group_to_delete)
     db.session.commit()
     return {"message": "Group deleted"}
