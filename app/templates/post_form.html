@@ -7,9 +7,9 @@
       {% endfor %}
       {% endif %}
       {% if type == "update"%}
-      <form action="/api/venues/{{id}}/edit" method="POST">
+      <form action="/api/posts/{{id}}/edit" method="POST" enctype="multipart/form-data">
             {% else %}
-            <form action="/api/groups/{{id}}/venues" method="POST">
+            <form action="/api/posts/create" method="POST" enctype="multipart/form-data">
                   {% endif %}
                   {{ form.csrf_token }}
                   <p>{{ form.title.label }}: {{ form.title }}</p>
