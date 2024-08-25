@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort, redirect, render_template
+from flask import Blueprint, request, abort, redirect, render_template, jsonify
 from flask_login import login_required, current_user
 from app.models import db, User, Post, Comment, Likes
 from app.forms import PostForm, CommentForm
@@ -204,3 +204,58 @@ def delete_group(postId):
 
 
 #     return redirect("/api/posts/")
+
+
+# ! POST - COMMENTS
+@post_routes.route("/<int:postId>/comments", methods=["POST"])
+@login_required
+def add_comment(postId):
+    form = CommentForm()
+    if form.validate_on_submit():
+        comment = Comment(
+            post_id=postId, user_id=current_user.id, comment=form.comment.data
+        )
+        db.session.add(comment)
+        db.session.commit()
+        return jsonify(comment.to_dict()), 201
+    return jsonify({"errors": form.errors}), 400
+
+
+@post_routes.route("/<int:postId>/comments/<int:commentId>", methods=["DELETE"])
+@login_required
+def delete_comment(postId, commentId):
+    comment = Comment.query.get(commentId)
+    if not comment or comment.post_id != postId:
+        return jsonify({"errors": {"message": "Comment not found"}}), 404
+
+    if comment.user_id != current_user.id:
+        return jsonify({"errors": {"message": "Unauthorized"}}), 403
+
+    db.session.delete(comment)
+    db.session.commit()
+    return jsonify({"message": "Comment deleted successfully"}), 200
+
+
+# ! POST - LIKES
+@post_routes.route("/<int:postId>/like", methods=["POST"])
+@login_required
+def like_post(postId):
+    post = Post.query.get(postId)
+    if not post:
+        return {"errors": {"message": "Post not found"}}, 404
+
+    if post.add_like(current_user.id):
+        return {"message": "Like added"}, 200
+    return {"errors": {"message": "Failed to add like"}}, 400
+
+
+@post_routes.route("/<int:postId>/unlike", methods=["POST"])
+@login_required
+def unlike_post(postId):
+    post = Post.query.get(postId)
+    if not post:
+        return {"errors": {"message": "Post not found"}}, 404
+
+    if post.remove_like(current_user.id):
+        return {"message": "Like removed"}, 200
+    return {"errors": {"message": "Failed to remove like"}}, 400

@@ -28,5 +28,3 @@ class PostForm(FlaskForm):
         "Post image",
         validators=[FileRequired(), FileAllowed(list(ALLOWED_EXTENSIONS))],
     )
-
-    submit = SubmitField("")

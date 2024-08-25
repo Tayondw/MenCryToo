@@ -1,0 +1,18 @@
+{% block content7 %}
+<div class="feed-container">
+      <h2>Create a Venue Post</h2>
+      {% if errors != None %}
+      {% for error in errors %}
+      <p style="color: red;">{{ error }}</p>
+      {% endfor %}
+      {% endif %}
+
+      <form action="/api/posts/create" method="POST">
+            {{ form.csrf_token }}
+            <p>{{ form.comment.label }}: {{ form.comment }}</p>
+            <button type="submit">Create COMMENT</button>
+            {% endif %}
+
+      </form>
+</div>
+{% endblock %}

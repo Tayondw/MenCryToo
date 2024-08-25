@@ -26,9 +26,16 @@ class Post(db.Model):
         back_populates="posts",
     )
 
-    post_likes = db.relationship("User", secondary=likes, back_populates="user_likes")
+    post_likes = db.relationship(
+        "User",
+        secondary=likes,
+        back_populates="user_likes",
+        cascade="all, delete-orphan",
+    )
 
-    post_comments = db.relationship("Comment", back_populates="post")
+    post_comments = db.relationship(
+        "Comment", back_populates="post", cascade="all, delete-orphan"
+    )
 
     def add_like(self, user_id):
         user = User.query.get(user_id)
