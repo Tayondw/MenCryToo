@@ -1,6 +1,7 @@
 from .db import db, environment, SCHEMA, add_prefix_for_prod
 from .like import likes
 from datetime import datetime
+from app.models import User
 
 
 class Post(db.Model):
@@ -29,6 +30,22 @@ class Post(db.Model):
 
     post_comments = db.relationship("Comment", back_populates="post")
 
+    def add_like(self, user_id):
+        user = User.query.get(user_id)
+        if user and user not in self.post_likes:
+            self.post_likes.append(user)
+            db.session.commit()
+            return True
+        return False
+
+    def remove_like(self, user_id):
+        user = User.query.get(user_id)
+        if user and user in self.post_likes:
+            self.post_likes.remove(user)
+            db.session.commit()
+            return True
+        return False
+
     def __repr__(self):
         return f"< Post id: {self.id} by: {self.user.username} >"
 
@@ -41,8 +58,8 @@ class Post(db.Model):
             "image": self.image,
             "likes": len(self.post_likes),
             "user": self.user.to_dict_no_posts(),
-            "createdAt": self.created_at,
-            "updatedAt": self.updated_at,
+            "createdAt": self.created_at.isoformat(),
+            "updatedAt": self.updated_at.isoformat(),
         }
         if post_comments:
             dict_post["postComments"] = [
