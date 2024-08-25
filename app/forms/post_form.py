@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField
+from wtforms import StringField, TextAreaField, SubmitField
 from flask_wtf.file import FileAllowed, FileField, FileRequired
 from wtforms.validators import DataRequired, Length
 
@@ -28,3 +28,5 @@ class PostForm(FlaskForm):
         "Post image",
         validators=[FileRequired(), FileAllowed(list(ALLOWED_EXTENSIONS))],
     )
+
+    submit = SubmitField("")

@@ -1,0 +1,27 @@
+{% block content6 %}
+<div class="feed-container">
+      <h2>Create a Venue Post</h2>
+      {% if errors != None %}
+      {% for error in errors %}
+      <p style="color: red;">{{ error }}</p>
+      {% endfor %}
+      {% endif %}
+      {% if type == "update"%}
+      <form action="/api/venues/{{id}}/edit" method="POST">
+            {% else %}
+            <form action="/api/groups/{{id}}/venues" method="POST">
+                  {% endif %}
+                  {{ form.csrf_token }}
+                  <p>{{ form.title.label }}: {{ form.title }}</p>
+                  <p>{{ form.caption.label }}: {{ form.caption }}</p>
+                  <p>{{ form.image.label }}: {{ form.image }}</p>
+                  {% if type == "update"%}
+                  <button type="submit">Update Event</button>
+                  {% else %}
+                  <button type="submit">Create Event</button>
+                  {% endif %}
+
+            </form>
+      </form>
+</div>
+{% endblock %}

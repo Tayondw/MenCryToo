@@ -28,4 +28,3 @@ class VenueForm(FlaskForm):
     )
     latitude = StringField("lat", validators=[DataRequired()])
     longitude = StringField("lng", validators=[DataRequired()])
-    submit = SubmitField("")

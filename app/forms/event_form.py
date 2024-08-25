@@ -45,7 +45,6 @@ class EventForm(FlaskForm):
     end_date = DateTimeLocalField(
         "end_date", format="%Y-%m-%dT%H:%M", validators=[DataRequired()]
     )
-    submit = SubmitField("")
 
     def validate_date_range(self):
         if self.start_date.data >= self.end_date.data:
