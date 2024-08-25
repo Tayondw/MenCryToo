@@ -160,7 +160,7 @@ def edit_post(postId):
         return {"errors": form.errors}, 400
 
     else:
-        return {"post": post_to_edit.to_dict()}, 200
+        return {"post": post_to_edit.to_dict(post_comments=True)}, 200
 
 
 @post_routes.route("/<int:postId>/delete", methods=["DELETE"])
@@ -207,7 +207,7 @@ def delete_post(postId):
 
 
 # ! POST - COMMENTS
-@post_routes.route("/<int:postId>/comments", methods=["GET","POST"])
+@post_routes.route("/<int:postId>/comments", methods=["GET", "POST"])
 @login_required
 def add_comment(postId):
 
@@ -224,22 +224,22 @@ def add_comment(postId):
         )
         db.session.add(comment)
         db.session.commit()
-        #   return jsonify(comment.to_dict()), 201
-        return redirect(f"/api/posts/{postId}")
-    elif form.errors:
-        print(form.errors)
-        return render_template(
-                "comment_form.html", form=form, id=postId, errors=form.errors
-            )
+        return jsonify(comment.to_dict()), 201
+    #   return redirect(f"/api/posts/{postId}")
+    #     elif form.errors:
+    #         print(form.errors)
+    #         return render_template(
+    #                 "comment_form.html", form=form, id=postId, errors=form.errors
+    #             )
 
-    else:
-        current_data = Post.query.get(postId)
-        print(current_data)
-        form.process(obj=current_data)
-        return render_template(
-                "comment_form.html", form=form, id=postId, errors=None
-            )
-#     return jsonify({"errors": form.errors}), 400
+    #     else:
+    #         current_data = Post.query.get(postId)
+    #         print(current_data)
+    #         form.process(obj=current_data)
+    #         return render_template(
+    #                 "comment_form.html", form=form, id=postId, errors=None
+    #             )
+    return jsonify({"errors": form.errors}), 400
 
 
 @post_routes.route("/<int:postId>/comments/<int:commentId>", methods=["DELETE"])
