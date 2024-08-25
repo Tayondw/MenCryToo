@@ -185,3 +185,70 @@ def edit_event_images(eventId, imageId):
 #         eventId=eventId,
 #         event_image=event_image,
 #     )
+
+
+# ! EVENT - ATTENDEES
+@event_routes.route("/<int:eventId>/attend-event", methods=["POST"])
+@login_required
+def attend_event(eventId):
+    event = Event.query.get(eventId)
+    group = Group.query.get(event.group_id)
+
+    if not event:
+        return {"errors": {"message": "Event Not Found"}}, 404
+
+    # Prevent the organizer from attending as a member
+    if group.organizer_id == current_user.id:
+        return {
+            "message": "User is the organizer and is currently attending the event"
+        }, 403
+
+    # Check if the user is currently attending the event
+    attendance = Attendances.query.filter_by(
+        event_id=eventId, user_id=current_user.id
+    ).first()
+
+    if attendance:
+        return {"message": "Currently attending the event"}, 400
+
+    new_attendance = Attendances(event_id=event.id, user_id=current_user.id)
+    db.session.add(new_attendance)
+    db.session.commit()
+
+    return {"message": "Successfully attended the event"}, 200
+
+
+@event_routes.route("/<int:eventId>/leave-event/<int:attendeeId>", methods=["DELETE"])
+@login_required
+def leave_event(eventId, attendeeId):
+    event = Event.query.get(eventId)
+    group = Group.query.get(event.group_id)
+
+    if not event:
+        return {"errors": {"message": "Event not found"}}, 404
+
+    # Check if the attendee to be removed is attending the event
+    attendee = Attendances.query.filter_by(event_id=eventId, user_id=attendeeId).first()
+
+    if not attendee:
+        return {"message": "User is not a attendee of this event"}, 400
+
+    # If the current user is trying to leave the event
+    if attendeeId == current_user.id:
+        if group.organizer_id == current_user.id:
+            return {"message": "The organizer must attend the event"}, 403
+
+        db.session.delete(attendee)
+        db.session.commit()
+        return {"message": "You have successfully unattended the event"}, 200
+
+    # If the current user is trying to remove another member
+    if group.organizer_id != current_user.id:
+        return {"message": "Only the organizer can remove attendees"}, 403
+
+    if attendeeId == group.organizer_id:
+        return {"message": "The organizer must attend the event"}, 400
+
+    db.session.delete(attendee)
+    db.session.commit()
+    return {"message": "Attendee successfully unattended the event"}, 200
