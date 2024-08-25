@@ -34,7 +34,7 @@ def post(postId):
     if not post:
         return {"errors": {"message": "Not Found"}}, 404
 
-    return post.to_dict()
+    return post.to_dict(post_comments=True)
 
 
 @post_routes.route("/create", methods=["GET", "POST"])
@@ -116,7 +116,7 @@ def edit_post(postId):
     if not user:
         return {"errors": {"message": "Not Found"}}, 404
 
-    # check if current user is post creator - group creator is only allowed to update
+    # check if current user is post creator - post creator is only allowed to update
     if current_user.id != post_to_edit.creator:
         return {"errors": {"message": "Unauthorized"}}, 401
 
@@ -165,7 +165,7 @@ def edit_post(postId):
 
 @post_routes.route("/<int:postId>/delete", methods=["DELETE"])
 @login_required
-def delete_group(postId):
+def delete_post(postId):
     """
     will delete a given post by its id
 
@@ -207,35 +207,36 @@ def delete_group(postId):
 
 
 # ! POST - COMMENTS
-@post_routes.route("/<int:postId>/comments", methods=["POST"])
+@post_routes.route("/<int:postId>/comments", methods=["GET","POST"])
 @login_required
 def add_comment(postId):
 
     post = Post.query.get(postId)
 
     if not post:
-     return jsonify({"error": "Post not found"}), 404
-    
+        return jsonify({"error": "Post not found"}), 404
+
     form = CommentForm()
+    form["csrf_token"].data = request.cookies["csrf_token"]
     if form.validate_on_submit():
         comment = Comment(
             post_id=postId, user_id=current_user.id, comment=form.comment.data
         )
         db.session.add(comment)
         db.session.commit()
-    #   return jsonify(comment.to_dict()), 201
+        #   return jsonify(comment.to_dict()), 201
         return redirect(f"/api/posts/{postId}")
     elif form.errors:
-            print(form.errors)
-            return render_template(
+        print(form.errors)
+        return render_template(
                 "comment_form.html", form=form, id=postId, errors=form.errors
             )
 
     else:
-            current_data = Post.query.get(postId)
-            print(current_data)
-            form.process(obj=current_data)
-            return render_template(
+        current_data = Post.query.get(postId)
+        print(current_data)
+        form.process(obj=current_data)
+        return render_template(
                 "comment_form.html", form=form, id=postId, errors=None
             )
 #     return jsonify({"errors": form.errors}), 400

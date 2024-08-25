@@ -1,0 +1,30 @@
+{% block content8 %}
+<div class="feed-container">
+      <h2>Create a Group Post</h2>
+      {% if errors != None %}
+      {% for error in errors %}
+      <p style="color: red;">{{ error }}</p>
+      {% endfor %}
+      {% endif %}
+      {% if type == "update"%}
+      <form action="/api/users/{{id}}/profile/edit" method="POST" enctype="multipart/form-data">
+            {% else %}
+            <form action="/api/users/{{id}}/profile/create" method="POST" enctype="multipart/form-data">
+                  {% endif %}
+                  {{ form.csrf_token }}
+                  <p>{{ form.first_name.label }}: {{ form.first_name }}</p>
+                  <p>{{ form.last_name.label }}: {{ form.last_name }}</p>
+                  <p>{{ form.bio.label }}: {{ form.bio }}</p>
+                  <p>{{ form.profile_image.label }}: {{ form.profile_image }}</p>
+                  <p>Please hold the control button as you select multiple tags</p>
+                  <p>{{ form.user_tags.label }}: {{ form.user_tags }}</p>
+                  {% if type == "update"%}
+                  <button type="submit">Update Profile</button>
+                  {% else %}
+                  <button type="submit">Create Profile</button>
+                  {% endif %}
+
+            </form>
+      </form>
+</div>
+{% endblock %}

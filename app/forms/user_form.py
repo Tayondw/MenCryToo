@@ -1,30 +1,40 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SelectField
+from wtforms import StringField, TextAreaField, SelectMultipleField
 from flask_wtf.file import FileAllowed, FileField, FileRequired
 from wtforms.validators import DataRequired, Length
 
 ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "gif"}
+
 tags = [
-    "ANGER",
-    "ANXIETY",
-    "DEPRESSION",
-    "SUBSTANCE ABUSE",
-    "STRESS",
-    "TRAUMA",
-    "RELATIONSHIPS",
-    "GRIEF",
-    "COMING OUT",
-    "SUICIDAL THOUGHTS",
+    ("ANGER", "ANGER"),
+    ("ANXIETY", "ANXIETY"),
+    ("DEPRESSION", "DEPRESSION"),
+    ("SUBSTANCE ABUSE", "SUBSTANCE ABUSE"),
+    ("STRESS", "STRESS"),
+    ("TRAUMA", "TRAUMA"),
+    ("RELATIONSHIPS", "RELATIONSHIPS"),
+    ("GRIEF", "GRIEF"),
+    ("COMING OUT", "COMING OUT"),
+    ("SUICIDAL THOUGHTS", "SUICIDAL THOUGHTS"),
 ]
 
 
 class UserForm(FlaskForm):
-    username = StringField(
-        "User Name",
+    first_name = StringField(
+        "first name",
         validators=[
             DataRequired(),
             Length(
-                min=3, max=20, message="Username must be between 3 and 20 characters"
+                min=3, max=20, message="First name must be between 3 and 20 characters"
+            ),
+        ],
+    )
+    last_name = StringField(
+        "last name",
+        validators=[
+            DataRequired(),
+            Length(
+                min=3, max=20, message="Last name must be between 3 and 20 characters"
             ),
         ],
     )
@@ -43,4 +53,9 @@ class UserForm(FlaskForm):
         "Profile Image",
         validators=[FileRequired(), FileAllowed(list(ALLOWED_EXTENSIONS))],
     )
-    user_tag = SelectField("tag", choices=tags)
+    user_tags = SelectMultipleField(
+        "Tags",
+        choices=tags,
+        validators=[DataRequired()],
+        coerce=str,
+    )
