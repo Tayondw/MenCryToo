@@ -116,7 +116,7 @@ def edit_post(postId):
     if not user:
         return {"errors": {"message": "Not Found"}}, 404
 
-    # check if current user is group organizer - group organizer is only allowed to update
+    # check if current user is post creator - group creator is only allowed to update
     if current_user.id != post_to_edit.creator:
         return {"errors": {"message": "Unauthorized"}}, 401
 
@@ -161,3 +161,46 @@ def edit_post(postId):
 
     else:
         return {"post": post_to_edit.to_dict()}, 200
+
+
+@post_routes.route("/<int:postId>/delete", methods=["DELETE"])
+@login_required
+def delete_group(postId):
+    """
+    will delete a given post by its id
+
+    Returns 401 Unauthorized if the current user's id does not match the post's user id
+
+    Returns 404 Not Found if the post is not in the database or if the user is not found in the database
+
+    The commented out code was to test if the delete request works
+    """
+
+    post_to_delete = Post.query.get(postId)
+
+    # check if there is a post to delete
+    if not post_to_delete:
+        return {"errors": {"message": "Not Found"}}, 404
+
+    user = User.query.get(post_to_delete.creator)
+
+    # check if there is a user who created the post
+    if not user:
+        return {"errors": {"message": "Not Found"}}, 404
+
+    # check if current user is post creator - post creator is only allowed to update
+    if current_user.id != post_to_delete.creator:
+        return {"errors": {"message": "Unauthorized"}}, 401
+
+    # Delete associated post comments
+    Comment.query.filter_by(post_id=postId).delete()
+
+    # Delete associated post likes
+    Likes.query.filter_by(post_id=postId).delete()
+
+    db.session.delete(post_to_delete)
+    db.session.commit()
+    return {"message": "post deleted"}
+
+
+#     return redirect("/api/posts/")
