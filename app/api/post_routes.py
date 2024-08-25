@@ -19,7 +19,7 @@ def all_posts():
     if not posts:
         return {"errors": {"message": "Not Found"}}, 404
 
-    return {"posts": [post.to_dict() for post in posts]}
+    return {"posts": [post.to_dict(post_comments=True) for post in posts]}
 
 
 @post_routes.route("/<int:postId>")

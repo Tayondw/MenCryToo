@@ -14,7 +14,18 @@ def users():
     Query for all users and returns them in a list of user dictionaries
     """
     users = User.query.all()
-    return {"users": [user.to_dict() for user in users]}
+    return {
+        "users": [
+            user.to_dict(
+                posts=True,
+                user_comments=True,
+                user_memberships=True,
+                user_attendances=True,
+                users_tags=True,
+            )
+            for user in users
+        ]
+    }
 
 
 @user_routes.route("/<int:id>")
@@ -31,6 +42,28 @@ def user(id):
         user_attendances=True,
         users_tags=True,
     )
+
+
+@user_routes.route("/profile-feed")
+@login_required
+def view_all_profiles():
+    """
+    Query for all users with a profile and returns them in a list of user dictionaries
+    """
+
+    users = User.query.filter(User.profile_image_url.isnot(None)).all()
+    return {
+        "users-profile": [
+            user.to_dict(
+                posts=True,
+                user_comments=True,
+                user_memberships=True,
+                user_attendances=True,
+                users_tags=True,
+            )
+            for user in users
+        ]
+    }
 
 
 @user_routes.route("/<int:userId>/profile/create", methods=["GET", "POST"])

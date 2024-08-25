@@ -87,8 +87,8 @@ class User(db.Model, UserMixin):
     ):
         dict_user = {
             "id": self.id,
-            "first_name": self.first_name,
-            "last_name": self.last_name,
+            "firstName": self.first_name,
+            "lastName": self.last_name,
             "username": self.username,
             "email": self.email,
             "bio": self.bio,
@@ -105,15 +105,15 @@ class User(db.Model, UserMixin):
                 comment.to_dict() for comment in self.user_comments
             ]
         if user_memberships:
-            dict_user["user_membership"] = [
+            dict_user["userMembership"] = [
                 user_membership.to_dict() for user_membership in self.user_memberships
             ]
         if user_attendances:
-            dict_user["user_attendances"] = [
+            dict_user["userAttendances"] = [
                 user_attendance.to_dict() for user_attendance in self.user_attendances
             ]
         if users_tags:
-            dict_user["users_tags"] = [
+            dict_user["usersTags"] = [
                 user_tag.to_dict() for user_tag in self.users_tags
             ]
         return dict_user
@@ -127,8 +127,8 @@ class User(db.Model, UserMixin):
 
         dict_user = {
             "id": self.id,
-            "first_name": self.first_name,
-            "last_name": self.last_name,
+            "firstName": self.first_name,
+            "lastName": self.last_name,
             "username": self.username,
             "email": self.email,
             "bio": self.bio,
@@ -139,15 +139,15 @@ class User(db.Model, UserMixin):
         }
 
         if user_memberships:
-            dict_user["user_membership"] = [
+            dict_user["userMembership"] = [
                 user_membership.to_dict() for user_membership in self.user_memberships
             ]
         if user_attendances:
-            dict_user["user_attendances"] = [
+            dict_user["userAttendances"] = [
                 user_attendance.to_dict() for user_attendance in self.user_attendances
             ]
         if users_tags:
-            dict_user["users_tags"] = [
+            dict_user["usersTags"] = [
                 user_tag.to_dict() for user_tag in self.users_tags
             ]
         return dict_user
