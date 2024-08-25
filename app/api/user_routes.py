@@ -250,3 +250,34 @@ def delete_profile(userId):
 
     db.session.commit()
     return jsonify({"message": "Profile deleted successfully"}), 200
+
+
+@user_routes.route("/<int:userId>/add-tags", methods=["POST"])
+@login_required
+def add_tags(userId):
+    user = User.query.get(userId)
+
+    if not user:
+        return jsonify({"errors": {"message": "User not found"}}), 404
+
+    if user.id != current_user.id:
+        return jsonify({"errors": {"message": "Unauthorized"}}), 403
+
+    form = request.json
+    new_tag_names = form.get("tags", [])
+
+    # Fetch existing tags
+    existing_tags = user.users_tags
+    existing_tag_names = {tag.name for tag in existing_tags}
+
+    # Fetch or create new tags
+    for tag_name in new_tag_names:
+        if tag_name not in existing_tag_names:
+            tag = Tag.query.filter_by(name=tag_name).first()
+            if not tag:
+                tag = Tag(name=tag_name)
+                db.session.add(tag)
+            user.users_tags.append(tag)
+
+    db.session.commit()
+    return jsonify({"message": "Tags added successfully"}), 200
