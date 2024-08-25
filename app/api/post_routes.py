@@ -141,7 +141,7 @@ def edit_post(postId):
             remove_file_from_s3(post_to_edit.image)
             post_to_edit.image = upload["url"]
         db.session.commit()
-        return {"post": post_to_edit.to_dict()}, 200
+        return {"post": post_to_edit.to_dict(post_comments=True)}, 200
     #   return redirect(f"/api/posts/{postId}")
     #     elif form.errors:
     #         print(form.errors)
