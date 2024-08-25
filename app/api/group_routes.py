@@ -444,7 +444,7 @@ def create_venue(groupId):
 
 
 # ! GROUP - MEMBERS
-@group_routes.route("/<int:groupId>/join", methods=["POST"])
+@group_routes.route("/<int:groupId>/join-group", methods=["POST"])
 @login_required
 def join_group(groupId):
     group = Group.query.get(groupId)
@@ -457,7 +457,9 @@ def join_group(groupId):
         return {"message": "User is the organizer of the group"}, 403
 
     # Check if the user is already a member of the group
-    membership = Memberships.query.filter_by(group_id=groupId, user_id=current_user.id).first()
+    membership = Memberships.query.filter_by(
+        group_id=groupId, user_id=current_user.id
+    ).first()
 
     if membership:
         return {"message": "Already a member of this group"}, 400
@@ -467,3 +469,38 @@ def join_group(groupId):
     db.session.commit()
 
     return {"message": "Successfully joined the group"}, 200
+
+
+@group_routes.route("/<int:groupId>/leave-group/<int:memberId>", methods=["DELETE"])
+@login_required
+def leave_group(groupId, memberId):
+    group = Group.query.get(groupId)
+
+    if not group:
+        return {"errors": {"message": "Group not found"}}, 404
+
+    # Check if the user to be removed is a member of the group
+    member = Memberships.query.filter_by(group_id=groupId, user_id=memberId).first()
+
+    if not member:
+        return {"message": "User is not a member of this group"}, 400
+
+    # If the current user is trying to leave the group
+    if memberId == current_user.id:
+        if group.organizer_id == current_user.id:
+            return {"message": "The organizer cannot leave their own group"}, 403
+
+        db.session.delete(member)
+        db.session.commit()
+        return {"message": "You have successfully left the group"}, 200
+
+    # If the current user is trying to remove another member
+    if group.organizer_id != current_user.id:
+        return {"message": "Only the organizer can remove members"}, 403
+
+    if memberId == group.organizer_id:
+        return {"message": "The organizer cannot be removed from the group"}, 400
+
+    db.session.delete(member)
+    db.session.commit()
+    return {"message": "Member successfully removed from the group"}, 200
