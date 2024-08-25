@@ -4,20 +4,20 @@ from app.models import db, User, Group, Event, Post, UserTags, Tag
 from app.forms import UserForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
 
-user_routes = Blueprint('users', __name__)
+user_routes = Blueprint("users", __name__)
 
 
-@user_routes.route('/')
+@user_routes.route("/")
 @login_required
 def users():
     """
     Query for all users and returns them in a list of user dictionaries
     """
     users = User.query.all()
-    return {'users': [user.to_dict() for user in users]}
+    return {"users": [user.to_dict() for user in users]}
 
 
-@user_routes.route('/<int:id>')
+@user_routes.route("/<int:id>")
 @login_required
 def user(id):
     """
@@ -37,7 +37,11 @@ def user(id):
 @login_required
 def create_profile(userId):
     """
-    Create or update a profile linked to the current user and submit to the database.
+    Create a profile linked to the current user and submit to the database.
+
+    renders an empty form on get requests, validates and submits form on post requests
+
+    The commented out code was to test if the post request works
     """
     user = User.query.get(userId)
 
@@ -48,7 +52,11 @@ def create_profile(userId):
         return {"errors": {"message": "User already has a profile"}}, 404
 
     if user.id != current_user.id:
-        return {"errors": {"message": "User is not the current user and cannot create a profile for another user"}}, 404
+        return {
+            "errors": {
+                "message": "User is not the current user and cannot create a profile for another user"
+            }
+        }, 404
 
     form = UserForm()
     form["csrf_token"].data = request.cookies["csrf_token"]
@@ -96,10 +104,94 @@ def create_profile(userId):
             )
         }, 201
 
-    if form.errors:
-        print(form.errors)
-        return render_template(
-            "user_form.html", form=form, id=userId, errors=form.errors
-        )
+    #     if form.errors:
+    #         print(form.errors)
+    #         return render_template(
+    #             "user_form.html", form=form, id=userId, errors=form.errors
+    #         )
 
-    return render_template("user_form.html", form=form, id=userId, errors=None)
+    #     return render_template("user_form.html", form=form, id=userId, errors=None)
+    return form.errors, 400
+
+
+@user_routes.route("/<int:userId>/profile/update", methods=["GET", "POST"])
+@login_required
+def update_profile(userId):
+    """
+    Update a profile linked to the current user and submit to the database.
+
+    renders an empty form on get requests, validates and submits form on post requests
+
+    The commented out code was to test if the post request works
+    """
+    user_to_edit = User.query.get(userId)
+
+    if not user_to_edit:
+        return {"errors": {"message": "Not Found"}}, 404
+
+    if user_to_edit.id != current_user.id:
+        return {
+            "errors": {
+                "message": "User is not the current user and cannot create a profile for another user"
+            }
+        }, 404
+
+    form = UserForm()
+    form["csrf_token"].data = request.cookies["csrf_token"]
+
+    if form.validate_on_submit():
+        profile_image = form.profile_image.data
+
+        if not profile_image:
+            return {"message": "An image is required to create a profile."}, 400
+
+        try:
+            profile_image.filename = get_unique_filename(profile_image.filename)
+            upload = upload_file_to_s3(profile_image)
+        except Exception as e:
+            return {"message": f"Image upload failed: {str(e)}"}, 500
+
+        if "url" not in upload:
+            return {
+                "message": upload.get(
+                    "errors", "Image upload failed. Please try again."
+                )
+            }, 400
+
+        # Remove the old image from S3
+        remove_file_from_s3(user_to_edit.profile_image_url)
+
+        url = upload["url"]
+
+        # Update the existing user with profile details
+        user_to_edit.first_name = form.data["first_name"]
+        user_to_edit.last_name = form.data["last_name"]
+        user_to_edit.bio = form.data["bio"]
+        user_to_edit.profile_image_url = url
+
+        # Update the user's tags
+        selected_tags = form.user_tags.data  # This returns a list of selected tags
+        tags_to_add = Tag.query.filter(Tag.name.in_(selected_tags)).all()
+        user_to_edit.users_tags = tags_to_add
+
+        db.session.commit()
+        return {
+            "profile": user_to_edit.to_dict(
+                posts=True,
+                user_comments=True,
+                user_memberships=True,
+                user_attendances=True,
+                users_tags=True,
+            )
+        }, 201
+
+    #     if form.errors:
+    #         print(form.errors)
+    #         return render_template(
+    #                 "user_form.html", form=form, id=userId, type="update", errors=form.errors
+    #             )
+
+    #     return render_template(
+    #         "user_form.html", form=form, id=userId, type="update", errors=None
+    #     )
+    return form.errors, 400
