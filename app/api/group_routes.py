@@ -441,3 +441,29 @@ def create_venue(groupId):
 
 
 #     return form.errors, 400
+
+
+# ! GROUP - MEMBERS
+@group_routes.route("/<int:groupId>/join", methods=["POST"])
+@login_required
+def join_group(groupId):
+    group = Group.query.get(groupId)
+
+    if not group:
+        return {"errors": {"message": "Not Found"}}, 404
+
+    # Prevent the organizer from joining as a member
+    if group.organizer_id == current_user.id:
+        return {"message": "User is the organizer of the group"}, 403
+
+    # Check if the user is already a member of the group
+    membership = Memberships.query.filter_by(group_id=groupId, user_id=current_user.id).first()
+
+    if membership:
+        return {"message": "Already a member of this group"}, 400
+
+    new_membership = Memberships(group_id=group.id, user_id=current_user.id)
+    db.session.add(new_membership)
+    db.session.commit()
+
+    return {"message": "Successfully joined the group"}, 200
