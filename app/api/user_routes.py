@@ -219,12 +219,34 @@ def update_profile(userId):
         }, 201
 
     #     if form.errors:
-    #         print(form.errors)
-    #         return render_template(
-    #                 "user_form.html", form=form, id=userId, type="update", errors=form.errors
-    #             )
+    #             print(form.errors)
+    #             return render_template(
+    #                     "user_form.html", form=form, id=userId, type="update", errors=form.errors
+    #                 )
 
     #     return render_template(
-    #         "user_form.html", form=form, id=userId, type="update", errors=None
-    #     )
+    #             "user_form.html", form=form, id=userId, type="update", errors=None
+    #         )
     return form.errors, 400
+
+
+@user_routes.route("/<int:userId>/profile/delete", methods=["DELETE"])
+@login_required
+def delete_profile(userId):
+    user = User.query.get(userId)
+
+    if not user:
+        return jsonify({"errors": {"message": "user not found"}}), 404
+
+    if user.id != current_user.id:
+        return jsonify({"errors": {"message": "Unauthorized"}}), 403
+
+    # Clear profile-related fields
+    user.first_name = None
+    user.last_name = None
+    user.bio = None
+    user.profile_image_url = None
+    user.users_tags = []
+
+    db.session.commit()
+    return jsonify({"message": "Profile deleted successfully"}), 200

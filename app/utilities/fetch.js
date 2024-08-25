@@ -30,3 +30,11 @@ fetch("api/event-images/11", {
 	},
 });
 
+// Delete profile by its id
+fetch("api/users/12/profile/delete", {
+	method: "DELETE",
+	headers: {
+		"content-type": "application/json",
+	},
+});
+
