@@ -210,6 +210,12 @@ def delete_group(postId):
 @post_routes.route("/<int:postId>/comments", methods=["POST"])
 @login_required
 def add_comment(postId):
+
+    post = Post.query.get(postId)
+
+    if not post:
+     return jsonify({"error": "Post not found"}), 404
+    
     form = CommentForm()
     if form.validate_on_submit():
         comment = Comment(
@@ -217,8 +223,22 @@ def add_comment(postId):
         )
         db.session.add(comment)
         db.session.commit()
-        return jsonify(comment.to_dict()), 201
-    return jsonify({"errors": form.errors}), 400
+    #   return jsonify(comment.to_dict()), 201
+        return redirect(f"/api/posts/{postId}")
+    elif form.errors:
+            print(form.errors)
+            return render_template(
+                "comment_form.html", form=form, id=postId, errors=form.errors
+            )
+
+    else:
+            current_data = Post.query.get(postId)
+            print(current_data)
+            form.process(obj=current_data)
+            return render_template(
+                "comment_form.html", form=form, id=postId, errors=None
+            )
+#     return jsonify({"errors": form.errors}), 400
 
 
 @post_routes.route("/<int:postId>/comments/<int:commentId>", methods=["DELETE"])

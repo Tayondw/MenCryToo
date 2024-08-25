@@ -7,7 +7,7 @@
       {% endfor %}
       {% endif %}
 
-      <form action="/api/posts/create" method="POST">
+      <form action="/api/posts/{{id}}/comments" method="POST">
             {{ form.csrf_token }}
             <p>{{ form.comment.label }}: {{ form.comment }}</p>
             <button type="submit">Create COMMENT</button>
