@@ -30,7 +30,6 @@ class Post(db.Model):
         "User",
         secondary=likes,
         back_populates="user_likes",
-        cascade="all, delete-orphan",
     )
 
     post_comments = db.relationship(
