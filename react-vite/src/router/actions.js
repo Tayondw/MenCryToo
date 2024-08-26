@@ -179,3 +179,93 @@ export const eventAttendeeActions = async ({ request }) => {
 		);
 	}
 };
+
+export const profileActions = async ({ request }) => {
+	let formData = await request.formData();
+	let data = Object.fromEntries(formData);
+	let intent = formData.get("intent");
+	data.id = +data.id;
+
+	if (intent === "create-profile") {
+		return await fetch(`/api/users/${data.id}/profile/create`, {
+			method: "POST",
+			body: formData,
+		});
+	}
+
+	if (intent === "update-profile") {
+		return await fetch(`/api/users/${data.id}/profile/update`, {
+			method: "POST",
+			body: formData,
+		});
+	}
+
+	if (intent === "add-tags") {
+		return await fetch(`/api/users/${data.id}/add-tags`, {
+			method: "POST",
+			body: formData,
+		});
+	}
+
+	if (intent === "delete-profile") {
+		return await fetch(`/api/users/${data.id}/profile/delete`, {
+			method: "DELETE",
+		});
+	}
+};
+
+export const postActions = async ({ request }) => {
+	let formData = await request.formData();
+	let data = Object.fromEntries(formData);
+	let intent = formData.get("intent");
+	data.id = +data.id;
+	data.commentId = +data.commentId;
+
+	if (intent === "create-post") {
+		return await fetch(`/api/posts/create`, {
+			method: "POST",
+			body: formData,
+		});
+	}
+
+	if (intent === "add-comment") {
+		return await fetch(`/api/posts/${data.id}/comments`, {
+			method: "POST",
+			body: formData,
+		});
+	}
+
+	if (intent === "remove-comment") {
+		return await fetch(`/api/posts/${data.id}/comments/${data.commentId}`, {
+			method: "DELETE",
+			body: formData,
+		});
+	}
+
+	if (intent === "add-like") {
+		return await fetch(`/api/posts/${data.id}/like`, {
+			method: "POST",
+			body: formData,
+		});
+	}
+
+	if (intent === "remove-like") {
+		return await fetch(`/api/posts/${data.id}/unlike`, {
+			method: "POST",
+			body: formData,
+		});
+	}
+
+	if (intent === "edit-post") {
+		return await fetch(`/api/posts/${data.id}/edit`, {
+			method: "POST",
+			body: formData,
+		});
+	}
+
+	if (intent === "delete-post") {
+		return await fetch(`/api/posts/${data.id}/delete`, {
+			method: "DELETE",
+		});
+	}
+};
