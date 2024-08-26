@@ -28,8 +28,6 @@ export const getLoader = async () => {
 };
 
 export const groupDetailsLoader = async ({ params }) => {
-      console.log("params:", params);
-      
 	const response = await fetch(`/api/groups/${params.groupId}`);
 	if (response.ok) {
 		const groupDetails = await response.json();
@@ -71,7 +69,7 @@ export const postDetailsLoader = async ({ params }) => {
 
 // export const detailsLoader = async ({ params }) => {
 //       console.log("params:", params);
-      
+
 // 	const urls = [
 // 		`/api/groups/${params.groupId}`,
 // 		`/api/events/${params.eventId}`,
