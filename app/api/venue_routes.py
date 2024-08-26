@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort, redirect, render_template
+from flask import Blueprint, request, abort, redirect, render_template, jsonify
 from flask_login import login_required, current_user
 from app.models import (
     db,
@@ -20,8 +20,8 @@ def all_venues():
     """
     venues = Venue.query.all()
     if not venues:
-        return {"errors": {"message": "Not Found"}}, 404
-    return {"venues": [venue.to_dict() for venue in venues]}
+        return jsonify({"errors": {"message": "Not Found"}}), 404
+    return jsonify({"venues": [venue.to_dict() for venue in venues]})
 
 
 @venue_routes.route("/<int:venueId>")
@@ -31,8 +31,8 @@ def venue(venueId):
     """
     venue = Venue.query.get(venueId)
     if not venue:
-        return {"errors": {"message": "Not Found"}}, 404
-    return venue.to_dict()
+        return jsonify({"errors": {"message": "Not Found"}}), 404
+    return jsonify(venue.to_dict())
 
 
 @venue_routes.route("/<int:venueId>/edit", methods=["GET", "POST"])

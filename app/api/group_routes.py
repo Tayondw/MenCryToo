@@ -36,7 +36,7 @@ def group(groupId):
     group = Group.query.get(groupId)
     if not group:
         return jsonify({"errors": {"message": "Not Found"}}), 404
-    return jsonify(group.to_dict())
+    return group.to_dict()
 
 
 @group_routes.route("/new", methods=["GET", "POST"])

@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort, render_template
+from flask import Blueprint, request, abort, render_template, jsonify
 from flask_login import login_required, current_user
 from app.models import (
     db,
@@ -24,7 +24,7 @@ def all_events():
     Query for all events and returns them in a list of event dictionaries
     """
     events = Event.query.all()
-    return {"events": [event.to_dict() for event in events]}
+    return jsonify({"events": [event.to_dict() for event in events]})
 
 
 @event_routes.route("/<int:eventId>")
@@ -34,7 +34,7 @@ def event(eventId):
     """
 
     event = Event.query.get(eventId)
-    return event.to_dict()
+    return jsonify(event.to_dict())
 
 
 @event_routes.route("/<int:eventId>", methods=["DELETE"])

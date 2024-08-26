@@ -17,9 +17,9 @@ def all_posts():
     posts = Post.query.order_by(Post.created_at.desc()).all()
 
     if not posts:
-        return {"errors": {"message": "Not Found"}}, 404
+        return jsonify({"errors": {"message": "Not Found"}}), 404
 
-    return {"posts": [post.to_dict(post_comments=True) for post in posts]}
+    return jsonify({"posts": [post.to_dict(post_comments=True) for post in posts]})
 
 
 @post_routes.route("/<int:postId>")
@@ -32,9 +32,9 @@ def post(postId):
     post = Post.query.get(postId)
 
     if not post:
-        return {"errors": {"message": "Not Found"}}, 404
+        return jsonify({"errors": {"message": "Not Found"}}), 404
 
-    return post.to_dict(post_comments=True)
+    return jsonify(post.to_dict(post_comments=True))
 
 
 @post_routes.route("/create", methods=["GET", "POST"])
