@@ -188,7 +188,7 @@ def edit_event_images(eventId, imageId):
 
 
 # ! EVENT - ATTENDEES
-@event_routes.route("/<int:eventId>/attend-event", methods=["POST"])
+@event_routes.route("/<int:eventId>/attend-event", methods=["GET","POST"])
 @login_required
 def attend_event(eventId):
     event = Event.query.get(eventId)

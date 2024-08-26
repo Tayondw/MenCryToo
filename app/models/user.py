@@ -60,7 +60,7 @@ class User(db.Model, UserMixin):
         back_populates="tags_users",
     )
 
-    groups = db.relationship("Group", back_populates="organizers")
+    groups = db.relationship("Group", back_populates="organizer")
 
     @property
     def password(self):

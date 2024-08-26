@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort, render_template, redirect
+from flask import Blueprint, request, abort, render_template, redirect, jsonify
 from flask_login import login_required, current_user
 from app.models import (
     db,
@@ -24,8 +24,8 @@ def all_groups():
     """
     groups = Group.query.all()
     if not groups:
-        return {"errors": {"message": "Not Found"}}, 404
-    return {"groups": [group.to_dict() for group in groups]}
+        return jsonify({"errors": {"message": "Not Found"}}), 404
+    return jsonify({"groups": [group.to_dict() for group in groups]})
 
 
 @group_routes.route("/<int:groupId>")
@@ -35,8 +35,8 @@ def group(groupId):
     """
     group = Group.query.get(groupId)
     if not group:
-        return {"errors": {"message": "Not Found"}}, 404
-    return group.to_dict()
+        return jsonify({"errors": {"message": "Not Found"}}), 404
+    return jsonify(group.to_dict())
 
 
 @group_routes.route("/new", methods=["GET", "POST"])

@@ -26,7 +26,7 @@ class Group(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Relationship attributes
-    organizers = db.relationship("User", back_populates="groups")
+    organizer = db.relationship("User", back_populates="groups")
     events = db.relationship("Event", back_populates="groups")
     venues = db.relationship("Venue", back_populates="groups")
     group_memberships = db.relationship(
@@ -41,7 +41,7 @@ class Group(db.Model):
     def to_dict(self):
         events = [event.to_dict() for event in self.events if event.group_id == self.id]
         venues = [venue.to_dict() for venue in self.venues if venue.group_id == self.id]
-        organizer = self.organizers.to_dict()
+        organizer = self.organizer.to_dict() if self.organizer else None
         members = {member.id: member.to_dict() for member in self.group_memberships}
         image = {
             group_image.id: group_image.to_dict() for group_image in self.group_images

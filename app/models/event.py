@@ -43,7 +43,11 @@ class Event(db.Model):
 
     def to_dict(self):
 
-        organizer = self.groups.organizers.to_dict()
+        organizer = (
+            self.groups.organizer.to_dict()
+            if self.groups and self.groups.organizer
+            else None
+        )
         #   group = [group.to_dict() for group in self.groups]
         #   venue = [venue.to_dict() for venue in self.venues]
         image = {
@@ -53,12 +57,16 @@ class Event(db.Model):
             attendee.id: attendee.to_dict() for attendee in self.event_attendances
         }
 
-        organizerInfo = {
-            "firstName": organizer["first_name"],
-            "lastName": organizer["last_name"],
-            "email": organizer["email"],
-            "profileImage": organizer["profileImage"],
-        }
+        organizerInfo = (
+            {
+                "firstName": organizer["firstName"],
+                "lastName": organizer["lastName"],
+                "email": organizer["email"],
+                "profileImage": organizer["profileImage"],
+            }
+            if organizer
+            else None
+        )
 
         groupInfo = {
             "id": self.groups.id,

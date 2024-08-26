@@ -28,13 +28,13 @@ def users():
     }
 
 
-@user_routes.route("/<int:id>")
+@user_routes.route("/<int:userId>")
 @login_required
-def user(id):
+def user(userId):
     """
     Query for a user by id and returns that user in a dictionary
     """
-    user = User.query.get(id)
+    user = User.query.get(userId)
     return user.to_dict(
         posts=True,
         user_comments=True,
