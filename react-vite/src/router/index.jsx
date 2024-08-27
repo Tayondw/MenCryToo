@@ -12,6 +12,7 @@ import {
 	venueDetailsLoader,
 	userDetailsLoader,
 	postDetailsLoader,
+      tagDetailsLoader,
 } from "./loaders";
 import {
 	groupActions,
@@ -195,7 +196,8 @@ export const router = createBrowserRouter([
 				action: postActions,
 			},
 			{
-				path: "tags",
+                        path: "tags/:id/:name",
+                        loader: tagDetailsLoader,
 				element: <SignupFormPage />,
 				action: profileActions,
 			},

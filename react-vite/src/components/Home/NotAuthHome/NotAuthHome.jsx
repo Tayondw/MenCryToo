@@ -50,7 +50,7 @@ function SectionOne() {
 				</div>
 				<div className="div-block-2">
 					{allTags.tags.map((tag) => (
-						<Link to={`/tags/${tag.id}`} key={tag.id} className="w-button">
+						<Link to={`/tags/${tag.id}/${tag.name}`} key={tag.id} className="w-button">
 							{tag.name}
 						</Link>
 					))}

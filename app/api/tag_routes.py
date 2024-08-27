@@ -14,20 +14,11 @@ def tags():
     return jsonify({"tags": [tag.to_dict() for tag in tags]})
 
 
-@tag_routes.route("/<name>")
-def tag(name):
-    """
-    Query for a tag by name and returns that tag in a dictionary
-    """
-    tag = User.query.get(name)
-    return jsonify(tag.to_dict())
-
-
 @tag_routes.route("/<int:tagId>")
 @login_required
 def user(tagId):
     """
     Query for a tag by id and returns that tag in a dictionary
     """
-    tag = User.query.get(tagId)
+    tag = Tag.query.get(tagId)
     return jsonify(tag.to_dict())

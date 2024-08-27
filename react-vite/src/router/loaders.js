@@ -15,8 +15,15 @@ export const getLoader = async () => {
 		fetch(url).then((response) => response.json()),
 	);
 
-	const [allGroups, allEvents, allUsers, allVenues, allPosts, allProfiles, allTags] =
-		await Promise.all(fetchPromises);
+	const [
+		allGroups,
+		allEvents,
+		allUsers,
+		allVenues,
+		allPosts,
+		allProfiles,
+		allTags,
+	] = await Promise.all(fetchPromises);
 
 	return json({
 		allGroups,
@@ -24,8 +31,8 @@ export const getLoader = async () => {
 		allUsers,
 		allVenues,
 		allPosts,
-            allProfiles,
-            allTags,
+		allProfiles,
+		allTags,
 	});
 };
 
@@ -70,8 +77,13 @@ export const postDetailsLoader = async ({ params }) => {
 };
 
 export const tagDetailsLoader = async ({ params }) => {
-      const response = await fetch(`/api/posts/`)
-}
+      const response = await fetch(`/api/tags/${params.id}`);
+      if (response.ok) {
+            
+		const tagDetails = await response.json();
+		return tagDetails;
+	}
+};
 
 // export const detailsLoader = async ({ params }) => {
 //       console.log("params:", params);
