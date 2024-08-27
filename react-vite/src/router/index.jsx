@@ -196,7 +196,25 @@ export const router = createBrowserRouter([
 				action: postActions,
 			},
 			{
+                        path: "tags",
+                        loader: getLoader,
+				element: <SignupFormPage />,
+				action: profileActions,
+			},
+			{
                         path: "tags/:id/:name",
+                        loader: tagDetailsLoader,
+				element: <SignupFormPage />,
+				action: profileActions,
+			},
+			{
+                        path: "about",
+                        loader: tagDetailsLoader,
+				element: <SignupFormPage />,
+				action: profileActions,
+			},
+			{
+                        path: "partnership",
                         loader: tagDetailsLoader,
 				element: <SignupFormPage />,
 				action: profileActions,

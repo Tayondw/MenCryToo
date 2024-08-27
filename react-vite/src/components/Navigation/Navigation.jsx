@@ -6,23 +6,15 @@ import "./Navigation.css";
 
 function Navigation({ isLoaded }) {
 	const sessionUser = useSelector((state) => state.session.user);
-      const navigate = useNavigate();
-      const {allTags} = useLoaderData();
+	const navigate = useNavigate();
+	const { allTags } = useLoaderData();
 
-      console.log("tags", allTags);
-      
+	console.log("tags", allTags);
+
 	return (
 		<div id="whole-navbar">
 			{!sessionUser ? (
-				<div
-					data-collapse="medium"
-					data-animation="default"
-					data-duration="400"
-					data-easing="ease"
-					data-easing2="ease"
-					role="banner"
-					className="navigation-bar w-nav"
-				>
+				<div className="navigation-bar w-nav">
 					<div className="w-container-nav-bar">
 						<NavLink
 							to="/"
@@ -70,15 +62,7 @@ function Navigation({ isLoaded }) {
 					</nav>
 				</div>
 			) : (
-				<div
-					data-collapse="medium"
-					data-animation="default"
-					data-duration="400"
-					data-easing="ease"
-					data-easing2="ease"
-					role="banner"
-					className="navigation-bar w-nav"
-				>
+				<div className="navigation-bar w-nav">
 					<div className="w-container">
 						<NavLink
 							to="/"

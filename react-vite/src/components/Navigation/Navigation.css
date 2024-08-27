@@ -82,17 +82,16 @@
 #authentication {
 	display: flex;
 	align-content: center;
-	column-gap: 50px;
+	column-gap: 20px;
 	color: #223f5c;
 	font-size: 1.5em;
 	font-family: Open Sans, sans-serif;
 	font-weight: 600;
 }
 
-#authentication .auth-login {
+#authentication .auth-login,  #authentication .auth-signup{
 	cursor: pointer;
+      font-size: 16px;
+      text-transform: uppercase;
 }
 
-#authentication .auth-signup {
-	cursor: pointer;
-}

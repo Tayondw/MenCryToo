@@ -1,28 +1,24 @@
 import { Link, Outlet } from "react-router-dom";
 import { useLoaderData } from "react-router-dom";
+import { useSelector } from "react-redux";
+import OpenModalButton from "../../OpenModalButton";
+import SignupFormModal from "../../SignupFormModal";
+import Footer from "../../Footer";
 import "./NotAuthHome.css";
 
 function HeroSection() {
 	return (
 		<div className="hero-section centered">
 			<div className="w-layout-blockcontainer container centered">
-				<div
-					data-w-id="1714dcca-e24e-17c8-e9ad-979ea4c1c526"
-					style={{ opacity: 1 }}
-					className="container w-container"
-				>
-					<h1 data-ix="fade-in-bottom-page-loads" className="hero-heading">
-						MEN CRY TOO
-					</h1>
-					<div data-ix="fade-in-bottom-page-loads" className="hero-subheading">
-						IT&apos;s OKAY TO CRY
-					</div>
+				<div style={{ opacity: 1 }} className="container w-container">
+					<h1 className="hero-heading">MEN CRY TOO</h1>
+					<div className="hero-subheading">IT&apos;s OKAY TO CRY</div>
 				</div>
 				<div className="w-layout-blockcontainer container-2 w-container">
 					<div>
 						<h4 className="heading-3">Take control of your mental health.</h4>
 					</div>
-					<div data-ix="fade-in-bottom-page-loads" className="div-block">
+					<div className="div-block">
 						<Link to="/mental-inspection" className="button">
 							TAKE INSPECTION
 						</Link>
@@ -32,13 +28,13 @@ function HeroSection() {
 					</div>
 				</div>
 			</div>
+			<Outlet />
 		</div>
 	);
 }
 
 function SectionOne() {
 	const { allTags } = useLoaderData();
-	console.log("here", allTags);
 	return (
 		<div className="section">
 			<div className="w-container-tag-div">
@@ -50,7 +46,11 @@ function SectionOne() {
 				</div>
 				<div className="div-block-2">
 					{allTags.tags.map((tag) => (
-						<Link to={`/tags/${tag.id}/${tag.name}`} key={tag.id} className="w-button">
+						<Link
+							to={`/tags/${tag.id}/${tag.name}`}
+							key={tag.id}
+							className="w-button"
+						>
 							{tag.name}
 						</Link>
 					))}
@@ -67,11 +67,7 @@ function SectionOne() {
 				</div>
 				<div className="w-row">
 					<div className="w-col w-col-6">
-						<div
-							data-w-id="270e8437-efa3-df11-d438-de69b23e41e9"
-							style={{ opacity: 1 }}
-							className="white-box"
-						>
+						<div style={{ opacity: 1 }} className="white-box">
 							<h3>FIND GROUPS</h3>
 							<p>
 								Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -80,11 +76,7 @@ function SectionOne() {
 						</div>
 					</div>
 					<div className="w-col w-col-6">
-						<div
-							data-w-id="29c25774-570b-ddb2-69b5-f4ddbb194afd"
-							style={{ opacity: 1 }}
-							className="white-box"
-						>
+						<div style={{ opacity: 1 }} className="white-box">
 							<h3>FIND EVENTS</h3>
 							<p>
 								Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -94,6 +86,7 @@ function SectionOne() {
 					</div>
 				</div>
 			</div>
+			<Outlet />
 		</div>
 	);
 }
@@ -101,19 +94,16 @@ function SectionOne() {
 function SectionTwo() {
 	return (
 		<section className="section-2">
-			<div
-				data-w-id="e464d218-f801-55d1-1f50-7da00b5bfb8f"
-				style={{ opacity: 1 }}
-				className="container bottom w-container"
-			>
-				<h2 className="heading-2 bottom">Its not me, it&apos;s you</h2>
+			<div style={{ opacity: 1 }} className="container bottom w-container">
+				<h2 className="heading-2 bottom">Its not you, it&apos;s them</h2>
 				<h1 className="heading bottom">WORRIED ABOUT SOMEONE?</h1>
-				<div data-ix="fade-in-bottom-page-loads" className="div-block">
+				<div className="div-block">
 					<a href="#" className="button">
 						LET US HELP
 					</a>
 				</div>
 			</div>
+			<Outlet />
 		</section>
 	);
 }
@@ -129,9 +119,9 @@ function AccentSection() {
 					<div className="w-col w-col-6">
 						<div className="white-box transparent">
 							<img
-								src="images/city-scape.jpg"
+								src="https://mencrytoo.s3.amazonaws.com/MENCRYTOO.PNG"
 								sizes="(max-width: 479px) 85vw, (max-width: 767px) 88vw, (max-width: 991px) 324px, 430px"
-								srcSet="images/city-scape-p-500x334.jpeg 500w, images/city-scape-p-1080x721.jpeg 1080w, images/city-scape.jpg 1300w"
+								srcSet="https://mencrytoo.s3.amazonaws.com/MENCRYTOO.PNG 500w, https://mencrytoo.s3.amazonaws.com/MENCRYTOO.PNG 1080w, https://mencrytoo.s3.amazonaws.com/MENCRYTOO.PNG 1300w"
 								alt=""
 								className="fullwidth-image"
 							/>
@@ -140,17 +130,17 @@ function AccentSection() {
 								Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 								Suspendisse varius enim in eros elementum tristique.
 							</p>
-							<a href="#" className="hollow-button">
+							<Link to="/about" className="hollow-button">
 								Learn more
-							</a>
+							</Link>
 						</div>
 					</div>
 					<div className="w-col w-col-6">
 						<div className="white-box transparent">
 							<img
-								src="images/photo-1416400639808-f41f0c149b09.jpg"
+								src="https://mencrytoo.s3.amazonaws.com/MENCRYTOO4.jpg"
 								sizes="(max-width: 479px) 85vw, (max-width: 767px) 88vw, (max-width: 991px) 324px, 430px"
-								srcSet="images/photo-1416400639808-f41f0c149b09-p-1080x721.jpeg 1080w, images/photo-1416400639808-f41f0c149b09.jpg 1300w"
+								srcSet="https://mencrytoo.s3.amazonaws.com/MENCRYTOO4.jpg 1080w, https://mencrytoo.s3.amazonaws.com/MENCRYTOO4.jpg 1300w"
 								alt=""
 								className="fullwidth-image"
 							/>
@@ -159,25 +149,55 @@ function AccentSection() {
 								Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 								Suspendisse varius enim in eros elementum tristique.
 							</p>
-							<a href="#" className="hollow-button all-caps">
+							<Link to="/partnership" className="hollow-button all-caps">
 								GET STARTED
-							</a>
+							</Link>
 						</div>
 					</div>
 				</div>
 			</div>
+			<Outlet />
 		</div>
 	);
 }
 
 const NotAuthHome = () => {
+	const sessionUser = useSelector((state) => state.session.user);
 	return (
 		<>
 			<HeroSection />
 			<SectionOne />
 			<SectionTwo />
 			<AccentSection />
-			<Outlet />
+			<div id="section-4">
+				{sessionUser ? null : (
+					<OpenModalButton
+						buttonText="Join Us"
+						style={{
+							background: `#223f5c`,
+							width: `200px`,
+							cursor: `pointer`,
+							borderRadius: `4px`,
+							color: `#fff`,
+							textAlign: `center`,
+							letterSpacing: `2px`,
+							textTransform: `uppercase`,
+							marginLeft: `10px`,
+							marginRight: `10px`,
+							padding: `12px 30px`,
+							fontSize: `16px`,
+							fontWeight: 600,
+							lineHeight: `21px`,
+							textDecoration: `none`,
+							transition: `background-color 0.3s`,
+							display: `inline-block`,
+							border: 0,
+						}}
+						modalComponent={<SignupFormModal />}
+					/>
+				)}
+			</div>
+			<Footer />
 		</>
 	);
 };
