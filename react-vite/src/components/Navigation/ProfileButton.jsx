@@ -1,19 +1,19 @@
 import { useState, useEffect, useRef } from "react";
-import { useDispatch} from "react-redux";
+import { useDispatch } from "react-redux";
 import { thunkLogout } from "../../redux/session";
 import OpenModalMenuItem from "./OpenModalMenuItem";
 import LoginFormModal from "../LoginFormModal";
 import SignupFormModal from "../SignupFormModal";
 import OpenModalButton from "../OpenModalButton";
 import { CgProfile } from "react-icons/cg";
-import { GoChevronDown } from "react-icons/go";
+import { GoChevronDown, GoChevronUp } from "react-icons/go";
 import "./Navigation.css";
-import { Link } from "react-router-dom";
 
 function ProfileButton({ user, navigate }) {
 	const dispatch = useDispatch();
 	const [showMenu, setShowMenu] = useState(false);
 	const ulRef = useRef();
+	console.log("this is user", user);
 
 	const toggleMenu = (e) => {
 		e.stopPropagation(); // Keep from bubbling up to document and triggering closeMenu
@@ -44,16 +44,17 @@ function ProfileButton({ user, navigate }) {
 
 	return (
 		<>
-			{user ? (
+			{user && user.profileImage ? (
 				<div id="options" ref={ulRef}>
-					<Link className="options-link" to="/groups/new">
-						Start a new Group
-					</Link>
 					<div id="options-button">
 						<div className="dropdown">
 							<button className="nav-profile-button" onClick={toggleMenu}>
-								<CgProfile size={35} style={{ color: `#FF6464` }} />
-								<GoChevronDown size={35} style={{ color: `#FF6464` }} />
+								<CgProfile size={35} style={{ color: `#223f5c` }} />
+								{showMenu ? (
+									<GoChevronUp size={35} style={{ color: `#223f5c` }} />
+								) : (
+									<GoChevronDown size={35} style={{ color: `#223f5c` }} />
+								)}
 							</button>
 						</div>
 						<div
@@ -70,13 +71,49 @@ function ProfileButton({ user, navigate }) {
 							<div id="options-modal">
 								<OpenModalButton
 									className="logout"
+									buttonText="Profile"
+									onButtonClick={() => {
+										closeMenu();
+										navigate("/profile");
+									}}
+									style={{
+										color: `#223f5c`,
+										backgroundColor: `#FAF5E4`,
+									}}
+								/>
+								<OpenModalButton
+									className="logout"
+									buttonText="Posts Feed"
+									onButtonClick={() => {
+										closeMenu();
+										navigate("/posts-feed");
+									}}
+									style={{
+										color: `#223f5c`,
+										backgroundColor: `#FAF5E4`,
+									}}
+								/>
+								<OpenModalButton
+									className="logout"
+									buttonText="Similar To You"
+									onButtonClick={() => {
+										closeMenu();
+										navigate("/profile-feed");
+									}}
+									style={{
+										color: `#223f5c`,
+										backgroundColor: `#FAF5E4`,
+									}}
+								/>
+								<OpenModalButton
+									className="logout"
 									buttonText="View Groups"
 									onButtonClick={() => {
 										closeMenu();
 										navigate("/groups");
 									}}
 									style={{
-										color: `#FF6464`,
+										color: `#223f5c`,
 										backgroundColor: `#FAF5E4`,
 									}}
 								/>
@@ -88,7 +125,7 @@ function ProfileButton({ user, navigate }) {
 										navigate("/events");
 									}}
 									style={{
-										color: `#FF6464`,
+										color: `#223f5c`,
 										backgroundColor: `#FAF5E4`,
 									}}
 								/>
@@ -97,7 +134,7 @@ function ProfileButton({ user, navigate }) {
 									buttonText="Log Out"
 									onButtonClick={logout}
 									style={{
-										color: `#FF6464`,
+										color: `#223f5c`,
 										backgroundColor: `#FAF5E4`,
 									}}
 								/>

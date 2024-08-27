@@ -1,8 +1,98 @@
 .profile-dropdown {
 	position: absolute;
+	width: 200px;
+	overflow: auto;
+	text-align: end;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+	background-color: #e08f2c;
+	border: 0 solid #e08f2c;
+	display: block;
+	flex-direction: column;
+	justify-self: end;
+	top: auto;
+	right: 0px;
+	border: #dddddc 3px solid;
+	padding: 5px;
+	text-align: start;
+	color: #223f5c;
+	font-size: 1.3em;
+	font-weight: bolder;
+}
+
+#whole-navbar {
+      display: flex;
+      /* justify-content: space-between; */
+      margin: 0;
+      padding: 0;
+      /* width: 100%; */
+      align-items: center;
 }
 
 .w-container-nav-bar {
 	display: flex;
-	justify-content: flex-start; /* Aligns content to the left */
+	/* justify-content: space-between; */
+      align-items: center;
+      /* width: 100%; */
+}
+
+.hidden {
+	display: none;
+	position: absolute;
+	width: 100px;
+	overflow: auto;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.7);
+}
+
+.nav-profile-button {
+      cursor: pointer;
+      border: none;
+      background-color: #dddddc;
+      border: #ea8d89;
+}
+
+.nav-profile-button:hover {
+      cursor: pointer;
+}
+
+#options {
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	align-content: center;
+	justify-content: space-between;
+	column-gap: 20px;
+}
+
+#options-button > button {
+	width: 100px;
+	height: 35px;
+	background: transparent;
+	border: none;
+}
+
+#options-modal {
+	display: flex;
+	flex-direction: column;
+}
+
+.logout {
+	cursor: pointer;
+}
+
+#authentication {
+	display: flex;
+	align-content: center;
+	column-gap: 50px;
+	color: #223f5c;
+	font-size: 1.5em;
+	font-family: Open Sans, sans-serif;
+	font-weight: 600;
+}
+
+#authentication .auth-login {
+	cursor: pointer;
+}
+
+#authentication .auth-signup {
+	cursor: pointer;
 }

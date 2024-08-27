@@ -45,6 +45,18 @@ function Navigation({ isLoaded }) {
 						<NavLink to="/about" className="navigation-link w-nav-link">
 							ABOUT
 						</NavLink>
+						<NavLink to="/partner" className="navigation-link w-nav-link">
+							BECOME A PARTNER
+						</NavLink>
+						<NavLink
+							to="/i-believe-campaign"
+							className="navigation-link w-nav-link"
+						>
+							&ldquo;I BELIEVE&ldquo; CAMPAIGN
+						</NavLink>
+						<NavLink to="/posts/create" className="navigation-link w-nav-link">
+							SHARE YOUR STORY
+						</NavLink>
 						<NavLink className="navigation-link current w-nav-link">
 							CRISIS SUPPORT
 						</NavLink>
@@ -89,6 +101,18 @@ function Navigation({ isLoaded }) {
 						<NavLink to="/about" className="navigation-link w-nav-link">
 							ABOUT
 						</NavLink>
+						<NavLink to="/partner" className="navigation-link w-nav-link">
+							BECOME A PARTNER
+						</NavLink>
+						<NavLink
+							to="/i-believe-campaign"
+							className="navigation-link w-nav-link"
+						>
+							&ldquo;I BELIEVE&ldquo; CAMPAIGN
+						</NavLink>
+						<NavLink to="/posts/create" className="navigation-link w-nav-link">
+							SHARE YOUR STORY
+						</NavLink>
 						<NavLink className="navigation-link current w-nav-link">
 							CRISIS SUPPORT
 						</NavLink>
@@ -99,15 +123,6 @@ function Navigation({ isLoaded }) {
 				</div>
 			)}
 		</div>
-		// <ul>
-		// 	<li>
-		// 		<NavLink to="/">Home</NavLink>
-		// 	</li>
-
-		// 	<li>
-		// 		<ProfileButton />
-		// 	</li>
-		// </ul>
 	);
 }
 

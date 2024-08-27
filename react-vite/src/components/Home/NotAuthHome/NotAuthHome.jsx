@@ -21,12 +21,12 @@ function HeroSection() {
 						<h4 className="heading-3">Take control of your mental health.</h4>
 					</div>
 					<div data-ix="fade-in-bottom-page-loads" className="div-block">
-						<a href="#" className="button">
+						<Link to="/mental-inspection" className="button">
 							TAKE INSPECTION
-						</a>
-						<a href="#" className="hollow-button all-caps">
+						</Link>
+						<Link to="/profile-feed" className="hollow-button all-caps">
 							FIND SOMEONE LIKE YOU
-						</a>
+						</Link>
 					</div>
 				</div>
 			</div>
@@ -54,52 +54,50 @@ function SectionOne() {
 						))}
 				</div>
 			</div>
+			<div className="w-container">
+				<div className="section-title-group">
+					<h2 className="section-heading centered">
+						GET SUPPORT CLOSE TO HOME
+					</h2>
+					<div className="section-subheading center">
+						LET&apos;S FIND GROUPS OR EVENTS NEAR YOU!
+					</div>
+				</div>
+				<div className="w-row">
+					<div className="w-col w-col-6">
+						<div
+							data-w-id="270e8437-efa3-df11-d438-de69b23e41e9"
+							style={{ opacity: 1 }}
+							className="white-box"
+						>
+							<h3>FIND GROUPS</h3>
+							<p>
+								Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+								Suspendisse varius enim in eros elementum tristique.
+							</p>
+						</div>
+					</div>
+					<div className="w-col w-col-6">
+						<div
+							data-w-id="29c25774-570b-ddb2-69b5-f4ddbb194afd"
+							style={{ opacity: 1 }}
+							className="white-box"
+						>
+							<h3>FIND EVENTS</h3>
+							<p>
+								Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+								Suspendisse varius enim in eros elementum tristique.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 }
+
 
 function SectionTwo() {
-	return (
-		<div className="w-container">
-			<div className="section-title-group">
-				<h2 className="section-heading centered">GET SUPPORT CLOSE TO HOME</h2>
-				<div className="section-subheading center">
-					LET&apos;S FIND GROUPS OR EVENTS NEAR YOU!
-				</div>
-			</div>
-			<div className="w-row">
-				<div className="w-col w-col-6">
-					<div
-						data-w-id="270e8437-efa3-df11-d438-de69b23e41e9"
-						style={{ opacity: 1 }}
-						className="white-box"
-					>
-						<h3>FIND GROUPS</h3>
-						<p>
-							Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-							Suspendisse varius enim in eros elementum tristique.
-						</p>
-					</div>
-				</div>
-				<div className="w-col w-col-6">
-					<div
-						data-w-id="29c25774-570b-ddb2-69b5-f4ddbb194afd"
-						style={{ opacity: 1 }}
-						className="white-box"
-					>
-						<h3>FIND EVENTS</h3>
-						<p>
-							Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-							Suspendisse varius enim in eros elementum tristique.
-						</p>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-}
-
-function SectionThree() {
 	return (
 		<section className="section-2">
 			<div
@@ -121,7 +119,7 @@ function SectionThree() {
 
 function AccentSection() {
 	return (
-		<div className="section accent">
+		<div className="section2 accent">
 			<div className="w-container">
 				<div className="section-title-group">
 					<div className="section-subheading center off-white"></div>
@@ -177,7 +175,6 @@ const NotAuthHome = () => {
 			<HeroSection />
 			<SectionOne />
 			<SectionTwo />
-			<SectionThree />
 			<AccentSection />
 			<Outlet />
 		</>
