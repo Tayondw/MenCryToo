@@ -694,16 +694,33 @@
 
 @media screen and (max-width: 991px) {
 	.navigation-link {
-		color: #ffffff85;
+		color: #223f5c;
+            font-size: 13px;
 	}
 
 	.navigation-link.w--current {
 		color: #fff;
 	}
 
+      .brand-text {
+            font-size: 19px;
+      }
+
+      #authentication p.auth-login, #authentication p.auth-signup{
+            font-size: 13px;
+      }
+
+      .navigation-menu {
+            gap: 25px;
+            text-wrap: balance;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 0;
+      }
+
 	.hamburger-button.w--open,
 	.navigation-menu {
-		background-color: #3b99d9;
 		margin-left: auto;
 	}
 
@@ -716,6 +733,26 @@
 		width: 50%;
 		padding: 15px;
 	}
+
+      .heading-3, .hollow-button.all-caps {
+           color: #e08f2c;
+      }
+
+      .hollow-button.all-caps {
+            border-color: #e08f2c;
+      }
+
+      .section-subheading.center {
+           line-height: 1;
+      }
+}
+
+@media screen and (max-height: 980px) {
+	.w-layout-blockcontainer.container.centered {
+            margin-top: 10px;
+            gap: 0;
+            height: fit-content;
+      }
 }
 
 @media screen and (max-width: 767px) {

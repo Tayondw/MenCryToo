@@ -7,6 +7,7 @@ import Footer from "../../Footer";
 import "./NotAuthHome.css";
 
 function HeroSection() {
+	const sessionUser = useSelector((state) => state.session.user);
 	return (
 		<div className="hero-section centered">
 			<div className="w-layout-blockcontainer container centered">
@@ -22,9 +23,15 @@ function HeroSection() {
 						<Link to="/mental-inspection" className="button">
 							TAKE INSPECTION
 						</Link>
-						<Link to="/profile-feed" className="hollow-button all-caps">
-							FIND SOMEONE LIKE YOU
-						</Link>
+						{sessionUser ? (
+							<Link to="/profile-feed" className="hollow-button all-caps">
+								FIND SOMEONE LIKE YOU
+							</Link>
+						) : (
+							<Link to="/profile-feed" className="hollow-button all-caps disabled">
+								FIND SOMEONE LIKE YOU
+							</Link>
+						)}
 					</div>
 				</div>
 			</div>
@@ -149,7 +156,7 @@ function AccentSection() {
 								Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 								Suspendisse varius enim in eros elementum tristique.
 							</p>
-							<Link to="/partnership" className="hollow-button all-caps">
+							<Link to="/partnership" className="hollow-button">
 								GET STARTED
 							</Link>
 						</div>
