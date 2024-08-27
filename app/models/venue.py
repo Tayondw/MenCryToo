@@ -16,8 +16,8 @@ class Venue(db.Model):
     city = db.Column(db.String(30), nullable=False)
     state = db.Column(db.String(2), nullable=False)
     zip_code = db.Column(db.String(5), nullable=False)
-    latitude = db.Column(db.Numeric(scale=10, asdecimal=False), nullable=False)
-    longitude = db.Column(db.Numeric(scale=10, asdecimal=False), nullable=False)
+    latitude = db.Column(db.Numeric(scale=10, asdecimal=False), nullable=True)
+    longitude = db.Column(db.Numeric(scale=10, asdecimal=False), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 

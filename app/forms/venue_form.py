@@ -26,5 +26,5 @@ class VenueForm(FlaskForm):
     zip_code = StringField(
         "zip code", validators=[DataRequired(), Length(min=5, max=5)]
     )
-    latitude = StringField("lat", validators=[DataRequired()])
-    longitude = StringField("lng", validators=[DataRequired()])
+    latitude = StringField("lat")
+    longitude = StringField("lng")
