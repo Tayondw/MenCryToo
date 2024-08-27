@@ -7,13 +7,13 @@ import "../Home/NotAuthHome/NotAuthHome.css";
 const Footer = () => {
 	return (
 		<div className="footer center">
-			<div className="w-container">
-				<RiTwitterXLine width={20} />
-				<RiFacebookLine width={20} />
-				<PiPinterestLogo width={20} />
-				<TiSocialGooglePlus width={20} />
-				<div className="footer-text">MEN CRY TOO COPYRIGHT 2024</div>
+			<div className="footer-container">
+				<RiTwitterXLine className="footer-link" />
+				<RiFacebookLine className="footer-link" />
+				<PiPinterestLogo className="footer-link" />
+				<TiSocialGooglePlus className="footer-link" />
 			</div>
+			<div className="footer-text">MEN CRY TOO COPYRIGHT 2024</div>
 			<Outlet />
 		</div>
 	);

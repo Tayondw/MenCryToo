@@ -480,8 +480,8 @@
 .footer.center {
 	text-align: center;
 	background-color: #223f5c;
-	display: flex;
-	flex-direction: row;
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
 }
 
 .footer-text {
@@ -489,6 +489,7 @@
 	margin-top: 5px;
 	margin-bottom: 5px;
 	font-size: 16px;
+      align-self: center;
 }
 
 .grid-image {
@@ -506,14 +507,17 @@
 	float: left;
 }
 
+.footer-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 25px;
+}
+
 .footer-link {
-	color: #668cad;
-	border-bottom: 1px solid #d5d5e0;
-	margin-bottom: 6px;
-	padding-bottom: 10px;
-	font-size: 14px;
+	color: #e08f2c;
+	font-size: 36px;
 	font-weight: 300;
-	text-decoration: none;
 	display: block;
 }
 
