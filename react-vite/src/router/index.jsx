@@ -29,9 +29,11 @@ import Layout from "./Layout";
 export const router = createBrowserRouter([
 	{
 		element: <Layout />,
+		loader: getLoader,
 		children: [
 			{
 				path: "/",
+				loader: getLoader,
 				element: <NotAuthHome />,
 			},
 			{

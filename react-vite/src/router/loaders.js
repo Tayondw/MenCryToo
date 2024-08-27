@@ -8,13 +8,14 @@ export const getLoader = async () => {
 		`/api/venues/`,
 		`/api/posts/feed`,
 		`/api/users/profile-feed`,
+		`/api/tags/`,
 	];
 
 	const fetchPromises = urls.map((url) =>
 		fetch(url).then((response) => response.json()),
 	);
 
-	const [allGroups, allEvents, allUsers, allVenues, allPosts, allProfiles] =
+	const [allGroups, allEvents, allUsers, allVenues, allPosts, allProfiles, allTags] =
 		await Promise.all(fetchPromises);
 
 	return json({
@@ -23,7 +24,8 @@ export const getLoader = async () => {
 		allUsers,
 		allVenues,
 		allPosts,
-		allProfiles,
+            allProfiles,
+            allTags,
 	});
 };
 
@@ -66,6 +68,10 @@ export const postDetailsLoader = async ({ params }) => {
 		return postDetails;
 	}
 };
+
+export const tagDetailsLoader = async ({ params }) => {
+      const response = await fetch(`/api/posts/`)
+}
 
 // export const detailsLoader = async ({ params }) => {
 //       console.log("params:", params);

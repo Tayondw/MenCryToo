@@ -135,8 +135,21 @@ p {
 	margin-left: auto;
 	margin-right: auto;
       justify-content: flex-start;
-	max-width: 940px;
+      width: 40%;
+	/* max-width: 940px; */
 }
+
+.w-container-tag-div {
+	margin-left: auto;
+	margin-right: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 50%;
+	/* max-width: 1500px; */
+}
+
 .w-container:before,
 .w-container:after {
 	content: " ";

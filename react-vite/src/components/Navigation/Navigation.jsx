@@ -1,12 +1,16 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useLoaderData } from "react-router-dom";
 import ProfileButton from "./ProfileButton";
 import "./Navigation.css";
 
 function Navigation({ isLoaded }) {
 	const sessionUser = useSelector((state) => state.session.user);
-	const navigate = useNavigate();
+      const navigate = useNavigate();
+      const {allTags} = useLoaderData();
 
+      console.log("tags", allTags);
+      
 	return (
 		<div id="whole-navbar">
 			{!sessionUser ? (

@@ -1,9 +1,11 @@
 import { Link, Outlet } from "react-router-dom";
+import { useLoaderData } from "react-router-dom";
 import "./NotAuthHome.css";
+
 function HeroSection() {
 	return (
 		<div className="hero-section centered">
-			<div className="w-layout-blockcontainer container centered w-container">
+			<div className="w-layout-blockcontainer container centered">
 				<div
 					data-w-id="1714dcca-e24e-17c8-e9ad-979ea4c1c526"
 					style={{ opacity: 1 }}
@@ -35,9 +37,11 @@ function HeroSection() {
 }
 
 function SectionOne() {
+	const { allTags } = useLoaderData();
+	console.log("here", allTags);
 	return (
 		<div className="section">
-			<div className="w-container">
+			<div className="w-container-tag-div">
 				<div className="section-title-group">
 					<h2 className="section-heading centered">GETLEMENTAL HEALTH 401</h2>
 					<div className="section-subheading center">
@@ -45,13 +49,11 @@ function SectionOne() {
 					</div>
 				</div>
 				<div className="div-block-2">
-					{Array(10)
-						.fill(0)
-						.map((_, idx) => (
-							<a href="#" className="w-button" key={idx}>
-								Button Text
-							</a>
-						))}
+					{allTags.tags.map((tag) => (
+						<Link to={`/tags/${tag.id}`} key={tag.id} className="w-button">
+							{tag.name}
+						</Link>
+					))}
 				</div>
 			</div>
 			<div className="w-container">
@@ -95,7 +97,6 @@ function SectionOne() {
 		</div>
 	);
 }
-
 
 function SectionTwo() {
 	return (
