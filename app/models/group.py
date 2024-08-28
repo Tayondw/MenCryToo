@@ -42,10 +42,8 @@ class Group(db.Model):
         events = [event.to_dict() for event in self.events if event.group_id == self.id]
         venues = [venue.to_dict() for venue in self.venues if venue.group_id == self.id]
         organizer = self.organizer.to_dict() if self.organizer else None
-        members = {member.id: member.to_dict() for member in self.group_memberships}
-        image = {
-            group_image.id: group_image.to_dict() for group_image in self.group_images
-        }
+        members = [member.to_dict() for member in self.group_memberships]
+        image = [group_image.to_dict() for group_image in self.group_images]
         return {
             "id": self.id,
             "organizerId": self.organizer_id,

@@ -107,7 +107,7 @@ groups = [
         "about": "this is for those with suicidal thoughts",
         "type": "online",
         "city": "Chicago",
-        "state": "MI",
+        "state": "IL",
         "group_memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
