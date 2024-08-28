@@ -1,12 +1,10 @@
-// import { useFetcher, Outlet } from "react-router-dom";
-import { useLoaderData, useActionData, Form, useNavigate } from "react-router-dom";
+import { useActionData, Form, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import "./CreateGroup.css";
 
 const CreateGroup = () => {
-	const { allGroups } = useLoaderData();
-	const newGroup = useActionData();
+	const errors = useActionData();
 	const sessionUser = useSelector((state) => state.session.user);
 	const navigate = useNavigate();
 
@@ -15,7 +13,6 @@ const CreateGroup = () => {
 	const [type, setType] = useState("");
 	const [city, setCity] = useState("");
 	const [state, setState] = useState("");
-	const [errors, setErrors] = useState({});
 
 	// Ensure user is logged in
 	useEffect(() => {
@@ -24,38 +21,13 @@ const CreateGroup = () => {
 		}
 	}, [sessionUser, navigate]);
 
-	// const onSubmit = async (event) => {
-	// 	event.preventDefault();
-	// 	const errs = {};
-	// 	if (!name.length || name.length < 3 || name.length > 50)
-	// 		errs.name = "Group name must be between 3 and 50 characters";
-	// 	if (!about.length || about.length < 20 || about.length > 150)
-	// 		errs.about =
-	// 			"Description must be at least 20 characters and no more than 150 characters";
-	// 	if (!type) errs.type = "Group Type is required";
-	// 	if (!city.length || city.length < 3 || city.length > 30)
-	// 		errs.city = "City name must be between 3 and 30 characters";
-	// 	if (!state.length || state.length < 2 || state.length > 2)
-	// 		errs.state = "Please enter the abbreviated form of the state";
-
-	// 	if (Object.keys(errs).length) {
-	// 		setErrors(errs);
-	// 		return;
-	// 	} else {
-	// 		setErrors({});
-	// 	}
-	// };
-
 	return (
 		<div id="create-group">
 			{sessionUser ? (
 				<Form
 					method="post"
 					action="/groups/new"
-					// name="intent"
-					// value="create-group"
 					className="create-group"
-					// onSubmit={onSubmit}
 				>
 					<div id="header">
 						<h1>Start a New Group</h1>
@@ -85,7 +57,7 @@ const CreateGroup = () => {
 								/>
 							</div>
 						</div>
-						{errors.city && (
+						{errors?.city && (
 							<p style={{ color: "red" }} className="errors">
 								{errors.city}
 							</p>
@@ -109,7 +81,7 @@ const CreateGroup = () => {
 								/>
 							</div>
 						</div>
-						{errors.state && (
+						{errors?.state && (
 							<p style={{ color: "red" }} className="errors">
 								{errors.state}
 							</p>
@@ -139,7 +111,7 @@ const CreateGroup = () => {
 								/>
 							</div>
 						</div>
-						{errors.name && (
+						{errors?.name && (
 							<p style={{ color: "red" }} className="errors">
 								{errors.name}
 							</p>
@@ -172,7 +144,7 @@ const CreateGroup = () => {
 								></textarea>
 							</div>
 						</div>
-						{errors.about && (
+						{errors?.about && (
 							<p style={{ color: "red" }} className="errors">
 								{errors.about}
 							</p>
@@ -202,7 +174,7 @@ const CreateGroup = () => {
 										</option>
 									</select>
 								</label>
-								{errors.type && (
+								{errors?.type && (
 									<p style={{ color: "red" }} className="errors">
 										{errors.type}
 									</p>
