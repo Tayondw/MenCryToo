@@ -5,6 +5,7 @@ import OpenModalButton from "../../OpenModalButton";
 import SignupFormModal from "../../SignupFormModal";
 import Footer from "../../Footer";
 import "./NotAuthHome.css";
+import "react-tooltip/dist/react-tooltip.css";
 
 function HeroSection() {
 	const sessionUser = useSelector((state) => state.session.user);
@@ -139,7 +140,7 @@ function AccentSection() {
 							/>
 							<h3 className="white-text">ABOUT MEN CRY TOO</h3>
 							<p className="white-text">
-								Men Cry Too is an effort to break though stigma of men not being allowed to express their feelings, improve help-seeking behavior and reduce male suicide. Let&apos; check the stats that led to why we&apos;re both here.
+								Men Cry Too is an effort to break through stigma of men not being allowed to express their feelings, improve help-seeking behavior and reduce male suicide. Let&apos; check the stats that led to why we&apos;re both here.
 							</p>
 							<Link to="/about" className="hollow-button">
 								Learn more

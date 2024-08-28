@@ -28,7 +28,7 @@ const Events = () => {
 
 	return (
 		<div id="events">
-			<h1>See where you fit in!</h1>
+			<h1>See what each group does to help each other</h1>
 			{allEvents.events.map((event) => (
 				<div
 					id="each-event"
@@ -55,12 +55,13 @@ const Events = () => {
 						<h3>{event.name}</h3>
 						<p>{event.description}</p>
 						<p>
-							Location: {event.venueInfo.address} {event.venueInfo.city}, {event.venueInfo.state}
-                                    </p>
-                                    <p>Belongs to: {event.groupInfo.name}</p>
-                                    <p>This event typically meets {event.type}</p>
-                                    <p>Start: {event.startDate}</p>
-                                    <p>End: {event.endDate}</p>
+							Location: {event.venueInfo.address} {event.venueInfo.city},{" "}
+							{event.venueInfo.state}
+						</p>
+						<p>Belongs to: {event.groupInfo.name}</p>
+						<p>This event typically meets {event.type}</p>
+						<p>Start: {event.startDate}</p>
+						<p>End: {event.endDate}</p>
 					</div>
 
 					{sessionUser && sessionUser.profileImage && (
@@ -79,8 +80,8 @@ const Events = () => {
 								<p>
 									Meet the organizer: {event.organizer.firstName}{" "}
 									{event.organizer.lastName}
-                                                </p>
-                                                <p>Contact: {event.organizer.email}</p>
+								</p>
+								<p>Contact: {event.organizer.email}</p>
 								<p>Bio: {event.organizer.bio}</p>
 								{event.organizerInfo.profileImage && (
 									<img src={event.organizer.profileImage} alt="Organizer" />
