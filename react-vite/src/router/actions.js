@@ -29,8 +29,8 @@ export const groupActions = async ({ request }) => {
 	data.id = +data.id;
 	data.organizer_id = +data.organizer_id;
 
-	// console.log("data - this is", data);
-	// console.log("intent", intent);
+	console.log("data - this is", data);
+	console.log("intent", intent);
 
 	if (intent === "create-group") {
 		await fetch(`/api/groups/new`, {
@@ -40,11 +40,16 @@ export const groupActions = async ({ request }) => {
 		return redirect("/groups");
 	}
 
-	if (intent === "edit-group") {
-		return await fetch(`/api/groups/${data.id}/edit`, {
+      if (intent === "edit-group") {
+            // console.log("made it here");
+            
+		await fetch(`/api/groups/${data.id}/edit`, {
 			method: "POST",
 			body: formData,
-		});
+            });
+            // console.log("res", response);
+            
+            return redirect(`/groups/${data.id}`);
 	}
 
 	if (intent === "delete-group") {

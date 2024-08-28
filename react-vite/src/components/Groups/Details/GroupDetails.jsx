@@ -75,13 +75,13 @@ const GroupDetails = () => {
 							>{`${groupDetails.city}, ${groupDetails.state}`}</h4>
 							{groupDetails.events.length > 1 ? (
 								<p id="groupDetailPrivacy" className="add-padding">
-									{`${groupDetails.events.length} events • `}{" "}
-									{groupDetails.type ? "online" : "in-person"}
+									{`${groupDetails.events.length} events • `}
+									{groupDetails.type === "online" ? "online" : "in-person"}
 								</p>
 							) : (
 								<p id="groupDetailPrivacy" className="add-padding">
 									{`${groupDetails.events.length} event • `}
-									{groupDetails.type ? "online" : "in-person"}
+									{groupDetails.type === "online" ? "online" : "in-person"}
 								</p>
 							)}
 							<p id="groupDetailOrganizer">

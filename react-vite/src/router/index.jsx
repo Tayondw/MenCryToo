@@ -83,26 +83,26 @@ export const router = createBrowserRouter([
 				action: groupActions,
 			},
 			{
-				path: "groups/groupId/edit",
+				path: "groups/:groupId/edit",
 				loader: groupDetailsLoader,
 				element: <UpdateGroup />,
 				action: groupActions,
 			},
 			{
-				path: "groups/groupId/delete",
+				path: "groups/:groupId/delete",
 				loader: groupDetailsLoader,
 				element: <DeleteGroup />,
 				action: groupActions,
 			},
 			// ! GROUP - IMAGES
 			{
-				path: "groups/groupId/images",
+				path: "groups/:groupId/images",
 				loader: getLoader,
 				element: <Groups />,
 				action: groupImageActions,
 			},
 			{
-				path: "groups/groupId/images/:imageId/edit",
+				path: "groups/:groupId/images/:imageId/edit",
 				loader: getLoader,
 				element: <Groups />,
 				action: groupImageActions,
@@ -126,13 +126,13 @@ export const router = createBrowserRouter([
 			},
 			// ! GROUP - MEMBERSHIPS
 			{
-				path: "groups/groupId/join-group",
+				path: "groups/:groupId/join-group",
 				loader: getLoader,
 				element: <Groups />,
 				action: groupMemberActions,
 			},
 			{
-				path: "groups/groupId/leave-group/:memberId",
+				path: "groups/:groupId/leave-group/:memberId",
 				loader: getLoader,
 				element: <Groups />,
 				action: groupMemberActions,
@@ -150,13 +150,13 @@ export const router = createBrowserRouter([
 				action: eventActions,
 			},
 			{
-				path: "groups/groupId/events",
+				path: "groups/:groupId/events",
 				loader: getLoader,
 				element: <CreateEvent />,
 				action: eventActions,
 			},
 			{
-				path: "groups/groupId/events/:eventId",
+				path: "groups/:groupId/events/:eventId",
 				loader: eventDetailsLoader,
 				element: <UpdateEvent />,
 				action: eventActions,

@@ -167,7 +167,7 @@ const CreateGroup = () => {
 										<option className="group-option-text" value="">
 											(select one)
 										</option>
-										<option className="group-option-text" value="in person">
+										<option className="group-option-text" value="in-person">
 											In Person
 										</option>
 										<option className="group-option-text" value="online">
