@@ -1,6 +1,7 @@
 import { useLoaderData, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import OpenModalButton from "../../OpenModalButton";
+import GroupImage from "../Images";
 import DeleteGroup from "../CRUD/Delete";
 import "./GroupDetails.css";
 
@@ -41,7 +42,7 @@ const GroupDetails = () => {
 	const formattedUpcomingEvents = formatEventDate(upcomingEvents);
 	const formattedPastEvents = formatEventDate(pastEvents);
 
-	console.log("group details", groupDetails.events.map((event) => event.eventImage));
+	console.log("group details", groupDetails);
 
 	return (
 		<div id="groups-details">
@@ -132,19 +133,34 @@ const GroupDetails = () => {
 										</button>
 									</div>
 									<div id="crud-buttons-update-image">
-										{groupDetails.groupImage.map((groupImage) => (
-											<button
-												key={groupImage.id}
-												onClick={() =>
-													navigate(
-														`/groups/${groupDetails.id}/images/${groupImage.id}/edit`,
-													)
-												}
-												style={{ backgroundColor: `gray`, color: `#FAF5E4` }}
-											>
-												Update Image
-											</button>
-										))}
+										{!groupDetails.groupImage.length ? (
+											<div id="crud-buttons-delete">
+												<OpenModalButton
+													groupDetails={groupDetails}
+													className="group-image-button"
+													id="add-group-image"
+													buttonText="Add Group Image"
+													style={{ backgroundColor: "gray", color: `#FAF5E4` }}
+													modalComponent={
+														<GroupImage groupDetails={groupDetails} />
+													}
+												/>
+											</div>
+										) : (
+											groupDetails.groupImage.map((groupImage) => (
+												<button
+													key={groupImage.id}
+													onClick={() =>
+														navigate(
+															`/groups/${groupDetails.id}/images/${groupImage.id}/edit`,
+														)
+													}
+													style={{ backgroundColor: `gray`, color: `#FAF5E4` }}
+												>
+													Update Image
+												</button>
+											))
+										)}
 									</div>
 									<div id="crud-buttons-delete">
 										<OpenModalButton

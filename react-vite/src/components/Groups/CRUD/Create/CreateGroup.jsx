@@ -1,6 +1,7 @@
 import { useActionData, Form, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import Footer from "../../../Footer";
 import "./CreateGroup.css";
 
 const CreateGroup = () => {
@@ -197,7 +198,8 @@ const CreateGroup = () => {
 				</Form>
 			) : (
 				<h1>Please log in to make a group!</h1>
-			)}
+                  )}
+                  <Footer />
 		</div>
 	);
 };

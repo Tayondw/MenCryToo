@@ -36,8 +36,8 @@ export const groupActions = async ({ request }) => {
 		await fetch(`/api/groups/new`, {
 			method: "POST",
 			body: formData,
-            });
-            return redirect("/groups")
+		});
+		return redirect("/groups");
 	}
 
 	if (intent === "edit-group") {
@@ -58,14 +58,17 @@ export const groupImageActions = async ({ request }) => {
 	let formData = await request.formData();
 	let data = Object.fromEntries(formData);
 	let intent = formData.get("intent");
+
 	data.id = +data.id;
 	data.imageId = +data.imageId;
 
 	if (intent === "add-group-image") {
-		return await fetch(`/api/groups/${data.id}`, {
+		await fetch(`/api/groups/${data.id}/images`, {
 			method: "POST",
 			body: formData,
 		});
+
+		return redirect(`/groups/${data.id}`);
 	}
 
 	if (intent === "edit-group-image") {
