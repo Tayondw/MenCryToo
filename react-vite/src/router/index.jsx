@@ -14,6 +14,12 @@ import CreateEvent from "../components/Events/CRUD/Create";
 import UpdateEvent from "../components/Events/CRUD/Update";
 import Profile from "../components/Profile";
 import ProfileDetails from "../components/Profile/Details";
+import Posts from "../components/Posts";
+import PostDetails from "../components/Posts/Details";
+import Comments from "../components/Comments";
+import CommentDetails from "../components/Comments/Details";
+import Tags from "../components/Tags";
+import TagDetails from "../components/Tags/Details";
 import {
 	getLoader,
 	groupDetailsLoader,
@@ -191,30 +197,35 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "posts",
-				element: <SignupFormPage />,
+				element: <Posts />,
 				action: postActions,
 			},
 			{
 				path: "posts/:postId",
 				loader: postDetailsLoader,
-				element: <SignupFormPage />,
+				element: <PostDetails />,
 				action: postActions,
 			},
 			{
 				path: "comments",
-				element: <SignupFormPage />,
+				element: <Comments />,
+				action: postActions,
+			},
+			{
+				path: "comments/:commentId",
+				element: <CommentDetails />,
 				action: postActions,
 			},
 			{
 				path: "tags",
 				loader: getLoader,
-				element: <SignupFormPage />,
+				element: <Tags />,
 				action: profileActions,
 			},
 			{
 				path: "tags/:id/:name",
 				loader: tagDetailsLoader,
-				element: <SignupFormPage />,
+				element: <TagDetails />,
 				action: profileActions,
 			},
 			{
