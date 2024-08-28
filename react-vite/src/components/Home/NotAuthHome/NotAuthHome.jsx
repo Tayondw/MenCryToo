@@ -74,22 +74,30 @@ function SectionOne() {
 				</div>
 				<div className="w-row">
 					<div className="w-col w-col-6">
-						<div style={{ opacity: 1 }} className="white-box">
+						<Link
+							to="/groups"
+							style={{ opacity: 1 }}
+							className="white-box group-event-links"
+						>
 							<h3>FIND GROUPS</h3>
 							<p>
-								Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-								Suspendisse varius enim in eros elementum tristique.
+								Look around at some people forming groups to discuss their
+								mental issues and find support
 							</p>
-						</div>
+						</Link>
 					</div>
 					<div className="w-col w-col-6">
-						<div style={{ opacity: 1 }} className="white-box">
+						<Link
+							to="/events"
+							style={{ opacity: 1 }}
+							className="white-box group-event-links"
+						>
 							<h3>FIND EVENTS</h3>
 							<p>
-								Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-								Suspendisse varius enim in eros elementum tristique.
+								Look at some events that some groups are having for themselves
+								and the community they are in.
 							</p>
-						</div>
+						</Link>
 					</div>
 				</div>
 			</div>
@@ -119,9 +127,6 @@ function AccentSection() {
 	return (
 		<div className="section2 accent">
 			<div className="w-container">
-				<div className="section-title-group">
-					<div className="section-subheading center off-white"></div>
-				</div>
 				<div className="w-row">
 					<div className="w-col w-col-6">
 						<div className="white-box transparent">
@@ -134,8 +139,7 @@ function AccentSection() {
 							/>
 							<h3 className="white-text">ABOUT MEN CRY TOO</h3>
 							<p className="white-text">
-								Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-								Suspendisse varius enim in eros elementum tristique.
+								Men Cry Too is an effort to break though stigma of men not being allowed to express their feelings, improve help-seeking behavior and reduce male suicide. Let&apos; check the stats that led to why we&apos;re both here.
 							</p>
 							<Link to="/about" className="hollow-button">
 								Learn more
@@ -153,8 +157,10 @@ function AccentSection() {
 							/>
 							<h3 className="white-text">PARTNERSHIP</h3>
 							<p className="white-text">
-								Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-								Suspendisse varius enim in eros elementum tristique.
+								Whether it&apos;s personal or business, we must come together
+								and help each other. There are partnership opportunities for a
+								single person up to full-scale businesses, so you&apos;ll fit
+								right in.
 							</p>
 							<Link to="/partnership" className="hollow-button">
 								GET STARTED
@@ -177,31 +183,34 @@ const NotAuthHome = () => {
 			<SectionTwo />
 			<AccentSection />
 			<div id="section-4">
-				{sessionUser ? null : (
-					<OpenModalButton
-						buttonText="Join Us"
-						style={{
-							background: `#223f5c`,
-							width: `200px`,
-							cursor: `pointer`,
-							borderRadius: `4px`,
-							color: `#fff`,
-							textAlign: `center`,
-							letterSpacing: `2px`,
-							textTransform: `uppercase`,
-							marginLeft: `10px`,
-							marginRight: `10px`,
-							padding: `12px 30px`,
-							fontSize: `16px`,
-							fontWeight: 600,
-							lineHeight: `21px`,
-							textDecoration: `none`,
-							transition: `background-color 0.3s`,
-							display: `inline-block`,
-							border: 0,
-						}}
-						modalComponent={<SignupFormModal />}
-					/>
+                        {sessionUser ? null : (
+                              <>
+                                    <h2>BECOME A MEMBER  - START IMPROVING YOUR MENTAL TODAY</h2>
+                                    <OpenModalButton
+                                          buttonText="Join Us"
+                                          style={{
+                                                background: `#223f5c`,
+                                                width: `200px`,
+                                                cursor: `pointer`,
+                                                borderRadius: `4px`,
+                                                color: `#fff`,
+                                                textAlign: `center`,
+                                                letterSpacing: `2px`,
+                                                textTransform: `uppercase`,
+                                                marginLeft: `10px`,
+                                                marginRight: `10px`,
+                                                padding: `12px 30px`,
+                                                fontSize: `16px`,
+                                                fontWeight: 600,
+                                                lineHeight: `21px`,
+                                                textDecoration: `none`,
+                                                transition: `background-color 0.3s`,
+                                                display: `inline-block`,
+                                                border: 0,
+                                          }}
+                                          modalComponent={<SignupFormModal />}
+                                    />
+                              </>
 				)}
 			</div>
 			<Footer />
