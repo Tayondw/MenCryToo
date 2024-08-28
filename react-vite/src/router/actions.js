@@ -2,8 +2,13 @@ export const groupActions = async ({ request }) => {
 	let formData = await request.formData();
 	let data = Object.fromEntries(formData);
 	let intent = formData.get("intent");
-	data.id = +data.id;
+      data.id = +data.id;
+      data.organizer_id = +data.organizer_id
 
+      console.log("data - this is", data);
+      console.log("intent", intent);
+      
+      
 	if (intent === "create-group") {
 		return await fetch(`/api/groups/new`, {
 			method: "POST",
