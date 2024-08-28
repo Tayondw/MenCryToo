@@ -39,13 +39,13 @@ class EventForm(FlaskForm):
     capacity = IntegerField(
         "Event capacity", validators=[DataRequired(), NumberRange(min=2, max=300)]
     )
-    start_date = DateTimeLocalField(
+    startDate = DateTimeLocalField(
         "start_date", format="%Y-%m-%dT%H:%M", validators=[DataRequired()]
     )
-    end_date = DateTimeLocalField(
+    endDate = DateTimeLocalField(
         "end_date", format="%Y-%m-%dT%H:%M", validators=[DataRequired()]
     )
 
     def validate_date_range(self):
-        if self.start_date.data >= self.end_date.data:
+        if self.startDate.data >= self.endDate.data:
             raise ValidationError("End date must be after start date")

@@ -269,7 +269,7 @@ def edit_group_images(groupId, imageId):
 
 
 # ! GROUP - EVENTS
-@group_routes.route("/<int:groupId>/events", methods=["GET", "POST"])
+@group_routes.route("/<int:groupId>/events/new", methods=["POST"])
 @login_required
 def create_event(groupId):
     """
@@ -300,8 +300,8 @@ def create_event(groupId):
             description=form.data["description"],
             type=form.data["type"],
             capacity=form.data["capacity"],
-            start_date=form.data["start_date"],
-            end_date=form.data["end_date"],
+            start_date=form.data["startDate"],
+            end_date=form.data["endDate"],
         )
         db.session.add(new_event)
         db.session.commit()

@@ -67,8 +67,8 @@ export const router = createBrowserRouter([
 			{
 				path: "groups",
 				loader: getLoader,
-                        element: <Groups />,
-                        action: groupActions,
+				element: <Groups />,
+				action: groupActions,
 			},
 			{
 				path: "groups/:groupId",
@@ -142,6 +142,7 @@ export const router = createBrowserRouter([
 				path: "events",
 				loader: getLoader,
 				element: <Events />,
+				action: eventActions,
 			},
 			{
 				path: "events/:eventId",
@@ -150,8 +151,8 @@ export const router = createBrowserRouter([
 				action: eventActions,
 			},
 			{
-				path: "groups/:groupId/events",
-				loader: getLoader,
+				path: "groups/:groupId/events/new",
+				loader: groupDetailsLoader,
 				element: <CreateEvent />,
 				action: eventActions,
 			},

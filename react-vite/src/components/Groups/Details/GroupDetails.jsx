@@ -115,7 +115,7 @@ const GroupDetails = () => {
 									<div id="crud-buttons-create">
 										<button
 											onClick={() =>
-												navigate(`/groups/${groupDetails.id}/events`)
+												navigate(`/groups/${groupDetails.id}/events/new`)
 											}
 											style={{ backgroundColor: `gray`, color: `#FAF5E4` }}
 										>
