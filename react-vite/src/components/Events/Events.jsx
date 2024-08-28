@@ -53,11 +53,14 @@ const Events = () => {
 					))}
 					<div className="event-content">
 						<h3>{event.name}</h3>
-						<p>{event.about}</p>
+						<p>{event.description}</p>
 						<p>
-							Base Location: {event.city}, {event.state}
-						</p>
-						<p>This event typically meets {event.type}</p>
+							Location: {event.venueInfo.address} {event.venueInfo.city}, {event.venueInfo.state}
+                                    </p>
+                                    <p>Belongs to: {event.groupInfo.name}</p>
+                                    <p>This event typically meets {event.type}</p>
+                                    <p>Start: {event.startDate}</p>
+                                    <p>End: {event.endDate}</p>
 					</div>
 
 					{sessionUser && sessionUser.profileImage && (
@@ -76,9 +79,10 @@ const Events = () => {
 								<p>
 									Meet the organizer: {event.organizer.firstName}{" "}
 									{event.organizer.lastName}
-								</p>
+                                                </p>
+                                                <p>Contact: {event.organizer.email}</p>
 								<p>Bio: {event.organizer.bio}</p>
-								{event.organizer.profileImage && (
+								{event.organizerInfo.profileImage && (
 									<img src={event.organizer.profileImage} alt="Organizer" />
 								)}
 							</div>

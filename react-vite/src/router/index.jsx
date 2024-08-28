@@ -5,6 +5,7 @@ import SignupFormPage from "../components/SignupFormPage";
 import NotAuthHome from "../components/Home/NotAuthHome";
 import Groups from "../components/Groups";
 import GroupDetails from "../components/Groups/GroupDetails";
+import Events from "../components/Events";
 import {
 	getLoader,
 	groupDetailsLoader,
@@ -120,8 +121,9 @@ export const router = createBrowserRouter([
 			},
 			// ! EVENTS
 			{
-				path: "events",
-				element: <SignupFormPage />,
+                        path: "events",
+                        loader: getLoader,
+				element: <Events />,
 			},
 			{
 				path: "events/:eventId",
