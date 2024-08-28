@@ -129,12 +129,11 @@ export const eventActions = async ({ request }) => {
 		return errors;
 	}
 
-      
 	data.id = +data.id;
 	data.eventId = +data.eventId;
 	data.capacity = +data.capacity;
 	data.group_id = +data.group_id;
-      
+
 	console.log("data - this is", data);
 	console.log("intent", intent);
 
@@ -147,10 +146,11 @@ export const eventActions = async ({ request }) => {
 	}
 
 	if (intent === "edit-event") {
-		return await fetch(`/api/groups/${data.id}/events/${data.eventId}`, {
+		await fetch(`/api/groups/${data.group_id}/events/${data.eventId}`, {
 			method: "POST",
 			body: formData,
 		});
+		return redirect(`/events/${data.eventId}`);
 	}
 
 	if (intent === "delete-event") {

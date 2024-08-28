@@ -317,7 +317,7 @@ def create_event(groupId):
     return form.errors, 400
 
 
-@group_routes.route("/<int:groupId>/events/<int:eventId>", methods=["GET", "POST"])
+@group_routes.route("/<int:groupId>/events/<int:eventId>", methods=["POST"])
 @login_required
 def edit_event(groupId, eventId):
     """
@@ -358,8 +358,8 @@ def edit_event(groupId, eventId):
         )
         event_to_edit.type = form.data["type"] or event_to_edit.type
         event_to_edit.capacity = form.data["capacity"] or event_to_edit.capacity
-        event_to_edit.start_date = form.data["start_date"] or event_to_edit.start_date
-        event_to_edit.end_date = form.data["end_date"] or event_to_edit.end_date
+        event_to_edit.start_date = form.data["startDate"] or event_to_edit.start_date
+        event_to_edit.end_date = form.data["endDate"] or event_to_edit.end_date
         db.session.commit()
         return event_to_edit.to_dict()
     #   return redirect(f"/api/groups/{groupId}")

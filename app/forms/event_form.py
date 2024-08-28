@@ -4,8 +4,7 @@ from wtforms import (
     IntegerField,
     TextAreaField,
     SelectField,
-    SubmitField,
-    DateTimeLocalField
+    DateTimeLocalField,
 )
 from wtforms.validators import DataRequired, Length, NumberRange, ValidationError
 
@@ -13,8 +12,6 @@ types = ["online", "in-person"]
 
 
 class EventForm(FlaskForm):
-    #     group_id = IntegerField("group id", validators=[DataRequired()])
-    #     venue_id = IntegerField("venue id", validators=[DataRequired()])
     name = StringField(
         "Event Name",
         validators=[

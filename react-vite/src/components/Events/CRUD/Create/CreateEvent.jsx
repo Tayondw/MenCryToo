@@ -22,15 +22,20 @@ const CreateEvent = () => {
 		}
 	}, [sessionUser, navigate]);
 
+	// Ensure user is the group owner
+	useEffect(() => {
+		if (sessionUser && groupDetails.organizerId !== sessionUser.id) {
+			navigate("/");
+		}
+	}, [groupDetails, sessionUser, navigate]);
+
 	const [name, setName] = useState("");
 	const [description, setDescription] = useState("");
-      const [type, setType] = useState("");
+	const [type, setType] = useState("");
 	const [capacity, setCapacity] = useState("");
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
-      
-      // console.log("details", groupDetails);
-      
+
 	const formatDate = (date) => {
 		if (!date) return;
 
@@ -48,7 +53,11 @@ const CreateEvent = () => {
 			{sessionUser && groupDetails ? (
 				<div id="events-section-1">
 					<h1>Create an event for {groupDetails.name}</h1>
-					<Form method="post" action={`/groups/${groupDetails.id}/events/new`} className="create-event">
+					<Form
+						method="post"
+						action={`/groups/${groupDetails.id}/events/new`}
+						className="create-event"
+					>
 						<div id="name-input">
 							<label>
 								What is the name of your event?
@@ -115,9 +124,7 @@ const CreateEvent = () => {
 									type="datetime-local"
 									name="startDate"
 									value={startDate ? formatDate(new Date(startDate)) : ""}
-									onChange={(event) =>
-										setStartDate(event.target.value)
-									}
+									onChange={(event) => setStartDate(event.target.value)}
 								/>
 							</label>
 							{errors?.startDate && (

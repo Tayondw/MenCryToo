@@ -13,12 +13,7 @@ const UpdateGroup = () => {
 	const groupDetails = useLoaderData();
 	const errors = useActionData();
 	const sessionUser = useSelector((state) => state.session.user);
-	// const groupUrl = parseInt(window.location.href.split("/")[4], 10);
 	const navigate = useNavigate();
-
-	console.log("groupDetails", groupDetails);
-	// console.log("group url", groupUrl);
-
 	const [name, setName] = useState("");
 	const [about, setAbout] = useState("");
 	const [type, setType] = useState("");
