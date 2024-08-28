@@ -15,7 +15,6 @@ def tags():
 
 
 @tag_routes.route("/<int:tagId>")
-@login_required
 def user(tagId):
     """
     Query for a tag by id and returns that tag in a dictionary
