@@ -1,6 +1,7 @@
-import { useLoaderData, Outlet, useNavigate } from "react-router-dom";
+import { useLoaderData} from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useState } from "react";
+import Footer from "../Footer";
 import "./Events.css";
 
 const Events = () => {
@@ -27,82 +28,87 @@ const Events = () => {
 	};
 
 	return (
-		<div id="events">
-			<h1>See what each group does to help each other</h1>
-			{allEvents.events.map((event) => (
-				<div
-					id="each-event"
-					key={event.id}
-					className={`mencrytoo-carousel-item ${
-						event.id === allEvents.events[currentIndex].id ? "active" : ""
-					}`}
-					style={{
-						display:
-							event.id === allEvents.events[currentIndex].id ? "flex" : "none",
-					}}
-				>
-					{event.eventImage.map((image) => (
-						<img
-							src={image.eventImage}
-							alt={`${event.name} event image`}
-							key={image.id}
-							width={300}
-							height={200}
-							className="carousel-image"
-						/>
-					))}
-					<div className="event-content">
-						<h3>{event.name}</h3>
-						<p>{event.description}</p>
-						<p>
-							Location: {event.venueInfo.address} {event.venueInfo.city},{" "}
-							{event.venueInfo.state}
-						</p>
-						<p>Belongs to: {event.groupInfo.name}</p>
-						<p>This event typically meets {event.type}</p>
-						<p>Start: {event.startDate}</p>
-						<p>End: {event.endDate}</p>
-					</div>
+		<>
+			<div id="events">
+				<h1>See what each group does to help each other</h1>
+				{allEvents.events.map((event) => (
+					<div
+						id="each-event"
+						key={event.id}
+						className={`mencrytoo-carousel-item ${
+							event.id === allEvents.events[currentIndex].id ? "active" : ""
+						}`}
+						style={{
+							display:
+								event.id === allEvents.events[currentIndex].id
+									? "flex"
+									: "none",
+						}}
+					>
+						{event.eventImage.map((image) => (
+							<img
+								src={image.eventImage}
+								alt={`${event.name} event image`}
+								key={image.id}
+								width={300}
+								height={200}
+								className="carousel-image"
+							/>
+						))}
+						<div className="event-content">
+							<h3>{event.name}</h3>
+							<p>{event.description}</p>
+							<p>
+								Location: {event.venueInfo.address} {event.venueInfo.city},{" "}
+								{event.venueInfo.state}
+							</p>
+							<p>Belongs to: {event.groupInfo.name}</p>
+							<p>This event typically meets {event.type}</p>
+							<p>Start: {event.startDate}</p>
+							<p>End: {event.endDate}</p>
+						</div>
 
-					{sessionUser && sessionUser.profileImage && (
-						<>
-							<div>
-								<p>See where the events like to go:</p>
-								{event.venues &&
-									event.venues.map((venue) => (
-										<div id="venue-event" key={venue.id}>
-											{venue.address} {venue.city}, {venue.state}{" "}
-											{venue.zipCode}
-										</div>
-									))}
-							</div>
-							<div>
-								<p>
-									Meet the organizer: {event.organizer.firstName}{" "}
-									{event.organizer.lastName}
-								</p>
-								<p>Contact: {event.organizer.email}</p>
-								<p>Bio: {event.organizer.bio}</p>
-								{event.organizerInfo.profileImage && (
-									<img src={event.organizer.profileImage} alt="Organizer" />
-								)}
-							</div>
-						</>
-					)}
-					<div id="carousel-navigation">
-						<button className="nav-button prev" onClick={handlePrevClick}>
-							◀
-						</button>
-						<span className="nav-indicator">{`${currentIndex + 1} of ${
-							allEvents.events.length
-						}`}</span>
-						<button className="nav-button next" onClick={handleNextClick}>
-							▶
-						</button>
+						{sessionUser && sessionUser.profileImage && (
+							<>
+								<div>
+									<p>See where the events like to go:</p>
+									{event.venues &&
+										event.venues.map((venue) => (
+											<div id="venue-event" key={venue.id}>
+												{venue.address} {venue.city}, {venue.state}{" "}
+												{venue.zipCode}
+											</div>
+										))}
+								</div>
+								<div>
+									<p>
+										Meet the organizer: {event.organizer.firstName}{" "}
+										{event.organizer.lastName}
+									</p>
+									<p>Contact: {event.organizer.email}</p>
+									<p>Bio: {event.organizer.bio}</p>
+									{event.organizerInfo.profileImage && (
+										<img src={event.organizer.profileImage} alt="Organizer" />
+									)}
+								</div>
+							</>
+						)}
+						<div id="carousel-navigation">
+							<button className="nav-button prev" onClick={handlePrevClick}>
+								◀
+							</button>
+							<span className="nav-indicator">{`${currentIndex + 1} of ${
+								allEvents.events.length
+							}`}</span>
+							<button className="nav-button next" onClick={handleNextClick}>
+								▶
+							</button>
+						</div>
 					</div>
-				</div>
-			))}
-		</div>
+				))}
+			</div>
+			<Footer />
+		</>
 	);
 };
 
