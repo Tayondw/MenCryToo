@@ -4,8 +4,16 @@ import SignupFormPage from "../components/SignupFormPage";
 // import Home from "../components/Home";
 import NotAuthHome from "../components/Home/NotAuthHome";
 import Groups from "../components/Groups";
-import GroupDetails from "../components/Groups/GroupDetails";
+import GroupDetails from "../components/Groups/Details";
+import CreateGroup from "../components/Groups/CRUD/Create";
+import UpdateGroup from "../components/Groups/CRUD/Update";
+import DeleteGroup from "../components/Groups/CRUD/Delete";
 import Events from "../components/Events";
+import EventDetails from "../components/Events/Details";
+import CreateEvent from "../components/Events/CRUD/Create";
+import UpdateEvent from "../components/Events/CRUD/Update";
+import Profile from "../components/Profile";
+import ProfileDetails from "../components/Profile/Details";
 import {
 	getLoader,
 	groupDetailsLoader,
@@ -13,7 +21,7 @@ import {
 	venueDetailsLoader,
 	userDetailsLoader,
 	postDetailsLoader,
-      tagDetailsLoader,
+	tagDetailsLoader,
 } from "./loaders";
 import {
 	groupActions,
@@ -61,19 +69,19 @@ export const router = createBrowserRouter([
 			{
 				path: "groups/new",
 				loader: getLoader,
-				element: <Groups />,
+				element: <CreateGroup />,
 				action: groupActions,
 			},
 			{
 				path: "groups/groupId/edit",
-				loader: getLoader,
-				element: <Groups />,
+				loader: groupDetailsLoader,
+				element: <UpdateGroup />,
 				action: groupActions,
 			},
 			{
 				path: "groups/groupId/delete",
-				loader: getLoader,
-				element: <Groups />,
+				loader: groupDetailsLoader,
+				element: <DeleteGroup />,
 				action: groupActions,
 			},
 			// ! GROUP - IMAGES
@@ -121,26 +129,26 @@ export const router = createBrowserRouter([
 			},
 			// ! EVENTS
 			{
-                        path: "events",
-                        loader: getLoader,
+				path: "events",
+				loader: getLoader,
 				element: <Events />,
 			},
 			{
 				path: "events/:eventId",
 				loader: eventDetailsLoader,
-				element: <SignupFormPage />,
+				element: <EventDetails />,
 				action: eventActions,
 			},
 			{
 				path: "groups/groupId/events",
 				loader: getLoader,
-				element: <Groups />,
+				element: <CreateEvent />,
 				action: eventActions,
 			},
 			{
 				path: "groups/groupId/events/:eventId",
-				loader: getLoader,
-				element: <Groups />,
+				loader: eventDetailsLoader,
+				element: <UpdateEvent />,
 				action: eventActions,
 			},
 			// ! EVENT - IMAGES
@@ -173,12 +181,12 @@ export const router = createBrowserRouter([
 			{
 				path: "profile",
 				loader: getLoader,
-				element: <SignupFormPage />,
+				element: <Profile />,
 			},
 			{
 				path: "users/:userId",
 				loader: userDetailsLoader,
-				element: <SignupFormPage />,
+				element: <ProfileDetails />,
 				action: postActions,
 			},
 			{
