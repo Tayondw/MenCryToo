@@ -20,6 +20,9 @@ import Comments from "../components/Comments";
 import CommentDetails from "../components/Comments/Details";
 import Tags from "../components/Tags";
 import TagDetails from "../components/Tags/Details";
+import Venues from "../components/Venues";
+import VenueDetails from "../components/Venues/Details";
+import CreateVenue from "../components/Venues/CRUD/Create";
 import {
 	getLoader,
 	groupDetailsLoader,
@@ -106,18 +109,18 @@ export const router = createBrowserRouter([
 			// ! VENUES
 			{
 				path: "venues",
-				element: <SignupFormPage />,
+				element: <Venues />,
 			},
 			{
 				path: "venues/:venueId",
 				loader: venueDetailsLoader,
-				element: <SignupFormPage />,
+				element: <VenueDetails />,
 				action: venueActions,
 			},
 			{
 				path: "groups/:groupId/venues",
 				loader: getLoader,
-				element: <Groups />,
+				element: <CreateVenue />,
 				action: venueActions,
 			},
 			// ! GROUP - MEMBERSHIPS
