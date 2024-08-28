@@ -1,4 +1,4 @@
-import { useLoaderData } from "react-router-dom";
+import { useLoaderData, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useState } from "react";
 import "./Groups.css";
@@ -101,6 +101,24 @@ const Groups = () => {
 						</div>
 					</div>
 				))}
+				<div className="meetup-links">
+					{sessionUser ? (
+						<Link className="nav-link" to="/groups/new">
+							Create a group
+						</Link>
+					) : (
+						<Link className="disabled" to="/groups/new">
+							Create a group
+						</Link>
+					)}
+
+					<div className="link-desc">
+						<p>
+							The cultivate platform—Where the places you go contain the places
+							in which you will grow
+						</p>
+					</div>
+				</div>
 			</div>
 			<Footer />
 		</>

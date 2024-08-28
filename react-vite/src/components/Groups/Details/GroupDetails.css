@@ -1,0 +1,163 @@
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Sacramento&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Sacramento&family=Shadows+Into+Light&display=swap");
+
+#groups-details {
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	margin: 5% 10%;
+	flex-direction: column;
+}
+
+#groups-link-holder #group-link {
+	color: teal;
+	font-family: "Quicksand", sans-serif;
+	font-weight: 500;
+}
+
+#top-each-groupDetail {
+	display: grid;
+	grid-template-columns: 0.4fr 2fr;
+	justify-content: center;
+	align-items: center;
+	column-gap: 55px;
+}
+
+#top-each-groupDetail #groupDetailImage img {
+	width: 500px;
+	height: 400px;
+}
+
+#top-each-groupDetail #groupDetailInfo {
+	display: flex;
+	justify-content: space-evenly;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+#groupDetailInfo #groupDetailName {
+	font-family: "Shadows Into Light";
+	font-size: 3em;
+	margin: 0;
+}
+
+#groupDetailInfo #groupDetailLocation {
+	font-family: "Quicksand", sans-serif;
+	font-weight: 500;
+	color: gray;
+	margin: 10px 0;
+}
+
+#groupDetailInfo #groupDetailPrivacy {
+	font-family: "Quicksand", sans-serif;
+	font-weight: 500;
+	color: gray;
+	margin-bottom: 10px;
+}
+
+#groupDetailInfo #groupDetailOrganizer {
+	font-family: "Quicksand", sans-serif;
+	font-weight: 500;
+	color: gray;
+	margin-bottom: 10px;
+}
+
+#crud-buttons {
+	padding-top: 200px;
+	display: flex;
+}
+
+#crud-buttons div {
+	padding-right: 10px;
+}
+
+#crud-buttons button:hover {
+	cursor: pointer;
+	box-shadow: 2px 2px #135c51;
+}
+
+#crud-buttons button {
+	cursor: pointer;
+	box-shadow: 2px 2px #ff6464;
+}
+
+#event-list-past {
+	cursor: pointer;
+}
+
+#event-list-upcoming {
+	cursor: pointer;
+}
+
+#body-page {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+#organizer {
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.groupDetail-h3 {
+	font-family: "Shadows Into Light";
+	font-size: 2.5em;
+	margin-top: 25px;
+	margin-bottom: 0px;
+}
+
+.groupDetail-desc-p {
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	font-family: "Quicksand", sans-serif;
+	font-weight: 500;
+}
+
+.event-item-dates {
+	display: flex;
+	justify-content: flex-start;
+	flex-direction: column;
+	align-items: flex-start;
+	width: 400px;
+}
+
+.event-item {
+	display: grid;
+	grid-template-columns: 0.4fr 2fr;
+	justify-content: center;
+	align-items: flex-start;
+	flex-direction: column;
+	padding: 0;
+}
+
+.event-item img {
+	width: 250px;
+}
+
+.event-item-dates-p {
+	font-family: "Quicksand", sans-serif;
+	font-weight: 500;
+	color: teal;
+	padding-top: 35px;
+}
+
+.event-desc-group {
+	font-family: "Quicksand", sans-serif;
+	font-weight: 500;
+}
+
+.event-item-dates-venue {
+	font-family: "Quicksand", sans-serif;
+	font-weight: 500;
+}
+
+.event-item-name-h4 {
+	font-family: "Shadows Into Light";
+	font-size: 2em;
+	margin: 0;
+}
