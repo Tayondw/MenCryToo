@@ -13,8 +13,7 @@ function ProfileButton({ user, navigate }) {
 	const dispatch = useDispatch();
 	const [showMenu, setShowMenu] = useState(false);
 	const ulRef = useRef();
-	console.log("this is user", user);
-
+	
 	const toggleMenu = (e) => {
 		e.stopPropagation(); // Keep from bubbling up to document and triggering closeMenu
 		setShowMenu(!showMenu);
@@ -44,7 +43,7 @@ function ProfileButton({ user, navigate }) {
 
 	return (
 		<>
-			{user && user.profileImage ? (
+			{user || (user && user.profileImage) ? (
 				<div id="options" ref={ulRef}>
 					<div id="options-button">
 						<div className="dropdown">

@@ -9,7 +9,7 @@ function Navigation({ isLoaded }) {
 	const navigate = useNavigate();
 	const { allTags } = useLoaderData();
 
-	console.log("tags", allTags);
+	// console.log("tags", allTags);
 
 	return (
 		<div id="whole-navbar">
@@ -41,18 +41,18 @@ function Navigation({ isLoaded }) {
 						<NavLink to="/about" className="navigation-link w-nav-link">
 							ABOUT
 						</NavLink>
-						<NavLink to="/partner" className="navigation-link w-nav-link">
+						{/* <NavLink to="/partner" className="navigation-link w-nav-link">
 							BECOME A PARTNER
-						</NavLink>
+						</NavLink> */}
 						<NavLink
 							to="/i-believe-campaign"
 							className="navigation-link w-nav-link"
 						>
 							&ldquo;I BELIEVE&ldquo; CAMPAIGN
 						</NavLink>
-						<NavLink to="/posts/create" className="navigation-link w-nav-link">
+						{/* <NavLink to="/posts/create" className="navigation-link w-nav-link">
 							SHARE YOUR STORY
-						</NavLink>
+						</NavLink> */}
 						<NavLink className="navigation-link current w-nav-link">
 							CRISIS SUPPORT
 						</NavLink>

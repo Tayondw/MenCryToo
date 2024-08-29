@@ -1,20 +1,23 @@
-// import { Link, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 import AuthHome from "./AuthHome";
-import NotAuthHome from "./NotAuthHome";
+import NotAuthHome from "./NotAuthHome/NotAuthHome";
 import ProfileHome from "./ProfileHome/ProfileHome";
 import Footer from "../Footer";
 
 const Home = () => {
 	const sessionUser = useSelector((state) => state.session.user);
 
+	let mainContent;
+
+	if (!sessionUser) mainContent = <NotAuthHome />;
+	if (sessionUser && !sessionUser.profileImage) mainContent = <AuthHome />;
+	if (sessionUser && sessionUser.profileImage) mainContent = <ProfileHome />;
+
 	return (
-            <div id="home-page">
-                  {!sessionUser && <NotAuthHome />}
-                  {sessionUser && <AuthHome />}
-                  {sessionUser && sessionUser.profileImage && <ProfileHome />}
-                  <Footer />
-		</div>
+		<>
+			{mainContent}
+			<Footer />
+		</>
 	);
 };
 
