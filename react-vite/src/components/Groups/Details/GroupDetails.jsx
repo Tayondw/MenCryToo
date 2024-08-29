@@ -1,6 +1,8 @@
 import { useLoaderData, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useEffect } from "react";
 import OpenModalButton from "../../OpenModalButton";
+import { useModal } from "../../../context/Modal";
 import GroupImage from "../Images";
 import DeleteGroup from "../CRUD/Delete";
 import "./GroupDetails.css";
@@ -9,6 +11,11 @@ const GroupDetails = () => {
 	const groupDetails = useLoaderData();
 	const navigate = useNavigate();
 	const sessionUser = useSelector((state) => state.session.user);
+	const { closeModal } = useModal();
+
+	useEffect(() => {
+		if (!groupDetails.id) navigate("/groups");
+	}, [groupDetails, navigate]);
 
 	const today = new Date();
 	const formatDate = (startDate) => {
@@ -23,10 +30,10 @@ const GroupDetails = () => {
 		return `${year}-${month}-${day} • ${hours}:${minutes}`;
 	};
 
-	const upcomingEvents = groupDetails.events.filter(
+	const upcomingEvents = groupDetails?.events.filter(
 		(event) => new Date(event.startDate) >= today,
 	);
-	const pastEvents = groupDetails.events.filter(
+	const pastEvents = groupDetails?.events.filter(
 		(event) => new Date(event.startDate) < today,
 	);
 
@@ -137,12 +144,16 @@ const GroupDetails = () => {
 											<div id="crud-buttons-delete">
 												<OpenModalButton
 													groupDetails={groupDetails}
+													onClose={closeModal}
 													className="group-image-button"
 													id="add-group-image"
 													buttonText="Add Group Image"
 													style={{ backgroundColor: "gray", color: `#FAF5E4` }}
 													modalComponent={
-														<GroupImage groupDetails={groupDetails} />
+														<GroupImage
+															groupDetails={groupDetails}
+															onClose={closeModal}
+														/>
 													}
 												/>
 											</div>

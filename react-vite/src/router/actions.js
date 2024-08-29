@@ -60,6 +60,8 @@ export const groupImageActions = async ({ request }) => {
 
 	data.id = +data.id;
 	data.imageId = +data.imageId;
+	// console.log("this is data", data);
+	// console.log("this is intent", intent);
 
 	if (intent === "add-group-image") {
 		await fetch(`/api/groups/${data.id}/images`, {
@@ -159,31 +161,32 @@ export const eventActions = async ({ request }) => {
 };
 
 export const eventImageActions = async ({ request }) => {
-	let formData = await request.formData();
-	let data = Object.fromEntries(formData);
-	let intent = formData.get("intent");
-	data.id = +data.id;
-	data.imageId = +data.imageId;
+	const formData = await request.formData();
+	const data = Object.fromEntries(formData);
+	const intent = formData.get("intent");
+	data.id = +data.eventId;
+      data.imageId = +data.imageId;
 
 	if (intent === "add-event-image") {
-		return await fetch(`/api/events/${data.id}/images`, {
+		await fetch(`/api/events/${data.eventId}/images`, {
 			method: "POST",
 			body: formData,
 		});
+		return redirect(`/events/${data.eventId}`);
 	}
 
 	if (intent === "edit-event-image") {
-		return await fetch(`/api/events/${data.id}/images/${data.imageId}/edit`, {
+		return await fetch(`/api/events/${data.eventId}/images/${data.imageId}/edit`, {
 			method: "POST",
 			body: formData,
 		});
 	}
 
 	if (intent === "delete-event-image") {
-		return await fetch(`/api/event-images/${data.id}`, {
+		return await fetch(`/api/event-images/${data.eventId}`, {
 			method: "DELETE",
 		});
-	}
+      }
 };
 
 export const venueActions = async ({ request }) => {

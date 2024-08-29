@@ -1,14 +1,8 @@
-import { useModal } from "../../../context/Modal";
 import { Form, useActionData } from "react-router-dom";
 import "./EventImage.css";
 
-const EventImage = ({ eventDetails }) => {
-	const { closeModal } = useModal();
+const EventImage = ({ eventDetails, onClose }) => {
 	const event_image = useActionData();
-	const onClose = async (event) => {
-		event.preventDefault();
-		closeModal();
-	};
 
 	return (
 		<div id="adding-group-image">
@@ -18,24 +12,21 @@ const EventImage = ({ eventDetails }) => {
 					✖
 				</button>
 			</div>
+
 			<Form
 				method="post"
 				encType="multipart/form-data"
 				type="file"
-				action={`/groups/${eventDetails.id}`}
+				action={`/events/${eventDetails.id}/images`}
+				onSubmit={onClose}
 			>
-				<input name="event_image" type="file" accept="image/*" />
-				<button
-					type="submit"
-					name="intent"
-					value="add-event-image"
-					onSubmit={onClose}
-				>
+				<input name="event_image" type="file" accept="image/*" required />
+				<button type="submit" name="intent" value="add-event-image">
 					Submit
 				</button>
-				<input type="hidden" name="id" value={eventDetails.id} />
+				<input type="hidden" name="eventId" value={eventDetails.id} />
 			</Form>
-			<img src={event_image?.name} />
+			{event_image && <img src={event_image?.name} alt="Event" />}
 		</div>
 	);
 };

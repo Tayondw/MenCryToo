@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { FaRegClock } from "react-icons/fa";
-import { MdOutlineAttachMoney } from "react-icons/md";
 import { GrLocationPin } from "react-icons/gr";
 import OpenModalButton from "../../OpenModalButton";
+import { useModal } from "../../../context/Modal";
 import EventImage from "../Images";
 import DeleteEvent from "../CRUD/Delete/DeleteEvent";
 import "./EventDetails.css";
@@ -13,6 +13,7 @@ const EventDetails = () => {
 	let eventDetails = useLoaderData();
 	const sessionUser = useSelector((state) => state.session.user);
 	const navigate = useNavigate();
+	const { closeModal } = useModal();
 
 	console.log("event details", eventDetails);
 
@@ -54,33 +55,43 @@ const EventDetails = () => {
 					</h4>
 				) : (
 					<h4 className="events-details-organizer">
-						Organized By {eventDetails.organizer.firstName} {eventDetails.organizer.lastName}
+						Organized By {eventDetails.organizer.firstName}{" "}
+						{eventDetails.organizer.lastName}
 					</h4>
 				)}
 			</div>
 			<div id="events-body">
 				<div id="event-section-1">
 					<div id="events-details-image">
-						<img src={eventDetails} alt={eventDetails?.name || "Event"} />
+						{eventDetails?.eventImage.map((eventImage) => (
+							<img
+								key={eventImage?.id}
+								src={eventImage?.eventImage}
+								alt={eventDetails?.name || "Event"}
+							/>
+						))}
 					</div>
 					<div id="mix-event-group">
-						<div id="group-events">
-							<div id="events-group-image">
-								<img
-									src={eventDetails}
-									alt={eventDetails?.name || "Group"}
-								/>
+						{eventDetails?.groupInfo?.groupImage.map((groupImage) => (
+							<div id="group-events" key={groupImage?.id}>
+								<div id="events-group-image">
+									<img
+										src={groupImage?.groupImage}
+										alt={eventDetails?.groupInfo?.name || "Group"}
+									/>
+								</div>
+								<div id="events-group-info">
+									{eventDetails?.groupInfo ? (
+										<>
+											<h3>{eventDetails?.groupInfo?.name}</h3>
+										</>
+									) : (
+										<h3>Group information not available</h3>
+									)}
+								</div>
 							</div>
-							<div id="events-group-info">
-								{eventDetails.groupInfo ? (
-									<>
-										<h3>{eventDetails.groupInfo.name}</h3>
-									</>
-								) : (
-									<h3>Group information not available</h3>
-								)}
-							</div>
-						</div>
+						))}
+
 						<div id="event-event">
 							<div id="events-details-date">
 								<FaRegClock className="events-details-clock" />
@@ -96,12 +107,6 @@ const EventDetails = () => {
 										END{" "}
 										<p style={{ color: "teal" }}>{formatEventDate.endDate}</p>
 									</p>
-								</div>
-							</div>
-							<div id="events-details-price">
-								<MdOutlineAttachMoney className="events-details-price" />
-								<div>
-									<p>{eventDetails.price}</p>
 								</div>
 							</div>
 							<div id="events-details-location">
@@ -134,26 +139,34 @@ const EventDetails = () => {
 										</button>
 									</div>
 									<div id="crud-buttons-update-image">
-										{!eventDetails.groupImage.length ? (
+										{!eventDetails?.eventImage.length ? (
 											<div id="crud-buttons-delete">
 												<OpenModalButton
 													eventDetails={eventDetails}
 													className="event-image-button"
 													id="add-group-image"
 													buttonText="Add Event Image"
-													style={{ backgroundColor: "gray", color: `#FAF5E4` }}
+													onClose={closeModal}
+													style={{
+														backgroundColor: "gray",
+														color: `#FAF5E4`,
+														cursor: `pointer`,
+													}}
 													modalComponent={
-														<EventImage eventDetails={eventDetails} />
+														<EventImage
+															eventDetails={eventDetails}
+															onClose={closeModal}
+														/>
 													}
 												/>
 											</div>
 										) : (
-											eventDetails.eventImage.map((groupImage) => (
+											eventDetails.eventImage.map((eventImage) => (
 												<button
-													key={groupImage.id}
+													key={eventImage.id}
 													onClick={() =>
 														navigate(
-															`/events/${eventDetails.id}/images/${groupImage.id}/edit`,
+															`/events/${eventDetails.id}/images/${eventImage.id}/edit`,
 														)
 													}
 													style={{ backgroundColor: `gray`, color: `#FAF5E4` }}

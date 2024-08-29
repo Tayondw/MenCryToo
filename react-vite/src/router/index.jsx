@@ -142,7 +142,7 @@ export const router = createBrowserRouter([
 				path: "events",
 				loader: getLoader,
 				element: <Events />,
-				action: eventActions,
+				action: eventImageActions,
 			},
 			{
 				path: "events/:eventId",
@@ -163,18 +163,18 @@ export const router = createBrowserRouter([
 				action: eventActions,
 			},
 			// ! EVENT - IMAGES
-			// ? to see all event images
+			// ? to add event images
 			{
 				path: "events/:eventId/images",
 				loader: eventDetailsLoader,
-				element: <SignupFormPage />,
+				element: <EventDetails />,
 				action: eventImageActions,
 			},
 			// ? to edit event images
 			{
 				path: "events/:eventId/images/:imageId/edit",
 				loader: eventDetailsLoader,
-				element: <SignupFormPage />,
+				element: <EventDetails/>,
 				action: eventImageActions,
 			},
 			// ! EVENT - ATTENDANCES
