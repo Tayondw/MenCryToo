@@ -1,0 +1,115 @@
+#auth-home {
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 1;
+      align-items: center;
+	background-image: linear-gradient(20deg, #dddddc, #e08f2c);
+}
+
+#auth-hero-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 70px;
+      /* margin: 0 10px 50px;
+      padding: 0 30px 40px; */
+}
+
+#create-profile {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+	align-items: center;
+	gap: 25px;
+	height: 400px;
+	padding: 4% 10% 3%;
+	background-color: #223f5c;
+      border-radius: 80px;
+}
+
+#create-profile-header {
+	width: 50%;
+}
+
+#create-profile-button .button {
+	border: none;
+}
+
+#auth-groups-events {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	/* margin: 5px; */
+	align-items: center;
+	justify-content: center;
+	/* background-color: none; */
+	/* gap: 30px; */
+}
+
+#auth-groups-carousel, #auth-events-carousel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      height: auto;
+}
+
+#each-group-carousel,
+#each-event-carousel {
+	display: flex;
+      flex-direction: column;
+	align-items: center;
+      margin: 50px;
+      justify-content: space-between;
+	width: 100%;
+      max-width: 800px; 
+	height: 600px;
+	padding: 40px;
+	box-sizing: border-box; /* Ensure padding doesn't affect width */
+}
+
+#group-carousel, #event-carousel {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      align-items: center;
+      background-color: #223f5c;
+      border-radius: 80px;
+      margin-bottom: 15px;
+      height: 400px;
+      width: 100%;
+      padding: 20px 40px;
+      box-sizing: border-box;
+}
+
+.group-content-carousel,
+.event-content-carousel {
+	display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+	/* flex-direction: column;
+	justify-content: center;
+	align-items: flex-start;
+      object-fit: cover;
+      flex-shrink: 0; */
+}
+
+#group-carousel-navigation,
+#event-carousel-navigation {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	max-width: 300px;
+}
+
+.event-nav-button {
+	background-color: transparent;
+	border: none;
+	font-size: 24px;
+	cursor: pointer;
+      color: #223f5c;
+}
+
+.event-nav-indicator {
+	font-size: 16px;
+}

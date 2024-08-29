@@ -3,11 +3,10 @@ import { useLoaderData } from "react-router-dom";
 import { useSelector } from "react-redux";
 import OpenModalButton from "../../OpenModalButton";
 import SignupFormModal from "../../SignupFormModal";
-import Footer from "../../Footer";
 import "./NotAuthHome.css";
 import "react-tooltip/dist/react-tooltip.css";
 
-function HeroSection() {
+export const HeroSection = () => {
 	const sessionUser = useSelector((state) => state.session.user);
 	return (
 		<div className="hero-section centered">
@@ -41,7 +40,7 @@ function HeroSection() {
 	);
 }
 
-function SectionOne() {
+export const SectionOne = () => {
 	const { allTags } = useLoaderData();
 	return (
 		<div className="section">
@@ -107,7 +106,7 @@ function SectionOne() {
 	);
 }
 
-function SectionTwo() {
+export const SectionTwo = () => {
 	return (
 		<section className="section-2">
 			<div style={{ opacity: 1 }} className="container bottom w-container">
@@ -124,7 +123,7 @@ function SectionTwo() {
 	);
 }
 
-function AccentSection() {
+export const AccentSection = () => {
 	return (
 		<div className="section2 accent">
 			<div className="w-container">
@@ -214,7 +213,6 @@ const NotAuthHome = () => {
                               </>
 				)}
 			</div>
-			<Footer />
 		</>
 	);
 };

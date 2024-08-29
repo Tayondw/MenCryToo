@@ -1,8 +1,8 @@
 import { createBrowserRouter } from "react-router-dom";
 import LoginFormPage from "../components/LoginFormPage";
 import SignupFormPage from "../components/SignupFormPage";
-// import Home from "../components/Home";
-import NotAuthHome from "../components/Home/NotAuthHome";
+import Home from "../components/Home";
+// import NotAuthHome from "../components/Home/NotAuthHome";
 import Groups from "../components/Groups";
 import GroupDetails from "../components/Groups/Details";
 import CreateGroup from "../components/Groups/CRUD/Create";
@@ -53,7 +53,7 @@ export const router = createBrowserRouter([
 			{
 				path: "/",
 				loader: getLoader,
-				element: <NotAuthHome />,
+				element: <Home />,
 			},
 			{
 				path: "login",

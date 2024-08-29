@@ -449,7 +449,7 @@
 	color: #e08f2c;
 	text-transform: uppercase;
 	border-width: 2px;
-	border-color: #e08f2c;
+	background-color: #dddddc;
 	font-weight: 600;
 }
 
@@ -761,6 +761,18 @@
 	font-weight: 600;
 	border-radius: 4px;
 	letter-spacing: 2px;
+}
+
+@media screen and (max-width: 1226px) {
+      .section-title-group {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+      }
+      .section-subheading.center {
+            width: 120%;
+      }
 }
 
 @media screen and (max-width: 991px) {
