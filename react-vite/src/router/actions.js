@@ -164,8 +164,13 @@ export const eventImageActions = async ({ request }) => {
 	const formData = await request.formData();
 	const data = Object.fromEntries(formData);
 	const intent = formData.get("intent");
-	data.id = +data.eventId;
+	data.eventId = +data.eventId;
       data.imageId = +data.imageId;
+      
+      console.log("data", data);
+      console.log("intent", intent);
+      
+      
 
 	if (intent === "add-event-image") {
 		await fetch(`/api/events/${data.eventId}/images`, {
@@ -176,17 +181,18 @@ export const eventImageActions = async ({ request }) => {
 	}
 
 	if (intent === "edit-event-image") {
-		return await fetch(`/api/events/${data.eventId}/images/${data.imageId}/edit`, {
+		await fetch(`/api/events/${data.eventId}/images/${data.imageId}/edit`, {
 			method: "POST",
 			body: formData,
 		});
+		return redirect(`/events/${data.eventId}`);
 	}
 
 	if (intent === "delete-event-image") {
 		return await fetch(`/api/event-images/${data.eventId}`, {
 			method: "DELETE",
 		});
-      }
+	}
 };
 
 export const venueActions = async ({ request }) => {

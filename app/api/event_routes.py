@@ -127,7 +127,7 @@ def add_event_image(eventId):
     return form.errors, 400
 
 
-@event_routes.route("/<int:eventId>/images/<int:imageId>/edit", methods=["GET", "POST"])
+@event_routes.route("/<int:eventId>/images/<int:imageId>/edit", methods=["POST"])
 @login_required
 def edit_event_images(eventId, imageId):
     """
@@ -159,6 +159,7 @@ def edit_event_images(eventId, imageId):
         return {"errors": {"message": "Unauthorized"}}, 401
 
     form = EventImageForm()
+    form["csrf_token"].data = request.cookies["csrf_token"]
     if form.validate_on_submit():
         edit_event_image = form.data["event_image"] or edit_event_image.group_image
         edit_event_image.filename = get_unique_filename(edit_event_image.filename)

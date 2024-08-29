@@ -6,6 +6,7 @@ import { GrLocationPin } from "react-icons/gr";
 import OpenModalButton from "../../OpenModalButton";
 import { useModal } from "../../../context/Modal";
 import EventImage from "../Images";
+import EditEventImage from "../Images/EditEventImage";
 import DeleteEvent from "../CRUD/Delete/DeleteEvent";
 import "./EventDetails.css";
 
@@ -162,17 +163,26 @@ const EventDetails = () => {
 											</div>
 										) : (
 											eventDetails.eventImage.map((eventImage) => (
-												<button
-													key={eventImage.id}
-													onClick={() =>
-														navigate(
-															`/events/${eventDetails.id}/images/${eventImage.id}/edit`,
-														)
-													}
-													style={{ backgroundColor: `gray`, color: `#FAF5E4` }}
-												>
-													Update Image
-												</button>
+												<div id="crud-buttons-delete" key={eventImage.id}>
+													<OpenModalButton
+														eventDetails={eventDetails}
+														className="event-image-button"
+														id="add-group-image"
+														buttonText="Update Event Image"
+														onClose={closeModal}
+														style={{
+															backgroundColor: "gray",
+															color: `#FAF5E4`,
+															cursor: `pointer`,
+														}}
+														modalComponent={
+															<EditEventImage
+																eventDetails={eventDetails}
+																onClose={closeModal}
+															/>
+														}
+													/>
+												</div>
 											))
 										)}
 									</div>
