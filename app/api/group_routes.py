@@ -1,12 +1,10 @@
-from flask import Blueprint, request, abort, render_template, redirect, jsonify
+from flask import Blueprint, request, render_template, redirect, jsonify
 from flask_login import login_required, current_user
 from app.models import (
     db,
     Group,
     GroupImage,
-    User,
     Memberships,
-    Attendances,
     Venue,
     Event,
 )

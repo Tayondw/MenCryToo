@@ -88,55 +88,52 @@ export const eventActions = async ({ request }) => {
 	const formData = await request.formData();
 	const data = Object.fromEntries(formData);
 	const intent = formData.get("intent");
-	const name = formData.get("name");
-	const description = formData.get("description");
-	const type = formData.get("type");
-	const capacity = formData.get("capacity");
-	const startDate = formData.get("startDate");
-	const endDate = formData.get("endDate");
-	const today = new Date();
-	const errors = {};
 
-	if (!name.length || name.length < 5 || name.length > 50)
-		errors.name = "Event name must be between 5 and 50 characters";
-	if (
-		!description.length ||
-		description.length < 50 ||
-		description.length > 150
-	)
-		errors.description =
-			"Description must be at least 50 characters and no more than 150 characters";
-	if (!type) errors.type = "Event Type is required";
-	if (!capacity || capacity < 2 || capacity > 300)
-		errors.capacity =
-			"Event capacity must have at least two people attending and cannot exceed more than 300 people";
-	const start = new Date(startDate);
-	const end = new Date(endDate);
+	// Only validate fields for creation and editing
+	if (intent === "create-event" || intent === "edit-event") {
+		const name = formData.get("name");
+		const description = formData.get("description");
+		const type = formData.get("type");
+		const capacity = formData.get("capacity");
+		const startDate = formData.get("startDate");
+		const endDate = formData.get("endDate");
+		const today = new Date();
+		const errors = {};
 
-	if (!startDate || isNaN(start.getTime())) {
-		errors.startDate = "Invalid start date";
-	} else if (start < today) {
-		errors.startDate = "Start date must be after or on the current date";
+		if (!name || name.length < 5 || name.length > 50)
+			errors.name = "Event name must be between 5 and 50 characters";
+		if (!description || description.length < 50 || description.length > 150)
+			errors.description =
+				"Description must be at least 50 characters and no more than 150 characters";
+		if (!type) errors.type = "Event Type is required";
+		if (!capacity || capacity < 2 || capacity > 300)
+			errors.capacity =
+				"Event capacity must have at least two people attending and cannot exceed more than 300 people";
+
+		const start = new Date(startDate);
+		const end = new Date(endDate);
+
+		if (!startDate || isNaN(start.getTime())) {
+			errors.startDate = "Invalid start date";
+		} else if (start < today) {
+			errors.startDate = "Start date must be after or on the current date";
+		}
+
+		if (!endDate || isNaN(end.getTime())) {
+			errors.endDate = "Invalid end date";
+		} else if (end < start) {
+			errors.endDate = "End date must be after the start date";
+		}
+
+		if (Object.keys(errors).length) {
+			return errors;
+		}
+
+		data.capacity = +data.capacity;
+		data.group_id = +data.group_id;
 	}
 
-	if (!endDate || isNaN(end.getTime())) {
-		errors.endDate = "Invalid end date";
-	} else if (end < start) {
-		errors.endDate = "End date must be after the start date";
-	}
-
-	if (Object.keys(errors).length) {
-		return errors;
-	}
-
-	data.id = +data.id;
-	data.eventId = +data.eventId;
-	data.capacity = +data.capacity;
-	data.group_id = +data.group_id;
-
-	console.log("data - this is", data);
-	console.log("intent", intent);
-
+	// Execute action based on the intent
 	if (intent === "create-event") {
 		await fetch(`/api/groups/${data.group_id}/events/new`, {
 			method: "POST",
@@ -154,9 +151,10 @@ export const eventActions = async ({ request }) => {
 	}
 
 	if (intent === "delete-event") {
-		return await fetch(`/api/events/${data.id}`, {
+		await fetch(`/api/events/${data.id}`, {
 			method: "DELETE",
 		});
+		return redirect("/events");
 	}
 };
 
