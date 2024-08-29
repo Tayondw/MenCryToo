@@ -238,6 +238,7 @@ def edit_group_images(groupId, imageId):
         return {"errors": {"message": "Unauthorized"}}, 401
 
     form = GroupImageForm()
+    form["csrf_token"].data = request.cookies["csrf_token"]
     if form.validate_on_submit():
         edit_group_image = form.data["group_image"] or edit_group_image.group_image
         edit_group_image.filename = get_unique_filename(edit_group_image.filename)

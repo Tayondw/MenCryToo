@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import OpenModalButton from "../../OpenModalButton";
 import { useModal } from "../../../context/Modal";
 import GroupImage from "../Images";
+import EditGroupImage from "../Images/EditGroupImage";
 import DeleteGroup from "../CRUD/Delete";
 import "./GroupDetails.css";
 
@@ -159,17 +160,27 @@ const GroupDetails = () => {
 											</div>
 										) : (
 											groupDetails.groupImage.map((groupImage) => (
-												<button
-													key={groupImage.id}
-													onClick={() =>
-														navigate(
-															`/groups/${groupDetails.id}/images/${groupImage.id}/edit`,
-														)
-													}
-													style={{ backgroundColor: `gray`, color: `#FAF5E4` }}
-												>
-													Update Image
-												</button>
+												<div id="crud-buttons-delete" key={groupImage.id}>
+													<OpenModalButton
+                                                                                    groupDetails={groupDetails}
+                                                                                    groupImageId={groupImage.id}
+														onClose={closeModal}
+														className="group-image-button"
+														id="add-group-image"
+														buttonText="Update Group Image"
+														style={{
+															backgroundColor: "gray",
+															color: `#FAF5E4`,
+														}}
+														modalComponent={
+															<EditGroupImage
+                                                                                                groupDetails={groupDetails}
+                                                                                                groupImageId={groupImage.id}
+																onClose={closeModal}
+															/>
+														}
+													/>
+												</div>
 											))
 										)}
 									</div>

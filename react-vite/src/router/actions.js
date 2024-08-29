@@ -73,10 +73,11 @@ export const groupImageActions = async ({ request }) => {
 	}
 
 	if (intent === "edit-group-image") {
-		return await fetch(`/api/groups/${data.id}/images/${data.imageId}/edit`, {
+		await fetch(`/api/groups/${data.id}/images/${data.imageId}/edit`, {
 			method: "POST",
 			body: formData,
-		});
+            });
+            return redirect(`/groups/${data.id}`);
 	}
 
 	if (intent === "delete-group-image") {
