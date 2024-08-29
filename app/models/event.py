@@ -51,6 +51,9 @@ class Event(db.Model):
         #   group = [group.to_dict() for group in self.groups]
         #   venue = [venue.to_dict() for venue in self.venues]
         image = [event_image.to_dict() for event_image in self.event_images]
+        group_image = [
+            group_image.to_dict() for group_image in self.groups.group_images
+        ]
 
         attendees = [attendee.to_dict() for attendee in self.event_attendances]
 
@@ -72,6 +75,7 @@ class Event(db.Model):
             "type": self.groups.type,
             "city": self.groups.city,
             "state": self.groups.state,
+            "groupImage": group_image,
         }
 
         venueInfo = {

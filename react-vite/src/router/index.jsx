@@ -163,12 +163,14 @@ export const router = createBrowserRouter([
 				action: eventActions,
 			},
 			// ! EVENT - IMAGES
+			// ? to see all event images
 			{
 				path: "events/:eventId/images",
 				loader: eventDetailsLoader,
 				element: <SignupFormPage />,
 				action: eventImageActions,
 			},
+			// ? to edit event images
 			{
 				path: "events/:eventId/images/:imageId/edit",
 				loader: eventDetailsLoader,

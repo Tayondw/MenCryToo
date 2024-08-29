@@ -5,6 +5,7 @@ import { FaRegClock } from "react-icons/fa";
 import { MdOutlineAttachMoney } from "react-icons/md";
 import { GrLocationPin } from "react-icons/gr";
 import OpenModalButton from "../../OpenModalButton";
+import EventImage from "../Images";
 import DeleteEvent from "../CRUD/Delete/DeleteEvent";
 import "./EventDetails.css";
 
@@ -47,34 +48,33 @@ const EventDetails = () => {
 			</div>
 			<div id="event-header">
 				<h1 id="events-details-name">{eventDetails.name}</h1>
-				{!eventDetails.host ? (
-					<h4 className="events-details-host">
-						Currently there is no host to this event!
+				{!eventDetails.organizer ? (
+					<h4 className="events-details-organizer">
+						Currently there is no organizer to this event!
 					</h4>
 				) : (
-					<h4 className="events-details-host">
-						Hosted By {eventDetails.host.firstName} {eventDetails.host.lastName}
+					<h4 className="events-details-organizer">
+						Organized By {eventDetails.organizer.firstName} {eventDetails.organizer.lastName}
 					</h4>
 				)}
 			</div>
 			<div id="events-body">
 				<div id="event-section-1">
 					<div id="events-details-image">
-						<img src={eventDetails} alt={eventDetails.Group?.name || "Event"} />
+						<img src={eventDetails} alt={eventDetails?.name || "Event"} />
 					</div>
 					<div id="mix-event-group">
 						<div id="group-events">
 							<div id="events-group-image">
 								<img
 									src={eventDetails}
-									alt={eventDetails.Group?.name || "Group"}
+									alt={eventDetails?.name || "Group"}
 								/>
 							</div>
 							<div id="events-group-info">
-								{eventDetails.Group ? (
+								{eventDetails.groupInfo ? (
 									<>
-										<h3>{eventDetails.Group.name}</h3>
-										<p>{eventDetails.Group.private ? "Private" : "Public"}</p>
+										<h3>{eventDetails.groupInfo.name}</h3>
 									</>
 								) : (
 									<h3>Group information not available</h3>
@@ -132,6 +132,36 @@ const EventDetails = () => {
 										>
 											Update
 										</button>
+									</div>
+									<div id="crud-buttons-update-image">
+										{!eventDetails.groupImage.length ? (
+											<div id="crud-buttons-delete">
+												<OpenModalButton
+													eventDetails={eventDetails}
+													className="event-image-button"
+													id="add-group-image"
+													buttonText="Add Event Image"
+													style={{ backgroundColor: "gray", color: `#FAF5E4` }}
+													modalComponent={
+														<EventImage eventDetails={eventDetails} />
+													}
+												/>
+											</div>
+										) : (
+											eventDetails.eventImage.map((groupImage) => (
+												<button
+													key={groupImage.id}
+													onClick={() =>
+														navigate(
+															`/events/${eventDetails.id}/images/${groupImage.id}/edit`,
+														)
+													}
+													style={{ backgroundColor: `gray`, color: `#FAF5E4` }}
+												>
+													Update Image
+												</button>
+											))
+										)}
 									</div>
 									<div id="events-delete-button">
 										<OpenModalButton
