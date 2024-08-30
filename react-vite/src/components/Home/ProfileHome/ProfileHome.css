@@ -159,16 +159,3 @@
 	letter-spacing: 2px;
       margin: 0;
 }
-
-#user-profile-details {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 25px;
-}
-
-#profile-home-edit-profile {
-      display: flex;
-      gap: 25px;
-}
