@@ -53,7 +53,7 @@ def view_all_profiles():
 
     users = User.query.filter(User.profile_image_url.isnot(None)).all()
     return jsonify({
-        "users-profile": [
+        "users_profile": [
             user.to_dict(
                 posts=True,
                 user_comments=True,

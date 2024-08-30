@@ -12,9 +12,6 @@ const AuthHome = () => {
 	const [currentGroupIndex, setGroupCurrentIndex] = useState(0);
 	const [currentEventIndex, setEventCurrentIndex] = useState(0);
 
-	if (!allGroups || !allGroups.groups) return <p>No groups available.</p>;
-	if (!allEvents || !allEvents.events) return <p>No events available.</p>;
-
 	const groups = allGroups.groups.find(
 		(group) => group.organizer.id === sessionUser.id,
 	);
