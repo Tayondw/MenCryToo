@@ -197,6 +197,7 @@ export const router = createBrowserRouter([
 				path: "profile",
 				loader: getLoader,
 				element: <Profile />,
+				action: profileActions,
 			},
 			{
 				path: "users/:userId/profile/create",
@@ -210,12 +211,12 @@ export const router = createBrowserRouter([
 				element: <UpdateProfile />,
 				action: profileActions,
 			},
-			{
-				path: "users/:userId/profile/delete",
-				loader: userDetailsLoader,
-				element: <Profile />,
-				action: profileActions,
-			},
+			// {
+			// 	path: "users/:userId/profile/delete",
+			// 	loader: userDetailsLoader,
+			// 	element: <DeleteProfile />,
+			// 	action: profileActions,
+			// },
 			// ? other users profiles when you click on their profile
 			{
 				path: "users/:userId",

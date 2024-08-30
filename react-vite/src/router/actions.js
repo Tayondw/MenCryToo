@@ -267,14 +267,25 @@ export const eventAttendeeActions = async ({ request }) => {
 
 export const profileActions = async ({ request }) => {
 	const formData = await request.formData();
-	const data = Object.fromEntries(formData);
 	const intent = formData.get("intent");
+	const errors = {};
+
+	// Handle profile deletion separately
+	if (intent === "delete-profile") {
+		const userId = formData.get("userId");
+		await fetch(`/api/users/${userId}/profile/delete`, {
+			method: "DELETE",
+		});
+		return redirect("/");
+	}
+
+	// For other actions like create or update profile
+	const data = Object.fromEntries(formData);
 	const firstName = formData.get("firstName");
 	const lastName = formData.get("lastName");
 	const bio = formData.get("bio");
 	const profileImage = formData.get("profileImage");
 	const userTags = formData.get("userTags");
-	const errors = {};
 
 	if (!firstName.length || firstName.length < 3 || firstName.length > 20)
 		errors.firstName = "First name must be between 3 and 20 characters";
@@ -315,12 +326,6 @@ export const profileActions = async ({ request }) => {
 		return await fetch(`/api/users/${data.userId}/add-tags`, {
 			method: "POST",
 			body: formData,
-		});
-	}
-
-	if (intent === "delete-profile") {
-		return await fetch(`/api/users/${data.id}/profile/delete`, {
-			method: "DELETE",
 		});
 	}
 };
