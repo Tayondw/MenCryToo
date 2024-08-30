@@ -12,12 +12,12 @@ const AuthHome = () => {
 	const [currentGroupIndex, setGroupCurrentIndex] = useState(0);
 	const [currentEventIndex, setEventCurrentIndex] = useState(0);
 
-	const groups = allGroups.groups.find(
-		(group) => group.organizer.id === sessionUser.id,
-	);
-	const events = allEvents.events.find(
-		(event) => event.attendees.user_id === sessionUser.id,
-	);
+	// const groups = allGroups.groups.find(
+	// 	(group) => group.organizer.id === sessionUser.id,
+	// );
+	// const events = allEvents.events.find(
+	// 	(event) => event.attendees.user_id === sessionUser.id,
+	// );
 
 	// add logic in return that if there are no groups or events the render create an event or create a group
 
