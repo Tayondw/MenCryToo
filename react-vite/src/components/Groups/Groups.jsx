@@ -116,13 +116,6 @@ const Groups = () => {
 							Create a group
 						</Link>
 					)}
-
-					<div className="link-desc">
-						<p>
-							The cultivate platform—Where the places you go contain the places
-							in which you will grow
-						</p>
-					</div>
 				</div>
 			</div>
 			<Footer />

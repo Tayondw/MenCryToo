@@ -1,4 +1,4 @@
-import { useLoaderData} from "react-router-dom";
+import { useLoaderData, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useState } from "react";
 import Footer from "../Footer";
@@ -8,8 +8,6 @@ const Events = () => {
 	const { allEvents } = useLoaderData();
 	const sessionUser = useSelector((state) => state.session.user);
 	const [currentIndex, setCurrentIndex] = useState(0);
-
-	console.log("this is events", allEvents.events);
 
 	if (!allEvents || !allEvents.events) {
 		return <p>No events available.</p>;
@@ -45,54 +43,60 @@ const Events = () => {
 									: "none",
 						}}
 					>
-						{event.eventImage.map((image) => (
-							<img
-								src={image.eventImage}
-								alt={`${event.name} event image`}
-								key={image.id}
-								width={300}
-								height={200}
-								className="carousel-image"
-							/>
-						))}
-						<div className="event-content">
-							<h3>{event.name}</h3>
-							<p>{event.description}</p>
-							<p>
-								Location: {event.venueInfo.address} {event.venueInfo.city},{" "}
-								{event.venueInfo.state}
-							</p>
-							<p>Belongs to: {event.groupInfo.name}</p>
-							<p>This event typically meets {event.type}</p>
-							<p>Start: {event.startDate}</p>
-							<p>End: {event.endDate}</p>
-						</div>
+						<Link
+							to={`/events/${event.id}`}
+							style={{ textDecoration: `none`, color: `inherit` }}
+						>
+							{event.eventImage.map((image) => (
+								<img
+									src={image.eventImage}
+									alt={`${event.name} event image`}
+									key={image.id}
+									width={300}
+									height={200}
+									className="carousel-image"
+								/>
+							))}
+							<div className="event-content">
+								<h3>{event.name}</h3>
+								<p>{event.description}</p>
+								<p>
+									Location: {event.venueInfo.address} {event.venueInfo.city},{" "}
+									{event.venueInfo.state}
+								</p>
+								<p>Belongs to: {event.groupInfo.name}</p>
+								<p>This event typically meets {event.type}</p>
+								<p>Start: {event.startDate}</p>
+								<p>End: {event.endDate}</p>
+							</div>
 
-						{sessionUser && sessionUser.profileImage && (
-							<>
-								<div>
-									<p>See where the events like to go:</p>
-									{event.venues &&
-										event.venues.map((venue) => (
-											<div id="venue-event" key={venue.id}>
-												{venue.address} {venue.city}, {venue.state}{" "}
-												{venue.zipCode}
-											</div>
-										))}
-								</div>
-								<div>
-									<p>
-										Meet the organizer: {event.organizer.firstName}{" "}
-										{event.organizer.lastName}
-									</p>
-									<p>Contact: {event.organizer.email}</p>
-									<p>Bio: {event.organizer.bio}</p>
-									{event.organizerInfo.profileImage && (
-										<img src={event.organizer.profileImage} alt="Organizer" />
-									)}
-								</div>
-							</>
-						)}
+							{sessionUser && sessionUser.profileImage && (
+								<>
+									<div>
+										<p>See where the events like to go:</p>
+										{event.venues &&
+											event.venues.map((venue) => (
+												<div id="venue-event" key={venue.id}>
+													{venue.address} {venue.city}, {venue.state}{" "}
+													{venue.zipCode}
+												</div>
+											))}
+									</div>
+									<div>
+										<p>
+											Meet the organizer: {event.organizer.firstName}{" "}
+											{event.organizer.lastName}
+										</p>
+										<p>Contact: {event.organizer.email}</p>
+										<p>Bio: {event.organizer.bio}</p>
+										{event.organizerInfo.profileImage && (
+											<img src={event.organizer.profileImage} alt="Organizer" />
+										)}
+									</div>
+								</>
+							)}
+						</Link>
+
 						<div id="carousel-navigation">
 							<button className="nav-button prev" onClick={handlePrevClick}>
 								◀
