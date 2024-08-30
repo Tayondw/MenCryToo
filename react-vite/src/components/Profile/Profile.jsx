@@ -181,7 +181,7 @@ const Profile = () => {
 									id="delete-group"
 									buttonText="Delete Profile"
 									style={{
-										backgroundColor: "#223f5c",
+										backgroundColor: "red",
 										color: `#dddddc`,
 										textDecoration: `none`,
 										borderRadius: `4px`,

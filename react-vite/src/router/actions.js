@@ -282,7 +282,9 @@ export const profileActions = async ({ request }) => {
 		errors.lastName = "Last name must be between 3 and 20 characters";
 	if (!bio.length || bio.length < 50 || bio.length > 500)
 		errors.bio = "Please enter at least 50 characters describing yourself";
-	if (!profileImage)
+
+	// Only require profileImage if the user does not already have one
+	if (intent === "create-profile" && !profileImage)
 		errors.profileImage = "Please add a profile image";
 	if (!userTags)
 		errors.userTags = "Please select 1 or more tags that fit your description";
@@ -291,10 +293,6 @@ export const profileActions = async ({ request }) => {
 		return errors;
 	}
 
-      console.log("data", data);
-      console.log(("intent", intent));
-      
-      
 	data.userId = +data.userId;
 
 	if (intent === "create-profile") {
@@ -306,10 +304,11 @@ export const profileActions = async ({ request }) => {
 	}
 
 	if (intent === "update-profile") {
-		return await fetch(`/api/users/${data.userId}/profile/update`, {
+		await fetch(`/api/users/${data.userId}/profile/update`, {
 			method: "POST",
 			body: formData,
 		});
+		return redirect("/profile");
 	}
 
 	if (intent === "add-tags") {

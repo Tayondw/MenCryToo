@@ -51,7 +51,7 @@ class UserForm(FlaskForm):
     )
     profileImage = FileField(
         "Profile Image",
-        validators=[FileRequired(), FileAllowed(list(ALLOWED_EXTENSIONS))],
+        validators=[FileAllowed(list(ALLOWED_EXTENSIONS))],
     )
     userTags = SelectMultipleField(
         "Tags",
