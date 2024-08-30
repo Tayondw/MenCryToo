@@ -1,5 +1,213 @@
+import { useLoaderData, Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import Footer from "../Footer";
+import OpenModalButton from "../OpenModalButton";
+import AddTag from "../Tags/AddTag";
+import "./Profile.css";
+
 const Profile = () => {
-	return null;
+	const sessionUser = useSelector((state) => state.session.user);
+	const { allProfiles } = useLoaderData();
+	const navigate = useNavigate();
+	const userProfile = allProfiles.users_profile.find(
+		(profile) => profile.id === sessionUser.id,
+	);
+	const userTags = userProfile.usersTags;
+	const userPosts = userProfile.posts;
+	const userGroups = userProfile.userMembership;
+	const userEvents = userProfile.userAttendances;
+
+	const [activeSection, setActiveSection] = useState("posts"); // State to track the active section
+
+	useEffect(() => {
+		if (!sessionUser || (sessionUser && !sessionUser.profileImage))
+			navigate("/");
+	}, [sessionUser, navigate]);
+
+	const renderContent = () => {
+		switch (activeSection) {
+			case "posts":
+				return userPosts.map((post) => (
+					<div
+						id="second-half-posts"
+						className="second-half-cards"
+						key={post.id}
+					>
+						<img src={post.image} alt={post.title} />
+						<div id="display-style-direction">
+							<div>
+								<h2>{post.title}</h2>
+								<h3>{post.caption}</h3>
+							</div>
+							<ul className="stats">
+								<li>
+									<var>{post.likes}</var>
+									<label>Likes</label>
+								</li>
+								<li>
+									<var>0</var>
+									<label>Comments</label>
+								</li>
+								<li>
+									<var>0</var>
+									<label>Shares</label>
+								</li>
+							</ul>
+						</div>
+					</div>
+				));
+			case "groups":
+				return userGroups.map((group) => (
+					<div
+						id="second-half-groups"
+						className="second-half-cards"
+						key={group.id}
+					>
+						<img src={group.groupImage[0].groupImage} alt={group.name} />
+						<div id="display-style-direction">
+							<div>
+								<h2>{group.name}</h2>
+								<h3>{group.about}</h3>
+							</div>
+							<ul className="stats">
+								<li>
+									<var>{group.numMembers}</var>
+									<label>Members</label>
+								</li>
+								<li>
+									<var>{group.events.length}</var>
+									<label>Events</label>
+								</li>
+								<li>
+									<var>{group.type}</var>
+									<label>Type</label>
+								</li>
+							</ul>
+						</div>
+					</div>
+				));
+			case "events":
+				return userEvents.map((event) => (
+					<div
+						id="second-half-events"
+						className="second-half-cards"
+						key={event.id}
+					>
+						<img src={event.eventImage[0].eventImage} alt={event.name} />
+						<div id="display-style-direction">
+							<div>
+								<h2>{event.name}</h2>
+								<h3>{event.description}</h3>
+							</div>
+							<ul className="stats">
+								<li>
+									<var>{event.numAttendees}</var>
+									<label>Attendees</label>
+								</li>
+								<li>
+									<var>{event.capacity}</var>
+									<label>Capacity</label>
+								</li>
+								<li>
+									<var>{event.type}</var>
+									<label>Type</label>
+								</li>
+								<li>
+									<var>{new Date(event.startDate).toLocaleString()}</var>
+									<label>Start Date</label>
+								</li>
+								<li>
+									<var>{new Date(event.endDate).toLocaleString()}</var>
+									<label>End Date</label>
+								</li>
+							</ul>
+						</div>
+					</div>
+				));
+			default:
+				return null;
+		}
+	};
+
+	return (
+		<div id="user-profile-page">
+			<div id="user-profile-basic">
+				<div id="user-profile-img-wdetails">
+					<div id="user-profile-image">
+						<img src={userProfile.profileImage} alt={userProfile.username} />
+					</div>
+					<div>
+						<div id="user-profile-details">
+							<h5>{userProfile.username}</h5>
+							<h4>First Name: {userProfile.firstName}</h4>
+							<h4>Last Name: {userProfile.lastName}</h4>
+							<h4>Email: {userProfile.email}</h4>
+						</div>
+						<div id="profile-home-edit-profile">
+							<Link to={`/users/${sessionUser.id}/profile/update`}>
+								<button id="profile-home-edit-profile-button">
+									Edit Profile
+								</button>
+							</Link>
+						</div>
+					</div>
+				</div>
+				<div id="second-half-profile">
+					<div id="left-second-half">
+						<div className="second-half-headers">
+							<h1 onClick={() => setActiveSection("posts")}>POSTS</h1>
+							<h1 onClick={() => setActiveSection("groups")}>GROUPS</h1>
+							<h1 onClick={() => setActiveSection("events")}>EVENTS</h1>
+						</div>
+						<div id="left-second-half-content">{renderContent()}</div>
+					</div>
+					<div id="right-second-half">
+						<div className="second-half-headers">
+							<h1>TAGS</h1>
+							<h1>SIMILAR TO YOU</h1>
+						</div>
+						<div id="right-second-half-content">
+							<div id="user-profile-tags">
+								<div id="users-tags-grid">
+									<div id="users-tags" className="div-block-2">
+										<h1 id="user-tags-header">Here are your tags</h1>
+										{userTags.map((tag) => (
+											<div id="each-tag" key={tag.id}>
+												<Link
+													to={`/tags/${tag.id}/${tag.name}`}
+													className="w-button"
+													id="each-profile-tag"
+												>
+													{tag.name}
+												</Link>
+											</div>
+										))}
+									</div>
+									<div id="add-tags-div" className="div-block-2">
+										<h1>You can add more tags too!</h1>
+										<div id="add-tags-button">
+											<OpenModalButton
+												buttonText="Add Tags"
+												className="w-button"
+												modalComponent={<AddTag />}
+											/>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div id="become-a-partner-userprofile">
+								<h1>
+									SOON YOU CAN BECOME A PARTNER - WE WILL RENDER THIS LATER
+								</h1>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<Footer />
+		</div>
+	);
 };
 
 export default Profile;

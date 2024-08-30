@@ -1,0 +1,139 @@
+#user-profile-page {
+	background: linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c);
+}
+
+#user-profile-img-wdetails {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 150px;
+      padding-top: 120px;
+}
+
+#second-half-profile {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      margin: 50px;
+      padding: 50px;
+      gap: 50px;
+}
+
+.second-half-headers {
+      display: flex;
+      justify-content: space-evenly;
+      cursor: pointer;
+}
+
+.second-half-headers > h1:hover {
+      color: #ea8d89;
+}
+
+#left-second-half {
+      grid-column: 1 / 2;
+}
+
+#left-second-half-content {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	gap: 25px;
+	margin: 0;
+	height: 100%;
+	color: #223f5c;
+}
+
+.second-half-cards {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	max-width: 750px;
+	padding: 50px 30px 50px 20px;
+	background: #dddddc;
+	border-radius: 60px;
+}
+
+.second-half-cards img {
+	max-width: 280px;
+	width: 32vw;
+	height: 270px;
+	object-fit: cover;
+	margin-left: -60px;
+	margin-right: 40px;
+	border-radius: inherit;
+}
+
+.second-half-cards div h2,
+.second-half-cards div h3 {
+	font-weight: 400;
+}
+
+.second-half-cards div h3,
+.stats label {
+	opacity: 0.5;
+}
+
+.second-half-cards div h2 {
+	font-size: 28px;
+	margin: 0;
+}
+
+.second-half-cards div h3 {
+	font-size: 16px;
+	margin: 0 0 20px;
+}
+
+.second-half-cards .stats {
+	display: flex;
+	gap: 24px;
+	list-style: none;
+	margin: 0 0 24px;
+	padding: 0;
+	align-items: flex-end;
+}
+
+.second-half-cards .stats var {
+	display: flex;
+	font-style: normal;
+	font-size: 15px;
+      align-items: center;
+      justify-content: center;
+}
+
+#right-second-half {
+      /* display: flex; */
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 50px;
+      /* margin-right: 150px; */
+      /* grid-column: 1 / 2; */
+}
+
+#user-profile-tags {
+      margin-bottom: 50px;
+}
+
+@media (width <= 720px) {
+	.second-half-cards {
+		margin: 0 40px;
+		padding-left: 50px;
+		padding-right: 50px;
+		width: 100%;
+		text-align: center;
+		flex-direction: column;
+	}
+
+	.second-half-cards div h2 {
+		font-size: 30px;
+	}
+
+	.second-half-cards img {
+		max-width: 1000px;
+		width: 100%;
+		margin: -100px 0 30px 0;
+	}
+
+	.second-half-cards .stats var {
+		min-width: 90px;
+	}
+}

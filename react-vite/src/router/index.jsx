@@ -2,7 +2,6 @@ import { createBrowserRouter } from "react-router-dom";
 import LoginFormPage from "../components/LoginFormPage";
 import SignupFormPage from "../components/SignupFormPage";
 import Home from "../components/Home";
-// import NotAuthHome from "../components/Home/NotAuthHome";
 import Groups from "../components/Groups";
 import GroupDetails from "../components/Groups/Details";
 import CreateGroup from "../components/Groups/CRUD/Create";
@@ -190,12 +189,29 @@ export const router = createBrowserRouter([
 				element: <SignupFormPage />,
 				action: eventAttendeeActions,
 			},
-			// ! PROFILE
+                  // ! PROFILE
+                  // ? your profile only you can access
 			{
 				path: "profile",
 				loader: getLoader,
 				element: <Profile />,
 			},
+			{
+				path: "users/:userId/profile/create",
+				loader: userDetailsLoader,
+				element: <Profile />,
+                  },
+			{
+				path: "users/:userId/profile/update",
+				loader: userDetailsLoader,
+				element: <Profile />,
+                  },
+			{
+				path: "users/:userId/profile/delete",
+				loader: userDetailsLoader,
+				element: <Profile />,
+                  },
+                  // ? other users profiles when you click on their profile
 			{
 				path: "users/:userId",
 				loader: userDetailsLoader,

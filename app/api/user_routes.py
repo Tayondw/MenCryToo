@@ -66,7 +66,7 @@ def view_all_profiles():
     })
 
 
-@user_routes.route("/<int:userId>/profile/create", methods=["GET", "POST"])
+@user_routes.route("/<int:userId>/profile/create", methods=["POST"])
 @login_required
 def create_profile(userId):
     """
@@ -147,7 +147,7 @@ def create_profile(userId):
     return form.errors, 400
 
 
-@user_routes.route("/<int:userId>/profile/update", methods=["GET", "POST"])
+@user_routes.route("/<int:userId>/profile/update", methods=["POST"])
 @login_required
 def update_profile(userId):
     """

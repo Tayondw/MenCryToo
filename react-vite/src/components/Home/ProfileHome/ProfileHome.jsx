@@ -55,11 +55,11 @@ const ProfileHome = () => {
 			currentEventIndex < userEvents.length - 1 ? currentEventIndex + 1 : 0,
 		);
 	};
-	console.log("users tags", userTags);
+	// console.log("users tags", userTags);
 
-	console.log("user profile", userProfile);
+	// console.log("user profile", userProfile);
 
-	console.log("profiles", allProfiles);
+	// console.log("profiles", allProfiles);
 
 	return (
 		<div id="profile-home">
@@ -85,27 +85,6 @@ const ProfileHome = () => {
 								<OpenModalButton
                                                       buttonText="Add Tags"
                                                       className="w-button"
-									// style={{
-									// 	background: `#e08f2c`,
-									// 	width: `170px`,
-									// 	cursor: `pointer`,
-									// 	borderRadius: `4px`,
-									// 	color: `#fff`,
-									// 	textAlign: `center`,
-									// 	letterSpacing: `2px`,
-									// 	textTransform: `uppercase`,
-									// 	marginLeft: `10px`,
-									// 	marginRight: `10px`,
-									// 	padding: `12px 30px`,
-									// 	fontSize: `16px`,
-									// 	fontWeight: 600,
-									// 	lineHeight: `21px`,
-									// 	textDecoration: `none`,
-									// 	transition: `background-color 0.3s`,
-									// 	display: `inline-block`,
-                                                      //       border: 0,
-                                                      //       font: `Open Sans, sans-serif`
-									// }}
 									modalComponent={<AddTag />}
 								/>
 							</div>
