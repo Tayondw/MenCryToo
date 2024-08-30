@@ -30,101 +30,120 @@ const Profile = () => {
 		switch (activeSection) {
 			case "posts":
 				return userPosts.map((post) => (
-					<div
-						id="second-half-posts"
-						className="second-half-cards"
+					<Link
 						key={post.id}
+						to={`/posts/${post.id}`}
+						style={{ textDecoration: `none`, color: `inherit` }}
 					>
-						<img src={post.image} alt={post.title} />
-						<div id="display-style-direction">
-							<div>
-								<h2>{post.title}</h2>
-								<h3>{post.caption}</h3>
+						<div
+							id="second-half-posts"
+							className="second-half-cards"
+							// key={post.id}
+						>
+							<img src={post.image} alt={post.title} />
+							<div id="display-style-direction">
+								<div>
+									<h2>{post.title}</h2>
+									<h3>{post.caption}</h3>
+								</div>
+								<ul className="stats">
+									<li>
+										<var>{post.likes}</var>
+										<label>Likes</label>
+									</li>
+									<li>
+										<var>0</var>
+										<label>Comments</label>
+									</li>
+									<li>
+										<var>0</var>
+										<label>Shares</label>
+									</li>
+								</ul>
 							</div>
-							<ul className="stats">
-								<li>
-									<var>{post.likes}</var>
-									<label>Likes</label>
-								</li>
-								<li>
-									<var>0</var>
-									<label>Comments</label>
-								</li>
-								<li>
-									<var>0</var>
-									<label>Shares</label>
-								</li>
-							</ul>
 						</div>
-					</div>
+					</Link>
 				));
 			case "groups":
 				return userGroups.map((group) => (
-					<div
-						id="second-half-groups"
-						className="second-half-cards"
+					<Link
+						to={`/groups/${group.id}`}
 						key={group.id}
+						style={{ textDecoration: `none`, color: `inherit` }}
 					>
-						<img src={group.groupImage[0].groupImage} alt={group.name} />
-						<div id="display-style-direction">
-							<div>
-								<h2>{group.name}</h2>
-								<h3>{group.about}</h3>
+						<div
+							id="second-half-groups"
+							className="second-half-cards"
+
+							// key={group.id}
+						>
+							<img src={group.groupImage[0].groupImage} alt={group.name} />
+							<div id="display-style-direction">
+								<div>
+									<h2>{group.name}</h2>
+									<h3>{group.about}</h3>
+								</div>
+								<ul className="stats">
+									<li>
+										<var>{group.numMembers}</var>
+										<label>Members</label>
+									</li>
+									<li>
+										<var>{group.events.length}</var>
+										<label>Events</label>
+									</li>
+									<li>
+										<var>{group.type}</var>
+										<label>Type</label>
+									</li>
+								</ul>
 							</div>
-							<ul className="stats">
-								<li>
-									<var>{group.numMembers}</var>
-									<label>Members</label>
-								</li>
-								<li>
-									<var>{group.events.length}</var>
-									<label>Events</label>
-								</li>
-								<li>
-									<var>{group.type}</var>
-									<label>Type</label>
-								</li>
-							</ul>
 						</div>
-					</div>
+					</Link>
 				));
 			case "events":
 				return userEvents.map((event) => (
-					<div
-						id="second-half-events"
-						className="second-half-cards"
+					<Link
 						key={event.id}
+						to={`/events/${event.id}`}
+						style={{ textDecoration: `none`, color: `inherit` }}
 					>
-						<img src={event.eventImage[0].eventImage} alt={event.name} />
-						<div id="display-style-direction">
-							<div>
-								<h2>{event.name}</h2>
-								<h3>{event.description}</h3>
+						<div
+							id="second-half-events"
+							className="second-half-cards"
+							key={event.id}
+						>
+							<img src={event.eventImage[0].eventImage} alt={event.name} />
+							<div id="display-style-direction">
+								<div>
+									<h2>{event.name}</h2>
+									<h3>{event.description}</h3>
+								</div>
+								<ul className="stats">
+									<li>
+										<var>{event.numAttendees}</var>
+										<label>Attendees</label>
+									</li>
+									<li>
+										<var>{event.capacity}</var>
+										<label>Capacity</label>
+									</li>
+									<li>
+										<var>{event.type}</var>
+										<label>Type</label>
+									</li>
+									<li>
+										<var>{new Date(event.startDate).toLocaleString()}</var>
+										<label>Start Date</label>
+									</li>
+									<li>
+										<var>{new Date(event.endDate).toLocaleString()}</var>
+										<label>End Date</label>
+									</li>
+								</ul>
 							</div>
-							<ul className="stats">
-								<li>
-									<var>{event.numAttendees}</var>
-									<label>Attendees</label>
-								</li>
-								<li>
-									<var>{event.capacity}</var>
-									<label>Capacity</label>
-								</li>
-								<li>
-									<var>{event.type}</var>
-									<label>Type</label>
-								</li>
-								<li>
-									<var>{new Date(event.startDate).toLocaleString()}</var>
-									<label>Start Date</label>
-								</li>
-								<li>
-									<var>{new Date(event.endDate).toLocaleString()}</var>
-									<label>End Date</label>
-								</li>
-							</ul>
 						</div>
-					</div>
+					</Link>
 				));
 			default:
 				return null;
