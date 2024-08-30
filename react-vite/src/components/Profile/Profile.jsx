@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import Footer from "../Footer";
 import OpenModalButton from "../OpenModalButton";
 import AddTag from "../Tags/AddTag";
+import DeleteProfile from "./CRUD/Delete";
 import "./Profile.css";
 
 const Profile = () => {
@@ -150,6 +151,37 @@ const Profile = () => {
 									Edit Profile
 								</button>
 							</Link>
+							<div id="crud-buttons-delete">
+								<OpenModalButton
+									userProfile={userProfile}
+									navigate={navigate}
+									className="group-delete-button"
+									id="delete-group"
+									buttonText="Delete Profile"
+									style={{
+										backgroundColor: "#223f5c",
+										color: `#dddddc`,
+										textDecoration: `none`,
+										borderRadius: `4px`,
+										border: `none`,
+										padding: `12px 30px`,
+										lineHeight: 1,
+										cursor: `pointer`,
+										textTransform: `uppercase`,
+										boxSizing: `border-box`,
+										transition: `background-color 0.3s`,
+										fontSize: `12px`,
+										fontWeight: 600,
+										letterSpacing: `2px`,
+									}}
+									modalComponent={
+										<DeleteProfile
+											userProfile={userProfile}
+											navigate={navigate}
+										/>
+									}
+								/>
+							</div>
 						</div>
 					</div>
 				</div>
