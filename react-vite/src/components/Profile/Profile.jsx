@@ -29,122 +29,125 @@ const Profile = () => {
 	const renderContent = () => {
 		switch (activeSection) {
 			case "posts":
-				return userPosts.map((post) => (
-					<Link
-						key={post.id}
-						to={`/posts/${post.id}`}
-						style={{ textDecoration: `none`, color: `inherit` }}
-					>
-						<div
-							id="second-half-posts"
-							className="second-half-cards"
-							// key={post.id}
+				return userPosts.length > 0 ? (
+					userPosts.map((post) => (
+						<Link
+							key={post.id}
+							to={`/posts/${post.id}`}
+							style={{ textDecoration: `none`, color: `inherit` }}
 						>
-							<img src={post.image} alt={post.title} />
-							<div id="display-style-direction">
-								<div>
-									<h2>{post.title}</h2>
-									<h3>{post.caption}</h3>
+							<div id="second-half-posts" className="second-half-cards">
+								<img src={post.image} alt={post.title} />
+								<div id="display-style-direction">
+									<div>
+										<h2>{post.title}</h2>
+										<h3>{post.caption}</h3>
+									</div>
+									<ul className="stats">
+										<li>
+											<var>{post.likes}</var>
+											<label>Likes</label>
+										</li>
+										<li>
+											<var>0</var>
+											<label>Comments</label>
+										</li>
+										<li>
+											<var>0</var>
+											<label>Shares</label>
+										</li>
+									</ul>
 								</div>
-								<ul className="stats">
-									<li>
-										<var>{post.likes}</var>
-										<label>Likes</label>
-									</li>
-									<li>
-										<var>0</var>
-										<label>Comments</label>
-									</li>
-									<li>
-										<var>0</var>
-										<label>Shares</label>
-									</li>
-								</ul>
 							</div>
-						</div>
-					</Link>
-				));
+						</Link>
+					))
+				) : (
+					<p>
+						Currently no posts available. You will see something after you make a post
+					</p>
+				);
 			case "groups":
-				return userGroups.map((group) => (
-					<Link
-						to={`/groups/${group.id}`}
-						key={group.id}
-						style={{ textDecoration: `none`, color: `inherit` }}
-					>
-						<div
-							id="second-half-groups"
-							className="second-half-cards"
-
-							// key={group.id}
+				return userGroups.length > 0 ? (
+					userGroups.map((group) => (
+						<Link
+							to={`/groups/${group.id}`}
+							key={group.id}
+							style={{ textDecoration: `none`, color: `inherit` }}
 						>
-							<img src={group.groupImage[0].groupImage} alt={group.name} />
-							<div id="display-style-direction">
-								<div>
-									<h2>{group.name}</h2>
-									<h3>{group.about}</h3>
+							<div id="second-half-groups" className="second-half-cards">
+								<img src={group.groupImage[0].groupImage} alt={group.name} />
+								<div id="display-style-direction">
+									<div>
+										<h2>{group.name}</h2>
+										<h3>{group.about}</h3>
+									</div>
+									<ul className="stats">
+										<li>
+											<var>{group.numMembers}</var>
+											<label>Members</label>
+										</li>
+										<li>
+											<var>{group.events.length}</var>
+											<label>Events</label>
+										</li>
+										<li>
+											<var>{group.type}</var>
+											<label>Type</label>
+										</li>
+									</ul>
 								</div>
-								<ul className="stats">
-									<li>
-										<var>{group.numMembers}</var>
-										<label>Members</label>
-									</li>
-									<li>
-										<var>{group.events.length}</var>
-										<label>Events</label>
-									</li>
-									<li>
-										<var>{group.type}</var>
-										<label>Type</label>
-									</li>
-								</ul>
 							</div>
-						</div>
-					</Link>
-				));
+						</Link>
+					))
+				) : (
+					<p>
+						Currently no groups available. You will see something after you join a group
+					</p>
+				);
 			case "events":
-				return userEvents.map((event) => (
-					<Link
-						key={event.id}
-						to={`/events/${event.id}`}
-						style={{ textDecoration: `none`, color: `inherit` }}
-					>
-						<div
-							id="second-half-events"
-							className="second-half-cards"
+				return userEvents.length > 0 ? (
+					userEvents.map((event) => (
+						<Link
 							key={event.id}
+							to={`/events/${event.id}`}
+							style={{ textDecoration: `none`, color: `inherit` }}
 						>
-							<img src={event.eventImage[0].eventImage} alt={event.name} />
-							<div id="display-style-direction">
-								<div>
-									<h2>{event.name}</h2>
-									<h3>{event.description}</h3>
+							<div id="second-half-events" className="second-half-cards">
+								<img src={event.eventImage[0].eventImage} alt={event.name} />
+								<div id="display-style-direction">
+									<div>
+										<h2>{event.name}</h2>
+										<h3>{event.description}</h3>
+									</div>
+									<ul className="stats">
+										<li>
+											<var>{event.numAttendees}</var>
+											<label>Attendees</label>
+										</li>
+										<li>
+											<var>{event.capacity}</var>
+											<label>Capacity</label>
+										</li>
+										<li>
+											<var>{event.type}</var>
+											<label>Type</label>
+										</li>
+										<li>
+											<var>{new Date(event.startDate).toLocaleString()}</var>
+											<label>Start Date</label>
+										</li>
+										<li>
+											<var>{new Date(event.endDate).toLocaleString()}</var>
+											<label>End Date</label>
+										</li>
+									</ul>
 								</div>
-								<ul className="stats">
-									<li>
-										<var>{event.numAttendees}</var>
-										<label>Attendees</label>
-									</li>
-									<li>
-										<var>{event.capacity}</var>
-										<label>Capacity</label>
-									</li>
-									<li>
-										<var>{event.type}</var>
-										<label>Type</label>
-									</li>
-									<li>
-										<var>{new Date(event.startDate).toLocaleString()}</var>
-										<label>Start Date</label>
-									</li>
-									<li>
-										<var>{new Date(event.endDate).toLocaleString()}</var>
-										<label>End Date</label>
-									</li>
-								</ul>
 							</div>
-						</div>
-					</Link>
-				));
+						</Link>
+					))
+				) : (
+					<p>Currently no events available. You will see something after you add an event</p>
+				);
 			default:
 				return null;
 		}

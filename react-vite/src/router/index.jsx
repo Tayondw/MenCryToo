@@ -13,6 +13,8 @@ import CreateEvent from "../components/Events/CRUD/Create";
 import UpdateEvent from "../components/Events/CRUD/Update";
 import Profile from "../components/Profile";
 import ProfileDetails from "../components/Profile/Details";
+import CreateProfile from "../components/Profile/CRUD/Create";
+import UpdateProfile from "../components/Profile/CRUD/Update";
 import Posts from "../components/Posts";
 import PostDetails from "../components/Posts/Details";
 import Comments from "../components/Comments";
@@ -173,7 +175,7 @@ export const router = createBrowserRouter([
 			{
 				path: "events/:eventId/images/:imageId/edit",
 				loader: eventDetailsLoader,
-				element: <EventDetails/>,
+				element: <EventDetails />,
 				action: eventImageActions,
 			},
 			// ! EVENT - ATTENDANCES
@@ -189,8 +191,8 @@ export const router = createBrowserRouter([
 				element: <SignupFormPage />,
 				action: eventAttendeeActions,
 			},
-                  // ! PROFILE
-                  // ? your profile only you can access
+			// ! PROFILE
+			// ? your profile only you can access
 			{
 				path: "profile",
 				loader: getLoader,
@@ -199,19 +201,22 @@ export const router = createBrowserRouter([
 			{
 				path: "users/:userId/profile/create",
 				loader: userDetailsLoader,
-				element: <Profile />,
-                  },
+				element: <CreateProfile />,
+				action: profileActions,
+			},
 			{
 				path: "users/:userId/profile/update",
 				loader: userDetailsLoader,
-				element: <Profile />,
-                  },
+				element: <UpdateProfile />,
+				action: profileActions,
+			},
 			{
 				path: "users/:userId/profile/delete",
 				loader: userDetailsLoader,
 				element: <Profile />,
-                  },
-                  // ? other users profiles when you click on their profile
+				action: profileActions,
+			},
+			// ? other users profiles when you click on their profile
 			{
 				path: "users/:userId",
 				loader: userDetailsLoader,

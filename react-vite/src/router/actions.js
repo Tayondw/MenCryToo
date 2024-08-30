@@ -76,8 +76,8 @@ export const groupImageActions = async ({ request }) => {
 		await fetch(`/api/groups/${data.id}/images/${data.imageId}/edit`, {
 			method: "POST",
 			body: formData,
-            });
-            return redirect(`/groups/${data.id}`);
+		});
+		return redirect(`/groups/${data.id}`);
 	}
 
 	if (intent === "delete-group-image") {
@@ -166,12 +166,10 @@ export const eventImageActions = async ({ request }) => {
 	const data = Object.fromEntries(formData);
 	const intent = formData.get("intent");
 	data.eventId = +data.eventId;
-      data.imageId = +data.imageId;
-      
-      console.log("data", data);
-      console.log("intent", intent);
-      
-      
+	data.imageId = +data.imageId;
+
+	console.log("data", data);
+	console.log("intent", intent);
 
 	if (intent === "add-event-image") {
 		await fetch(`/api/events/${data.eventId}/images`, {
@@ -268,27 +266,54 @@ export const eventAttendeeActions = async ({ request }) => {
 };
 
 export const profileActions = async ({ request }) => {
-	let formData = await request.formData();
-	let data = Object.fromEntries(formData);
-	let intent = formData.get("intent");
-	data.id = +data.id;
+	const formData = await request.formData();
+	const data = Object.fromEntries(formData);
+	const intent = formData.get("intent");
+	const firstName = formData.get("firstName");
+	const lastName = formData.get("lastName");
+	const bio = formData.get("bio");
+	const profileImage = formData.get("profileImage");
+	const userTags = formData.get("userTags");
+	const errors = {};
+
+	if (!firstName.length || firstName.length < 3 || firstName.length > 20)
+		errors.firstName = "First name must be between 3 and 20 characters";
+	if (!lastName.length || lastName.length < 3 || lastName.length > 20)
+		errors.lastName = "Last name must be between 3 and 20 characters";
+	if (!bio.length || bio.length < 50 || bio.length > 500)
+		errors.bio = "Please enter at least 50 characters describing yourself";
+	if (!profileImage)
+		errors.profileImage = "Please add a profile image";
+	if (!userTags)
+		errors.userTags = "Please select 1 or more tags that fit your description";
+
+	if (Object.keys(errors).length) {
+		return errors;
+	}
+
+      console.log("data", data);
+      console.log(("intent", intent));
+      
+      
+	data.userId = +data.userId;
 
 	if (intent === "create-profile") {
-		return await fetch(`/api/users/${data.id}/profile/create`, {
+		await fetch(`/api/users/${data.userId}/profile/create`, {
 			method: "POST",
 			body: formData,
 		});
+		return redirect("/");
 	}
 
 	if (intent === "update-profile") {
-		return await fetch(`/api/users/${data.id}/profile/update`, {
+		return await fetch(`/api/users/${data.userId}/profile/update`, {
 			method: "POST",
 			body: formData,
 		});
 	}
 
 	if (intent === "add-tags") {
-		return await fetch(`/api/users/${data.id}/add-tags`, {
+		return await fetch(`/api/users/${data.userId}/add-tags`, {
 			method: "POST",
 			body: formData,
 		});

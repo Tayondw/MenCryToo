@@ -20,7 +20,7 @@ tags = [
 
 
 class UserForm(FlaskForm):
-    first_name = StringField(
+    firstName = StringField(
         "first name",
         validators=[
             DataRequired(),
@@ -29,7 +29,7 @@ class UserForm(FlaskForm):
             ),
         ],
     )
-    last_name = StringField(
+    lastName = StringField(
         "last name",
         validators=[
             DataRequired(),
@@ -49,11 +49,11 @@ class UserForm(FlaskForm):
             ),
         ],
     )
-    profile_image = FileField(
+    profileImage = FileField(
         "Profile Image",
         validators=[FileRequired(), FileAllowed(list(ALLOWED_EXTENSIONS))],
     )
-    user_tags = SelectMultipleField(
+    userTags = SelectMultipleField(
         "Tags",
         choices=tags,
         validators=[DataRequired()],

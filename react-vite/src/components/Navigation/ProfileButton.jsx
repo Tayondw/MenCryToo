@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { thunkLogout } from "../../redux/session";
 import OpenModalMenuItem from "./OpenModalMenuItem";
 import LoginFormModal from "../LoginFormModal";
@@ -11,9 +11,10 @@ import "./Navigation.css";
 
 function ProfileButton({ user, navigate }) {
 	const dispatch = useDispatch();
+	const sessionUser = useSelector((state) => state.session.user);
 	const [showMenu, setShowMenu] = useState(false);
 	const ulRef = useRef();
-	
+
 	const toggleMenu = (e) => {
 		e.stopPropagation(); // Keep from bubbling up to document and triggering closeMenu
 		setShowMenu(!showMenu);
@@ -67,77 +68,115 @@ function ProfileButton({ user, navigate }) {
 									border: `1px solid #D9ECF2`,
 								}}
 							/>
-							<div id="options-modal">
-								<OpenModalButton
-									className="logout"
-									buttonText="Profile"
-									onButtonClick={() => {
-										closeMenu();
-										navigate("/profile");
-									}}
-									style={{
-										color: `#223f5c`,
-										backgroundColor: `#FAF5E4`,
-									}}
-								/>
-								<OpenModalButton
-									className="logout"
-									buttonText="Posts Feed"
-									onButtonClick={() => {
-										closeMenu();
-										navigate("/posts-feed");
-									}}
-									style={{
-										color: `#223f5c`,
-										backgroundColor: `#FAF5E4`,
-									}}
-								/>
-								<OpenModalButton
-									className="logout"
-									buttonText="Similar To You"
-									onButtonClick={() => {
-										closeMenu();
-										navigate("/profile-feed");
-									}}
-									style={{
-										color: `#223f5c`,
-										backgroundColor: `#FAF5E4`,
-									}}
-								/>
-								<OpenModalButton
-									className="logout"
-									buttonText="View Groups"
-									onButtonClick={() => {
-										closeMenu();
-										navigate("/groups");
-									}}
-									style={{
-										color: `#223f5c`,
-										backgroundColor: `#FAF5E4`,
-									}}
-								/>
-								<OpenModalButton
-									className="logout"
-									buttonText="View Events"
-									onButtonClick={() => {
-										closeMenu();
-										navigate("/events");
-									}}
-									style={{
-										color: `#223f5c`,
-										backgroundColor: `#FAF5E4`,
-									}}
-								/>
-								<OpenModalButton
-									className="logout"
-									buttonText="Log Out"
-									onButtonClick={logout}
-									style={{
-										color: `#223f5c`,
-										backgroundColor: `#FAF5E4`,
-									}}
-								/>
-							</div>
+							{!sessionUser || (sessionUser && !sessionUser.profileImage) ? (
+								<div id="options-modal">
+									<OpenModalButton
+										className="logout"
+										buttonText="View Groups"
+										onButtonClick={() => {
+											closeMenu();
+											navigate("/groups");
+										}}
+										style={{
+											color: `#223f5c`,
+											backgroundColor: `#FAF5E4`,
+										}}
+									/>
+									<OpenModalButton
+										className="logout"
+										buttonText="View Events"
+										onButtonClick={() => {
+											closeMenu();
+											navigate("/events");
+										}}
+										style={{
+											color: `#223f5c`,
+											backgroundColor: `#FAF5E4`,
+										}}
+									/>
+									<OpenModalButton
+										className="logout"
+										buttonText="Log Out"
+										onButtonClick={logout}
+										style={{
+											color: `#223f5c`,
+											backgroundColor: `#FAF5E4`,
+										}}
+									/>
+								</div>
+							) : (
+								<div id="options-modal">
+									<OpenModalButton
+										className="logout"
+										buttonText="Profile"
+										onButtonClick={() => {
+											closeMenu();
+											navigate("/profile");
+										}}
+										style={{
+											color: `#223f5c`,
+											backgroundColor: `#FAF5E4`,
+										}}
+									/>
+									<OpenModalButton
+										className="logout"
+										buttonText="Posts Feed"
+										onButtonClick={() => {
+											closeMenu();
+											navigate("/posts-feed");
+										}}
+										style={{
+											color: `#223f5c`,
+											backgroundColor: `#FAF5E4`,
+										}}
+									/>
+									<OpenModalButton
+										className="logout"
+										buttonText="Similar To You"
+										onButtonClick={() => {
+											closeMenu();
+											navigate("/profile-feed");
+										}}
+										style={{
+											color: `#223f5c`,
+											backgroundColor: `#FAF5E4`,
+										}}
+									/>
+									<OpenModalButton
+										className="logout"
+										buttonText="View Groups"
+										onButtonClick={() => {
+											closeMenu();
+											navigate("/groups");
+										}}
+										style={{
+											color: `#223f5c`,
+											backgroundColor: `#FAF5E4`,
+										}}
+									/>
+									<OpenModalButton
+										className="logout"
+										buttonText="View Events"
+										onButtonClick={() => {
+											closeMenu();
+											navigate("/events");
+										}}
+										style={{
+											color: `#223f5c`,
+											backgroundColor: `#FAF5E4`,
+										}}
+									/>
+									<OpenModalButton
+										className="logout"
+										buttonText="Log Out"
+										onButtonClick={logout}
+										style={{
+											color: `#223f5c`,
+											backgroundColor: `#FAF5E4`,
+										}}
+									/>
+								</div>
+							)}
 						</div>
 					</div>
 				</div>

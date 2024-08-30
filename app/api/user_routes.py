@@ -95,7 +95,7 @@ def create_profile(userId):
     form["csrf_token"].data = request.cookies["csrf_token"]
 
     if form.validate_on_submit():
-        profile_image = form.profile_image.data
+        profile_image = form.profileImage.data
 
         if not profile_image:
             return {"message": "An image is required to create a profile."}, 400
@@ -116,13 +116,13 @@ def create_profile(userId):
         url = upload["url"]
 
         # Update the existing user with profile details
-        user.first_name = form.data["first_name"]
-        user.last_name = form.data["last_name"]
+        user.first_name = form.data["firstName"]
+        user.last_name = form.data["lastName"]
         user.bio = form.data["bio"]
         user.profile_image_url = url
 
         # Update the user's tags
-        selected_tags = form.user_tags.data  # This returns a list of selected tags
+        selected_tags = form.userTags.data  # This returns a list of selected tags
         tags_to_add = Tag.query.filter(Tag.name.in_(selected_tags)).all()
         user.users_tags = tags_to_add
 
