@@ -12,7 +12,9 @@ function SignupFormModal() {
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [errors, setErrors] = useState({});
-	const { closeModal } = useModal();
+      const { closeModal } = useModal();
+      
+      const isDisabled = username.length < 3 || password.length < 8;
 
 	useEffect(() => {
 		dispatch(thunkAuthenticate());
@@ -93,55 +95,68 @@ function SignupFormModal() {
 	};
 
 	return (
-		<>
-			<h1>Sign Up</h1>
+		<div className="signup-body">
 			{errors.server && <p className="error">{errors.server}</p>}
-			<form onSubmit={handleSubmit}>
-				<label>
-					Email
-					<input
-						type="text"
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
-						required
-					/>
-				</label>
-				{errors.email && <p className="error">{errors.email}</p>}
-				<label>
-					Username
-					<input
-						type="text"
-						value={username}
-						onChange={(e) => setUsername(e.target.value)}
-						required
-					/>
-				</label>
-				{errors.username && <p className="error">{errors.username}</p>}
-				<label>
-					Password
-					<input
-						type="password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						required
-					/>
-				</label>
-				{errors.password && <p className="error">{errors.password}</p>}
-				<label>
-					Confirm Password
-					<input
-						type="password"
-						value={confirmPassword}
-						onChange={(e) => setConfirmPassword(e.target.value)}
-						required
-					/>
-				</label>
-				{errors.confirmPassword && (
-					<p className="error">{errors.confirmPassword}</p>
-				)}
-				<button type="submit">Sign Up</button>
-			</form>
-		</>
+			<div className="login">
+				<form className="form-signup" onSubmit={handleSubmit}>
+					<h1>Sign Up</h1>
+					<label>
+						Email
+						<input
+							type="text"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+							placeholder="Email"
+							required
+						/>
+					</label>
+					{errors.email && <p className="error">{errors.email}</p>}
+					<label>
+						Username
+						<input
+							type="text"
+							value={username}
+							onChange={(e) => setUsername(e.target.value)}
+							placeholder="Username"
+							required
+						/>
+					</label>
+					{errors.username && <p className="error">{errors.username}</p>}
+					<label>
+						Password
+						<input
+							type="password"
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+							placeholder="Password"
+							required
+						/>
+					</label>
+					{errors.password && <p className="error">{errors.password}</p>}
+					<label>
+						Confirm Password
+						<input
+							type="password"
+							value={confirmPassword}
+							onChange={(e) => setConfirmPassword(e.target.value)}
+							placeholder="Confirm Password"
+							required
+						/>
+					</label>
+					{errors.confirmPassword && (
+						<p className="error">{errors.confirmPassword}</p>
+					)}
+					<button
+						className="signup"
+						disabled={isDisabled}
+						style={{ cursor: isDisabled ? "not-allowed" : "pointer" }}
+						type="submit"
+					>
+						Sign Up
+					</button>
+				</form>
+			</div>
+		</div>
 	);
 }
 
