@@ -5,6 +5,19 @@
 	justify-content: center;
 } */
 
+#groups-body {
+     background: linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c); 
+}
+
+.create-group-link {
+      padding: 30px;
+}
+
+#groups-body-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+}
 
 #groups {
       display: flex;
@@ -13,7 +26,7 @@
       justify-content: center;
       margin: 0;
       /* height: 100vh; */
-      background: linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c);
+      
       padding-bottom: 150px;
       padding-top: 50px;
       flex-wrap: wrap;
@@ -102,6 +115,19 @@
 	.cards .stats var {
 		min-width: 90px;
 	}
+}
+
+.create-group-link .nav-link {
+      font-size: 1.3em;
+      text-decoration: none;
+      font-weight: 800;
+      font-family: "Open Sans", sans-serif;
+      color: #223f5c;
+}
+
+.create-group-link .nav-link:hover {
+      color: #ea8d89;
+      text-decoration: underline;
 }
 
 

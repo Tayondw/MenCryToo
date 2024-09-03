@@ -1,12 +1,12 @@
 import { useLoaderData, Link } from "react-router-dom";
-// import { useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 // import { useState } from "react";
 import "./Groups.css";
 import Footer from "../Footer";
 
 const Groups = () => {
 	const { allGroups } = useLoaderData();
-	// const sessionUser = useSelector((state) => state.session.user);
+	const sessionUser = useSelector((state) => state.session.user);
 	// const [currentIndex, setCurrentIndex] = useState(0);
 
 	// console.log("this is groups", allGroups.groups);
@@ -28,7 +28,21 @@ const Groups = () => {
 	// };
 
 	return (
-		<>
+		<div id="groups-body">
+			<div className="create-group-link">
+				{sessionUser ? (
+					<Link className="nav-link" to="/groups/new">
+						Create a group
+					</Link>
+				) : (
+					<Link className="disabled" to="/groups/new">
+						Create a group
+					</Link>
+				)}
+			</div>
+			<div id="groups-body-header">
+				<h1>See where you fit in!</h1>
+			</div>
 			<div id="groups">
 				{allGroups.groups.length > 0 ? (
 					allGroups.groups.map((group) => (
@@ -162,7 +176,7 @@ const Groups = () => {
 				</div>
 			</div> */}
 			<Footer />
-		</>
+		</div>
 	);
 };
 
