@@ -1,4 +1,132 @@
-#groups {
+#events-body {
+	background: linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c);
+	/* display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;*/
+} 
+
+#events-body-header {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+      padding-top: 20px;
+}
+
+#events {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	margin: 0;
+	/* height: 100vh; */
+	padding-bottom: 150px;
+	padding-top: 50px;
+	flex-wrap: wrap;
+	/* gap: 150px; */
+}
+
+.event-cards {
+	display: flex;
+	align-items: center;
+	width: 75vh;
+	/* max-width: 1850px; */
+	padding: 20px;
+	border-radius: 60px;
+	background: #dddddc;
+	height: 350px;
+	margin: 8px;
+	flex-wrap: wrap;
+}
+
+.event-cards img {
+	max-width: 280px;
+	width: 32vw;
+	height: 270px;
+	object-fit: cover;
+	margin-left: -50px;
+	margin-right: 40px;
+	border-radius: inherit;
+	flex-shrink: 0; /* Prevent the image from shrinking */
+}
+
+#display-style-direction {
+	flex: 1; /* Allow the content area to take available space */
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap; /* Enable wrapping for the content */
+}
+
+.event-cards div h2,
+.event-cards div h3 {
+	font-weight: 400;
+      /* word-wrap: break-word; */
+}
+
+.event-cards div h3,
+.event-stats label {
+	opacity: 0.5;
+}
+
+.event-cards div h2 {
+	font-size: 28px;
+	margin: 0;
+	word-wrap: break-word; /* Ensure long words break to the next line */
+}
+
+.event-cards div h3 {
+	font-size: 16px;
+	margin: 0 0 20px;
+	word-wrap: break-word; /* Ensure long words break to the next line */
+}
+
+.event-cards .event-stats {
+	display: flex;
+	gap: 24px;
+	list-style: none;
+	margin: 0 0 24px;
+	padding: 0;
+	align-items: flex-end;
+	flex-wrap: wrap; /* Enable wrapping for the stats */
+}
+
+.event-cards .event-stats var {
+	display: flex;
+	font-style: normal;
+	font-size: 15px;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap; /* Enable wrapping for the stats */
+	word-wrap: break-word; /* Ensure long words break to the next line */
+}
+
+@media (width <= 720px) {
+	.event-cards {
+		margin: 0 40px;
+		padding-left: 50px;
+		padding-right: 50px;
+		width: 100%;
+		text-align: center;
+		flex-direction: column;
+		height: auto; /* Ensure height adjusts based on content */
+	}
+
+	.event-cards div h2 {
+		font-size: 30px;
+	}
+
+	.event-cards img {
+		max-width: 1000px;
+		width: 100%;
+		margin: -100px 0 30px 0;
+	}
+
+	.event-cards .stats var {
+		min-width: 90px;
+	}
+}
+
+/* #groups {
 	display: flex;
 	grid-template-columns: 2fr 1fr;
 	gap: 20px;
@@ -77,4 +205,4 @@
 
 .group-content p {
 	font-size: 15px;
-}
+} */

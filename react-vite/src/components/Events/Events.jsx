@@ -1,33 +1,86 @@
 import { useLoaderData, Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { useState } from "react";
+// import { useSelector } from "react-redux";
+// import { useState } from "react";
 import Footer from "../Footer";
 import "./Events.css";
 
 const Events = () => {
 	const { allEvents } = useLoaderData();
-	const sessionUser = useSelector((state) => state.session.user);
-	const [currentIndex, setCurrentIndex] = useState(0);
+	// const sessionUser = useSelector((state) => state.session.user);
+	// const [currentIndex, setCurrentIndex] = useState(0);
 
 	if (!allEvents || !allEvents.events) {
 		return <p>No events available.</p>;
 	}
 
-	const handlePrevClick = () => {
-		setCurrentIndex(
-			currentIndex > 0 ? currentIndex - 1 : allEvents.events.length - 1,
-		);
-	};
+	// const handlePrevClick = () => {
+	// 	setCurrentIndex(
+	// 		currentIndex > 0 ? currentIndex - 1 : allEvents.events.length - 1,
+	// 	);
+	// };
 
-	const handleNextClick = () => {
-		setCurrentIndex(
-			currentIndex < allEvents.events.length - 1 ? currentIndex + 1 : 0,
-		);
-	};
+	// const handleNextClick = () => {
+	// 	setCurrentIndex(
+	// 		currentIndex < allEvents.events.length - 1 ? currentIndex + 1 : 0,
+	// 	);
+	// };
 
 	return (
-		<>
-			<div id="events">
+		<div id="events-body">
+			<div id="events-body-header">
+				<h1>See what each group does to help each other</h1>
+                  </div>
+                  <div id="events">
+
+                  
+			{allEvents.events.length > 0 ? (
+				allEvents.events.map((event) => (
+					<Link
+						key={event.id}
+						to={`/events/${event.id}`}
+						style={{ textDecoration: `none`, color: `inherit` }}
+					>
+						<div className="event-cards">
+							<img src={event.eventImage[0].eventImage} alt={event.name} />
+							<div id="display-style-direction">
+								<div>
+									<h2>{event.name}</h2>
+									<h3>{event.description}</h3>
+								</div>
+								<ul className="event-stats">
+									<li>
+										<var>{event.numAttendees}</var>
+										<label>Attendees</label>
+									</li>
+									<li>
+										<var>{event.capacity}</var>
+										<label>Capacity</label>
+									</li>
+									<li>
+										<var>{event.type}</var>
+										<label>Type</label>
+									</li>
+									<li>
+										<var>{new Date(event.startDate).toLocaleString()}</var>
+										<label>Start Date</label>
+									</li>
+									<li>
+										<var>{new Date(event.endDate).toLocaleString()}</var>
+										<label>End Date</label>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</Link>
+				))
+			) : (
+				<p>
+					Currently no events available. You will see something after you add an
+					event
+				</p>
+                        )}
+                  </div>
+			{/* <div id="events">
 				<h1>See what each group does to help each other</h1>
 				{allEvents.events.map((event) => (
 					<div
@@ -110,9 +163,9 @@ const Events = () => {
 						</div>
 					</div>
 				))}
-			</div>
+			</div> */}
 			<Footer />
-		</>
+		</div>
 	);
 };
 

@@ -8,7 +8,7 @@ export const getLoader = async () => {
 		// `/api/venues/`,
 		// `/api/posts/feed`,
 		// `/api/users/profile-feed`,
-		// `/api/tags/`,
+		`/api/tags/`,
 	];
 
 	const fetchPromises = urls.map((url) =>
@@ -22,7 +22,7 @@ export const getLoader = async () => {
 		// allVenues,
 		// allPosts,
 		// allProfiles,
-		// allTags,
+		allTags,
 	] = await Promise.all(fetchPromises);
 
 	return json({
@@ -32,7 +32,7 @@ export const getLoader = async () => {
 		// allVenues,
 		// allPosts,
 		// allProfiles,
-		// allTags,
+		allTags,
 	});
 };
 
