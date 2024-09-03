@@ -43,7 +43,8 @@ function SignupFormModal() {
 		if (!username.length)
 			error.username =
 				"Now you know you need a username, I need 3 to 20 characters for you to signup!";
-		if (password.length > 255) error.password = "Password is too long!";
+		if (password.length > 25) error.password = "Password is too long!";
+		if (password.length < 8) error.password = "Password is too short!";
 		if (password.length < 0) error.password = "Password is required";
 		if (password !== confirmPassword)
 			error.confirmPassword =
