@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { thunkLogin } from "../../redux/session";
 import { useDispatch } from "react-redux";
 import { useModal } from "../../context/Modal";
@@ -9,9 +9,9 @@ function LoginFormModal() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [errors, setErrors] = useState({});
-      const { closeModal } = useModal();
-      
-      const isDisabled = email.length < 4 || password.length < 6;
+	const { closeModal } = useModal();
+
+	const isDisabled = email.length < 4 || password.length < 6;
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -46,6 +46,34 @@ function LoginFormModal() {
 			closeModal();
 		}
 	};
+
+	// Close modal when clicking the back button
+	useEffect(() => {
+		const handlePopState = () => {
+			closeModal();
+		};
+
+		window.addEventListener("popstate", handlePopState);
+
+		return () => {
+			window.removeEventListener("popstate", handlePopState);
+		};
+	}, [closeModal]);
+
+	// Close modal when clicking outside of the modal content
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			if (event.target.classList.contains("body")) {
+				closeModal();
+			}
+		};
+
+		document.addEventListener("click", handleClickOutside);
+
+		return () => {
+			document.removeEventListener("click", handleClickOutside);
+		};
+	}, [closeModal]);
 
 	return (
 		<div className="body">
