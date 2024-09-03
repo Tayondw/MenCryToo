@@ -9,7 +9,9 @@ function LoginFormModal() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [errors, setErrors] = useState({});
-	const { closeModal } = useModal();
+      const { closeModal } = useModal();
+      
+      const isDisabled = email.length < 4 || password.length < 6;
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -46,35 +48,50 @@ function LoginFormModal() {
 	};
 
 	return (
-		<>
-			<h1>Log In</h1>
-			<form onSubmit={handleSubmit}>
-				<label>
-					Email
-					<input
-						type="text"
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
-						required
-					/>
-				</label>
-				{errors.email && <p>{errors.email}</p>}
-				<label>
-					Password
-					<input
-						type="password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						required
-					/>
-				</label>
-				{errors.password && <p>{errors.password}</p>}
-				<button type="submit">Log In</button>
-				<button type="submit" onClick={demoUserLogin}>
-					Log in as Demo User
-				</button>
-			</form>
-		</>
+		<div className="body">
+			<div className="login">
+				<form className="form" onSubmit={handleSubmit}>
+					<h1>Log In</h1>
+					<label>
+						Email
+						<input
+							type="text"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+							placeholder="Email"
+							required
+						/>
+					</label>
+					{errors.email && <p>{errors.email}</p>}
+					<label>
+						Password
+						<input
+							type="password"
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+							placeholder="Password"
+							required
+						/>
+					</label>
+					{errors.password && <p>{errors.password}</p>}
+					<button
+						className="login-button"
+						disabled={isDisabled}
+						style={{ cursor: isDisabled ? "not-allowed" : "pointer" }}
+						type="submit"
+					>
+						Log In
+					</button>
+					<button
+						type="submit"
+						className="demo-login-button"
+						onClick={demoUserLogin}
+					>
+						Log in as Demo User
+					</button>
+				</form>
+			</div>
+		</div>
 	);
 }
 

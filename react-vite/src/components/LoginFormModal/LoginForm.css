@@ -1,0 +1,99 @@
+div #modal-content {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	border-radius: 125px;
+	font-family: "Quicksand", sans-serif;
+}
+
+.body {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 350px;
+	background: #faf5e4;
+	width: 350px;
+	overflow: hidden;
+      border-radius: 25px;
+      flex-direction: column;
+}
+
+.login {
+	position: absolute;
+	width: 000px;
+	height: 000px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+      padding: 25px;
+}
+
+.form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+}
+
+.form h1 {
+      margin: 0;
+	font-size: 40px;
+	color: #e08f2c;
+}
+
+.login .input {
+	position: relative;
+	width: 195px;
+	padding: 12px 25px;
+	background: transparent;
+	border: 2px solid #111;
+	border-radius: 40px;
+	font-size: 1.2em;
+	color: #111;
+	box-shadow: none;
+	outline: none;
+}
+
+.login label input::placeholder {
+	color: #111;
+}
+
+.login .form {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding-top: 115px;
+      padding-bottom: 150px;
+}
+
+form div {
+	padding-bottom: 15px;
+}
+
+.login-button {
+	width: 170px;
+	background: #e08f2c;
+	border: none;
+	cursor: pointer;
+	border-radius: 4px;
+	padding: 12px 20px;
+	font-size: 1em;
+}
+
+.demo-login-button {
+	width: 170px;
+	background: linear-gradient(270deg, #e08f2c, #223f5c 80%);
+	border: none;
+	cursor: pointer;
+	border-radius: 4px;
+	padding: 12px 20px;
+	font-size: 1em;
+      color: #dddddc;
+}
+
+.form p {
+      margin: 0;
+      display: flex;
+      justify-content: space-around;
+}
