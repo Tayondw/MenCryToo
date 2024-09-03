@@ -16,10 +16,13 @@ const Footer = () => {
 					<h3>WHERE YOU CAN FIND US</h3>
 				</div>
 				<div className="footer-logos">
-					<RiTwitterXLine className="footer-link" />
-					<RiFacebookLine className="footer-link" />
-					<PiPinterestLogo className="footer-link" />
-					<TiSocialGooglePlus className="footer-link" />
+					<RiTwitterXLine className="footer-link" style={{ cursor: `text` }} />
+					<RiFacebookLine className="footer-link" style={{ cursor: `text` }} />
+					<PiPinterestLogo className="footer-link" style={{ cursor: `text` }} />
+					<TiSocialGooglePlus
+						className="footer-link"
+						style={{ cursor: `text` }}
+					/>
 				</div>
 			</div>
 			<div id="middle-profile-footer">

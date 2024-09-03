@@ -118,7 +118,9 @@ export const SectionTwo = () => {
 				<h2 className="heading-2 bottom">Its not you, it&apos;s them</h2>
 				<h1 className="heading bottom">WORRIED ABOUT SOMEONE?</h1>
 				<div className="div-block">
-					<a href="#" className="button">
+                              <a
+                                    // href="#"
+                                    className="button">
 						LET US HELP
 					</a>
 				</div>
@@ -144,9 +146,16 @@ export const AccentSection = () => {
 							/>
 							<h3 className="white-text">ABOUT MEN CRY TOO</h3>
 							<p className="white-text">
-								Men Cry Too is an effort to break through stigma of men not being allowed to express their feelings, improve help-seeking behavior and reduce male suicide. Let&apos; check the stats that led to why we&apos;re both here.
+								Men Cry Too is an effort to break through stigma of men not
+								being allowed to express their feelings, improve help-seeking
+								behavior and reduce male suicide. Let&apos; check the stats that
+								led to why we&apos;re both here.
 							</p>
-							<Link to="/about" className="hollow-button">
+							<Link
+								// to="/about"
+								style={{ cursor: `text` }}
+								className="hollow-button"
+							>
 								Learn more
 							</Link>
 						</div>
@@ -167,7 +176,11 @@ export const AccentSection = () => {
 								single person up to full-scale businesses, so you&apos;ll fit
 								right in.
 							</p>
-							<Link to="/partnership" className="hollow-button">
+							<Link
+								// to="/partnership"
+								style={{ cursor: `text` }}
+								className="hollow-button"
+							>
 								GET STARTED
 							</Link>
 						</div>
