@@ -1,0 +1,23 @@
+#adding-group-image {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 700px;
+      height: 300px;
+}
+
+#image-close-confirm {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: row-reverse;
+      gap: 25px;
+      padding-bottom: 25px;
+}
+
+#image-close-button {
+      border: 0;
+      font-size: 25px;
+      cursor: pointer;
+}

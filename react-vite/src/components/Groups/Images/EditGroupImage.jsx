@@ -9,10 +9,10 @@ const EditGroupImage = ({ groupDetails, groupImageId, onClose }) => {
 	return (
 		<div id="adding-group-image">
 			<div id="image-close-confirm">
-				<h1>Add an image to your group</h1>
 				<button id="image-close-button" onClick={onClose}>
 					✖
 				</button>
+				<h1>Update the image to your group</h1>
 			</div>
 			<Form
 				method="post"
