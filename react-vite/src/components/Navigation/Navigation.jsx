@@ -28,34 +28,34 @@ function Navigation({ isLoaded }) {
 						</div>
 					</div>
 					<nav role="navigation" className="navigation-menu w-nav-menu">
-						<NavLink
+						<p
 							to="/tags"
 							className="navigation-link w-nav-link"
 							aria-current="page"
 						>
 							EXPLORE TAGS
-						</NavLink>
-						<NavLink to="/get-help" className="navigation-link w-nav-link">
+						</p>
+						<p to="/get-help" className="navigation-link w-nav-link">
 							GET HELP
-						</NavLink>
-						<NavLink to="/about" className="navigation-link w-nav-link">
+						</p>
+						<p to="/about" className="navigation-link w-nav-link">
 							ABOUT
-						</NavLink>
-						{/* <NavLink to="/partner" className="navigation-link w-nav-link">
+						</p>
+						{/* <p to="/partner" className="navigation-link w-nav-link">
 							BECOME A PARTNER
-						</NavLink> */}
-						<NavLink
+						</p> */}
+						<p
 							to="/i-believe-campaign"
 							className="navigation-link w-nav-link"
 						>
 							&ldquo;I BELIEVE&ldquo; CAMPAIGN
-						</NavLink>
-						{/* <NavLink to="/posts/create" className="navigation-link w-nav-link">
+						</p>
+						{/* <p to="/posts/create" className="navigation-link w-nav-link">
 							SHARE YOUR STORY
-						</NavLink> */}
-						<NavLink className="navigation-link current w-nav-link">
+						</p> */}
+						<p className="navigation-link current w-nav-link">
 							CRISIS SUPPORT
-						</NavLink>
+						</p>
 						{isLoaded && (
 							<ProfileButton user={sessionUser} navigate={navigate} />
 						)}
@@ -76,34 +76,34 @@ function Navigation({ isLoaded }) {
 						</div>
 					</div>
 					<nav role="navigation" className="navigation-menu w-nav-menu">
-						<NavLink
+						<p
 							to="/tags"
 							className="navigation-link w-nav-link"
 							aria-current="page"
 						>
 							EXPLORE TAGS
-						</NavLink>
-						<NavLink to="/get-help" className="navigation-link w-nav-link">
+						</p>
+						<p to="/get-help" className="navigation-link w-nav-link">
 							GET HELP
-						</NavLink>
-						<NavLink to="/about" className="navigation-link w-nav-link">
+						</p>
+						<p to="/about" className="navigation-link w-nav-link">
 							ABOUT
-						</NavLink>
-						<NavLink to="/partner" className="navigation-link w-nav-link">
+						</p>
+						<p to="/partner" className="navigation-link w-nav-link">
 							BECOME A PARTNER
-						</NavLink>
-						<NavLink
+						</p>
+						<p
 							to="/i-believe-campaign"
 							className="navigation-link w-nav-link"
 						>
 							&ldquo;I BELIEVE&ldquo; CAMPAIGN
-						</NavLink>
-						<NavLink to="/posts/create" className="navigation-link w-nav-link">
+						</p>
+						<p to="/posts/create" className="navigation-link w-nav-link">
 							SHARE YOUR STORY
-						</NavLink>
-						<NavLink className="navigation-link current w-nav-link">
+						</p>
+						<p className="navigation-link current w-nav-link">
 							CRISIS SUPPORT
-						</NavLink>
+						</p>
 						{isLoaded && (
 							<ProfileButton user={sessionUser} navigate={navigate} />
 						)}
