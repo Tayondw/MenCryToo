@@ -61,7 +61,7 @@ function ProfileButton({ user, navigate }) {
 							className={showMenu ? "profile-dropdown" : "hidden"}
 							ref={ulRef}
 						>
-							<OpenModalMenuItem itemText={`Hello, ${user.firstName}`} />
+							<OpenModalMenuItem itemText={`Hello, ${user.username}`} />
 							<OpenModalMenuItem itemText={user.email} />
 							<hr
 								style={{
@@ -106,7 +106,7 @@ function ProfileButton({ user, navigate }) {
 								</div>
 							) : (
 								<div id="options-modal">
-									<OpenModalButton
+									{/* <OpenModalButton
 										className="logout"
 										buttonText="Profile"
 										onButtonClick={() => {
@@ -141,7 +141,7 @@ function ProfileButton({ user, navigate }) {
 											color: `#223f5c`,
 											backgroundColor: `#FAF5E4`,
 										}}
-									/>
+									/> */}
 									<OpenModalButton
 										className="logout"
 										buttonText="View Groups"

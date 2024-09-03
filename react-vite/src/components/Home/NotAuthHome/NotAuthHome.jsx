@@ -20,7 +20,9 @@ export const HeroSection = () => {
 						<h4 className="heading-3">Take control of your mental health.</h4>
 					</div>
 					<div className="div-block">
-						<Link className="button">TAKE INSPECTION</Link>
+						<Link className="button" style={{ cursor: `text` }}>
+							TAKE INSPECTION
+						</Link>
 						{sessionUser ? (
 							<Link
 								className="hollow-button all-caps"
@@ -42,7 +44,7 @@ export const HeroSection = () => {
 			<Outlet />
 		</div>
 	);
-}
+};
 
 export const SectionOne = () => {
 	const { allTags } = useLoaderData();
@@ -109,7 +111,7 @@ export const SectionOne = () => {
 			<Outlet />
 		</div>
 	);
-}
+};
 
 export const SectionTwo = () => {
 	return (
@@ -118,9 +120,10 @@ export const SectionTwo = () => {
 				<h2 className="heading-2 bottom">Its not you, it&apos;s them</h2>
 				<h1 className="heading bottom">WORRIED ABOUT SOMEONE?</h1>
 				<div className="div-block">
-                              <a
-                                    // href="#"
-                                    className="button">
+					<a
+						// href="#"
+						className="button"
+					>
 						LET US HELP
 					</a>
 				</div>
@@ -128,7 +131,7 @@ export const SectionTwo = () => {
 			<Outlet />
 		</section>
 	);
-}
+};
 
 export const AccentSection = () => {
 	return (
@@ -190,7 +193,7 @@ export const AccentSection = () => {
 			<Outlet />
 		</div>
 	);
-}
+};
 
 const NotAuthHome = () => {
 	const sessionUser = useSelector((state) => state.session.user);
@@ -201,34 +204,34 @@ const NotAuthHome = () => {
 			<SectionTwo />
 			<AccentSection />
 			<div id="section-4">
-                        {sessionUser ? null : (
-                              <>
-                                    <h2>BECOME A MEMBER  - START IMPROVING YOUR MENTAL TODAY</h2>
-                                    <OpenModalButton
-                                          buttonText="Join Us"
-                                          style={{
-                                                background: `#223f5c`,
-                                                width: `200px`,
-                                                cursor: `pointer`,
-                                                borderRadius: `4px`,
-                                                color: `#fff`,
-                                                textAlign: `center`,
-                                                letterSpacing: `2px`,
-                                                textTransform: `uppercase`,
-                                                marginLeft: `10px`,
-                                                marginRight: `10px`,
-                                                padding: `12px 30px`,
-                                                fontSize: `16px`,
-                                                fontWeight: 600,
-                                                lineHeight: `21px`,
-                                                textDecoration: `none`,
-                                                transition: `background-color 0.3s`,
-                                                display: `inline-block`,
-                                                border: 0,
-                                          }}
-                                          modalComponent={<SignupFormModal />}
-                                    />
-                              </>
+				{sessionUser ? null : (
+					<>
+						<h2>BECOME A MEMBER - START IMPROVING YOUR MENTAL TODAY</h2>
+						<OpenModalButton
+							buttonText="Join Us"
+							style={{
+								background: `#223f5c`,
+								width: `200px`,
+								cursor: `pointer`,
+								borderRadius: `4px`,
+								color: `#fff`,
+								textAlign: `center`,
+								letterSpacing: `2px`,
+								textTransform: `uppercase`,
+								marginLeft: `10px`,
+								marginRight: `10px`,
+								padding: `12px 30px`,
+								fontSize: `16px`,
+								fontWeight: 600,
+								lineHeight: `21px`,
+								textDecoration: `none`,
+								transition: `background-color 0.3s`,
+								display: `inline-block`,
+								border: 0,
+							}}
+							modalComponent={<SignupFormModal />}
+						/>
+					</>
 				)}
 			</div>
 		</>

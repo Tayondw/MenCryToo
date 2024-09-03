@@ -11,38 +11,38 @@ import Events from "../components/Events";
 import EventDetails from "../components/Events/Details";
 import CreateEvent from "../components/Events/CRUD/Create";
 import UpdateEvent from "../components/Events/CRUD/Update";
-import Profile from "../components/Profile";
-import ProfileDetails from "../components/Profile/Details";
-import CreateProfile from "../components/Profile/CRUD/Create";
-import UpdateProfile from "../components/Profile/CRUD/Update";
-import Posts from "../components/Posts";
-import PostDetails from "../components/Posts/Details";
-import Comments from "../components/Comments";
-import CommentDetails from "../components/Comments/Details";
-import Tags from "../components/Tags";
-import TagDetails from "../components/Tags/Details";
-import Venues from "../components/Venues";
-import VenueDetails from "../components/Venues/Details";
-import CreateVenue from "../components/Venues/CRUD/Create";
+// import Profile from "../components/Profile";
+// import ProfileDetails from "../components/Profile/Details";
+// import CreateProfile from "../components/Profile/CRUD/Create";
+// import UpdateProfile from "../components/Profile/CRUD/Update";
+// import Posts from "../components/Posts";
+// import PostDetails from "../components/Posts/Details";
+// import Comments from "../components/Comments";
+// import CommentDetails from "../components/Comments/Details";
+// import Tags from "../components/Tags";
+// import TagDetails from "../components/Tags/Details";
+// import Venues from "../components/Venues";
+// import VenueDetails from "../components/Venues/Details";
+// import CreateVenue from "../components/Venues/CRUD/Create";
 import {
 	getLoader,
 	groupDetailsLoader,
 	eventDetailsLoader,
-	venueDetailsLoader,
-	userDetailsLoader,
-	postDetailsLoader,
-	tagDetailsLoader,
+	// venueDetailsLoader,
+	// userDetailsLoader,
+	// postDetailsLoader,
+	// tagDetailsLoader,
 } from "./loaders";
 import {
 	groupActions,
 	groupImageActions,
 	eventActions,
 	eventImageActions,
-	groupMemberActions,
-	eventAttendeeActions,
-	venueActions,
-	profileActions,
-	postActions,
+	// groupMemberActions,
+	// eventAttendeeActions,
+	// venueActions,
+	// profileActions,
+	// postActions,
 } from "./actions";
 import Layout from "./Layout";
 
@@ -109,35 +109,35 @@ export const router = createBrowserRouter([
 				action: groupImageActions,
 			},
 			// ! VENUES
-			{
-				path: "venues",
-				element: <Venues />,
-			},
-			{
-				path: "venues/:venueId",
-				loader: venueDetailsLoader,
-				element: <VenueDetails />,
-				action: venueActions,
-			},
-			{
-				path: "groups/:groupId/venues",
-				loader: getLoader,
-				element: <CreateVenue />,
-				action: venueActions,
-			},
+			// {
+			// 	path: "venues",
+			// 	element: <Venues />,
+			// },
+			// {
+			// 	path: "venues/:venueId",
+			// 	loader: venueDetailsLoader,
+			// 	element: <VenueDetails />,
+			// 	action: venueActions,
+			// },
+			// {
+			// 	path: "groups/:groupId/venues",
+			// 	loader: getLoader,
+			// 	element: <CreateVenue />,
+			// 	action: venueActions,
+			// },
 			// ! GROUP - MEMBERSHIPS
-			{
-				path: "groups/:groupId/join-group",
-				loader: getLoader,
-				element: <Groups />,
-				action: groupMemberActions,
-			},
-			{
-				path: "groups/:groupId/leave-group/:memberId",
-				loader: getLoader,
-				element: <Groups />,
-				action: groupMemberActions,
-			},
+			// {
+			// 	path: "groups/:groupId/join-group",
+			// 	loader: getLoader,
+			// 	element: <Groups />,
+			// 	action: groupMemberActions,
+			// },
+			// {
+			// 	path: "groups/:groupId/leave-group/:memberId",
+			// 	loader: getLoader,
+			// 	element: <Groups />,
+			// 	action: groupMemberActions,
+			// },
 			// ! EVENTS
 			{
 				path: "events",
@@ -179,38 +179,38 @@ export const router = createBrowserRouter([
 				action: eventImageActions,
 			},
 			// ! EVENT - ATTENDANCES
-			{
-				path: "events/:eventId/attend-event",
-				loader: eventDetailsLoader,
-				element: <SignupFormPage />,
-				action: eventAttendeeActions,
-			},
-			{
-				path: "events/:eventId/leave-event/:attendeeId",
-				loader: eventDetailsLoader,
-				element: <SignupFormPage />,
-				action: eventAttendeeActions,
-			},
+			// {
+			// 	path: "events/:eventId/attend-event",
+			// 	loader: eventDetailsLoader,
+			// 	element: <SignupFormPage />,
+			// 	action: eventAttendeeActions,
+			// },
+			// {
+			// 	path: "events/:eventId/leave-event/:attendeeId",
+			// 	loader: eventDetailsLoader,
+			// 	element: <SignupFormPage />,
+			// 	action: eventAttendeeActions,
+			// },
 			// ! PROFILE
 			// ? your profile only you can access
-			{
-				path: "profile",
-				loader: getLoader,
-				element: <Profile />,
-				action: profileActions,
-			},
-			{
-				path: "users/:userId/profile/create",
-				loader: userDetailsLoader,
-				element: <CreateProfile />,
-				action: profileActions,
-			},
-			{
-				path: "users/:userId/profile/update",
-				loader: userDetailsLoader,
-				element: <UpdateProfile />,
-				action: profileActions,
-			},
+			// {
+			// 	path: "profile",
+			// 	loader: getLoader,
+			// 	element: <Profile />,
+			// 	action: profileActions,
+			// },
+			// {
+			// 	path: "users/:userId/profile/create",
+			// 	loader: userDetailsLoader,
+			// 	element: <CreateProfile />,
+			// 	action: profileActions,
+			// },
+			// {
+			// 	path: "users/:userId/profile/update",
+			// 	loader: userDetailsLoader,
+			// 	element: <UpdateProfile />,
+			// 	action: profileActions,
+			// },
 			// {
 			// 	path: "users/:userId/profile/delete",
 			// 	loader: userDetailsLoader,
@@ -218,62 +218,74 @@ export const router = createBrowserRouter([
 			// 	action: profileActions,
 			// },
 			// ? other users profiles when you click on their profile
+			// {
+			// 	path: "users/:userId",
+			// 	loader: userDetailsLoader,
+			// 	element: <ProfileDetails />,
+			// 	action: postActions,
+			// },
+			// {
+			// 	path: "posts",
+			// 	element: <Posts />,
+			// 	action: postActions,
+			// },
+			// {
+			// 	path: "posts/:postId",
+			// 	loader: postDetailsLoader,
+			// 	element: <PostDetails />,
+			// 	action: postActions,
+			// },
+			// {
+			// 	path: "comments",
+			// 	element: <Comments />,
+			// 	action: postActions,
+			// },
+			// {
+			// 	path: "comments/:commentId",
+			// 	element: <CommentDetails />,
+			// 	action: postActions,
+			// },
+			// {
+			// 	path: "tags",
+			// 	loader: getLoader,
+			// 	element: <Tags />,
+			// 	action: profileActions,
+			// },
+			// {
+			// 	path: "tags/:id/:name",
+			// 	loader: tagDetailsLoader,
+			// 	element: <TagDetails />,
+			// 	action: profileActions,
+			// },
+			// {
+			// 	path: "about",
+			// 	loader: tagDetailsLoader,
+			// 	element: <SignupFormPage />,
+			// 	action: profileActions,
+			// },
+			// {
+			// 	path: "partnership",
+			// 	loader: tagDetailsLoader,
+			// 	element: <SignupFormPage />,
+			// 	action: profileActions,
+			// },
+			// {
+			// 	path: "assets/resume",
+			// 	loader: tagDetailsLoader,
+			// 	element: <SignupFormPage />,
+			// 	action: profileActions,
+			// },
 			{
-				path: "users/:userId",
-				loader: userDetailsLoader,
-				element: <ProfileDetails />,
-				action: postActions,
-			},
-			{
-				path: "posts",
-				element: <Posts />,
-				action: postActions,
-			},
-			{
-				path: "posts/:postId",
-				loader: postDetailsLoader,
-				element: <PostDetails />,
-				action: postActions,
-			},
-			{
-				path: "comments",
-				element: <Comments />,
-				action: postActions,
-			},
-			{
-				path: "comments/:commentId",
-				element: <CommentDetails />,
-				action: postActions,
-			},
-			{
-				path: "tags",
-				loader: getLoader,
-				element: <Tags />,
-				action: profileActions,
-			},
-			{
-				path: "tags/:id/:name",
-				loader: tagDetailsLoader,
-				element: <TagDetails />,
-				action: profileActions,
-			},
-			{
-				path: "about",
-				loader: tagDetailsLoader,
-				element: <SignupFormPage />,
-				action: profileActions,
-			},
-			{
-				path: "partnership",
-				loader: tagDetailsLoader,
-				element: <SignupFormPage />,
-				action: profileActions,
-			},
-			{
-				path: "assets/resume",
-				loader: tagDetailsLoader,
-				element: <SignupFormPage />,
-				action: profileActions,
+				path: "*",
+				element: (
+					<div>
+						<h1>404 Page not found</h1>
+						<p>
+							Not all those who wander are lost, but it seems you may have taken
+							a wrong turn.
+						</p>
+					</div>
+				),
 			},
 		],
 	},

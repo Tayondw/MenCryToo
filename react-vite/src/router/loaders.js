@@ -4,11 +4,11 @@ export const getLoader = async () => {
 	const urls = [
 		`/api/groups/`,
 		`/api/events/`,
-		`/api/users/`,
-		`/api/venues/`,
-		`/api/posts/feed`,
-		`/api/users/profile-feed`,
-		`/api/tags/`,
+		// `/api/users/`,
+		// `/api/venues/`,
+		// `/api/posts/feed`,
+		// `/api/users/profile-feed`,
+		// `/api/tags/`,
 	];
 
 	const fetchPromises = urls.map((url) =>
@@ -18,21 +18,21 @@ export const getLoader = async () => {
 	const [
 		allGroups,
 		allEvents,
-		allUsers,
-		allVenues,
-		allPosts,
-		allProfiles,
-		allTags,
+		// allUsers,
+		// allVenues,
+		// allPosts,
+		// allProfiles,
+		// allTags,
 	] = await Promise.all(fetchPromises);
 
 	return json({
 		allGroups,
 		allEvents,
-		allUsers,
-		allVenues,
-		allPosts,
-		allProfiles,
-		allTags,
+		// allUsers,
+		// allVenues,
+		// allPosts,
+		// allProfiles,
+		// allTags,
 	});
 };
 

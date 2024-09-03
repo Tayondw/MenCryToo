@@ -70,7 +70,10 @@ const AuthHome = () => {
 							</h4>
 						</div>
 						<div id="create-profile-button">
-							<Link to={`/users/${sessionUser.id}/profile/create`}>
+							<Link
+								style={{ cursor: `text` }}
+								// to={`/users/${sessionUser.id}/profile/create`}
+							>
 								<button className="button">CREATE PROFILE</button>
 							</Link>
 						</div>
