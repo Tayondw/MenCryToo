@@ -12,13 +12,41 @@ function SignupFormModal() {
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [errors, setErrors] = useState({});
-      const { closeModal } = useModal();
-      
-      const isDisabled = username.length < 3 || password.length < 8;
+	const { closeModal } = useModal();
+
+	const isDisabled = username.length < 3 || password.length < 8;
 
 	useEffect(() => {
 		dispatch(thunkAuthenticate());
 	}, [dispatch]);
+
+	// Close modal when clicking the back button
+	useEffect(() => {
+		const handlePopState = () => {
+			closeModal();
+		};
+
+		window.addEventListener("popstate", handlePopState);
+
+		return () => {
+			window.removeEventListener("popstate", handlePopState);
+		};
+	}, [closeModal]);
+
+	// Close modal when clicking outside of the modal content
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			if (event.target.classList.contains("body")) {
+				closeModal();
+			}
+		};
+
+		document.addEventListener("click", handleClickOutside);
+
+		return () => {
+			document.removeEventListener("click", handleClickOutside);
+		};
+	}, [closeModal]);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
