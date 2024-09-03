@@ -61,7 +61,7 @@ const EventDetails = () => {
 					</h4>
 				)}
 			</div>
-			<div id="events-body">
+			<div id="events-body-details">
 				<div id="event-section-1">
 					<div id="events-details-image">
 						{eventDetails?.eventImage.map((eventImage) => (

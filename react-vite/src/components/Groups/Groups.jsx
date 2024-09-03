@@ -52,7 +52,13 @@ const Groups = () => {
 							style={{ textDecoration: `none`, color: `inherit` }}
 						>
 							<div className="cards">
-								<img src={group.groupImage[0].groupImage} alt={group.name} />
+								{group.groupImage.map((groupImage) => (
+									<img
+										src={groupImage.groupImage}
+										alt={group.name}
+										key={groupImage.id}
+									/>
+								))}
 								<div id="display-style-direction">
 									<div>
 										<h2>{group.name}</h2>
