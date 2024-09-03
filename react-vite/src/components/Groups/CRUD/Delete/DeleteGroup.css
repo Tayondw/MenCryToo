@@ -2,17 +2,38 @@
 	opacity: 0.7;
 }
 
-#deleteMenu {
+#event-deleteMenu {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	padding: 30px;
+      width: 900px;
+      gap: 20px;
 }
 
-#deleteMenu h1 {
+#event-close-confirm {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+}
+
+#confirm-delete {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+}
+
+#event-close-confirm h1 {
 	margin: 0;
 	font-size: 2.5em;
+      padding-bottom: 25px;
+}
+
+#delete-close-button {
+      align-self: self-end;
 }
 
 #button-div {
@@ -26,4 +47,8 @@
 
 #button-text:hover {
 	cursor: pointer;
+}
+
+.event-delete-button-modal {
+      margin-right: 15px;
 }
