@@ -23,7 +23,7 @@
 	padding-bottom: 150px;
 	padding-top: 50px;
 	flex-wrap: wrap;
-	/* gap: 150px; */
+	gap: 50px;
 }
 
 .event-cards {
@@ -34,7 +34,7 @@
 	padding: 20px;
 	border-radius: 60px;
 	background: #dddddc;
-	height: 350px;
+	height: 450px;
 	margin: 8px;
 	flex-wrap: wrap;
 }
