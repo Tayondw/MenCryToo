@@ -29,57 +29,57 @@ const Events = () => {
 		<div id="events-body">
 			<div id="events-body-header">
 				<h1>See what each group does to help each other</h1>
-                  </div>
-                  <div id="events">
-
-                  
-			{allEvents.events.length > 0 ? (
-				allEvents.events.map((event) => (
-					<Link
-						key={event.id}
-						to={`/events/${event.id}`}
-						style={{ textDecoration: `none`, color: `inherit` }}
-					>
-						<div className="event-cards">
-							<img src={event.eventImage[0].eventImage} alt={event.name} />
-							<div id="display-style-direction">
-								<div>
-									<h2>{event.name}</h2>
-									<h3>{event.description}</h3>
+			</div>
+			<div id="events">
+				{allEvents.events.length > 0 ? (
+					allEvents.events.map((event) => (
+						<Link
+							key={event.id}
+							to={`/events/${event.id}`}
+							style={{ textDecoration: `none`, color: `inherit` }}
+						>
+							<div className="event-cards">
+								{event.eventImage.map((eventImage) => (
+									<img src={eventImage.eventImage} alt={event.name} key={eventImage.id} />
+								))}
+								<div id="display-style-direction">
+									<div>
+										<h2>{event.name}</h2>
+										<h3>{event.description}</h3>
+									</div>
+									<ul className="event-stats">
+										<li>
+											<var>{event.numAttendees}</var>
+											<label>Attendees</label>
+										</li>
+										<li>
+											<var>{event.capacity}</var>
+											<label>Capacity</label>
+										</li>
+										<li>
+											<var>{event.type}</var>
+											<label>Type</label>
+										</li>
+										<li>
+											<var>{new Date(event.startDate).toLocaleString()}</var>
+											<label>Start Date</label>
+										</li>
+										<li>
+											<var>{new Date(event.endDate).toLocaleString()}</var>
+											<label>End Date</label>
+										</li>
+									</ul>
 								</div>
-								<ul className="event-stats">
-									<li>
-										<var>{event.numAttendees}</var>
-										<label>Attendees</label>
-									</li>
-									<li>
-										<var>{event.capacity}</var>
-										<label>Capacity</label>
-									</li>
-									<li>
-										<var>{event.type}</var>
-										<label>Type</label>
-									</li>
-									<li>
-										<var>{new Date(event.startDate).toLocaleString()}</var>
-										<label>Start Date</label>
-									</li>
-									<li>
-										<var>{new Date(event.endDate).toLocaleString()}</var>
-										<label>End Date</label>
-									</li>
-								</ul>
 							</div>
-						</div>
-					</Link>
-				))
-			) : (
-				<p>
-					Currently no events available. You will see something after you add an
-					event
-				</p>
-                        )}
-                  </div>
+						</Link>
+					))
+				) : (
+					<p>
+						Currently no events available. You will see something after you add
+						an event
+					</p>
+				)}
+			</div>
 			{/* <div id="events">
 				<h1>See what each group does to help each other</h1>
 				{allEvents.events.map((event) => (
