@@ -1,0 +1,97 @@
+#new-group {
+	display: flex;
+	flex-direction: column;
+	margin: 0 10%;
+	align-items: center;
+	justify-content: center;
+}
+
+#header h1 {
+	margin: 0;
+	font-family: "Shadows Into Light";
+	font-size: 2.3em;
+	color: #223f5c;
+	padding-bottom: 10px;
+}
+
+#create-group h2 {
+	margin: 0;
+	font-family: "Shadows Into Light";
+	font-size: 1.5em;
+}
+
+#update-form p,
+#update-form label {
+	font-family: "Quicksand", sans-serif;
+	font-weight: 500;
+}
+
+#section-1-create,
+#section-2-create,
+#section-3-create,
+#section-4-create,
+#section-5-create {
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+}
+
+#set-city,
+#set-state,
+#set-name,
+#set-description,
+#set-privacy {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: flex-start;
+	max-width: 600px;
+	width: 100%;
+	padding: 0;
+}
+
+#city-input,
+#state-input,
+#name-input,
+#description-input {
+	width: 100%;
+}
+
+#city-input-text,
+#state-input-text,
+#name-input-text {
+	border: 2px solid black;
+	font-family: "Quicksand", sans-serif;
+	width: 50%;
+	box-sizing: border-box;
+}
+
+#group-name-textarea {
+	border: 2px solid black;
+	font-family: "Quicksand", sans-serif;
+	width: 70%;
+	box-sizing: border-box;
+	height: 200px;
+}
+
+select,
+.group-option-text {
+	font-family: "Quicksand", sans-serif;
+	font-weight: 500;
+}
+
+select {
+	border: 2px solid black;
+}
+
+#create-group-submit {
+	border: 0;
+	width: 250px;
+	cursor: pointer;
+	border-radius: 40px;
+	padding: 12px 25px;
+	font-size: 1em;
+	color: #dddddc;
+	font-family: "Quicksand", sans-serif;
+	background: linear-gradient(45deg, #e08f2c, #223f5c);
+}
