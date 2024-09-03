@@ -20,15 +20,19 @@ export const HeroSection = () => {
 						<h4 className="heading-3">Take control of your mental health.</h4>
 					</div>
 					<div className="div-block">
-						<Link to="/mental-inspection" className="button">
-							TAKE INSPECTION
-						</Link>
+						<Link className="button">TAKE INSPECTION</Link>
 						{sessionUser ? (
-							<Link to="/profile-feed" className="hollow-button all-caps">
+							<Link
+								className="hollow-button all-caps"
+								style={{ cursor: `text` }}
+							>
 								FIND SOMEONE LIKE YOU
 							</Link>
 						) : (
-							<Link to="/profile-feed" className="hollow-button all-caps disabled">
+							<Link
+								className="hollow-button all-caps disabled"
+								style={{ cursor: `text` }}
+							>
 								FIND SOMEONE LIKE YOU
 							</Link>
 						)}
@@ -54,9 +58,10 @@ export const SectionOne = () => {
 				<div className="div-block-2">
 					{allTags.tags.map((tag) => (
 						<Link
-							to={`/tags/${tag.id}/${tag.name}`}
+							// to={`/tags/${tag.id}/${tag.name}`}
 							key={tag.id}
 							className="w-button"
+							style={{ cursor: `text` }}
 						>
 							{tag.name}
 						</Link>

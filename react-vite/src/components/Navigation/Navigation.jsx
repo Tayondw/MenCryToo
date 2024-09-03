@@ -28,34 +28,45 @@ function Navigation({ isLoaded }) {
 						</div>
 					</div>
 					<nav role="navigation" className="navigation-menu w-nav-menu">
-						<p
-							to="/tags"
+						<NavLink
+							// to="/tags"
 							className="navigation-link w-nav-link"
 							aria-current="page"
+							style={{ cursor: `text` }}
 						>
 							EXPLORE TAGS
-						</p>
-						<p to="/get-help" className="navigation-link w-nav-link">
-							GET HELP
-						</p>
-						<p to="/about" className="navigation-link w-nav-link">
-							ABOUT
-						</p>
-						{/* <p to="/partner" className="navigation-link w-nav-link">
-							BECOME A PARTNER
-						</p> */}
-						<p
-							to="/i-believe-campaign"
+						</NavLink>
+						<NavLink
+							style={{ cursor: `text` }}
 							className="navigation-link w-nav-link"
 						>
+							GET HELP
+						</NavLink>
+						<NavLink
+							style={{ cursor: `text` }}
+							className="navigation-link w-nav-link"
+						>
+							ABOUT
+						</NavLink>
+						{/* <NavLink to="/partner" className="navigation-link w-nav-link">
+							BECOME A PARTNER
+						</NavLink> */}
+						<NavLink
+							// to="/i-believe-campaign"
+							className="navigation-link w-nav-link"
+							style={{ cursor: `text` }}
+						>
 							&ldquo;I BELIEVE&ldquo; CAMPAIGN
-						</p>
-						{/* <p to="/posts/create" className="navigation-link w-nav-link">
+						</NavLink>
+						{/* <NavLink to="/posts/create" className="navigation-link w-nav-link">
 							SHARE YOUR STORY
-						</p> */}
-						<p className="navigation-link current w-nav-link">
+						</NavLink> */}
+						<NavLink
+							className="navigation-link current w-nav-link"
+							style={{ cursor: `text` }}
+						>
 							CRISIS SUPPORT
-						</p>
+						</NavLink>
 						{isLoaded && (
 							<ProfileButton user={sessionUser} navigate={navigate} />
 						)}
@@ -76,34 +87,55 @@ function Navigation({ isLoaded }) {
 						</div>
 					</div>
 					<nav role="navigation" className="navigation-menu w-nav-menu">
-						<p
-							to="/tags"
+						<NavLink
+							// to="/tags"
 							className="navigation-link w-nav-link"
 							aria-current="page"
+							style={{ cursor: `text` }}
 						>
 							EXPLORE TAGS
-						</p>
-						<p to="/get-help" className="navigation-link w-nav-link">
-							GET HELP
-						</p>
-						<p to="/about" className="navigation-link w-nav-link">
-							ABOUT
-						</p>
-						<p to="/partner" className="navigation-link w-nav-link">
-							BECOME A PARTNER
-						</p>
-						<p
-							to="/i-believe-campaign"
+						</NavLink>
+						<NavLink
+							// to="/get-help"
 							className="navigation-link w-nav-link"
+							style={{ cursor: `text` }}
+						>
+							GET HELP
+						</NavLink>
+						<NavLink
+							// to="/about"
+							className="navigation-link w-nav-link"
+							style={{ cursor: `text` }}
+						>
+							ABOUT
+						</NavLink>
+						<NavLink
+							// to="/partner"
+							className="navigation-link w-nav-link"
+							style={{ cursor: `text` }}
+						>
+							BECOME A PARTNER
+						</NavLink>
+						<NavLink
+							// to="/i-believe-campaign"
+							className="navigation-link w-nav-link"
+							style={{ cursor: `text` }}
 						>
 							&ldquo;I BELIEVE&ldquo; CAMPAIGN
-						</p>
-						<p to="/posts/create" className="navigation-link w-nav-link">
+						</NavLink>
+						<NavLink
+							// to="/posts/create"
+							className="navigation-link w-nav-link"
+							style={{ cursor: `text` }}
+						>
 							SHARE YOUR STORY
-						</p>
-						<p className="navigation-link current w-nav-link">
+						</NavLink>
+						<NavLink
+							className="navigation-link current w-nav-link"
+							style={{ cursor: `text` }}
+						>
 							CRISIS SUPPORT
-						</p>
+						</NavLink>
 						{isLoaded && (
 							<ProfileButton user={sessionUser} navigate={navigate} />
 						)}
