@@ -1,35 +1,78 @@
 import { useLoaderData, Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { useState } from "react";
+// import { useSelector } from "react-redux";
+// import { useState } from "react";
 import "./Groups.css";
 import Footer from "../Footer";
 
 const Groups = () => {
 	const { allGroups } = useLoaderData();
-	const sessionUser = useSelector((state) => state.session.user);
-	const [currentIndex, setCurrentIndex] = useState(0);
+	// const sessionUser = useSelector((state) => state.session.user);
+	// const [currentIndex, setCurrentIndex] = useState(0);
 
-	console.log("this is groups", allGroups.groups);
+	// console.log("this is groups", allGroups.groups);
 
 	if (!allGroups || !allGroups.groups) {
 		return <p>No groups available.</p>;
 	}
 
-	const handlePrevClick = () => {
-		setCurrentIndex(
-			currentIndex > 0 ? currentIndex - 1 : allGroups.groups.length - 1,
-		);
-	};
+	// const handlePrevClick = () => {
+	// 	setCurrentIndex(
+	// 		currentIndex > 0 ? currentIndex - 1 : allGroups.groups.length - 1,
+	// 	);
+	// };
 
-	const handleNextClick = () => {
-		setCurrentIndex(
-			currentIndex < allGroups.groups.length - 1 ? currentIndex + 1 : 0,
-		);
-	};
+	// const handleNextClick = () => {
+	// 	setCurrentIndex(
+	// 		currentIndex < allGroups.groups.length - 1 ? currentIndex + 1 : 0,
+	// 	);
+	// };
 
 	return (
 		<>
 			<div id="groups">
+				{allGroups.groups.length > 0 ? (
+					allGroups.groups.map((group) => (
+						<Link
+							to={`/groups/${group.id}`}
+							key={group.id}
+							style={{ textDecoration: `none`, color: `inherit` }}
+						>
+							<div className="cards">
+								<img src={group.groupImage[0].groupImage} alt={group.name} />
+								<div id="display-style-direction">
+									<div>
+										<h2>{group.name}</h2>
+										<h3>{group.about}</h3>
+										<p>
+											Base Location: {group.city}, {group.state}
+										</p>
+									</div>
+									<ul className="stats">
+										<li>
+											<var>{group.numMembers}</var>
+											<label>Members</label>
+										</li>
+										<li>
+											<var>{group.events.length}</var>
+											<label>Events</label>
+										</li>
+										<li>
+											<var>{group.type}</var>
+											<label>Type</label>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</Link>
+					))
+				) : (
+					<p>
+						Currently no groups available. You will see something after you join
+						a group
+					</p>
+				)}
+			</div>
+			{/* <div id="groups">
 				<h1>See where you fit in!</h1>
 				{allGroups.groups.map((group) => (
 					<div
@@ -117,7 +160,7 @@ const Groups = () => {
 						</Link>
 					)}
 				</div>
-			</div>
+			</div> */}
 			<Footer />
 		</>
 	);
