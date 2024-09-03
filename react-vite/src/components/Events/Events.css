@@ -44,7 +44,7 @@
 	width: 32vw;
 	height: 270px;
 	object-fit: cover;
-	margin-left: -50px;
+	margin-left: -70px;
 	margin-right: 40px;
 	border-radius: inherit;
 	flex-shrink: 0; /* Prevent the image from shrinking */
