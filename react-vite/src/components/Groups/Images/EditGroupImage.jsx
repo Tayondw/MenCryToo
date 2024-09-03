@@ -1,8 +1,39 @@
 import { Form, useActionData } from "react-router-dom";
+import { useEffect } from "react";
+import { useModal } from "../../../context/Modal";
 import "./GroupImage.css";
 
 const EditGroupImage = ({ groupDetails, groupImageId, onClose }) => {
 	const group_image = useActionData();
+	const { closeModal } = useModal();
+
+	// Close modal when clicking the back button
+	useEffect(() => {
+		const handlePopState = () => {
+			closeModal();
+		};
+
+		window.addEventListener("popstate", handlePopState);
+
+		return () => {
+			window.removeEventListener("popstate", handlePopState);
+		};
+	}, [closeModal]);
+
+	// Close modal when clicking outside of the modal content
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			if (event.target.classList.contains("modal-close")) {
+				closeModal();
+			}
+		};
+
+		document.addEventListener("click", handleClickOutside);
+
+		return () => {
+			document.removeEventListener("click", handleClickOutside);
+		};
+	}, [closeModal]);
 
 	// console.log(groupDetails);
 
