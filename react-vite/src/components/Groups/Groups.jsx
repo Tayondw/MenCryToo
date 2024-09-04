@@ -60,7 +60,7 @@ const Groups = () => {
 									/>
 								))}
 								<div id="display-style-direction">
-									<div>
+									<div id="keep-in-style">
 										<h2>{group.name}</h2>
 										<h3>{group.about}</h3>
 										<p>
