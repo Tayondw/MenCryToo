@@ -24,7 +24,7 @@ class Event(db.Model):
         nullable=False,
     )
     capacity = db.Column(db.Integer, nullable=False)
-    image = db.Column(db.String(500), nullable=False)
+    image = db.Column(db.String(500), nullable=True)
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now)

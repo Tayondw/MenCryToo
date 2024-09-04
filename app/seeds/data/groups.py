@@ -9,6 +9,7 @@ groups = [
         "type": "in-person",
         "city": "Tucker",
         "state": "GA",
+        "image": "https://mencrytoo.s3.amazonaws.com/group-images/allGroups.png",
         "group_memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
@@ -20,6 +21,7 @@ groups = [
         "type": "in-person",
         "city": "San Francisco",
         "state": "CA",
+        "image": "https://mencrytoo.s3.amazonaws.com/group-images/collageGroup-1.png",
         "group_memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
@@ -31,6 +33,7 @@ groups = [
         "type": "in-person",
         "city": "Austin",
         "state": "TX ",
+        "image": "https://mencrytoo.s3.amazonaws.com/group-images/collageGroup-2.png",
         "group_memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
@@ -42,6 +45,7 @@ groups = [
         "type": "in-person",
         "city": "Alexandria",
         "state": "VA",
+        "image": "https://mencrytoo.s3.amazonaws.com/group-images/collageGroup-3.png",
         "group_memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
@@ -53,6 +57,7 @@ groups = [
         "type": "in-person",
         "city": "Atlanta",
         "state": "GA",
+        "image": "https://mencrytoo.s3.amazonaws.com/group-images/collageGroup-4.png",
         "group_memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
@@ -64,6 +69,7 @@ groups = [
         "type": "in-person",
         "city": "Seattle",
         "state": "WA",
+        "image": "https://mencrytoo.s3.amazonaws.com/group-images/meetup-6.png",
         "group_memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
@@ -75,6 +81,7 @@ groups = [
         "type": "online",
         "city": "New York City",
         "state": "NY",
+        "image": "https://mencrytoo.s3.amazonaws.com/group-images/mencrytoo.png",
         "group_memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
@@ -86,6 +93,7 @@ groups = [
         "type": "online",
         "city": "Petaluma",
         "state": "CA",
+        "image": "https://mencrytoo.s3.amazonaws.com/group-images/newGroup.png",
         "group_memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
@@ -97,6 +105,7 @@ groups = [
         "type": "online",
         "city": "Boston",
         "state": "MA",
+        "image": "https://mencrytoo.s3.amazonaws.com/group-images/swe-study.png",
         "group_memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
@@ -108,6 +117,7 @@ groups = [
         "type": "online",
         "city": "Chicago",
         "state": "IL",
+        "image": "https://mencrytoo.s3.amazonaws.com/group-images/swe-talk.png",
         "group_memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],

@@ -17,6 +17,7 @@ def seed_groups():
             type=group_data["type"],
             city=group_data["city"],
             state=group_data["state"],
+            image=group_data["image"],
         )
         db.session.add(group)
         db.session.flush()  # Ensure the group.id is available before adding memberships
@@ -32,11 +33,11 @@ def seed_groups():
     db.session.commit()
 
 
-def seed_group_images():
-    for group_image_data in group_images:
-        group_image = GroupImage(**group_image_data)
-        db.session.add(group_image)
-    db.session.commit()
+# def seed_group_images():
+#     for group_image_data in group_images:
+#         group_image = GroupImage(**group_image_data)
+#         db.session.add(group_image)
+#     db.session.commit()
 
 
 def undo_groups():
@@ -47,11 +48,11 @@ def undo_groups():
     db.session.commit()
 
 
-def undo_group_images():
-    if environment == "production":
-        db.session.execute(
-            f"TRUNCATE table {SCHEMA}.group_images RESTART IDENTITY CASCADE;"
-        )
-    else:
-        db.session.execute(text("DELETE FROM group_images"))
-    db.session.commit()
+# def undo_group_images():
+#     if environment == "production":
+#         db.session.execute(
+#             f"TRUNCATE table {SCHEMA}.group_images RESTART IDENTITY CASCADE;"
+#         )
+#     else:
+#         db.session.execute(text("DELETE FROM group_images"))
+#     db.session.commit()

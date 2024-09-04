@@ -22,7 +22,7 @@ class Group(db.Model):
     )
     city = db.Column(db.String(30), nullable=False)
     state = db.Column(db.String(2), nullable=False)
-    image = db.Column(db.String(500), nullable=False)
+    image = db.Column(db.String(500), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 

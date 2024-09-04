@@ -26,7 +26,13 @@ const CreateGroup = () => {
 		<>
 			<div id="new-group">
 				{sessionUser ? (
-					<Form method="post" action="/groups/new" className="create-group">
+					<Form
+						method="post"
+						action="/groups/new"
+						className="create-group"
+						encType="multipart/form-data"
+						type="file"
+					>
 						<div id="header">
 							<h1>Start a New Group</h1>
 							<h2>
@@ -40,8 +46,8 @@ const CreateGroup = () => {
 								<h2>What city will your group be based in?</h2>
 								<div className="caption">
 									<p>
-										Groups meet locally, in person, and online.
-										We&apos;ll connect you with people in your area.
+										Groups meet locally, in person, and online. We&apos;ll
+										connect you with people in your area.
 									</p>
 								</div>
 								<div id="city-input">
@@ -143,6 +149,17 @@ const CreateGroup = () => {
 							)}
 						</div>
 						<hr />
+						<div id="image-upload">
+							<h2>Upload a group image</h2>
+							<input name="image" type="file" accept="image/*" />
+							{errors?.image && (
+								<p style={{ color: "red" }} className="errors">
+									{errors.image}
+								</p>
+							)}
+						</div>
+
+						<hr />
 						<div id="section-4-create">
 							<div id="set-privacy">
 								<h2>Final steps...</h2>
@@ -175,6 +192,7 @@ const CreateGroup = () => {
 							</div>
 						</div>
 						<hr />
+
 						<div id="section-5-create">
 							<button
 								id="create-group-submit"

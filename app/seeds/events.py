@@ -16,6 +16,7 @@ def seed_events():
             description=event_data["description"],
             type=event_data["type"],
             capacity=event_data["capacity"],
+            image=event_data["image"],
             start_date=event_data["start_date"],
             end_date=event_data["end_date"],
         )
@@ -32,11 +33,11 @@ def seed_events():
     db.session.commit()
 
 
-def seed_event_images():
-    for event_image_data in event_images:
-        event_image = EventImage(**event_image_data)
-        db.session.add(event_image)
-    db.session.commit()
+# def seed_event_images():
+#     for event_image_data in event_images:
+#         event_image = EventImage(**event_image_data)
+#         db.session.add(event_image)
+#     db.session.commit()
 
 
 def undo_events():
@@ -47,11 +48,11 @@ def undo_events():
     db.session.commit()
 
 
-def undo_event_images():
-    if environment == "production":
-        db.session.execute(
-            f"TRUNCATE table {SCHEMA}.event_images RESTART IDENTITY CASCADE;"
-        )
-    else:
-        db.session.execute(text("DELETE FROM event_images"))
-    db.session.commit()
+# def undo_event_images():
+#     if environment == "production":
+#         db.session.execute(
+#             f"TRUNCATE table {SCHEMA}.event_images RESTART IDENTITY CASCADE;"
+#         )
+#     else:
+#         db.session.execute(text("DELETE FROM event_images"))
+#     db.session.commit()
