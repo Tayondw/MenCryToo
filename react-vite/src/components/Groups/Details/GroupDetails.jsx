@@ -67,13 +67,7 @@ const GroupDetails = () => {
 					<div id="each-groupDetail">
 						<div id="top-each-groupDetail">
 							<div id="groupDetailImage">
-								{groupDetails.groupImage.map((groupImage) => (
-									<img
-										src={groupImage.groupImage}
-										alt={groupDetails.name}
-										key={groupImage.id}
-									/>
-								))}
+								<img src={groupDetails.image} alt={groupDetails.name} />
 							</div>
 							<div id="groupDetailInfo">
 								<h2 id="groupDetailName" className="add-padding">
@@ -232,14 +226,12 @@ const GroupDetails = () => {
 															className="event-item"
 															onClick={() => navigate(`/events/${event.id}`)}
 														>
-															{event.eventImage.map((eventImage) => (
-																<img
-																	src={eventImage.eventImage}
-																	alt={event.name}
-																	key={eventImage.id}
-																	className="event-image"
-																/>
-															))}
+															<img
+																src={event.image}
+																alt={event.name}
+																className="event-image"
+															/>
+
 															<div className="event-item-dates">
 																<p className="event-item-dates-p">
 																	{event.startDate}

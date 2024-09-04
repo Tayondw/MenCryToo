@@ -52,11 +52,8 @@ const Groups = () => {
 							style={{ textDecoration: `none`, color: `inherit` }}
 						>
 							<div className="cards">
-									<img
-										src={group.image}
-										alt={group.name}
-									/>
-								
+								<img src={group.image} alt={group.name} />
+
 								<div id="display-style-direction">
 									<div id="keep-in-style">
 										<h2>{group.name}</h2>

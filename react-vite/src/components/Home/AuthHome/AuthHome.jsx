@@ -97,26 +97,29 @@ const AuthHome = () => {
 									}}
 								>
 									<h1>GROUPS</h1>
-									<div id="group-carousel">
-										{group.groupImage.map((image) => (
+									<Link
+										to={`/groups/${group.id}`}
+										style={{ textDecoration: `none`, color: `#dddddc` }}
+									>
+										<div id="group-carousel">
 											<img
-												src={image.groupImage}
-												key={image.id}
+												src={group.image}
 												alt={`${group.name} group image`}
 												width={200}
 												height={200}
 												className="group-carousel-image"
 											/>
-										))}
-										<div className="group-content-carousel">
-											<h3>{group.name}</h3>
-											<p>{group.about}</p>
-											<p>
-												Base Location: {group.city}, {group.state}
-											</p>
-											<p>This group typically meets {group.type}</p>
+
+											<div className="group-content-carousel">
+												<h3>{group.name}</h3>
+												<p>About: {group.about}</p>
+												<p>
+													Base Location: {group.city}, {group.state}
+												</p>
+												<p>This group typically meets {group.type}</p>
+											</div>
 										</div>
-									</div>
+									</Link>
 
 									<div id="group-carousel-navigation">
 										<button
@@ -156,30 +159,40 @@ const AuthHome = () => {
 									}}
 								>
 									<h1>EVENTS</h1>
-									<div id="event-carousel">
-										{event.eventImage.map((image) => (
+									<Link
+										to={`/events/${event.id}`}
+										style={{ textDecoration: `none`, color: `#dddddc` }}
+									>
+										<div id="event-carousel">
 											<img
-												src={image.eventImage}
+												src={event.image}
 												alt={`${event.name} event image`}
-												key={image.id}
 												width={200}
 												height={200}
 												className="event-carousel-image"
 											/>
-										))}
-										<div className="event-content-carousel">
-											<h3>{event.name}</h3>
-											<p>{event.description}</p>
-											<p>
-												Location: {event.venueInfo.address}{" "}
-												{event.venueInfo.city}, {event.venueInfo.state}
-											</p>
-											<p>Belongs to: {event.groupInfo.name}</p>
-											<p>This event typically meets {event.type}</p>
-											<p>Start: {event.startDate}</p>
-											<p>End: {event.endDate}</p>
+											<div className="event-content-carousel">
+												<h3>{event.name}</h3>
+												<p>Description: {event.description}</p>
+												{event.venueInfo && event.venueInfo.address ? (
+													<p>
+														Location: {event.venueInfo.address}{" "}
+														{event.venueInfo.city}, {event.venueInfo.state}
+													</p>
+												) : (
+													<p>
+														Location: Currently there is no location for this
+														event
+													</p>
+												)}
+
+												<p>Belongs to: {event.groupInfo.name}</p>
+												<p>This event typically meets {event.type}</p>
+												<p>Start: {event.startDate}</p>
+												<p>End: {event.endDate}</p>
+											</div>
 										</div>
-									</div>
+									</Link>
 
 									<div id="event-carousel-navigation">
 										<button
