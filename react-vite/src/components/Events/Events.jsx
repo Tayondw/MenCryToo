@@ -40,10 +40,14 @@ const Events = () => {
 						>
 							<div className="event-cards">
 								{event.eventImage.map((eventImage) => (
-									<img src={eventImage.eventImage} alt={event.name} key={eventImage.id} />
+									<img
+										src={eventImage.eventImage}
+										alt={event.name}
+										key={eventImage.id}
+									/>
 								))}
 								<div id="display-style-direction">
-									<div>
+									<div id="keep-in-style">
 										<h2>{event.name}</h2>
 										<h3>{event.description}</h3>
 									</div>
