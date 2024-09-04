@@ -94,10 +94,16 @@ const GroupDetails = () => {
 										{groupDetails.type === "online" ? "online" : "in-person"}
 									</p>
 								)}
-								<p id="groupDetailOrganizer">
-									Organized by{" "}
-									{`${groupDetails.organizer.firstName} ${groupDetails.organizer.lastName}`}
-								</p>
+								{groupDetails.organizer.firstName &&
+								groupDetails.organizer.lastName ? (
+									<p id="groupDetailOrganizer">
+										Organized by{" "}
+										{`${groupDetails.organizer.firstName} ${groupDetails.organizer.lastName}`}
+									</p>
+								) : (
+									<p>Currently there is no organizer for this group</p>
+								)}
+
 								{!sessionUser ||
 								sessionUser.id === groupDetails.organizerId ? null : (
 									<div id="join">
