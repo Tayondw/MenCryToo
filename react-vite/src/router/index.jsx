@@ -97,7 +97,7 @@ export const router = createBrowserRouter([
 			},
 			// ! GROUP - IMAGES
 			{
-				path: "groups/:groupId/images",
+				path: "groups/:groupId/images/:imageId",
 				loader: getLoader,
 				element: <Groups />,
 				action: groupImageActions,

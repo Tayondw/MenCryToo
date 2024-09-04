@@ -1,10 +1,20 @@
+#group-details-background {
+     background: linear-gradient(135deg, #dddddc, #e08f2c);
+}
 
 #groups-details {
 	display: flex;
 	justify-content: center;
 	align-items: flex-start;
-	margin: 5% 10%;
+	padding: 1% 5%;
 	flex-direction: column;
+      
+}
+
+#each-groupDetail {
+      display: grid;
+      grid-template-columns: 85% 15%;
+      gap: 15px;
 }
 
 #groups-link-holder #group-link {
@@ -15,22 +25,38 @@
 
 #top-each-groupDetail {
 	display: grid;
-	grid-template-columns: 0.4fr 2fr;
+	/* grid-template-columns: 0.4fr 2fr; */
+      grid-template-rows: 0fr 0fr;
 	justify-content: center;
 	align-items: center;
-	column-gap: 55px;
+      gap: 30px;
+	/* column-gap: 55px; */
+}
+
+#top-group-details {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+}
+
+#top-each-groupDetail #groupDetailImage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      grid-row: 1;
 }
 
 #top-each-groupDetail #groupDetailImage img {
-	width: 500px;
-	height: 400px;
+	width: 300px;
+	height: 300px;
 }
 
 #top-each-groupDetail #groupDetailInfo {
 	display: flex;
-	justify-content: space-evenly;
+	justify-content: center;
 	flex-direction: column;
-	align-items: flex-start;
+	align-items: center;
+      grid-row: 2;
 }
 
 #groupDetailInfo #groupDetailName {
@@ -61,7 +87,8 @@
 }
 
 #crud-buttons {
-	padding-top: 200px;
+      padding-top: 20px;
+      padding-bottom: 20px;
 	display: flex;
 }
 
@@ -77,6 +104,46 @@
 #crud-buttons button {
 	cursor: pointer;
 	box-shadow: 2px 2px #ff6464;
+}
+
+#second-half-main-group-details {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+}
+
+#second-half-main-group-details h2 {
+      align-self: center;
+}
+
+#group-details-images {
+      display: flex;
+      flex-wrap: wrap;
+      width: 100%; 
+      margin: 0;
+      padding: 0;
+      justify-content: space-between;
+      align-items: center;
+}
+
+#group-details-images .box {
+      height: 400px;
+      width: 400px;
+      margin: 20px 20px 20px 20px;
+      overflow: hidden;
+      border-radius: 5px;
+      box-shadow: 0 3px 5px #000;   
+}
+
+#group-details-images .box img {
+      height: 100%;
+      width: 100%;
+      object-fit: cover;
+}
+
+#group-details-images .box img:hover {
+      transform: scale(1.4);
 }
 
 #event-list-past {
@@ -164,6 +231,7 @@
 	flex-direction: row;
       flex-wrap: wrap;
 	width: 100%;
+      position: sticky;
 }
 
 .event-list {

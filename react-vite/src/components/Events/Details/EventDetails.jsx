@@ -67,24 +67,30 @@ const EventDetails = () => {
 						<img src={eventDetails.image} alt={eventDetails?.name || "Event"} />
 					</div>
 					<div id="mix-event-group">
-							<div id="group-events">
-								<div id="events-group-image">
-									<img
-										src={eventDetails.groupInfo.image}
-										alt={eventDetails?.groupInfo?.name || "Group"}
-									/>
-								</div>
-								<div id="events-group-info">
-									{!eventDetails?.groupInfo ? (
-										<>
-											<h3>Group information not available</h3>
-										</>
-									) : (
-										<h3>{eventDetails?.groupInfo?.name}</h3>
-									)}
-								</div>
+						<div id="group-events">
+							<div id="events-group-image">
+								<img
+									src={eventDetails.groupInfo.image}
+									alt={eventDetails?.groupInfo?.name || "Group"}
+								/>
 							</div>
-			
+							<div id="events-group-info">
+								{!eventDetails?.groupInfo ? (
+									<>
+										<h3>Group information not available</h3>
+									</>
+								) : (
+									<Link to={`/groups/${eventDetails.groupInfo.id}`} style={{textDecoration: `none`}}>
+										<h3>{eventDetails?.groupInfo?.name}</h3>
+										<p>
+											Base Location: {eventDetails?.groupInfo?.city},{" "}
+											{eventDetails?.groupInfo?.state}
+										</p>
+										<p>Type: {eventDetails?.groupInfo?.type}</p>
+									</Link>
+								)}
+							</div>
+						</div>
 
 						<div id="event-event">
 							<div id="events-details-date">

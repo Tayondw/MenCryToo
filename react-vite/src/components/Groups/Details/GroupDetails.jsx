@@ -54,7 +54,7 @@ const GroupDetails = () => {
 	console.log("group details", groupDetails);
 
 	return (
-		<>
+		<div id="group-details-background">
 			<div id="groups-details">
 				<div id="groups-link-holder">
 					{"< "}
@@ -65,92 +65,93 @@ const GroupDetails = () => {
 
 				{groupDetails && (
 					<div id="each-groupDetail">
-						<div id="top-each-groupDetail">
-							<div id="groupDetailImage">
-								<img src={groupDetails.image} alt={groupDetails.name} />
-							</div>
-							<div id="groupDetailInfo">
-								<h2 id="groupDetailName" className="add-padding">
-									{groupDetails.name}
-								</h2>
-								<h4
-									id="groupDetailLocation"
-									className="add-padding"
-								>{`${groupDetails.city}, ${groupDetails.state}`}</h4>
-								{groupDetails.events.length > 1 ? (
-									<p id="groupDetailPrivacy" className="add-padding">
-										{`${groupDetails.events.length} events • `}
-										{groupDetails.type === "online" ? "online" : "in-person"}
-									</p>
-								) : (
-									<p id="groupDetailPrivacy" className="add-padding">
-										{`${groupDetails.events.length} event • `}
-										{groupDetails.type === "online" ? "online" : "in-person"}
-									</p>
-								)}
-								{groupDetails.organizer.firstName &&
-								groupDetails.organizer.lastName ? (
-									<p id="groupDetailOrganizer">
-										Organized by{" "}
-										{`${groupDetails.organizer.firstName} ${groupDetails.organizer.lastName}`}
-									</p>
-								) : (
-									<p>Currently there is no organizer for this group</p>
-								)}
+						<main id="top-each-groupDetail">
+							<div id="top-group-details">
+								<div id="groupDetailImage">
+									<img src={groupDetails.image} alt={groupDetails.name} />
+								</div>
+								<div id="groupDetailInfo">
+									<h2 id="groupDetailName" className="add-padding">
+										{groupDetails.name}
+									</h2>
+									<h4
+										id="groupDetailLocation"
+										className="add-padding"
+									>{`${groupDetails.city}, ${groupDetails.state}`}</h4>
+									{groupDetails.events.length > 1 ? (
+										<p id="groupDetailPrivacy" className="add-padding">
+											{`${groupDetails.events.length} events • `}
+											{groupDetails.type === "online" ? "online" : "in-person"}
+										</p>
+									) : (
+										<p id="groupDetailPrivacy" className="add-padding">
+											{`${groupDetails.events.length} event • `}
+											{groupDetails.type === "online" ? "online" : "in-person"}
+										</p>
+									)}
+									{groupDetails.organizer.firstName &&
+									groupDetails.organizer.lastName ? (
+										<p id="groupDetailOrganizer">
+											Organized by{" "}
+											{`${groupDetails.organizer.firstName} ${groupDetails.organizer.lastName}`}
+										</p>
+									) : (
+										<p>Currently there is no organizer for this group</p>
+									)}
 
-								{!sessionUser ||
-								sessionUser.id === groupDetails.organizerId ? null : (
-									<div id="join">
-										<button
-											className="revoke"
-											onClick={(event) => {
-												event.preventDefault();
-												alert("Feature Coming Soon...");
-											}}
-											style={{
-												backgroundColor: "red",
-												width: `250px`,
-												cursor: `pointer`,
-												borderRadius: `40px`,
-												padding: `12px 25px`,
-												fontSize: `1em`,
-											}}
-										>
-											Join this group
-										</button>
-									</div>
-								)}
-								{sessionUser && sessionUser.id === groupDetails.organizerId ? (
-									<div id="crud-buttons">
-										<div id="crud-buttons-create">
+									{!sessionUser ||
+									sessionUser.id === groupDetails.organizerId ? null : (
+										<div id="join">
 											<button
-												onClick={() =>
-													navigate(`/groups/${groupDetails.id}/events/new`)
-												}
-												style={{ backgroundColor: `gray`, color: `#FAF5E4` }}
+												className="revoke"
+												onClick={(event) => {
+													event.preventDefault();
+													alert("Feature Coming Soon...");
+												}}
+												style={{
+													backgroundColor: "red",
+													width: `250px`,
+													cursor: `pointer`,
+													borderRadius: `40px`,
+													padding: `12px 25px`,
+													fontSize: `1em`,
+												}}
 											>
-												Create event
+												Join this group
 											</button>
 										</div>
-										<div id="crud-buttons-update">
-											<button
-												onClick={() =>
-													navigate(`/groups/${groupDetails.id}/edit`)
-												}
-												style={{ backgroundColor: `gray`, color: `#FAF5E4` }}
-											>
-												Update
-											</button>
-										</div>
-										<div id="crud-buttons-update-image">
-											{!groupDetails.groupImage.length ? (
+									)}
+									{sessionUser &&
+									sessionUser.id === groupDetails.organizerId ? (
+										<div id="crud-buttons">
+											<div id="crud-buttons-create">
+												<button
+													onClick={() =>
+														navigate(`/groups/${groupDetails.id}/events/new`)
+													}
+													style={{ backgroundColor: `gray`, color: `#FAF5E4` }}
+												>
+													Create event
+												</button>
+											</div>
+											<div id="crud-buttons-update">
+												<button
+													onClick={() =>
+														navigate(`/groups/${groupDetails.id}/edit`)
+													}
+													style={{ backgroundColor: `gray`, color: `#FAF5E4` }}
+												>
+													Update Group
+												</button>
+											</div>
+											<div id="crud-buttons-update-image">
 												<div id="crud-buttons-delete">
 													<OpenModalButton
 														groupDetails={groupDetails}
 														onClose={closeModal}
 														className="group-image-button"
 														id="add-group-image"
-														buttonText="Add Group Image"
+														buttonText="Add Images"
 														style={{
 															backgroundColor: "gray",
 															color: `#FAF5E4`,
@@ -163,53 +164,44 @@ const GroupDetails = () => {
 														}
 													/>
 												</div>
-											) : (
-												groupDetails.groupImage.map((groupImage) => (
-													<div id="crud-buttons-delete" key={groupImage.id}>
-														<OpenModalButton
+											</div>
+											<div id="crud-buttons-delete">
+												<OpenModalButton
+													groupDetails={groupDetails}
+													navigate={navigate}
+													className="group-delete-button"
+													id="delete-group"
+													buttonText="Delete Group"
+													style={{ backgroundColor: "red", color: `#dddddc` }}
+													modalComponent={
+														<DeleteGroup
 															groupDetails={groupDetails}
-															groupImageId={groupImage.id}
-															onClose={closeModal}
-															className="group-image-button"
-															id="add-group-image"
-															buttonText="Update Group Image"
-															style={{
-																backgroundColor: "gray",
-																color: `#FAF5E4`,
-															}}
-															modalComponent={
-																<EditGroupImage
-																	groupDetails={groupDetails}
-																	groupImageId={groupImage.id}
-																	onClose={closeModal}
-																/>
-															}
+															navigate={navigate}
 														/>
-													</div>
-												))
-											)}
+													}
+												/>
+											</div>
 										</div>
-										<div id="crud-buttons-delete">
-											<OpenModalButton
-												groupDetails={groupDetails}
-												navigate={navigate}
-												className="group-delete-button"
-												id="delete-group"
-												buttonText="Delete"
-												style={{ backgroundColor: "gray", color: `#FAF5E4` }}
-												modalComponent={
-													<DeleteGroup
-														groupDetails={groupDetails}
-														navigate={navigate}
-													/>
-												}
-											/>
-										</div>
-									</div>
-								) : null}
+									) : null}
+								</div>
 							</div>
-						</div>
-						<div id="body-page">
+
+							<div id="second-half-main-group-details">
+								<h2>Check out the group&apos;s images</h2>
+								<div id="group-details-images">
+									{groupDetails.groupImage.map((image) => (
+										<Link
+											to={`/groups/${groupDetails.id}/images/${image.id}`}
+											key={image.id}
+											className="box"
+										>
+											<img src={image.groupImage} alt={image.name} />
+										</Link>
+									))}
+								</div>
+							</div>
+						</main>
+						<aside id="body-page">
 							<div id="events-section">
 								<div id="upcoming-events">
 									{!upcomingEvents.length ? (
@@ -315,12 +307,12 @@ const GroupDetails = () => {
 									)}
 								</div>
 							</div>
-						</div>
+						</aside>
 					</div>
 				)}
 			</div>
 			<Footer />
-		</>
+		</div>
 	);
 };
 
