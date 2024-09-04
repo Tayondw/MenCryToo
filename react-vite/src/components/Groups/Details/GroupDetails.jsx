@@ -281,14 +281,12 @@ const GroupDetails = () => {
 															className="event-item"
 															onClick={() => navigate(`/events/${event.id}`)}
 														>
-															{event.eventImage.map((eventImage) => (
-																<img
-																	src={eventImage.eventImage}
-																	alt={event.name}
-																	key={eventImage.id}
-																	className="event-image"
-																/>
-															))}
+															<img
+																src={event.image}
+																alt={event.name}
+																className="event-image"
+															/>
+
 															<div className="event-item-dates">
 																<p className="event-item-dates-p">
 																	{event.startDate}

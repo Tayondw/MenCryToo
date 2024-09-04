@@ -64,34 +64,27 @@ const EventDetails = () => {
 			<div id="events-body-details">
 				<div id="event-section-1">
 					<div id="events-details-image">
-						{eventDetails?.eventImage.map((eventImage) => (
-							<img
-								key={eventImage?.id}
-								src={eventImage?.eventImage}
-								alt={eventDetails?.name || "Event"}
-							/>
-						))}
+						<img src={eventDetails.image} alt={eventDetails?.name || "Event"} />
 					</div>
 					<div id="mix-event-group">
-						{eventDetails?.groupInfo?.groupImage.map((groupImage) => (
-							<div id="group-events" key={groupImage?.id}>
+							<div id="group-events">
 								<div id="events-group-image">
 									<img
-										src={groupImage?.groupImage}
+										src={eventDetails.groupInfo.image}
 										alt={eventDetails?.groupInfo?.name || "Group"}
 									/>
 								</div>
 								<div id="events-group-info">
-									{eventDetails?.groupInfo ? (
+									{!eventDetails?.groupInfo ? (
 										<>
-											<h3>{eventDetails?.groupInfo?.name}</h3>
+											<h3>Group information not available</h3>
 										</>
 									) : (
-										<h3>Group information not available</h3>
+										<h3>{eventDetails?.groupInfo?.name}</h3>
 									)}
 								</div>
 							</div>
-						))}
+			
 
 						<div id="event-event">
 							<div id="events-details-date">

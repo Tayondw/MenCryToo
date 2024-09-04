@@ -39,13 +39,8 @@ const Events = () => {
 							style={{ textDecoration: `none`, color: `inherit` }}
 						>
 							<div className="event-cards">
-								{event.eventImage.map((eventImage) => (
-									<img
-										src={eventImage.eventImage}
-										alt={event.name}
-										key={eventImage.id}
-									/>
-								))}
+								<img src={event.image} alt={event.name} />
+
 								<div id="display-style-direction">
 									<div id="keep-in-style">
 										<h2>{event.name}</h2>
