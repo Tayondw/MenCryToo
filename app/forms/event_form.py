@@ -7,6 +7,9 @@ from wtforms import (
     DateTimeLocalField,
 )
 from wtforms.validators import DataRequired, Length, NumberRange, ValidationError
+from flask_wtf.file import FileField, FileAllowed, FileRequired
+
+ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "gif"}
 
 types = ["online", "in-person"]
 
@@ -35,6 +38,10 @@ class EventForm(FlaskForm):
     type = SelectField("Event type", validators=[DataRequired()], choices=types)
     capacity = IntegerField(
         "Event capacity", validators=[DataRequired(), NumberRange(min=2, max=300)]
+    )
+    image = FileField(
+        "Event Image File",
+        validators=[FileRequired(), FileAllowed(list(ALLOWED_EXTENSIONS))],
     )
     startDate = DateTimeLocalField(
         "start_date", format="%Y-%m-%dT%H:%M", validators=[DataRequired()]

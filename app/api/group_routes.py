@@ -51,6 +51,26 @@ def create_group():
     form["csrf_token"].data = request.cookies["csrf_token"]
 
     if form.validate_on_submit():
+        image = form.image.data
+
+        if not image:
+            return {"message": "An image is required to create a group."}, 400
+
+        try:
+            image.filename = get_unique_filename(image.filename)
+            upload = upload_file_to_s3(image)
+        except Exception as e:
+            return {"message": f"Image upload failed: {str(e)}"}, 500
+
+        if "url" not in upload:
+            return {
+                "message": upload.get(
+                    "errors", "Image upload failed. Please try again."
+                )
+            }, 400
+
+        url = upload["url"]
+
         new_group = Group(
             organizer_id=current_user.id,
             name=form.data["name"],
@@ -58,11 +78,12 @@ def create_group():
             type=form.data["type"],
             city=form.data["city"],
             state=form.data["state"],
+            image=url,
         )
         db.session.add(new_group)
         db.session.commit()
         #   return redirect("/api/groups/")
-        return new_group.to_dict()
+        return new_group.to_dict(), 201
     #     if form.errors:
     #         print(form.errors)
     #         return render_template("group_form.html", form=form, errors=form.errors)
@@ -71,7 +92,7 @@ def create_group():
     return form.errors, 400
 
 
-@group_routes.route("/<int:groupId>/edit", methods=["GET", "POST"])
+@group_routes.route("/<int:groupId>/edit", methods=["POST"])
 @login_required
 def edit_group(groupId):
     """
@@ -97,6 +118,26 @@ def edit_group(groupId):
     form["csrf_token"].data = request.cookies["csrf_token"]
 
     if form.validate_on_submit():
+        image = form.image.data
+
+        if image:
+            try:
+                image.filename = get_unique_filename(image.filename)
+                upload = upload_file_to_s3(image)
+            except Exception as e:
+                return {"message": f"Image upload failed: {str(e)}"}, 500
+
+            if "url" not in upload:
+                return {
+                    "message": upload.get(
+                        "errors", "Image upload failed. Please try again."
+                    )
+                }, 400
+
+            # Remove the old image from S3
+            remove_file_from_s3(group_to_edit.image)
+            group_to_edit.image = upload["url"]
+
         group_to_edit.organizer_id = current_user.id
         group_to_edit.name = form.data["name"] or group_to_edit.name
         group_to_edit.about = form.data["about"] or group_to_edit.about
@@ -104,7 +145,7 @@ def edit_group(groupId):
         group_to_edit.city = form.data["city"] or group_to_edit.city
         group_to_edit.state = form.data["state"] or group_to_edit.state
         db.session.commit()
-        return group_to_edit.to_dict()
+        return group_to_edit.to_dict(), 201
     #   return redirect(f"/api/groups/{groupId}")
 
     #     elif form.errors:
@@ -294,19 +335,40 @@ def create_event(groupId):
     form["csrf_token"].data = request.cookies["csrf_token"]
 
     if form.validate_on_submit():
+        image = form.image.data
+
+        if not image:
+            return {"message": "An image is required to create a profile."}, 400
+
+        try:
+            image.filename = get_unique_filename(image.filename)
+            upload = upload_file_to_s3(image)
+        except Exception as e:
+            return {"message": f"Image upload failed: {str(e)}"}, 500
+
+        if "url" not in upload:
+            return {
+                "message": upload.get(
+                    "errors", "Image upload failed. Please try again."
+                )
+            }, 400
+
+        url = upload["url"]
+
         new_event = Event(
             group_id=groupId,
             name=form.data["name"],
             description=form.data["description"],
             type=form.data["type"],
             capacity=form.data["capacity"],
+            image=url,
             start_date=form.data["startDate"],
             end_date=form.data["endDate"],
         )
         db.session.add(new_event)
         db.session.commit()
         #   return redirect("/api/events/")
-        return new_event.to_dict()
+        return new_event.to_dict(), 201
     #     if form.errors:
     #             print(form.errors)
     #             return render_template(
@@ -351,6 +413,26 @@ def edit_event(groupId, eventId):
     form["csrf_token"].data = request.cookies["csrf_token"]
 
     if form.validate_on_submit():
+        image = form.image.data
+
+        if image:
+            try:
+                image.filename = get_unique_filename(image.filename)
+                upload = upload_file_to_s3(image)
+            except Exception as e:
+                return {"message": f"Image upload failed: {str(e)}"}, 500
+
+            if "url" not in upload:
+                return {
+                    "message": upload.get(
+                        "errors", "Image upload failed. Please try again."
+                    )
+                }, 400
+
+            # Remove the old image from S3
+            remove_file_from_s3(event_to_edit.image)
+            event_to_edit.image = upload["url"]
+
         event_to_edit.group_id = groupId
         event_to_edit.name = form.data["name"] or event_to_edit.name
         event_to_edit.description = (
@@ -361,7 +443,7 @@ def edit_event(groupId, eventId):
         event_to_edit.start_date = form.data["startDate"] or event_to_edit.start_date
         event_to_edit.end_date = form.data["endDate"] or event_to_edit.end_date
         db.session.commit()
-        return event_to_edit.to_dict()
+        return event_to_edit.to_dict(), 201
     #   return redirect(f"/api/groups/{groupId}")
 
     #     elif form.errors:

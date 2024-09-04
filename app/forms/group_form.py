@@ -1,8 +1,10 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, TextAreaField, SelectField, DateField, SubmitField
-from wtforms.validators import DataRequired, Length, NumberRange, ValidationError
+from wtforms import StringField, TextAreaField, SelectField
+from wtforms.validators import DataRequired, Length
+from flask_wtf.file import FileField, FileAllowed, FileRequired
 
 types = ["online", "in-person"]
+ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "gif"}
 
 
 class GroupForm(FlaskForm):
@@ -44,4 +46,8 @@ class GroupForm(FlaskForm):
                 min=2, max=2, message="Please enter the abbreviated form of the state"
             ),
         ],
+    )
+    image = FileField(
+        "Group Image File",
+        validators=[FileRequired(), FileAllowed(list(ALLOWED_EXTENSIONS))],
     )
