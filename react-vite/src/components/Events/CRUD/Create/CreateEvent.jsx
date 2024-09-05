@@ -53,6 +53,7 @@ const CreateEvent = () => {
 						src={groupDetails.image}
 						alt={groupDetails.name}
 						id="fit-image-content"
+						sizes="(min-width: 768px) 1440px, 720px"
 					/>
 					<div className="create-event">
 						<Form
@@ -65,8 +66,8 @@ const CreateEvent = () => {
 							<h3
 								style={{
 									fontWeight: 800,
-                                                      fontSize: `29.4px`,
-                                                      marginTop: `20px`
+									fontSize: `29.4px`,
+									marginTop: `20px`,
 								}}
 							>
 								Create an event for {groupDetails.name}
