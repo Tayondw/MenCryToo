@@ -21,8 +21,8 @@ export const groupActions = async ({ request }) => {
 	if (!city.length || city.length < 3 || city.length > 30)
 		errors.city = "City name must be between 3 and 30 characters";
 	if (!state.length || state.length < 2 || state.length > 2)
-            errors.state = "Please enter the abbreviated form of the state";
-      
+		errors.state = "Please enter the abbreviated form of the state";
+
 	// Only require image if the group does not already have one
 	if (intent === "create-group" && !image)
 		errors.image = "Group image is required to create a group";
@@ -32,8 +32,9 @@ export const groupActions = async ({ request }) => {
 	}
 
 	data.id = +data.id;
-      data.organizer_id = +data.organizer_id;
-      
+	data.organizer_id = +data.organizer_id;
+	data.group_id = +data.group_id;
+
 	if (intent === "create-group") {
 		await fetch(`/api/groups/new`, {
 			method: "POST",
@@ -52,9 +53,10 @@ export const groupActions = async ({ request }) => {
 	}
 
 	if (intent === "delete-group") {
-		return await fetch(`/api/groups/${data.id}/delete`, {
+		await fetch(`/api/groups/${data.id}/delete`, {
 			method: "DELETE",
 		});
+		return redirect("/groups");
 	}
 };
 
@@ -102,7 +104,8 @@ export const eventActions = async ({ request }) => {
 		const name = formData.get("name");
 		const description = formData.get("description");
 		const type = formData.get("type");
-		const capacity = formData.get("capacity");
+            const capacity = formData.get("capacity");
+            const image = formData.get("image");
 		const startDate = formData.get("startDate");
 		const endDate = formData.get("endDate");
 		const today = new Date();
@@ -117,6 +120,9 @@ export const eventActions = async ({ request }) => {
 		if (!capacity || capacity < 2 || capacity > 300)
 			errors.capacity =
 				"Event capacity must have at least two people attending and cannot exceed more than 300 people";
+		// Only require image if the group does not already have one
+		if (intent === "create-event" && !image)
+			errors.image = "Group image is required to create a group";
 
 		const start = new Date(startDate);
 		const end = new Date(endDate);

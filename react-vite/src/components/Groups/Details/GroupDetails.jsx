@@ -56,7 +56,10 @@ const GroupDetails = () => {
 			case "Images":
 				return groupDetails.groupImage.length > 0 ? (
 					<div id="second-half-main-group-details">
-						<h2>Check out the group&apos;s images</h2>
+						<h3>
+							Check out the group&apos;s images - click on an image to see its
+							details
+						</h3>
 						<div id="group-details-images">
 							{groupDetails.groupImage.map((image) => (
 								<Link
@@ -195,14 +198,15 @@ const GroupDetails = () => {
 
 	return (
 		<div id="group-details-background">
+			<div id="groups-link-holder">
+				<Link to="/groups" id="group-link">
+					{"< "}Groups
+				</Link>
+				<Link to="/groups/new" id="group-link">
+					Create Another Group{" >"}
+				</Link>
+			</div>
 			<div id="groups-details">
-				<div id="groups-link-holder">
-					{"< "}
-					<Link to="/groups" id="group-link">
-						Groups
-					</Link>
-				</div>
-
 				{groupDetails && (
 					<div id="each-groupDetail">
 						<main id="top-each-groupDetail">
@@ -327,11 +331,38 @@ const GroupDetails = () => {
 							</div>
 							<div id="second-half-group-details">
 								<div className="second-half-headers-groups">
-									<h1 onClick={() => setActiveSection("Images")}>IMAGES</h1>
-									<h1 onClick={() => setActiveSection("Meet the Organizer")}>
-										MEET THE ORGANIZER
-									</h1>
-									<h1 onClick={() => setActiveSection("Members")}>MEMBERS</h1>
+									{activeSection !== "Images" ? (
+										<h1 onClick={() => setActiveSection("Images")}>IMAGES</h1>
+									) : (
+										<h1
+											onClick={() => setActiveSection("Images")}
+											style={{ color: `var(--peach)` }}
+										>
+											IMAGES
+										</h1>
+									)}
+									{activeSection !== "Meet the Organizer"  ? (
+										<h1 onClick={() => setActiveSection("Meet the Organizer")}>
+											MEET THE ORGANIZER
+										</h1>
+									) : (
+										<h1
+											onClick={() => setActiveSection("Meet the Organizer")}
+											style={{ color: `var(--peach)` }}
+										>
+											MEET THE ORGANIZER
+										</h1>
+									)}
+									{activeSection !== "Members" ? (
+										<h1 onClick={() => setActiveSection("Members")}>MEMBERS</h1>
+									) : (
+										<h1
+											onClick={() => setActiveSection("Members")}
+											style={{ color: `var(--peach)` }}
+										>
+											MEMBERS
+										</h1>
+									)}
 								</div>
 								<div id="render-content">{renderContent()}</div>
 							</div>

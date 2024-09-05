@@ -11,6 +11,8 @@
 
 .create-group-link {
 	padding: 30px;
+      display: flex;
+      justify-content: space-between;
 }
 
 #groups-body-header {

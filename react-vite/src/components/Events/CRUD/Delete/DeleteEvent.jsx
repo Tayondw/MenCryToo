@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Form } from "react-router-dom";
 import { useModal } from "../../../../context/Modal";
 import "./DeleteEvent.css";
@@ -8,6 +9,12 @@ const DeleteEvent = ({ eventDetails }) => {
 		event.preventDefault();
 		closeModal();
 	};
+	// Close modal when clicking the back button
+	useEffect(() => {
+		const handlePopState = () => closeModal();
+		window.addEventListener("popstate", handlePopState);
+		return () => window.removeEventListener("popstate", handlePopState);
+	}, [closeModal]);
 
 	return (
 		<div id="event-deleteMenu">

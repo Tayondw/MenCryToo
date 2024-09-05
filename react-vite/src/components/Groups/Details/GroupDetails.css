@@ -20,13 +20,17 @@
 }
 
 #groups-link-holder {
-     margin: 2%
+     padding: 2%;
+     display: flex;
+     justify-content: space-between;
+     
 }
 
 #groups-link-holder, #groups-link-holder #group-link {
 	color: #223f5c;
 	font-family: "Open Sans", sans-serif;
 	font-weight: 800;
+      text-decoration: none;
 }
 
 #groups-link-holder:hover, #groups-link-holder #group-link:hover {

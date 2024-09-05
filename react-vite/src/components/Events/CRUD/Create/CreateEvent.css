@@ -1,0 +1,8 @@
+#new-event {
+      display: flex;
+	flex-direction: column;
+	margin: 3.65% 10%;
+      padding: 0;
+	align-items: center;
+	justify-content: center;
+}

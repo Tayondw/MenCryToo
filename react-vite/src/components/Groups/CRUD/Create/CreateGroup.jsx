@@ -1,4 +1,4 @@
-import { useActionData, Form, useNavigate } from "react-router-dom";
+import { useActionData, Form, useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import Footer from "../../../Footer";
@@ -35,15 +35,15 @@ const CreateGroup = () => {
 					>
 						<div id="header">
 							<h1>Start a New Group</h1>
-							<h2>
+							<h3>
 								We&apos;ll walk you through a few steps to build your local
 								community
-							</h2>
+							</h3>
 							<hr />
 						</div>
 						<div id="section-1-create">
 							<div id="set-city">
-								<h2>What city will your group be based in?</h2>
+								<h3>What city will your group be based in?</h3>
 								<div className="caption">
 									<p>
 										Groups meet locally, in person, and online. We&apos;ll
@@ -67,7 +67,7 @@ const CreateGroup = () => {
 								</p>
 							)}
 							<div id="set-state">
-								<h2>What state will the group be based in?</h2>
+								<h3>What state will the group be based in?</h3>
 								<div id="state-input">
 									<input
 										id="state-input-text"
@@ -88,7 +88,7 @@ const CreateGroup = () => {
 						<hr />
 						<div id="section-2-create">
 							<div id="set-name">
-								<h2>What will your group&apos;s name be?</h2>
+								<h3>What will your group&apos;s name be?</h3>
 								<div className="caption">
 									<p>
 										Choose a name that will give people a clear idea of what the
@@ -118,7 +118,7 @@ const CreateGroup = () => {
 						<hr />
 						<div id="section-3-create">
 							<div id="set-description">
-								<h2>Describe the purpose of your group.</h2>
+								<h3>Describe the purpose of your group.</h3>
 								<div className="caption">
 									<p>
 										People will see this when we promote your group, but
@@ -150,7 +150,7 @@ const CreateGroup = () => {
 						</div>
 						<hr />
 						<div id="image-upload">
-							<h2>Upload a group image</h2>
+							<h3>Upload a group image</h3>
 							<input name="image" type="file" accept="image/*" />
 							{errors?.image && (
 								<p style={{ color: "red" }} className="errors">
@@ -161,7 +161,7 @@ const CreateGroup = () => {
 						<hr />
 						<div id="section-4-create">
 							<div id="set-privacy">
-								<h2>Final steps...</h2>
+								<h3>Final steps...</h3>
 								<div className="type-questions">
 									<label htmlFor="type-select">
 										Is this an in-person or online group?
@@ -201,6 +201,9 @@ const CreateGroup = () => {
 							>
 								Create group
 							</button>
+							<Link to="/groups">
+								<button id="update-group-cancel">Cancel</button>
+							</Link>
 							<input type="hidden" name="organizer_id" value={sessionUser.id} />
 						</div>
 					</Form>

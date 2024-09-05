@@ -1,58 +1,59 @@
+import { useEffect } from "react";
+import { Form } from "react-router-dom";
 import { useModal } from "../../../../context/Modal";
 import "./DeleteGroup.css";
 
-const DeleteGroup = ({ groupDetails, navigate }) => {
+const DeleteGroup = ({ groupDetails }) => {
 	const { closeModal } = useModal();
-
-	const yesDelete = async (event) => {
-		event.preventDefault();
-		try {
-			const response = await fetch(`/api/groups/${groupDetails.id}/delete`, {
-				method: "DELETE",
-			});
-
-			if (response.ok) {
-				console.log("Group deleted successfully");
-				closeModal();
-				navigate("/groups");
-			} else {
-				console.error("Failed to delete the group");
-			}
-		} catch (error) {
-			console.error("Error:", error);
-		}
-	};
-
-	const noDelete = async (event) => {
+	const onClose = async (event) => {
 		event.preventDefault();
 		closeModal();
 	};
+	// Close modal when clicking the back button
+	useEffect(() => {
+		const handlePopState = () => closeModal();
+		window.addEventListener("popstate", handlePopState);
+		return () => window.removeEventListener("popstate", handlePopState);
+	}, [closeModal]);
 
 	return (
-		<div id="deleteMenu">
-			<h1>Confirm Delete</h1>
-			<h3>Are you sure you want to remove this group?</h3>
-			<div id="button-div">
-				<div>
+		<div id="event-deleteMenu">
+			<div id="event-close-confirm">
+				<button id="delete-close-button" onClick={onClose}>
+					✖
+				</button>
+				<div id="confirm-delete">
+					<h1>Confirm Delete</h1>
+					<h3>Are you sure you want to remove {groupDetails.name}?</h3>
+				</div>
+			</div>
+			<div id="delete-event">
+				<Form
+					method="delete"
+					action={`/groups/${groupDetails.id}`}
+					onSubmit={closeModal}
+				>
 					<button
-						id="button-text"
-						style={{ backgroundColor: "red" }}
-						value="delete"
 						type="submit"
-						onClick={yesDelete}
+						name="intent"
+						style={{ backgroundColor: "red" }}
+						value="delete-group"
+						id="button-text"
+						className="button"
 					>
 						Yes (Delete Group)
 					</button>
-				</div>
-				<div>
 					<button
 						id="button-text"
 						style={{ backgroundColor: "darkgray" }}
-						onClick={noDelete}
+						onClick={onClose}
+						className="button"
 					>
 						No (Keep Group)
 					</button>
-				</div>
+					<input type="hidden" name="groupId" value={groupDetails.id} />
+					<input type="hidden" name="id" value={groupDetails.id} />
+				</Form>
 			</div>
 		</div>
 	);

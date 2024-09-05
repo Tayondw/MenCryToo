@@ -4,35 +4,13 @@ import { useModal } from "../../../context/Modal";
 import "./GroupImage.css";
 
 const GroupImage = ({ groupDetails, onClose }) => {
-      const group_image = useActionData();
-      const { closeModal } = useModal();
-
+	const group_image = useActionData();
+	const { closeModal } = useModal();
 	// Close modal when clicking the back button
 	useEffect(() => {
-		const handlePopState = () => {
-			closeModal();
-		};
-
+		const handlePopState = () => closeModal();
 		window.addEventListener("popstate", handlePopState);
-
-		return () => {
-			window.removeEventListener("popstate", handlePopState);
-		};
-	}, [closeModal]);
-
-	// Close modal when clicking outside of the modal content
-	useEffect(() => {
-		const handleClickOutside = (event) => {
-			if (event.target.classList.contains("modal-close")) {
-				closeModal();
-			}
-		};
-
-		document.addEventListener("click", handleClickOutside);
-
-		return () => {
-			document.removeEventListener("click", handleClickOutside);
-		};
+		return () => window.removeEventListener("popstate", handlePopState);
 	}, [closeModal]);
 
 	return (
@@ -50,7 +28,7 @@ const GroupImage = ({ groupDetails, onClose }) => {
 				action={`/groups/${groupDetails.id}`}
 				onSubmit={onClose}
 			>
-				<input name="group_image" type="file" accept="image/*" multiple/>
+				<input name="group_image" type="file" accept="image/*" multiple />
 				<button type="submit" name="intent" value="add-group-image">
 					Submit
 				</button>
