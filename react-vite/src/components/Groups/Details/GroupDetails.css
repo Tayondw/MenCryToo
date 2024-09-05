@@ -1,6 +1,5 @@
 #group-details-background {
-     background: linear-gradient(135deg, #dddddc, #e08f2c);
-     
+	background: linear-gradient(135deg, #dddddc, #e08f2c);
 }
 
 #groups-details {
@@ -9,13 +8,15 @@
 	align-items: flex-start;
 	padding: 1% 5%;
 	flex-direction: column;
-      padding-bottom: 42.3px;
+	padding-bottom: 42.3px;
+      width: 100%;
 }
 
 #each-groupDetail {
-      display: grid;
-      grid-template-columns: 80% 15%;
-      gap: 15px;
+	display: grid;
+	grid-template-columns: 80% 10%;
+	gap: 15px;
+      width: 100%;
 }
 
 #groups-link-holder #group-link {
@@ -27,24 +28,25 @@
 #top-each-groupDetail {
 	display: grid;
 	/* grid-template-columns: 0.4fr 2fr; */
-      grid-template-rows: 0fr 0fr;
+	grid-template-rows: 0fr 0fr;
 	justify-content: center;
 	align-items: center;
-      gap: 20px;
+      grid-column: 1;
+	gap: 20px;
 	/* column-gap: 55px; */
 }
 
 #top-group-details {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 #top-each-groupDetail #groupDetailImage {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      grid-row: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	grid-row: 1;
 }
 
 #top-each-groupDetail #groupDetailImage img {
@@ -57,7 +59,7 @@
 	justify-content: center;
 	flex-direction: column;
 	align-items: center;
-      grid-row: 2;
+	grid-row: 2;
 }
 
 #groupDetailInfo #groupDetailName {
@@ -88,8 +90,8 @@
 }
 
 #crud-buttons {
-      padding-top: 20px;
-      padding-bottom: 20px;
+	padding-top: 20px;
+	padding-bottom: 20px;
 	display: flex;
 }
 
@@ -108,43 +110,43 @@
 }
 
 #second-half-main-group-details {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 }
 
 #second-half-main-group-details h2 {
-      align-self: center;
+	align-self: center;
 }
 
 #group-details-images {
-      display: flex;
-      flex-wrap: wrap;
-      width: 100%; 
-      margin: 0;
-      padding: 0;
-      justify-content: center;
-      align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	justify-content: center;
+	align-items: center;
 }
 
 #group-details-images .box {
-      height: 350px;
-      width: 350px;
-      margin: 20px 20px 20px 20px;
-      overflow: hidden;
-      border-radius: 5px;
-      box-shadow: 0 3px 5px #000;   
+	height: 350px;
+	width: 350px;
+	margin: 20px 20px 20px 20px;
+	overflow: hidden;
+	border-radius: 5px;
+	box-shadow: 0 3px 5px #000;
 }
 
 #group-details-images .box img {
-      height: 100%;
-      width: 100%;
-      object-fit: cover;
+	height: 100%;
+	width: 100%;
+	object-fit: cover;
 }
 
 #group-details-images .box img:hover {
-      transform: scale(1.4);
+	transform: scale(1.4);
 }
 
 #event-list-past {
@@ -155,14 +157,56 @@
 	cursor: pointer;
 }
 
+.second-half-headers-groups {
+	display: flex;
+	justify-content: space-evenly;
+	gap: 55px;
+}
+
+.members-list {
+	display: flex;
+	flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+	gap: 50px;
+}
+
+.members-list .cards {
+      width: 600px;
+	/* flex: 1 1 calc(33.333% - 20px);
+	min-width: 250px; */
+}
+
+#second-half-group-details {
+	flex: 1;
+	min-width: 0; /* Helps prevent content overflow */
+}
+
+.second-half-headers-groups h1 {
+	cursor: pointer;
+}
+
+.second-half-headers-groups h1:hover {
+	color: #ea8d89;
+}
+
+#render-content {
+	/* Add a max width or consistent width to prevent layout shift */
+	width: 100%; /* Adjust as needed */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+}
+
 #body-page {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
-      justify-content: flex-start;
-      position: sticky;
-      flex-wrap: wrap;
-      width: 100px;
+	justify-content: flex-start;
+	position: sticky;
+	flex-wrap: wrap;
+	width: 100px;
+      grid-column: 2;
 }
 
 #organizer {
@@ -233,21 +277,22 @@
 
 #events-section {
 	display: grid;
-      align-items: center;
-      justify-content: center;
+	align-items: center;
+	justify-content: center;
 	flex-direction: row;
-      flex-wrap: wrap;
+	flex-wrap: wrap;
 	width: fit-content;
-      position: sticky;
-      border: 2px solid #223f5c;
-      padding: 20%;
-      gap: 30px;
+	position: sticky;
+	border: 2px solid #223f5c;
+	padding: 20%;
+	gap: 30px;
 }
 
 .event-list {
-	display: flex;
+	/* display: flex;
 	flex-wrap: wrap;
-	gap: 20px;
+	gap: 20px; */
+	margin-top: 15px;
 }
 
 .group-details-event-card {

@@ -1,6 +1,6 @@
 import { useLoaderData, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import OpenModalButton from "../../OpenModalButton";
 import { useModal } from "../../../context/Modal";
 import GroupImage from "../Images";
@@ -13,6 +13,7 @@ const GroupDetails = () => {
 	const groupDetails = useLoaderData();
 	const navigate = useNavigate();
 	const sessionUser = useSelector((state) => state.session.user);
+	const [activeSection, setActiveSection] = useState("Images"); // State to track the active section
 	const { closeModal } = useModal();
 
 	useEffect(() => {
@@ -52,6 +53,152 @@ const GroupDetails = () => {
 	const formattedPastEvents = formatEventDate(pastEvents);
 
 	console.log("group details", groupDetails);
+
+	const renderContent = () => {
+		switch (activeSection) {
+			case "Images":
+				return groupDetails.groupImage.length > 0 ? (
+					<div id="second-half-main-group-details">
+						<h2>Check out the group&apos;s images</h2>
+						<div id="group-details-images">
+							{groupDetails.groupImage.map((image) => (
+								<Link
+									to={`/groups/${groupDetails.id}/images/${image.id}`}
+									key={image.id}
+									className="box"
+								>
+									<img src={image.groupImage} alt={image.name} />
+								</Link>
+							))}
+						</div>
+					</div>
+				) : (
+					<div id="crud-buttons-update-image">
+						<p>
+							Currently no images have been uploaded by the group organizer.
+						</p>
+						<div id="crud-buttons-delete">
+							<OpenModalButton
+								groupDetails={groupDetails}
+								onClose={closeModal}
+								className="group-image-button w-button"
+								id="add-group-image"
+								buttonText="Add Images"
+								style={{
+									backgroundColor: "gray",
+									color: `#FAF5E4`,
+								}}
+								modalComponent={
+									<GroupImage
+										groupDetails={groupDetails}
+										onClose={closeModal}
+									/>
+								}
+							/>
+						</div>
+					</div>
+				);
+			case "Meet the Organizer":
+				return !groupDetails.organizer ? (
+					<p>Currently no group organizer. Create a group!</p>
+				) : (
+					<Link
+						to={`user/${groupDetails.organizer.id}`}
+						style={{
+							textDecoration: `none`,
+							color: `inherit`,
+						}}
+					>
+						<div className="cards">
+							<img
+								src={groupDetails.organizer.profileImage}
+								alt={groupDetails.organizer.username}
+							/>
+							<div id="display-style-direction">
+								<div id="keep-in-style">
+									<h2>
+										{groupDetails.organizer.firstName}{" "}
+										{groupDetails.organizer.lastName}
+									</h2>
+									<h3>{groupDetails.organizer.bio}</h3>
+								</div>
+								<ul className="stats">
+									<li>
+										<var>{groupDetails.organizer.username}</var>
+										<label>Username</label>
+									</li>
+									<li>
+										<var>{groupDetails.organizer.email}</var>
+										<label>Email</label>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</Link>
+				);
+			case "Members":
+				return groupDetails.members.length > 0 ? (
+					<div className="members-list">
+						{groupDetails.members.map((member) => (
+							<Link
+								to={`users/${member.id}`}
+								style={{
+									textDecoration: "none",
+									color: "inherit",
+								}}
+								key={member.id}
+							>
+								<div className="cards">
+									<img src={member.profileImage} alt={member.username} />
+									<div id="display-style-direction">
+										<div id="keep-in-style">
+											<h2>
+												{member.firstName} {member.lastName}
+											</h2>
+											<h3>{member.bio}</h3>
+										</div>
+										<ul className="stats">
+											<li>
+												<var>{member.username}</var>
+												<label>Username</label>
+											</li>
+											<li>
+												<var>{member.email}</var>
+												<label>Email</label>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</Link>
+						))}
+					</div>
+				) : (
+					<div id="join">
+						<p>No members in this group yet. Join to be the first member!</p>
+						<button
+							className="revoke"
+							onClick={(event) => {
+								event.preventDefault();
+								alert("Feature Coming Soon...");
+							}}
+							style={{
+								backgroundColor: "red",
+								width: `250px`,
+								cursor: `pointer`,
+								borderRadius: `40px`,
+								padding: `12px 25px`,
+								fontSize: `1em`,
+							}}
+						>
+							Join this group
+						</button>
+					</div>
+				);
+
+			default:
+				return null;
+		}
+	};
 
 	return (
 		<div id="group-details-background">
@@ -187,20 +334,15 @@ const GroupDetails = () => {
 									) : null}
 								</div>
 							</div>
-
-							<div id="second-half-main-group-details">
-								<h2>Check out the group&apos;s images</h2>
-								<div id="group-details-images">
-									{groupDetails.groupImage.map((image) => (
-										<Link
-											to={`/groups/${groupDetails.id}/images/${image.id}`}
-											key={image.id}
-											className="box"
-										>
-											<img src={image.groupImage} alt={image.name} />
-										</Link>
-									))}
+							<div id="second-half-group-details">
+								<div className="second-half-headers-groups">
+									<h1 onClick={() => setActiveSection("Images")}>IMAGES</h1>
+									<h1 onClick={() => setActiveSection("Meet the Organizer")}>
+										MEET THE ORGANIZER
+									</h1>
+									<h1 onClick={() => setActiveSection("Members")}>MEMBERS</h1>
 								</div>
+								<div id="render-content">{renderContent()}</div>
 							</div>
 						</main>
 						<aside id="body-page">
@@ -215,7 +357,10 @@ const GroupDetails = () => {
 											</h3>
 											<div id="event-list-upcoming" className="event-list">
 												{formattedUpcomingEvents.map((event) => (
-													<div key={event.id} className="group-details-event-card">
+													<div
+														key={event.id}
+														className="group-details-event-card"
+													>
 														<div
 															className="group-details-event-item"
 															onClick={() => navigate(`/events/${event.id}`)}
@@ -259,8 +404,8 @@ const GroupDetails = () => {
 											</div>
 										</>
 									)}
-                                                </div>
-                                                {/* <hr width={500}/> */}
+								</div>
+								{/* <hr width={500}/> */}
 								<div id="past-events">
 									{!pastEvents.length ? (
 										<h3 className="groupDetail-h3">No Past Events</h3>
@@ -271,7 +416,10 @@ const GroupDetails = () => {
 											</h3>
 											<div id="event-list-past" className="event-list">
 												{formattedPastEvents.map((event) => (
-													<div key={event.id} className="group-details-event-card">
+													<div
+														key={event.id}
+														className="group-details-event-card"
+													>
 														<div
 															className="group-details-event-item"
 															onClick={() => navigate(`/events/${event.id}`)}
