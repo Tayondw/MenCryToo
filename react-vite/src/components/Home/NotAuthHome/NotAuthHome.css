@@ -205,6 +205,7 @@
 	text-decoration: none;
 	transition: background-color 0.3s;
 	display: inline-block;
+      border: none;
 }
 
 .button:hover,
@@ -504,7 +505,7 @@
 
 .footer {
 	padding-top: 35px;
-	padding-bottom: 35px;
+	padding-bottom: 20px;
 	display: flex;
 	flex-direction: row;
 }

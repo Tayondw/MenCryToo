@@ -81,13 +81,9 @@ const GroupDetails = () => {
 							<OpenModalButton
 								groupDetails={groupDetails}
 								onClose={closeModal}
-								className="group-image-button w-button"
+								className="button"
 								id="add-group-image"
 								buttonText="Add Images"
-								style={{
-									backgroundColor: "gray",
-									color: `#FAF5E4`,
-								}}
 								modalComponent={
 									<GroupImage
 										groupDetails={groupDetails}
@@ -273,22 +269,20 @@ const GroupDetails = () => {
 										<div id="crud-buttons">
 											<div id="crud-buttons-create">
 												<button
-													className="w-button"
+													className="button"
 													onClick={() =>
 														navigate(`/groups/${groupDetails.id}/events/new`)
 													}
-													style={{ backgroundColor: `gray`, color: `#FAF5E4` }}
 												>
 													Create event
 												</button>
 											</div>
 											<div id="crud-buttons-update">
 												<button
-													className="w-button"
+													className="button"
 													onClick={() =>
 														navigate(`/groups/${groupDetails.id}/edit`)
 													}
-													style={{ backgroundColor: `gray`, color: `#FAF5E4` }}
 												>
 													Update Group
 												</button>
@@ -298,13 +292,9 @@ const GroupDetails = () => {
 													<OpenModalButton
 														groupDetails={groupDetails}
 														onClose={closeModal}
-														className="group-image-button w-button"
+														className="button"
 														id="add-group-image"
 														buttonText="Add Images"
-														style={{
-															backgroundColor: "gray",
-															color: `#FAF5E4`,
-														}}
 														modalComponent={
 															<GroupImage
 																groupDetails={groupDetails}
@@ -318,10 +308,14 @@ const GroupDetails = () => {
 												<OpenModalButton
 													groupDetails={groupDetails}
 													navigate={navigate}
-													className="group-delete-button w-button"
+													className="button"
 													id="delete-group"
 													buttonText="Delete Group"
-													style={{ backgroundColor: "red", color: `#dddddc` }}
+													style={{
+														backgroundColor: "red",
+														color: `#dddddc`,
+														boxShadow: `none`,
+													}}
 													modalComponent={
 														<DeleteGroup
 															groupDetails={groupDetails}
