@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import Footer from "../../../Footer";
 import "./CreateEvent.css";
 
 const CreateEvent = () => {
@@ -47,17 +46,34 @@ const CreateEvent = () => {
 	};
 
 	return (
-		<>
-			<div id="new-event">
-				{sessionUser && groupDetails ? (
-					<div id="events-section-1">
-						<h1>Create an event for {groupDetails.name}</h1>
+		<div id="new-event">
+			{sessionUser && groupDetails ? (
+				<div id="events-section-1">
+					<img
+						src={groupDetails.image}
+						alt={groupDetails.name}
+						id="fit-image-content"
+					/>
+					<div className="create-event">
 						<Form
 							method="post"
 							action={`/groups/${groupDetails.id}/events/new`}
-							className="create-event"
+							className="create-event-form"
+							encType="multipart/form-data"
+							type="file"
 						>
+							<h3
+								style={{
+									fontWeight: 800,
+                                                      fontSize: `29.4px`,
+                                                      marginTop: `20px`
+								}}
+							>
+								Create an event for {groupDetails.name}
+							</h3>
+							<hr />
 							<div id="name-input">
+								<h3>EVENT NAME</h3>
 								<label>
 									What is the name of your event?
 									<input
@@ -77,6 +93,7 @@ const CreateEvent = () => {
 							</div>
 							<hr />
 							<div id="event-status">
+								<h3>Type of Event</h3>
 								<label>
 									Is this an in-person or online group?
 									<select
@@ -116,6 +133,7 @@ const CreateEvent = () => {
 							</div>
 							<hr />
 							<div id="event-date-time">
+								<h3>EVENT STATUS</h3>
 								<label>
 									When does your event start?
 									<input
@@ -149,6 +167,7 @@ const CreateEvent = () => {
 							</div>
 							<hr />
 							<div id="event-description">
+								<h3>EVENT DESCRIPTION</h3>
 								<label>
 									Please describe your event:
 									<textarea
@@ -192,12 +211,11 @@ const CreateEvent = () => {
 							</div>
 						</Form>
 					</div>
-				) : (
-					<h1>Please log in to create an event!</h1>
-				)}
-			</div>
-			<Footer />
-		</>
+				</div>
+			) : (
+				<h1>Please log in to create an event!</h1>
+			)}
+		</div>
 	);
 };
 

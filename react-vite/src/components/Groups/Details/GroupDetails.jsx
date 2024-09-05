@@ -5,7 +5,6 @@ import OpenModalButton from "../../OpenModalButton";
 import { useModal } from "../../../context/Modal";
 import GroupImage from "../Images";
 import DeleteGroup from "../CRUD/Delete";
-import Footer from "../../Footer";
 import "./GroupDetails.css";
 
 const GroupDetails = () => {
@@ -484,7 +483,6 @@ const GroupDetails = () => {
 					</div>
 				)}
 			</div>
-			<Footer />
 		</div>
 	);
 };

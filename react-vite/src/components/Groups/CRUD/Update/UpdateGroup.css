@@ -1,0 +1,7 @@
+#update-group {
+	display: flex;
+	flex-direction: column;
+	margin: 0px 10% 2%;
+	align-items: center;
+	justify-content: center;
+}

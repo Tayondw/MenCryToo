@@ -1,7 +1,6 @@
 import { useActionData, Form, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import Footer from "../../../Footer";
 import "./CreateProfile.css";
 
 const CreateProfile = () => {
@@ -166,7 +165,6 @@ const CreateProfile = () => {
 			) : (
 				<h1>Please log in to make a profile!</h1>
 			)}
-			<Footer />
 		</div>
 	);
 };

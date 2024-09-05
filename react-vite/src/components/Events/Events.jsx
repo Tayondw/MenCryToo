@@ -1,6 +1,5 @@
 import { useLoaderData, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import Footer from "../Footer";
 import "./Events.css";
 
 const Events = () => {
@@ -79,7 +78,6 @@ const Events = () => {
 					</p>
 				)}
 			</div>
-			<Footer />
 		</div>
 	);
 };

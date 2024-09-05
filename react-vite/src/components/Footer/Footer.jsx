@@ -1,4 +1,4 @@
-import { Outlet, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { RiTwitterXLine, RiFacebookLine } from "react-icons/ri";
 import { PiPinterestLogo } from "react-icons/pi";
 import { TiSocialGooglePlus } from "react-icons/ti";
@@ -89,9 +89,7 @@ const Footer = () => {
 					</div>
 				</div>
 			</div>
-
 			<div className="footer-text">MEN CRY TOO COPYRIGHT 2024</div>
-			<Outlet />
 		</div>
 	);
 };

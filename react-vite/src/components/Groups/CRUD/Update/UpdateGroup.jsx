@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import Footer from "../../../Footer";
 import "./UpdateGroup.css";
 
 const UpdateGroup = () => {
@@ -48,12 +47,12 @@ const UpdateGroup = () => {
 	return (
 		<>
 			<div id="groups-link-holder">
-				{"< "}
 				<Link to={`/groups/${groupDetails.id}`} id="group-link">
+					{"< "}
 					{groupDetails.name}
 				</Link>
 			</div>
-			<div id="new-group">
+			<div id="update-group">
 				<div id="update-form">
 					{sessionUser ? (
 						<Form
@@ -246,7 +245,6 @@ const UpdateGroup = () => {
 					)}
 				</div>
 			</div>
-			<Footer />
 		</>
 	);
 };

@@ -1,7 +1,6 @@
 import { useLoaderData, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import "./Groups.css";
-import Footer from "../Footer";
 
 const Groups = () => {
 	const { allGroups } = useLoaderData();
@@ -71,7 +70,6 @@ const Groups = () => {
 					</p>
 				)}
 			</div>
-			<Footer />
 		</div>
 	);
 };
