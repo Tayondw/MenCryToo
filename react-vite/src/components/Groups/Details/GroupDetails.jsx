@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import OpenModalButton from "../../OpenModalButton";
 import { useModal } from "../../../context/Modal";
 import GroupImage from "../Images";
-import EditGroupImage from "../Images/EditGroupImage";
+// import EditGroupImage from "../Images/EditGroupImage";
 import DeleteGroup from "../CRUD/Delete";
 import Footer from "../../Footer";
 import "./GroupDetails.css";
@@ -126,6 +126,7 @@ const GroupDetails = () => {
 										<div id="crud-buttons">
 											<div id="crud-buttons-create">
 												<button
+													className="w-button"
 													onClick={() =>
 														navigate(`/groups/${groupDetails.id}/events/new`)
 													}
@@ -136,6 +137,7 @@ const GroupDetails = () => {
 											</div>
 											<div id="crud-buttons-update">
 												<button
+													className="w-button"
 													onClick={() =>
 														navigate(`/groups/${groupDetails.id}/edit`)
 													}
@@ -149,7 +151,7 @@ const GroupDetails = () => {
 													<OpenModalButton
 														groupDetails={groupDetails}
 														onClose={closeModal}
-														className="group-image-button"
+														className="group-image-button w-button"
 														id="add-group-image"
 														buttonText="Add Images"
 														style={{
@@ -169,7 +171,7 @@ const GroupDetails = () => {
 												<OpenModalButton
 													groupDetails={groupDetails}
 													navigate={navigate}
-													className="group-delete-button"
+													className="group-delete-button w-button"
 													id="delete-group"
 													buttonText="Delete Group"
 													style={{ backgroundColor: "red", color: `#dddddc` }}
@@ -213,9 +215,9 @@ const GroupDetails = () => {
 											</h3>
 											<div id="event-list-upcoming" className="event-list">
 												{formattedUpcomingEvents.map((event) => (
-													<div key={event.id} className="event-card">
+													<div key={event.id} className="group-details-event-card">
 														<div
-															className="event-item"
+															className="group-details-event-item"
 															onClick={() => navigate(`/events/${event.id}`)}
 														>
 															<img
@@ -257,7 +259,8 @@ const GroupDetails = () => {
 											</div>
 										</>
 									)}
-								</div>
+                                                </div>
+                                                {/* <hr width={500}/> */}
 								<div id="past-events">
 									{!pastEvents.length ? (
 										<h3 className="groupDetail-h3">No Past Events</h3>
@@ -268,15 +271,15 @@ const GroupDetails = () => {
 											</h3>
 											<div id="event-list-past" className="event-list">
 												{formattedPastEvents.map((event) => (
-													<div key={event.id} className="event-card">
+													<div key={event.id} className="group-details-event-card">
 														<div
-															className="event-item"
+															className="group-details-event-item"
 															onClick={() => navigate(`/events/${event.id}`)}
 														>
 															<img
 																src={event.image}
 																alt={event.name}
-																className="event-image"
+																className="group-details-event-image"
 															/>
 
 															<div className="event-item-dates">
