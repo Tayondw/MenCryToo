@@ -158,7 +158,6 @@ const CreateGroup = () => {
 								</p>
 							)}
 						</div>
-
 						<hr />
 						<div id="section-4-create">
 							<div id="set-privacy">

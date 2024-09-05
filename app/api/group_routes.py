@@ -8,7 +8,7 @@ from app.models import (
     Venue,
     Event,
 )
-from app.forms import GroupForm, GroupImageForm, EventForm, VenueForm
+from app.forms import GroupForm, GroupImageForm, EventForm, VenueForm, EditGroupForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
 
 group_routes = Blueprint("groups", __name__)
@@ -92,7 +92,7 @@ def create_group():
     return form.errors, 400
 
 
-@group_routes.route("/<int:groupId>/edit", methods=["POST"])
+@group_routes.route("/<int:groupId>/edit", methods=["GET", "POST"])
 @login_required
 def edit_group(groupId):
     """
@@ -114,7 +114,7 @@ def edit_group(groupId):
     if current_user.id != group_to_edit.organizer_id:
         return {"errors": {"message": "Unauthorized"}}, 401
 
-    form = GroupForm()
+    form = EditGroupForm()
     form["csrf_token"].data = request.cookies["csrf_token"]
 
     if form.validate_on_submit():

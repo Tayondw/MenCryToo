@@ -52,7 +52,7 @@ const EditGroupImage = ({ groupDetails, groupImageId, onClose }) => {
 				action={`/groups/${groupDetails.id}/images/${groupImageId}/edit`}
 				onSubmit={onClose}
 			>
-				<input name="group_image" type="file" accept="image/*" />
+				<input name="group_image" type="file" accept="image/*"/>
 				<button type="submit" name="intent" value="edit-group-image">
 					Submit
 				</button>

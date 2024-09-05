@@ -50,7 +50,7 @@ const GroupImage = ({ groupDetails, onClose }) => {
 				action={`/groups/${groupDetails.id}`}
 				onSubmit={onClose}
 			>
-				<input name="group_image" type="file" accept="image/*" />
+				<input name="group_image" type="file" accept="image/*" multiple/>
 				<button type="submit" name="intent" value="add-group-image">
 					Submit
 				</button>

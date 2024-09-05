@@ -19,6 +19,7 @@ const UpdateGroup = () => {
 	const [type, setType] = useState("");
 	const [city, setCity] = useState("");
 	const [state, setState] = useState("");
+	const [image, setImage] = useState("");
 
 	// Ensure user is logged in
 	useEffect(() => {
@@ -41,6 +42,7 @@ const UpdateGroup = () => {
 			setName(groupDetails.name || "");
 			setAbout(groupDetails.about || "");
 			setType(groupDetails.type || "");
+			setImage(groupDetails.image || "");
 		}
 	}, [groupDetails]);
 
@@ -53,6 +55,8 @@ const UpdateGroup = () => {
 							method="post"
 							action={`/groups/${groupDetails.id}/edit`}
 							className="update-group"
+							encType="multipart/form-data"
+							type="file"
 						>
 							<div id="header">
 								<h1>Update Group Information</h1>
@@ -67,8 +71,8 @@ const UpdateGroup = () => {
 									<h2>What city will your group be based in?</h2>
 									<div className="caption">
 										<p>
-											Groups meet locally, in person, and online.
-											We&apos;ll connect you with people in your area.
+											Groups meet locally, in person, and online. We&apos;ll
+											connect you with people in your area.
 										</p>
 									</div>
 									<div id="city-input">
@@ -166,6 +170,16 @@ const UpdateGroup = () => {
 								{errors?.about && (
 									<p style={{ color: "red" }} className="errors">
 										{errors.about}
+									</p>
+								)}
+							</div>
+							<hr />
+							<div id="image-upload">
+								<h2>Change your group image</h2>
+                                                <input name="image" type="file" accept="image/*" data-name={image} />
+								{errors?.image && (
+									<p style={{ color: "red" }} className="errors">
+										{errors.image}
 									</p>
 								)}
 							</div>

@@ -8,8 +8,8 @@ export const groupActions = async ({ request }) => {
 	const about = formData.get("about");
 	const type = formData.get("type");
 	const city = formData.get("city");
-      const state = formData.get("state");
-      const image = formData.get("image");
+	const state = formData.get("state");
+	const image = formData.get("image");
 	const errors = {};
 
 	if (!name.length || name.length < 3 || name.length > 50)
@@ -21,16 +21,23 @@ export const groupActions = async ({ request }) => {
 	if (!city.length || city.length < 3 || city.length > 30)
 		errors.city = "City name must be between 3 and 30 characters";
 	if (!state.length || state.length < 2 || state.length > 2)
-            errors.state = "Please enter the abbreviated form of the state";
-      if (!image) errors.image = "Group image is required to create a group";
+		errors.state = "Please enter the abbreviated form of the state";
+	// Only require image if the group does not already have one
+	if (intent === "create-group" && !image)
+		errors.image = "Group image is required to create a group";
+	// if (!image) errors.image = "Group image is required to create a group";
 
 	if (Object.keys(errors).length) {
 		return errors;
 	}
 
 	data.id = +data.id;
-	data.organizer_id = +data.organizer_id;
-
+      data.organizer_id = +data.organizer_id;
+      
+      console.log("data", data);
+      console.log("intent", intent);
+      console.log("this is image", image);
+      
 	if (intent === "create-group") {
 		await fetch(`/api/groups/new`, {
 			method: "POST",
