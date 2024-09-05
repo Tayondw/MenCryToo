@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import OpenModalButton from "../../OpenModalButton";
 import { useModal } from "../../../context/Modal";
 import GroupImage from "../Images";
-// import EditGroupImage from "../Images/EditGroupImage";
 import DeleteGroup from "../CRUD/Delete";
 import Footer from "../../Footer";
 import "./GroupDetails.css";
@@ -51,8 +50,6 @@ const GroupDetails = () => {
 
 	const formattedUpcomingEvents = formatEventDate(upcomingEvents);
 	const formattedPastEvents = formatEventDate(pastEvents);
-
-	console.log("group details", groupDetails);
 
 	const renderContent = () => {
 		switch (activeSection) {

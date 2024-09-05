@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SelectMultipleField
-from flask_wtf.file import FileAllowed, FileField, FileRequired
+from flask_wtf.file import FileAllowed, FileField
 from wtforms.validators import DataRequired, Length
 
 ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "gif"}
@@ -19,7 +19,7 @@ tags = [
 ]
 
 
-class UserForm(FlaskForm):
+class EditUserForm(FlaskForm):
     firstName = StringField(
         "first name",
         validators=[
@@ -51,7 +51,7 @@ class UserForm(FlaskForm):
     )
     profileImage = FileField(
         "Profile Image",
-        validators=[FileRequired(), FileAllowed(list(ALLOWED_EXTENSIONS))],
+        validators=[FileAllowed(list(ALLOWED_EXTENSIONS))],
     )
     userTags = SelectMultipleField(
         "Tags",

@@ -19,7 +19,6 @@ const UpdateGroup = () => {
 	const [type, setType] = useState("");
 	const [city, setCity] = useState("");
 	const [state, setState] = useState("");
-	const [image, setImage] = useState("");
 
 	// Ensure user is logged in
 	useEffect(() => {
@@ -42,7 +41,6 @@ const UpdateGroup = () => {
 			setName(groupDetails.name || "");
 			setAbout(groupDetails.about || "");
 			setType(groupDetails.type || "");
-			setImage(groupDetails.image || "");
 		}
 	}, [groupDetails]);
 
@@ -176,7 +174,7 @@ const UpdateGroup = () => {
 							<hr />
 							<div id="image-upload">
 								<h2>Change your group image</h2>
-                                                <input name="image" type="file" accept="image/*" data-name={image} />
+                                                <input name="image" type="file" accept="image/*"/>
 								{errors?.image && (
 									<p style={{ color: "red" }} className="errors">
 										{errors.image}
