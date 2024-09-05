@@ -135,6 +135,7 @@ const CreateEvent = () => {
 							<hr />
 							<div id="event-date-time">
 								<h3>EVENT STATUS</h3>
+
 								<label>
 									When does your event start?
 									<input
@@ -166,11 +167,12 @@ const CreateEvent = () => {
 									</p>
 								)}
 							</div>
+
 							<hr />
 							<div id="event-description">
 								<h3>EVENT DESCRIPTION</h3>
 								<label>
-									Please describe your event:
+									Please an event description:
 									<textarea
 										name="description"
 										id="event-description-textarea"
@@ -188,7 +190,15 @@ const CreateEvent = () => {
 							<hr />
 							<div id="image-upload">
 								<h3>Upload an event image</h3>
-								<input name="image" type="file" accept="image/*" />
+								<label htmlFor="file-upload" className="custom-file-upload">
+									Choose an image
+								</label>
+								<input
+									name="image"
+									type="file"
+									accept="image/*"
+									id="file-upload"
+								/>
 								{errors?.image && (
 									<p style={{ color: "red" }} className="errors">
 										{errors.image}

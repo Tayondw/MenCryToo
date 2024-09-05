@@ -104,8 +104,7 @@ select {
 	border-radius: 40px;
 	padding: 12px 25px;
 	font-size: 1em;
-	color: #dddddc;
-	font-family: "Quicksand", sans-serif;
+	color: var(--white-smoke);
 	background: linear-gradient(45deg, var(--orangy), var(--deep-blue));
 }
 
@@ -116,7 +115,6 @@ select {
 	border-radius: 40px;
 	padding: 12px 25px;
 	font-size: 1em;
-	color: #dddddc;
-	font-family: "Quicksand", sans-serif;
+	color: var(--white-smoke);
 	background: linear-gradient(45deg, var(--peach), var(--deep-blue));
 }

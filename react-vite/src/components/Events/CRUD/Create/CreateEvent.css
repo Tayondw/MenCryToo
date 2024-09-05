@@ -7,30 +7,32 @@
 }
 
 #events-section-1 {
-	-webkit-box-align: center;
+	/* -webkit-box-align: center;
 	align-items: center;
 	display: flex;
 	flex-direction: row;
 	-webkit-box-flex: 1;
 	flex-grow: 1;
 	height: 100%;
-	width: 100%;
-	/* display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 35px; */
+	width: 100%; */
+	display: grid;
+	grid-template-columns: 1fr 1fr;
 	/* flex-direction: column; */
 }
 
 #fit-image-content {
-	flex: 1 1 100%;
+	width: 100%;
+	height: 100%;
+	/* flex: 1 1 100%;
 	object-fit: cover;
-	overflow: hidden;
+	overflow: hidden; */
 }
 
 .create-event {
 	display: flex;
-	flex: 1 1 90%;
+	/* flex: 1 1 90%; */
 	flex-direction: column;
+	align-items: center;
 	height: 100%;
 	/* grid-column: 2;
 	display: flex;
@@ -65,32 +67,33 @@
 #event-date-time label,
 #event-description label {
 	display: flex;
-	flex-direction: column;
+	/* flex-direction: column; */
 	width: 100%;
+	gap: 15px;
 }
 
 #event-name-input {
-	border: 2px solid black;
-	width: 60%;
+	border: 2px solid var(--deep-blue);
+	width: 35%;
 	box-sizing: border-box;
 }
 
 #event-privacy-select,
 #event-capacity-select {
-	border: 2px solid black;
-	width: 30%;
+	border: 2px solid var(--deep-blue);
+	width: 20%;
 	box-sizing: border-box;
 }
 
 #event-startDate-select,
 #event-endDate-select {
-	border: 2px solid black;
-	width: 40%;
+	border: 2px solid var(--deep-blue);
+	width: 30%;
 	box-sizing: border-box;
 }
 
 #event-description-textarea {
-	border: 2px solid black;
+	border: 2px solid var(--deep-blue);
 	width: 100%;
 	box-sizing: border-box;
 	height: 50px;
@@ -104,7 +107,29 @@
 }
 
 #create-event {
+	padding-top: 25px;
 	padding-bottom: 25px;
 	display: flex;
 	gap: 25px;
+}
+
+#image-upload {
+	margin-bottom: 20px;
+}
+
+input[type="file"] {
+	&::-webkit-file-upload-button {
+            display: none;
+      }
+      &::file-selector-button {
+            display: none;
+      }
+}
+
+.custom-file-upload {
+	background-color: var(--deep-blue);
+	display: inline-block;
+	padding: 6px 12px;
+	cursor: pointer;
+      color: var(--white-smoke);
 }
