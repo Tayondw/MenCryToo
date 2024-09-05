@@ -59,7 +59,8 @@
 
 #display-style-direction {
       /* border: 2px solid blue; */
-      width: inherit;
+      width: 100%;
+      max-width: 650px;
       /* display: flex;
       justify-content: center;
       align-items: center;
@@ -69,7 +70,7 @@
 #keep-in-style {
       display: flex;
       flex-direction: column;
-      width: inherit;
+      width: 100%;
       /* border: 2px solid red; */
 }
 

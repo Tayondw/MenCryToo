@@ -360,3 +360,37 @@
 	-webkit-line-clamp: 3; /* Limit to 3 lines */
 	-webkit-box-orient: vertical;
 }
+
+#members-display-style-direction {
+      width: 100%;
+      max-width: 650px;
+}
+
+#members-keep-in-style {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+}
+
+#members-keep-in-style h2,
+#keep-in-style h3 {
+	font-weight: 400;
+      width: 65%;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+}
+
+#keep-in-style h3,
+.stats label {
+	opacity: 0.5;
+}
+
+#keep-in-style h2 {
+	font-size: 28px;
+	margin: 0;
+}
+
+#members-keep-in-style h3 {
+	font-size: 16px;
+	margin: 0 0 20px;
+}

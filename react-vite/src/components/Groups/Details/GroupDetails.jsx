@@ -145,8 +145,8 @@ const GroupDetails = () => {
 							>
 								<div className="cards">
 									<img src={member.profileImage} alt={member.username} />
-									<div id="display-style-direction">
-										<div id="keep-in-style">
+									<div id="members-display-style-direction">
+										<div id="members-keep-in-style">
 											<h2>
 												{member.firstName} {member.lastName}
 											</h2>

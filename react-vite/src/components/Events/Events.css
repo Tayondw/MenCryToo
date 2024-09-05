@@ -27,16 +27,18 @@
 }
 
 .event-cards {
-	display: flex;
+	display: grid;
+      grid-template-columns: 0.4fr 1fr;
 	align-items: center;
 	width: 100%;
-	max-width: 870px;
+	max-width: 850px;
 	padding: 20px;
 	border-radius: 60px;
 	background: #dddddc;
 	height: 500px;
 	margin: 8px;
 	flex-wrap: wrap;
+      flex-direction: row;
 }
 
 .event-cards img {
@@ -55,12 +57,13 @@
 	display: flex;
 	flex-direction: column;
 	flex-wrap: wrap; /* Enable wrapping for the content */
+
 }
 
 .event-cards div h2,
 .event-cards div h3 {
 	font-weight: 400;
-      /* word-wrap: break-word; */
+      word-wrap: break-word;
 }
 
 .event-cards div h3,
@@ -72,17 +75,21 @@
 	font-size: 28px;
 	margin: 0;
 	word-wrap: break-word; /* Ensure long words break to the next line */
+      /* overflow-wrap: break-word;  */
+      /* Better word breaking for long words */
 }
 
 .event-cards div h3 {
 	font-size: 16px;
 	margin: 0 0 20px;
 	word-wrap: break-word; /* Ensure long words break to the next line */
+      /* overflow-wrap: break-word;  */
+      /* Better word breaking for long words */
 }
 
 .event-cards .event-stats {
 	display: flex;
-	gap: 24px;
+	gap: 20px;
 	list-style: none;
 	margin: 0 0 24px;
 	padding: 0;
@@ -98,6 +105,8 @@
 	justify-content: center;
 	flex-wrap: wrap; /* Enable wrapping for the stats */
 	word-wrap: break-word; /* Ensure long words break to the next line */
+      /* overflow-wrap: break-word;  */
+      /* Better word breaking for long words */
 }
 
 @media (width <= 720px) {
