@@ -29,7 +29,7 @@
 
 .create-event {
 	display: flex;
-	flex: 1 1 50%;
+	flex: 1 1 90%;
 	flex-direction: column;
 	height: 100%;
 	/* grid-column: 2;
