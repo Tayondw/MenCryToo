@@ -1,7 +1,7 @@
 #new-group {
 	display: flex;
 	flex-direction: column;
-	margin: 0 10%;
+	margin: 2% 10%;
 	align-items: center;
 	justify-content: center;
 }
@@ -29,18 +29,27 @@
 #section-1-create,
 #section-2-create,
 #section-3-create,
-#section-4-create,
-#section-5-create {
+#section-4-create {
 	display: flex;
 	flex-direction: column;
 	padding: 0;
+}
+
+#section-5-create {
+      display: flex;
+      justify-content: flex-start;
+      gap: 25px;
+      align-items: center;
+      margin-top: 25px;
+      padding: 0;
 }
 
 #set-city,
 #set-state,
 #set-name,
 #set-description,
-#set-privacy, #image-upload {
+#set-privacy,
+#image-upload {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -51,7 +60,7 @@
 }
 
 #image-upload h2 {
-      margin-bottom: 10px;
+	margin-bottom: 10px;
 }
 
 #city-input,
@@ -97,5 +106,17 @@ select {
 	font-size: 1em;
 	color: #dddddc;
 	font-family: "Quicksand", sans-serif;
-	background: linear-gradient(45deg, #e08f2c, #223f5c);
+	background: linear-gradient(45deg, var(--orangy), var(--deep-blue));
+}
+
+#update-group-cancel {
+	border: 0;
+	width: 250px;
+	cursor: pointer;
+	border-radius: 40px;
+	padding: 12px 25px;
+	font-size: 1em;
+	color: #dddddc;
+	font-family: "Quicksand", sans-serif;
+	background: linear-gradient(45deg, var(--peach), var(--deep-blue));
 }

@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, render_template, request, redirect, abort
 from flask_login import login_required, current_user
 from app.models import db, User, Group, Event, Post, UserTags, Tag
-from app.forms import UserForm
+from app.forms import UserForm, EditUserForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
 
 user_routes = Blueprint("users", __name__)
@@ -168,7 +168,7 @@ def update_profile(userId):
             }
         }, 404
 
-    form = UserForm()
+    form = EditUserForm()
     form["csrf_token"].data = request.cookies["csrf_token"]
 
     if form.validate_on_submit():

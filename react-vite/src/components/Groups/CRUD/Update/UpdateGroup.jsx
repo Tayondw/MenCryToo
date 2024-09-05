@@ -3,6 +3,7 @@ import {
 	Form,
 	useNavigate,
 	useLoaderData,
+	Link,
 } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
@@ -46,6 +47,12 @@ const UpdateGroup = () => {
 
 	return (
 		<>
+			<div id="groups-link-holder">
+				{"< "}
+				<Link to={`/groups/${groupDetails.id}`} id="group-link">
+					{groupDetails.name}
+				</Link>
+			</div>
 			<div id="new-group">
 				<div id="update-form">
 					{sessionUser ? (
@@ -174,7 +181,7 @@ const UpdateGroup = () => {
 							<hr />
 							<div id="image-upload">
 								<h2>Change your group image</h2>
-                                                <input name="image" type="file" accept="image/*"/>
+								<input name="image" type="file" accept="image/*" />
 								{errors?.image && (
 									<p style={{ color: "red" }} className="errors">
 										{errors.image}
@@ -221,8 +228,11 @@ const UpdateGroup = () => {
 									name="intent"
 									value="edit-group"
 								>
-									Update group
+									Update Group
 								</button>
+								<Link to={`/groups/${groupDetails.id}`}>
+									<button id="update-group-cancel">Cancel</button>
+								</Link>
 								<input
 									type="hidden"
 									name="organizer_id"

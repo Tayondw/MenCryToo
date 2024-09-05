@@ -19,6 +19,9 @@
       width: 100%;
 }
 
+#groups-link-holder {
+     margin: 2%
+}
 
 #groups-link-holder, #groups-link-holder #group-link {
 	color: #223f5c;
