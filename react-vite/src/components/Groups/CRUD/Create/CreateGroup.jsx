@@ -1,7 +1,6 @@
 import { useActionData, Form, useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import Footer from "../../../Footer";
 import "./CreateGroup.css";
 
 const CreateGroup = () => {
