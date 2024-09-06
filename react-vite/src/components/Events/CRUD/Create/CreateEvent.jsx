@@ -188,7 +188,7 @@ const CreateEvent = () => {
 								)}
 							</div>
 							<hr />
-							<div id="image-upload">
+							<div id="create-group-image-upload">
 								<h3>Upload an event image</h3>
 								<label htmlFor="file-upload" className="custom-file-upload">
 									Choose an image

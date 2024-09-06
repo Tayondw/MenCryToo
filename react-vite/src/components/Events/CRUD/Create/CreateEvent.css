@@ -19,12 +19,13 @@
 	display: grid;
 	grid-template-columns: 1fr 1fr;
       width: 100%;
+      height: 820px;
 	/* flex-direction: column; */
 }
 
 #fit-image-content {
 	width: 100%;
-	height: 100%;
+	height: 820px;
       /* background-image: url("https://mencrytoo.s3.amazonaws.com/group-images/mens-mental-health.png");
       background-repeat: no-repeat;
       background-size: 100% 100%;
@@ -40,13 +41,13 @@
 	/* flex: 1 1 90%; */
 	flex-direction: column;
 	align-items: center;
-	height: 100%;
 	/* grid-column: 2;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	justify-content: space-evenly;
 	margin: 0 10%; */
+      height: 820px;
 }
 .create-event-form {
 	-webkit-box-flex: 1;
@@ -115,7 +116,7 @@
 
 #create-event {
 	padding-top: 25px;
-	padding-bottom: 25px;
+      padding-bottom: 0;
 	display: flex;
 	gap: 25px;
 }
