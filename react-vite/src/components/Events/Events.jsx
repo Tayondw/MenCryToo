@@ -1,11 +1,9 @@
 import { useLoaderData, Link } from "react-router-dom";
-import { useSelector } from "react-redux";
 import "./Events.css";
 
 const Events = () => {
 	const { allEvents } = useLoaderData();
-	const sessionUser = useSelector((state) => state.session.user);
-      if (!allEvents || !allEvents.events) return <p>No events available.</p>;
+	if (!allEvents || !allEvents.events) return <p>No events available.</p>;
 
 	return (
 		<div id="events-body">
@@ -13,15 +11,6 @@ const Events = () => {
 				<Link to="/groups" id="group-link">
 					{"< "}Groups
 				</Link>
-				{sessionUser   ? (
-					<Link to="/events/new" id="group-link">
-						Create An Event{" >"}
-					</Link>
-				) : (
-					<Link className="disabled" to="/events/new">
-						Create An Event{" >"}
-					</Link>
-				)}
 			</div>
 			<div id="events-body-header">
 				<h3>See what each group does to help each other</h3>

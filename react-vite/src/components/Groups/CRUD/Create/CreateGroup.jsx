@@ -23,75 +23,82 @@ const CreateGroup = () => {
 
 	return (
 		<div id="new-group">
-			<img
+			{/* <img
 				src="https://mencrytoo.s3.amazonaws.com/group-images/mens-mental-health.png"
 				alt="create-group"
 				id="fit-image-content"
-			/>
+			/> */}
+			<div id="group-fit-image-content"></div>
 			{sessionUser ? (
 				<Form
 					method="post"
 					action="/groups/new"
-					className="create-group"
 					encType="multipart/form-data"
 					type="file"
+					// id="create-group-form"
+					className="create-group-form"
 				>
 					<div id="header">
-						<h1>Start a New Group</h1>
-						<h3>
+						<h3>Start a New Group</h3>
+						<p>
 							We&apos;ll walk you through a few steps to build your local
 							community
-						</h3>
+						</p>
 						<hr />
 					</div>
 					<div id="section-1-create">
-						<div id="set-city">
-							<h3>What city will your group be based in?</h3>
-							<div className="caption">
-								<p>
-									Groups meet locally, in person, and online. We&apos;ll connect
-									you with people in your area.
+						<h3 style={{ fontSize: `15px` }}>
+							Where will this group be located?
+						</h3>
+						<div className="caption">
+							<p>
+								Groups meet locally, in person, and online. We&apos;ll connect
+								you with people in your area.
+							</p>
+						</div>
+						<div id="set-location">
+							<div id="set-city">
+								<div id="city-input">
+									<input
+										id="city-input-text"
+										type="text"
+										placeholder="City"
+										name="city"
+										value={city}
+										onChange={(event) => setCity(event.target.value)}
+									/>
+								</div>
+							</div>
+							{errors?.city && (
+								<p style={{ color: "red" }} className="errors">
+									{errors.city}
 								</p>
+							)}
+							<div id="set-state">
+								<div id="state-input">
+									<input
+										id="state-input-text"
+										type="text"
+										placeholder="STATE"
+										name="state"
+										value={state}
+										onChange={(event) => setState(event.target.value)}
+									/>
+								</div>
 							</div>
-							<div id="city-input">
-								<input
-									id="city-input-text"
-									type="text"
-									placeholder="City"
-									name="city"
-									value={city}
-									onChange={(event) => setCity(event.target.value)}
-								/>
-							</div>
+							{errors?.state && (
+								<p style={{ color: "red" }} className="errors">
+									{errors.state}
+								</p>
+							)}
 						</div>
-						{errors?.city && (
-							<p style={{ color: "red" }} className="errors">
-								{errors.city}
-							</p>
-						)}
-						<div id="set-state">
-							<h3>What state will the group be based in?</h3>
-							<div id="state-input">
-								<input
-									id="state-input-text"
-									type="text"
-									placeholder="STATE"
-									name="state"
-									value={state}
-									onChange={(event) => setState(event.target.value)}
-								/>
-							</div>
-						</div>
-						{errors?.state && (
-							<p style={{ color: "red" }} className="errors">
-								{errors.state}
-							</p>
-						)}
 					</div>
 					<hr />
 					<div id="section-2-create">
 						<div id="set-name">
-							<h3>What will your group&apos;s name be?</h3>
+							<h3 style={{ fontSize: `15px` }}>
+								What will your group&apos;s name be?
+							</h3>
 							<div className="caption">
 								<p>
 									Choose a name that will give people a clear idea of what the
@@ -121,13 +128,11 @@ const CreateGroup = () => {
 					<hr />
 					<div id="section-3-create">
 						<div id="set-description">
-							<h3>Describe the purpose of your group.</h3>
+							<h3 style={{ fontSize: `15px` }}>
+								Describe the purpose of your group.
+							</h3>
 							<div className="caption">
 								<p>
-									People will see this when we promote your group, but
-									you&apos;ll be able to add to it later, too.
-									<br />
-									<br />
 									1. What&apos;s the purpose of the group?
 									<br />
 									2. Who should join?
@@ -152,8 +157,8 @@ const CreateGroup = () => {
 						)}
 					</div>
 					<hr />
-					<div id="image-upload">
-						<h3>Upload an image</h3>
+					<div id="create-group-image-upload">
+						<h3 style={{ fontSize: `15px` }}>Upload an image</h3>
 						<label htmlFor="file-upload" className="custom-file-upload">
 							Choose an image
 						</label>
@@ -167,7 +172,7 @@ const CreateGroup = () => {
 					<hr />
 					<div id="section-4-create">
 						<div id="set-privacy">
-							<h3>Final steps...</h3>
+							<h3 style={{ fontSize: `15px` }}>Final steps...</h3>
 							<div className="type-questions">
 								<label htmlFor="type-select">
 									Is this an in-person or online group?
