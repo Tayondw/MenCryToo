@@ -75,7 +75,7 @@ export const router = createBrowserRouter([
 				path: "groups/:groupId",
 				loader: groupDetailsLoader,
 				element: <GroupDetails />,
-				action: groupImageActions,
+				action: groupActions,
 			},
 			{
 				path: "groups/new",

@@ -22,16 +22,12 @@ const UpdateGroup = () => {
 
 	// Ensure user is logged in
 	useEffect(() => {
-		if (!sessionUser) {
-			navigate("/");
-		}
+		if (!sessionUser) navigate("/");
 	}, [sessionUser, navigate]);
 
 	// Ensure user is the group owner
 	useEffect(() => {
-		if (sessionUser && groupDetails.organizerId !== sessionUser.id) {
-			navigate("/");
-		}
+		if (sessionUser && groupDetails.organizerId !== sessionUser.id) navigate("/");
 	}, [groupDetails, sessionUser, navigate]);
 
 	useEffect(() => {
@@ -179,8 +175,16 @@ const UpdateGroup = () => {
 							</div>
 							<hr />
 							<div id="image-upload">
-								<h2>Change your group image</h2>
-								<input name="image" type="file" accept="image/*" />
+								<h3>Change your group image</h3>
+								<label htmlFor="file-upload" className="custom-file-upload">
+									Choose an image
+								</label>
+								<input
+									name="image"
+									type="file"
+									accept="image/*"
+									id="file-upload"
+								/>
 								{errors?.image && (
 									<p style={{ color: "red" }} className="errors">
 										{errors.image}

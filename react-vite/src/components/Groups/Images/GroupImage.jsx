@@ -16,10 +16,10 @@ const GroupImage = ({ groupDetails, onClose }) => {
 	return (
 		<div id="adding-group-image" className="modal-close">
 			<div id="image-close-confirm">
-				<button id="image-close-button" onClick={onClose}>
+				<button id="delete-close-button" onClick={onClose}>
 					✖
 				</button>
-				<h1>Add an image to your group</h1>
+				<h3>Add an image to your group</h3>
 			</div>
 			<Form
 				method="post"
@@ -27,9 +27,26 @@ const GroupImage = ({ groupDetails, onClose }) => {
 				type="file"
 				action={`/groups/${groupDetails.id}`}
 				onSubmit={onClose}
+				className="image-upload-form"
 			>
-				<input name="group_image" type="file" accept="image/*" multiple />
-				<button type="submit" name="intent" value="add-group-image">
+				<div id="group-image-upload">
+					{/* <h3>Upload a group image</h3> */}
+					<label htmlFor="file-upload" className="custom-file-upload">
+						Choose an image
+					</label>
+					<input
+						name="group_image"
+						type="file"
+						accept="image/*"
+						id="file-upload"
+					/>
+				</div>
+				<button
+					type="submit"
+					name="intent"
+					value="add-group-image"
+					className="button"
+				>
 					Submit
 				</button>
 				<input type="hidden" name="id" value={groupDetails.id} />

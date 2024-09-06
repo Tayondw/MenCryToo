@@ -4,36 +4,39 @@ export const groupActions = async ({ request }) => {
 	const formData = await request.formData();
 	const data = Object.fromEntries(formData);
 	const intent = formData.get("intent");
-	const name = formData.get("name");
-	const about = formData.get("about");
-	const type = formData.get("type");
-	const city = formData.get("city");
-	const state = formData.get("state");
-	const image = formData.get("image");
-	const errors = {};
 
-	if (!name.length || name.length < 3 || name.length > 50)
-		errors.name = "Group name must be between 3 and 50 characters";
-	if (!about.length || about.length < 20 || about.length > 150)
-		errors.about =
-			"Description must be at least 20 characters and no more than 150 characters";
-	if (!type) errors.type = "Group Type is required";
-	if (!city.length || city.length < 3 || city.length > 30)
-		errors.city = "City name must be between 3 and 30 characters";
-	if (!state.length || state.length < 2 || state.length > 2)
-		errors.state = "Please enter the abbreviated form of the state";
+	if (intent === "create-group" || intent === "edit-group") {
+		const name = formData.get("name");
+		const about = formData.get("about");
+		const type = formData.get("type");
+		const city = formData.get("city");
+		const state = formData.get("state");
+		const image = formData.get("image");
+		const errors = {};
 
-	// Only require image if the group does not already have one
-	if (intent === "create-group" && !image)
-		errors.image = "Group image is required to create a group";
+		if (!name.length || name.length < 3 || name.length > 50)
+			errors.name = "Group name must be between 3 and 50 characters";
+		if (!about.length || about.length < 20 || about.length > 150)
+			errors.about =
+				"Description must be at least 20 characters and no more than 150 characters";
+		if (!type) errors.type = "Group Type is required";
+		if (!city.length || city.length < 3 || city.length > 30)
+			errors.city = "City name must be between 3 and 30 characters";
+		if (!state.length || state.length < 2 || state.length > 2)
+			errors.state = "Please enter the abbreviated form of the state";
 
-	if (Object.keys(errors).length) {
-		return errors;
+		// Only require image if the group does not already have one
+		if (intent === "create-group" && !image)
+			errors.image = "Group image is required to create a group";
+
+		if (Object.keys(errors).length) {
+			return errors;
+		}
+
+		data.id = +data.id;
+		data.organizer_id = +data.organizer_id;
+		data.group_id = +data.group_id;
 	}
-
-	data.id = +data.id;
-	data.organizer_id = +data.organizer_id;
-	data.group_id = +data.group_id;
 
 	if (intent === "create-group") {
 		await fetch(`/api/groups/new`, {
@@ -58,6 +61,28 @@ export const groupActions = async ({ request }) => {
 		});
 		return redirect("/groups");
 	}
+
+	if (intent === "add-group-image" || intent === "edit-group-image") {
+		data.id = +data.id;
+		data.imageId = +data.imageId;
+	}
+
+	if (intent === "add-group-image") {
+		await fetch(`/api/groups/${data.id}/images`, {
+			method: "POST",
+			body: formData,
+		});
+
+		return redirect(`/groups/${data.id}`);
+	}
+
+	if (intent === "edit-group-image") {
+		await fetch(`/api/groups/${data.id}/images/${data.imageId}/edit`, {
+			method: "POST",
+			body: formData,
+		});
+		return redirect(`/groups/${data.id}`);
+	}
 };
 
 export const groupImageActions = async ({ request }) => {
@@ -65,8 +90,6 @@ export const groupImageActions = async ({ request }) => {
 	let data = Object.fromEntries(formData);
 	let intent = formData.get("intent");
 
-	data.id = +data.id;
-	data.imageId = +data.imageId;
 	// console.log("this is data", data);
 	// console.log("this is intent", intent);
 
@@ -104,8 +127,8 @@ export const eventActions = async ({ request }) => {
 		const name = formData.get("name");
 		const description = formData.get("description");
 		const type = formData.get("type");
-            const capacity = formData.get("capacity");
-            const image = formData.get("image");
+		const capacity = formData.get("capacity");
+		const image = formData.get("image");
 		const startDate = formData.get("startDate");
 		const endDate = formData.get("endDate");
 		const today = new Date();

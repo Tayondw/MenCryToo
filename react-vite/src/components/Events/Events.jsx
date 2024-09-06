@@ -6,10 +6,7 @@ const Events = () => {
 	const { allEvents } = useLoaderData();
 	const sessionUser = useSelector((state) => state.session.user);
       if (!allEvents || !allEvents.events) return <p>No events available.</p>;
-      
-      console.log(allEvents.events);
-      
-	
+
 	return (
 		<div id="events-body">
 			<div id="groups-link-holder">

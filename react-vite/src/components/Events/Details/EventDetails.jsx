@@ -16,22 +16,16 @@ const EventDetails = () => {
 	const navigate = useNavigate();
 	const { closeModal } = useModal();
 
-	console.log("event details", eventDetails);
-
-	if (!eventDetails) {
-		return <div>Event not found</div>;
-	}
-
+	if (!eventDetails) return <div>Event not found</div>;
+	
 	const formatDate = (startDate) => {
 		const date = new Date(startDate);
-
 		const year = date.getFullYear();
 		const month = String(date.getMonth() + 1).padStart(2, "0");
 		const day = String(date.getDate()).padStart(2, "0");
 		const hours = String(date.getHours()).padStart(2, "0");
 		const minutes = String(date.getMinutes()).padStart(2, "0");
-
-		return `${year}-${month}-${day} • ${hours}:${minutes}`;
+		return `${year}-${month}-${day}T${hours}:${minutes}`;
 	};
 
 	const formatEventDate = {
