@@ -76,8 +76,9 @@ class Event(db.Model):
             "type": self.groups.type,
             "city": self.groups.city,
             "state": self.groups.state,
+            "about": self.groups.about,
             "groupImage": group_image,
-            "image": self.groups.image
+            "image": self.groups.image,
         }
 
         venueInfo = {

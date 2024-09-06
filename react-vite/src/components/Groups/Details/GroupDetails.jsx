@@ -30,7 +30,6 @@ const GroupDetails = () => {
 
 		return `${year}-${month}-${day} • ${hours}:${minutes}`;
 	};
-
 	const upcomingEvents = groupDetails?.events.filter(
 		(event) => new Date(event.startDate) >= today,
 	);
@@ -46,13 +45,8 @@ const GroupDetails = () => {
 			...event,
 			startDate: formatDate(event.startDate),
 		}));
-
 	const formattedUpcomingEvents = formatEventDate(upcomingEvents);
       const formattedPastEvents = formatEventDate(pastEvents);
-      
-      console.log(formattedPastEvents);
-      
-
 	const renderContent = () => {
 		switch (activeSection) {
 			case "Images":
@@ -219,7 +213,10 @@ const GroupDetails = () => {
 							<div id="groupDetailInfo">
 								<h2 id="groupDetailName" className="add-padding">
 									{groupDetails.name}
-								</h2>
+                                                </h2>
+                                                <h3>
+                                                      {groupDetails.about}
+                                                </h3>
 								<h4
 									id="groupDetailLocation"
 									className="add-padding"

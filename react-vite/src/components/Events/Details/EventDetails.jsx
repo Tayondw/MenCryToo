@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -6,18 +7,16 @@ import { GrLocationPin } from "react-icons/gr";
 import OpenModalButton from "../../OpenModalButton";
 import { useModal } from "../../../context/Modal";
 import EventImage from "../Images";
-import EditEventImage from "../Images/EditEventImage";
 import DeleteEvent from "../CRUD/Delete/DeleteEvent";
 import "./EventDetails.css";
 
 const EventDetails = () => {
-	let eventDetails = useLoaderData();
+	const eventDetails = useLoaderData();
 	const sessionUser = useSelector((state) => state.session.user);
 	const navigate = useNavigate();
+	const [activeSection, setActiveSection] = useState("Images"); // State to track the active section
 	const { closeModal } = useModal();
-
 	if (!eventDetails) return <div>Event not found</div>;
-	
 	const formatDate = (startDate) => {
 		const date = new Date(startDate);
 		const year = date.getFullYear();
@@ -27,11 +26,158 @@ const EventDetails = () => {
 		const minutes = String(date.getMinutes()).padStart(2, "0");
 		return `${year}-${month}-${day}T${hours}:${minutes}`;
 	};
-
 	const formatEventDate = {
 		...eventDetails,
 		startDate: formatDate(eventDetails.startDate),
 		endDate: formatDate(eventDetails.endDate),
+	};
+	console.log(eventDetails);
+	const renderContent = () => {
+		switch (activeSection) {
+			case "Images":
+				return eventDetails.eventImage.length > 0 ? (
+					<div id="second-half-main-group-details">
+						<h3>
+							Check out the event&apos;s images - click on an image to see its
+							details
+						</h3>
+						<div id="group-details-images">
+							{eventDetails.eventImage.map((image) => (
+								<Link
+									to={`/groups/${eventDetails.id}/images/${image.id}`}
+									key={image.id}
+									className="box"
+								>
+									<img src={image.eventImage} alt={image.name} />
+								</Link>
+							))}
+						</div>
+					</div>
+				) : (
+					<div id="crud-buttons-update-image">
+						<p>
+							Currently no images have been uploaded by the group organizer.
+						</p>
+						<div id="crud-buttons-delete">
+							<OpenModalButton
+								eventDetails={eventDetails}
+								onClose={closeModal}
+								className="button"
+								id="add-group-image"
+								buttonText="Add Images"
+								modalComponent={
+									<EventImage
+										eventDetails={eventDetails}
+										onClose={closeModal}
+									/>
+								}
+							/>
+						</div>
+					</div>
+				);
+			case "Meet the Group":
+				return !eventDetails.groupInfo ? (
+					<p>Currently no group organizer. Create a group!</p>
+				) : (
+					<Link
+						to={`groups/${eventDetails.groupInfo.id}`}
+						style={{
+							textDecoration: `none`,
+							color: `inherit`,
+						}}
+					>
+						<div className="cards">
+							<img
+								src={eventDetails.groupInfo.image}
+								alt={eventDetails.groupInfo.name}
+							/>
+							<div id="display-style-direction">
+								<div id="keep-in-style">
+									<h2>{eventDetails.groupInfo.name}</h2>
+									<h3>{eventDetails.groupInfo.about}</h3>
+								</div>
+								<ul className="stats">
+									<li>
+										<var>{eventDetails.groupInfo.city}</var>
+										<label>City</label>
+									</li>
+									<li>
+										<var>{eventDetails.groupInfo.state}</var>
+										<label>State</label>
+									</li>
+									<li>
+										<var>{eventDetails.groupInfo.type}</var>
+										<label>Type</label>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</Link>
+				);
+			case "Attendees":
+				return eventDetails.attendees.length > 0 ? (
+					<div className="members-list">
+						{eventDetails.attendees.map((attendee) => (
+							<Link
+								to={`users/${attendee.id}`}
+								style={{
+									textDecoration: "none",
+									color: "inherit",
+								}}
+								key={attendee.id}
+							>
+								<div className="cards">
+									<img src={attendee.profileImage} alt={attendee.username} />
+									<div id="members-display-style-direction">
+										<div id="members-keep-in-style">
+											<h2>
+												{attendee.firstName} {attendee.lastName}
+											</h2>
+											<h3>{attendee.bio}</h3>
+										</div>
+										<ul className="stats">
+											<li>
+												<var>{attendee.username}</var>
+												<label>Username</label>
+											</li>
+											<li>
+												<var>{attendee.email}</var>
+												<label>Email</label>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</Link>
+						))}
+					</div>
+				) : (
+					<div id="join">
+						<p>
+							No attendees in this group yet. Attend to be the first attendee!
+						</p>
+						<button
+							className="revoke"
+							onClick={(event) => {
+								event.preventDefault();
+								alert("Feature Coming Soon...");
+							}}
+							style={{
+								backgroundColor: "red",
+								width: `250px`,
+								cursor: `pointer`,
+								borderRadius: `40px`,
+								padding: `12px 25px`,
+								fontSize: `1em`,
+							}}
+						>
+							Attend Event
+						</button>
+					</div>
+				);
+
+			default:
+				return null;
+		}
 	};
 
 	return (
@@ -42,50 +188,18 @@ const EventDetails = () => {
 					Events
 				</Link>
 			</div>
-			<div id="event-header">
-				<h1 id="events-details-name">{eventDetails.name}</h1>
-				{!eventDetails.organizer ? (
-					<h4 className="events-details-organizer">
-						Currently there is no organizer to this event!
-					</h4>
-				) : (
-					<h4 className="events-details-organizer">
-						Organized By {eventDetails.organizer.firstName}{" "}
-						{eventDetails.organizer.lastName}
-					</h4>
-				)}
-			</div>
-			<div id="events-body-details">
-				<div id="event-section-1">
+			<div id="each-groupDetail">
+				<main id="event-section-1">
 					<div id="events-details-image">
 						<img src={eventDetails.image} alt={eventDetails?.name || "Event"} />
 					</div>
 					<div id="mix-event-group">
-						<div id="group-events">
-							<div id="events-group-image">
-								<img
-									src={eventDetails.groupInfo.image}
-									alt={eventDetails?.groupInfo?.name || "Group"}
-								/>
-							</div>
-							<div id="events-group-info">
-								{!eventDetails?.groupInfo ? (
-									<>
-										<h3>Group information not available</h3>
-									</>
-								) : (
-									<Link to={`/groups/${eventDetails.groupInfo.id}`} style={{textDecoration: `none`}}>
-										<h3>{eventDetails?.groupInfo?.name}</h3>
-										<p>
-											Base Location: {eventDetails?.groupInfo?.city},{" "}
-											{eventDetails?.groupInfo?.state}
-										</p>
-										<p>Type: {eventDetails?.groupInfo?.type}</p>
-									</Link>
-								)}
-							</div>
+						<div id="eventDetailInfo">
+							<h2 id="groupDetailName" className="add-padding">
+								{eventDetails.name}
+							</h2>
+							<h3>{eventDetails.description}</h3>
 						</div>
-
 						<div id="event-event">
 							<div id="events-details-date">
 								<FaRegClock className="events-details-clock" />
@@ -106,8 +220,22 @@ const EventDetails = () => {
 							<div id="events-details-location">
 								<GrLocationPin className="events-details-location" />
 								<div>
-									<p>{eventDetails.type}</p>
+									{!eventDetails.venueInfo ? (
+										<p>Currently no venue has been selected</p>
+									) : (
+										<p>
+											{eventDetails.venueInfo.address}{" "}
+											{eventDetails.venueInfo.city},{" "}
+											{eventDetails.venueInfo.state}
+										</p>
+									)}
 								</div>
+							</div>
+							<div id="event-details-type">
+								<p>Type: {eventDetails.type}</p>
+							</div>
+							<div id="event-details-capacity">
+								<p>Capacity: {eventDetails.capacity}</p>
 							</div>
 						</div>
 						<div id="events-update-delete">
@@ -115,79 +243,42 @@ const EventDetails = () => {
 							eventDetails.organizer &&
 							sessionUser.id === eventDetails.organizer.id ? (
 								<>
-									<div id="events-update-button">
+									<div id="crud-buttons-update">
 										<button
+											className="button"
 											onClick={() => {
 												navigate(
 													`/groups/${eventDetails.groupId}/events/${eventDetails.id}`,
 												);
 											}}
-											id="update-event-button"
-											style={{
-												backgroundColor: `gray`,
-												color: `#FAF5E4`,
-												cursor: `pointer`,
-											}}
 										>
-											Update
+											Update Event
 										</button>
 									</div>
 									<div id="crud-buttons-update-image">
-										{!eventDetails?.eventImage.length ? (
-											<div id="crud-buttons-delete">
-												<OpenModalButton
-													eventDetails={eventDetails}
-													className="event-image-button"
-													id="add-group-image"
-													buttonText="Add Event Image"
-													onClose={closeModal}
-													style={{
-														backgroundColor: "gray",
-														color: `#FAF5E4`,
-														cursor: `pointer`,
-													}}
-													modalComponent={
-														<EventImage
-															eventDetails={eventDetails}
-															onClose={closeModal}
-														/>
-													}
-												/>
-											</div>
-										) : (
-											eventDetails.eventImage.map((eventImage) => (
-												<div id="crud-buttons-delete" key={eventImage.id}>
-													<OpenModalButton
-														eventDetails={eventDetails}
-														className="event-image-button"
-														id="add-group-image"
-														buttonText="Update Event Image"
-														onClose={closeModal}
-														style={{
-															backgroundColor: "gray",
-															color: `#FAF5E4`,
-															cursor: `pointer`,
-														}}
-														modalComponent={
-															<EditEventImage
-																eventDetails={eventDetails}
-																onClose={closeModal}
-															/>
-														}
-													/>
-												</div>
-											))
-										)}
-									</div>
-									<div id="events-delete-button">
 										<OpenModalButton
 											eventDetails={eventDetails}
-											className="event-delete-button"
-											id="delete-event"
+											className="button"
+											id="add-group-image"
+											buttonText="Add Images"
+											onClose={closeModal}
+											modalComponent={
+												<EventImage
+													eventDetails={eventDetails}
+													onClose={closeModal}
+												/>
+											}
+										/>
+									</div>
+									<div id="crud-buttons-delete">
+										<OpenModalButton
+											eventDetails={eventDetails}
+											className="button"
+											id="delete-group"
 											buttonText="Delete"
 											style={{
-												backgroundColor: `gray`,
-												color: `#FAF5E4`,
+												backgroundColor: `red`,
+												color: `#dddddc`,
 												cursor: `pointer`,
 											}}
 											modalComponent={
@@ -196,14 +287,103 @@ const EventDetails = () => {
 										/>
 									</div>
 								</>
-							) : null}
+							) : (
+								<button
+									className="revoke"
+									onClick={(event) => {
+										event.preventDefault();
+										alert("Feature Coming Soon...");
+									}}
+									style={{
+										backgroundColor: "red",
+										width: `250px`,
+										cursor: `pointer`,
+										borderRadius: `40px`,
+										padding: `12px 25px`,
+										fontSize: `1em`,
+									}}
+								>
+									Attend Event
+								</button>
+							)}
 						</div>
 					</div>
-				</div>
-				<div id="event-section-2">
-					<h2>Details</h2>
-					<p>{eventDetails.description}</p>
-				</div>
+					<div id="second-half-group-details">
+						<div className="second-half-headers-groups">
+							{activeSection !== "Images" ? (
+								<h1 onClick={() => setActiveSection("Images")}>IMAGES</h1>
+							) : (
+								<h1
+									onClick={() => setActiveSection("Images")}
+									style={{ color: `var(--peach)` }}
+								>
+									IMAGES
+								</h1>
+							)}
+							{activeSection !== "Meet the Group" ? (
+								<h1 onClick={() => setActiveSection("Meet the Group")}>
+									MEET THE GROUP
+								</h1>
+							) : (
+								<h1
+									onClick={() => setActiveSection("Meet the Group")}
+									style={{ color: `var(--peach)` }}
+								>
+									MEET THE GROUP
+								</h1>
+							)}
+							{activeSection !== "Attendees" ? (
+								<h1 onClick={() => setActiveSection("Attendees")}>ATTENDEES</h1>
+							) : (
+								<h1
+									onClick={() => setActiveSection("Attendees")}
+									style={{ color: `var(--peach)` }}
+								>
+									ATTENDEES
+								</h1>
+							)}
+						</div>
+						<div id="render-content">{renderContent()}</div>
+					</div>
+				</main>
+				<aside id="body-page">
+					<div id="events-section">
+						<h3>Meet the Group Organizer</h3>
+						<Link
+							to={`user/${eventDetails.organizer.id}`}
+							style={{
+								textDecoration: `none`,
+								color: `inherit`,
+							}}
+						>
+							<div className="cards">
+								<img
+									src={eventDetails.organizer.profileImage}
+									alt={eventDetails.organizer.username}
+								/>
+								<div id="display-style-direction">
+									<div id="keep-in-style">
+										<h2>
+											{eventDetails.organizer.firstName}{" "}
+											{eventDetails.organizer.lastName}
+										</h2>
+										<h3>{eventDetails.organizer.bio}</h3>
+									</div>
+									<ul className="stats">
+										<li>
+											<var>{eventDetails.organizer.username}</var>
+											<label>Username</label>
+										</li>
+										<li>
+											<var>{eventDetails.organizer.email}</var>
+											<label>Email</label>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</Link>
+					</div>
+				</aside>
 			</div>
 		</div>
 	);
