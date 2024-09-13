@@ -31,7 +31,7 @@ const EventDetails = () => {
 		startDate: formatDate(eventDetails.startDate),
 		endDate: formatDate(eventDetails.endDate),
 	};
-	console.log(eventDetails);
+	// console.log(eventDetails);
 	const renderContent = () => {
 		switch (activeSection) {
 			case "Images":
@@ -58,8 +58,11 @@ const EventDetails = () => {
 						<p>
 							Currently no images have been uploaded by the group organizer.
 						</p>
-						{eventDetails.organizer.id !== sessionUser.id ? (
-							<div id="crud-buttons-delete">
+						{(sessionUser && eventDetails.organizer.id !== sessionUser.id) || !sessionUser ? (
+							<div id="events-deets-crud-buttons-delete">
+								<p>
+									You must be the group organizer to add images to this event
+								</p>
 								<OpenModalButton
 									eventDetails={eventDetails}
 									onClose={closeModal}
@@ -135,38 +138,46 @@ const EventDetails = () => {
 			case "Attendees":
 				return eventDetails.attendees.length > 0 ? (
 					<div className="members-list">
-						{eventDetails.attendees.map((attendee) => (
-							<Link
-								to={`users/${attendee.id}`}
-								style={{
-									textDecoration: "none",
-									color: "inherit",
-								}}
-								key={attendee.id}
-							>
-								<div className="cards">
-									<img src={attendee.profileImage} alt={attendee.username} />
-									<div id="members-display-style-direction">
-										<div id="members-keep-in-style">
-											<h2>
-												{attendee.firstName} {attendee.lastName}
-											</h2>
-											<h3>{attendee.bio}</h3>
+						{!sessionUser ? (
+							<p>You must be a user in order to view attendees to this event</p>
+						) : (
+							<>
+								{eventDetails.attendees.map((attendee) => (
+									<Link
+										to={`users/${attendee.id}`}
+										style={{
+											textDecoration: "none",
+											color: "inherit",
+										}}
+										key={attendee.id}
+									>
+										<div className="members-group-cards">
+											<img
+												src={attendee.profileImage}
+												alt={attendee.username}
+											/>
+											<div id="members-group-display-style-direction">
+												<div id="members-group-keep-in-style">
+													<h2>
+														{attendee.firstName} {attendee.lastName}
+													</h2>
+												</div>
+												<ul className="stats">
+													<li>
+														<var>{attendee.username}</var>
+														<label>Username</label>
+													</li>
+													<li>
+														<var>{attendee.email}</var>
+														<label>Email</label>
+													</li>
+												</ul>
+											</div>
 										</div>
-										<ul className="stats">
-											<li>
-												<var>{attendee.username}</var>
-												<label>Username</label>
-											</li>
-											<li>
-												<var>{attendee.email}</var>
-												<label>Email</label>
-											</li>
-										</ul>
-									</div>
-								</div>
-							</Link>
-						))}
+									</Link>
+								))}
+							</>
+						)}
 					</div>
 				) : (
 					<div id="join">
@@ -250,8 +261,8 @@ const EventDetails = () => {
 									</div>
 								</div>
 								<div id="event-details-type">
-                                                      <p>Type: {eventDetails.type}</p>
-                                                      <p>Capacity: {eventDetails.capacity}</p>
+									<p>Type: {eventDetails.type}</p>
+									<p>Capacity: {eventDetails.capacity}</p>
 								</div>
 							</div>
 							<div id="events-update-delete">

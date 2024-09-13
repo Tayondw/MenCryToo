@@ -20,7 +20,7 @@ const UpdateProfile = () => {
 	const [userTags, setUserTags] = useState(["ANGER"]);
 	// const [profileImage, setProfileImage] = useState(userDetails.profileImage);
 
-	console.log("user loader data", userDetails);
+	// console.log("user loader data", userDetails);
 
 	// Ensure user is logged in
 	useEffect(() => {

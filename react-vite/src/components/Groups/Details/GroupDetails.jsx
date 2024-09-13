@@ -73,8 +73,12 @@ const GroupDetails = () => {
 						<p>
 							Currently no images have been uploaded by the group organizer.
 						</p>
-						{groupDetails.organizer.id !== sessionUser.id ? (
+						{(sessionUser && groupDetails.organizer.id !== sessionUser.id) ||
+						!sessionUser ? (
 							<div id="crud-buttons-delete">
+								<p>
+									You must be the group organizer to add images to this group
+								</p>
 								<OpenModalButton
 									groupDetails={groupDetails}
 									onClose={closeModal}
@@ -149,38 +153,43 @@ const GroupDetails = () => {
 			case "Members":
 				return groupDetails.members.length > 0 ? (
 					<div className="members-list">
-						{groupDetails.members.map((member) => (
-							<Link
-								to={`users/${member.id}`}
-								style={{
-									textDecoration: "none",
-									color: "inherit",
-								}}
-								key={member.id}
-							>
-								<div className="cards">
-									<img src={member.profileImage} alt={member.username} />
-									<div id="members-display-style-direction">
-										<div id="members-keep-in-style">
-											<h2>
-												{member.firstName} {member.lastName}
-											</h2>
-											<h3>{member.bio}</h3>
+						{!sessionUser ? (
+							<p>You must be a user in order to view members of this group</p>
+						) : (
+							<>
+								{groupDetails.members.map((member) => (
+									<Link
+										to={`users/${member.id}`}
+										style={{
+											textDecoration: "none",
+											color: "inherit",
+										}}
+										key={member.id}
+									>
+										<div className="members-groups-cards">
+											<img src={member.profileImage} alt={member.username} />
+											<div id="members-groups-display-style-direction">
+												<div id="members-groups-keep-in-style">
+													<h2>
+														{member.firstName} {member.lastName}
+													</h2>
+												</div>
+												<ul className="stats">
+													<li>
+														<var>{member.username}</var>
+														<label>Username</label>
+													</li>
+													<li>
+														<var>{member.email}</var>
+														<label>Email</label>
+													</li>
+												</ul>
+											</div>
 										</div>
-										<ul className="stats">
-											<li>
-												<var>{member.username}</var>
-												<label>Username</label>
-											</li>
-											<li>
-												<var>{member.email}</var>
-												<label>Email</label>
-											</li>
-										</ul>
-									</div>
-								</div>
-							</Link>
-						))}
+									</Link>
+								))}
+							</>
+						)}
 					</div>
 				) : (
 					<div id="join">
@@ -395,7 +404,7 @@ const GroupDetails = () => {
 											{formattedUpcomingEvents.map((event) => (
 												<div
 													key={event.id}
-													className="group-details-event-card"
+													className="group-details-event-cards"
 												>
 													<div
 														className="group-details-event-item"
@@ -455,28 +464,14 @@ const GroupDetails = () => {
 													to={`/events/${event.id}`}
 													style={{ textDecoration: `none`, color: `inherit` }}
 												>
-													<div className="group-details-event-cards">
+													<div className="group-details-past-event-cards">
 														<img src={event.image} alt={event.name} />
 
-														<div id="group-details-display-style-direction">
-															<div id="group-details-keep-in-style">
+														<div id="group-details-past-display-style-direction">
+															<div id="group-details-past-keep-in-style">
 																<h2>{event.name}</h2>
 																<h3>{event.description}</h3>
 															</div>
-															<ul className="group-details-event-stats">
-																<li>
-																	<var>
-																		{new Date(event.startDate).toLocaleString()}
-																	</var>
-																	<label>Start Date</label>
-																</li>
-																<li>
-																	<var>
-																		{new Date(event.endDate).toLocaleString()}
-																	</var>
-																	<label>End Date</label>
-																</li>
-															</ul>
 														</div>
 													</div>
 												</Link>

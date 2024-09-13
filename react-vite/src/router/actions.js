@@ -202,8 +202,8 @@ export const eventImageActions = async ({ request }) => {
 	data.eventId = +data.eventId;
 	data.imageId = +data.imageId;
 
-	console.log("data", data);
-	console.log("intent", intent);
+	// console.log("data", data);
+	// console.log("intent", intent);
 
 	if (intent === "add-event-image") {
 		await fetch(`/api/events/${data.eventId}/images`, {

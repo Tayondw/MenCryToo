@@ -6,42 +6,20 @@ import "./EventImage.css";
 const EventImage = ({ eventDetails, onClose }) => {
 	const event_image = useActionData();
 	const { closeModal } = useModal();
-
 	// Close modal when clicking the back button
 	useEffect(() => {
-		const handlePopState = () => {
-			closeModal();
-		};
-
+		const handlePopState = () => closeModal();
 		window.addEventListener("popstate", handlePopState);
-
-		return () => {
-			window.removeEventListener("popstate", handlePopState);
-		};
-	}, [closeModal]);
-
-	// Close modal when clicking outside of the modal content
-	useEffect(() => {
-		const handleClickOutside = (event) => {
-			if (event.target.classList.contains("modal-close")) {
-				closeModal();
-			}
-		};
-
-		document.addEventListener("click", handleClickOutside);
-
-		return () => {
-			document.removeEventListener("click", handleClickOutside);
-		};
+		return () => window.removeEventListener("popstate", handlePopState);
 	}, [closeModal]);
 
 	return (
-		<div id="adding-group-image">
+		<div id="adding-group-image" className="modal-close">
 			<div id="image-close-confirm">
-				<button id="image-close-button" onClick={onClose}>
+				<button id="delete-close-button" onClick={onClose}>
 					✖
 				</button>
-				<h1>Add an image to your event</h1>
+				<h3>Add an image to your event</h3>
 			</div>
 
 			<Form
@@ -50,9 +28,27 @@ const EventImage = ({ eventDetails, onClose }) => {
 				type="file"
 				action={`/events/${eventDetails.id}/images`}
 				onSubmit={onClose}
+				className="image-upload-form"
 			>
-				<input name="event_image" type="file" accept="image/*" required />
-				<button type="submit" name="intent" value="add-event-image">
+				<div id="group-image-upload">
+					<label htmlFor="file-upload" className="custom-file-upload">
+						Choose an image
+					</label>
+					<input
+						id="file-upload"
+						name="event_image"
+						type="file"
+						accept="image/*"
+						required
+					/>
+				</div>
+
+				<button
+					type="submit"
+					name="intent"
+					value="add-event-image"
+					className="button"
+				>
 					Submit
 				</button>
 				<input type="hidden" name="eventId" value={eventDetails.id} />

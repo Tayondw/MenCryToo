@@ -47,6 +47,102 @@
 	margin: 8px;
 }
 
+.group-details-past-event-cards {
+      display: flex;
+	align-items: center;
+	width: 500px;
+	max-width: 670px;
+	padding: 100px 40px 100px 20px;
+	border-radius: 60px;
+	background: #dddddc;
+	height: 320px;
+	margin: 8px;
+}
+
+.members-groups-cards {
+      display: flex;
+	align-items: center;
+	width: 360px;
+	max-width: 670px;
+	/* padding: 15px 10px 15px 10px; */
+	border-radius: 60px;
+	background: #dddddc;
+	height: 250px;
+}
+
+.members-groups-cards img {
+      max-width: 180px;
+	width: 20vw;
+	height: 200px;
+	object-fit: cover;
+	margin-left: -20px;
+	margin-right: 10px;
+	border-radius: 40px;
+	flex-shrink: 0; /* Prevent the image from shrinking */
+}
+
+.members-groups-cards .stats {
+	display: flex;
+	gap: 10px;
+	list-style: none;
+	width: 150px;
+	flex-direction: column;
+	/* margin: 0 0 24px; */
+	justify-content: space-around;
+	padding: 0;
+	align-items: center;
+}
+
+#members-groups-display-style-direction {
+      flex: 1; /* Allow the content area to take available space */
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap; /* Enable wrapping for the content */
+	justify-content: center;
+	align-items: center;
+}
+
+#members-groups-display-style-direction h2 {
+      font-size: 18px;
+}
+
+#members-groups-display-style-direction .stats {
+      display: flex;
+	gap: 10px;
+	list-style: none;
+	width: 150px;
+	flex-direction: column;
+	/* margin: 0 0 24px; */
+	justify-content: center;
+	padding: 0;
+	align-items: center;
+}
+
+#members-groups-display-style-direction .stats li {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.group-details-past-event-cards img {
+      max-width: 280px;
+	width: 10vw;
+	height: 220px;
+	object-fit: cover;
+	margin-left: -30px;
+	margin-right: 20px;
+	border-radius: inherit;
+}
+
+#group-details-past-display-style-direction h2 {
+      font-size: 20px;
+}
+
+#group-details-past-display-style-direction h3 {
+      font-size: 12px;
+}
+
 .cards img {
 	max-width: 280px;
 	width: 32vw;

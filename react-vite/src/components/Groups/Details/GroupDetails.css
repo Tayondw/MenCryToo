@@ -320,9 +320,9 @@
 
 .group-details-event-cards {
 	display: grid;
-      grid-template-columns: 0.5fr 1fr;
+      grid-template-columns: 40% 60%;
 	align-items: center;
-	width: 100%;
+	width: fit-content;
 	max-width: 850px;
 	padding: 20px;
 	border-radius: 60px;

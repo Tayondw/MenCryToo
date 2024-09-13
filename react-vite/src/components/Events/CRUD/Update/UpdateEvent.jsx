@@ -20,7 +20,7 @@ const UpdateEvent = () => {
 	const [capacity, setCapacity] = useState("");
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
-      console.log("events", eventDetails);
+      // console.log("events", eventDetails);
       
 	// Ensure user is logged in
 	useEffect(() => {
