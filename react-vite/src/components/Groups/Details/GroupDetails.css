@@ -211,6 +211,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-top: 8px;
+      margin-bottom: 25px;
 }
 
 #body-page {
@@ -288,6 +290,7 @@
 	flex-wrap: wrap;
 	width: fit-content;
 	position: sticky;
+      top: 20px;
 	border: 2px solid #223f5c;
 	padding: 20%;
 	gap: 30px;

@@ -151,7 +151,7 @@ export const AccentSection = () => {
 							<p className="white-text">
 								Men Cry Too is an effort to break through stigma of men not
 								being allowed to express their feelings, improve help-seeking
-								behavior and reduce male suicide. Let&apos; check the stats that
+								behavior and reduce male suicide. Let&apos;s check the stats that
 								led to why we&apos;re both here.
 							</p>
 							<Link

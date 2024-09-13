@@ -46,7 +46,7 @@ const GroupDetails = () => {
 			startDate: formatDate(event.startDate),
 		}));
 	const formattedUpcomingEvents = formatEventDate(upcomingEvents);
-      const formattedPastEvents = formatEventDate(pastEvents);
+	const formattedPastEvents = formatEventDate(pastEvents);
 	const renderContent = () => {
 		switch (activeSection) {
 			case "Images":
@@ -73,21 +73,39 @@ const GroupDetails = () => {
 						<p>
 							Currently no images have been uploaded by the group organizer.
 						</p>
-						<div id="crud-buttons-delete">
-							<OpenModalButton
-								groupDetails={groupDetails}
-								onClose={closeModal}
-								className="button"
-								id="add-group-image"
-								buttonText="Add Images"
-								modalComponent={
-									<GroupImage
-										groupDetails={groupDetails}
-										onClose={closeModal}
-									/>
-								}
-							/>
-						</div>
+						{groupDetails.organizer.id !== sessionUser.id ? (
+							<div id="crud-buttons-delete">
+								<OpenModalButton
+									groupDetails={groupDetails}
+									onClose={closeModal}
+									className="button disabled"
+									id="add-group-image"
+									buttonText="Add Images"
+									modalComponent={
+										<GroupImage
+											groupDetails={groupDetails}
+											onClose={closeModal}
+										/>
+									}
+								/>
+							</div>
+						) : (
+							<div id="crud-buttons-delete">
+								<OpenModalButton
+									groupDetails={groupDetails}
+									onClose={closeModal}
+									className="button"
+									id="add-group-image"
+									buttonText="Add Images"
+									modalComponent={
+										<GroupImage
+											groupDetails={groupDetails}
+											onClose={closeModal}
+										/>
+									}
+								/>
+							</div>
+						)}
 					</div>
 				);
 			case "Meet the Organizer":
@@ -213,10 +231,8 @@ const GroupDetails = () => {
 							<div id="groupDetailInfo">
 								<h2 id="groupDetailName" className="add-padding">
 									{groupDetails.name}
-                                                </h2>
-                                                <h3>
-                                                      {groupDetails.about}
-                                                </h3>
+								</h2>
+								<h3>{groupDetails.about}</h3>
 								<h4
 									id="groupDetailLocation"
 									className="add-padding"

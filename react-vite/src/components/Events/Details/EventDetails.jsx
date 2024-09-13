@@ -58,21 +58,39 @@ const EventDetails = () => {
 						<p>
 							Currently no images have been uploaded by the group organizer.
 						</p>
-						<div id="crud-buttons-delete">
-							<OpenModalButton
-								eventDetails={eventDetails}
-								onClose={closeModal}
-								className="button"
-								id="add-group-image"
-								buttonText="Add Images"
-								modalComponent={
-									<EventImage
-										eventDetails={eventDetails}
-										onClose={closeModal}
-									/>
-								}
-							/>
-						</div>
+						{eventDetails.organizer.id !== sessionUser.id ? (
+							<div id="crud-buttons-delete">
+								<OpenModalButton
+									eventDetails={eventDetails}
+									onClose={closeModal}
+									className="button disabled"
+									id="add-group-image"
+									buttonText="Add Images"
+									modalComponent={
+										<EventImage
+											eventDetails={eventDetails}
+											onClose={closeModal}
+										/>
+									}
+								/>
+							</div>
+						) : (
+							<div id="crud-buttons-delete">
+								<OpenModalButton
+									eventDetails={eventDetails}
+									onClose={closeModal}
+									className="button"
+									id="add-group-image"
+									buttonText="Add Images"
+									modalComponent={
+										<EventImage
+											eventDetails={eventDetails}
+											onClose={closeModal}
+										/>
+									}
+								/>
+							</div>
+						)}
 					</div>
 				);
 			case "Meet the Group":
@@ -80,19 +98,19 @@ const EventDetails = () => {
 					<p>Currently no group organizer. Create a group!</p>
 				) : (
 					<Link
-						to={`groups/${eventDetails.groupInfo.id}`}
+						to={`/groups/${eventDetails.groupInfo.id}`}
 						style={{
 							textDecoration: `none`,
 							color: `inherit`,
 						}}
 					>
-						<div className="cards">
+						<div className="meet-group-cards">
 							<img
 								src={eventDetails.groupInfo.image}
 								alt={eventDetails.groupInfo.name}
 							/>
-							<div id="display-style-direction">
-								<div id="keep-in-style">
+							<div id="meet-group-display-style-direction">
+								<div id="meet-group-keep-in-style">
 									<h2>{eventDetails.groupInfo.name}</h2>
 									<h3>{eventDetails.groupInfo.about}</h3>
 								</div>
@@ -181,174 +199,136 @@ const EventDetails = () => {
 	};
 
 	return (
-		<div id="events-details">
-			<div id="events-link-holder">
-				{"< "}
-				<Link to="/events" id="event-link">
-					Events
-				</Link>
-			</div>
-			<div id="each-groupDetail">
-				<main id="event-section-1">
-					<div id="events-details-image">
-						<img src={eventDetails.image} alt={eventDetails?.name || "Event"} />
-					</div>
-					<div id="mix-event-group">
-						<div id="eventDetailInfo">
-							<h2 id="groupDetailName" className="add-padding">
-								{eventDetails.name}
-							</h2>
-							<h3>{eventDetails.description}</h3>
+		<>
+			<div id="events-details">
+				<main>
+					{"< "}
+					<Link to="/events" id="event-link">
+						Events
+					</Link>
+					<div id="event-section-1">
+						<div id="events-details-image">
+							<img
+								src={eventDetails.image}
+								alt={eventDetails?.name || "Event"}
+							/>
 						</div>
-						<div id="event-event">
-							<div id="events-details-date">
-								<FaRegClock className="events-details-clock" />
-								<div>
-									<p>
-										START{" "}
-										<p style={{ color: "teal" }}>
-											{" "}
-											{formatEventDate.startDate}
-										</p>
-									</p>
-									<p>
-										END{" "}
-										<p style={{ color: "teal" }}>{formatEventDate.endDate}</p>
-									</p>
-								</div>
+						<div id="mix-event-group">
+							<div id="eventDetailInfo">
+								<h2 id="eventDetailName" className="add-padding">
+									{eventDetails.name}
+								</h2>
+								<h3>{eventDetails.description}</h3>
 							</div>
-							<div id="events-details-location">
-								<GrLocationPin className="events-details-location" />
-								<div>
-									{!eventDetails.venueInfo ? (
-										<p>Currently no venue has been selected</p>
-									) : (
+							<div id="event-event">
+								<div id="events-details-date">
+									<FaRegClock className="events-details-clock" />
+									<div>
 										<p>
-											{eventDetails.venueInfo.address}{" "}
-											{eventDetails.venueInfo.city},{" "}
-											{eventDetails.venueInfo.state}
+											START{" "}
+											<p style={{ color: "teal", paddingRight: `15px` }}>
+												{" "}
+												{formatEventDate.startDate}
+											</p>
+											END{" "}
+											<p style={{ color: "teal" }}>{formatEventDate.endDate}</p>
 										</p>
-									)}
+									</div>
+								</div>
+								<div id="events-details-location">
+									<GrLocationPin className="events-details-location" />
+									<div>
+										{!eventDetails.venueInfo ? (
+											<p>Currently no venue has been selected</p>
+										) : (
+											<p style={{ marginLeft: `5px` }}>
+												{eventDetails.venueInfo.address}{" "}
+												{eventDetails.venueInfo.city},{" "}
+												{eventDetails.venueInfo.state}
+											</p>
+										)}
+									</div>
+								</div>
+								<div id="event-details-type">
+                                                      <p>Type: {eventDetails.type}</p>
+                                                      <p>Capacity: {eventDetails.capacity}</p>
 								</div>
 							</div>
-							<div id="event-details-type">
-								<p>Type: {eventDetails.type}</p>
+							<div id="events-update-delete">
+								{sessionUser &&
+								eventDetails.organizer &&
+								sessionUser.id === eventDetails.organizer.id ? (
+									<>
+										<div id="crud-buttons-update">
+											<button
+												className="button"
+												onClick={() => {
+													navigate(
+														`/groups/${eventDetails.groupId}/events/${eventDetails.id}`,
+													);
+												}}
+											>
+												Update Event
+											</button>
+										</div>
+										<div id="crud-buttons-update-image">
+											<OpenModalButton
+												eventDetails={eventDetails}
+												className="button"
+												id="add-group-image"
+												buttonText="Add Images"
+												onClose={closeModal}
+												modalComponent={
+													<EventImage
+														eventDetails={eventDetails}
+														onClose={closeModal}
+													/>
+												}
+											/>
+										</div>
+										<div id="crud-buttons-delete">
+											<OpenModalButton
+												eventDetails={eventDetails}
+												className="button"
+												id="delete-group"
+												buttonText="Delete"
+												style={{
+													backgroundColor: `red`,
+													color: `#dddddc`,
+													cursor: `pointer`,
+												}}
+												modalComponent={
+													<DeleteEvent eventDetails={eventDetails} />
+												}
+											/>
+										</div>
+									</>
+								) : (
+									<button
+										className="revoke"
+										onClick={(event) => {
+											event.preventDefault();
+											alert("Feature Coming Soon...");
+										}}
+										style={{
+											backgroundColor: "red",
+											width: `250px`,
+											cursor: `pointer`,
+											borderRadius: `40px`,
+											padding: `12px 25px`,
+											fontSize: `1em`,
+										}}
+									>
+										Attend Event
+									</button>
+								)}
 							</div>
-							<div id="event-details-capacity">
-								<p>Capacity: {eventDetails.capacity}</p>
-							</div>
 						</div>
-						<div id="events-update-delete">
-							{sessionUser &&
-							eventDetails.organizer &&
-							sessionUser.id === eventDetails.organizer.id ? (
-								<>
-									<div id="crud-buttons-update">
-										<button
-											className="button"
-											onClick={() => {
-												navigate(
-													`/groups/${eventDetails.groupId}/events/${eventDetails.id}`,
-												);
-											}}
-										>
-											Update Event
-										</button>
-									</div>
-									<div id="crud-buttons-update-image">
-										<OpenModalButton
-											eventDetails={eventDetails}
-											className="button"
-											id="add-group-image"
-											buttonText="Add Images"
-											onClose={closeModal}
-											modalComponent={
-												<EventImage
-													eventDetails={eventDetails}
-													onClose={closeModal}
-												/>
-											}
-										/>
-									</div>
-									<div id="crud-buttons-delete">
-										<OpenModalButton
-											eventDetails={eventDetails}
-											className="button"
-											id="delete-group"
-											buttonText="Delete"
-											style={{
-												backgroundColor: `red`,
-												color: `#dddddc`,
-												cursor: `pointer`,
-											}}
-											modalComponent={
-												<DeleteEvent eventDetails={eventDetails} />
-											}
-										/>
-									</div>
-								</>
-							) : (
-								<button
-									className="revoke"
-									onClick={(event) => {
-										event.preventDefault();
-										alert("Feature Coming Soon...");
-									}}
-									style={{
-										backgroundColor: "red",
-										width: `250px`,
-										cursor: `pointer`,
-										borderRadius: `40px`,
-										padding: `12px 25px`,
-										fontSize: `1em`,
-									}}
-								>
-									Attend Event
-								</button>
-							)}
-						</div>
-					</div>
-					<div id="second-half-group-details">
-						<div className="second-half-headers-groups">
-							{activeSection !== "Images" ? (
-								<h1 onClick={() => setActiveSection("Images")}>IMAGES</h1>
-							) : (
-								<h1
-									onClick={() => setActiveSection("Images")}
-									style={{ color: `var(--peach)` }}
-								>
-									IMAGES
-								</h1>
-							)}
-							{activeSection !== "Meet the Group" ? (
-								<h1 onClick={() => setActiveSection("Meet the Group")}>
-									MEET THE GROUP
-								</h1>
-							) : (
-								<h1
-									onClick={() => setActiveSection("Meet the Group")}
-									style={{ color: `var(--peach)` }}
-								>
-									MEET THE GROUP
-								</h1>
-							)}
-							{activeSection !== "Attendees" ? (
-								<h1 onClick={() => setActiveSection("Attendees")}>ATTENDEES</h1>
-							) : (
-								<h1
-									onClick={() => setActiveSection("Attendees")}
-									style={{ color: `var(--peach)` }}
-								>
-									ATTENDEES
-								</h1>
-							)}
-						</div>
-						<div id="render-content">{renderContent()}</div>
 					</div>
 				</main>
-				<aside id="body-page">
-					<div id="events-section">
-						<h3>Meet the Group Organizer</h3>
+				<aside id="event-body-page">
+					<div id="events-section-details">
+						<h3>Group Organizer</h3>
 						<Link
 							to={`user/${eventDetails.organizer.id}`}
 							style={{
@@ -356,18 +336,18 @@ const EventDetails = () => {
 								color: `inherit`,
 							}}
 						>
-							<div className="cards">
+							<div className="event-details-card">
 								<img
+									className="event-details-card-img"
 									src={eventDetails.organizer.profileImage}
 									alt={eventDetails.organizer.username}
 								/>
-								<div id="display-style-direction">
-									<div id="keep-in-style">
+								<div id="event-display-style-direction">
+									<div id="event-keep-in-style">
 										<h2>
 											{eventDetails.organizer.firstName}{" "}
 											{eventDetails.organizer.lastName}
 										</h2>
-										<h3>{eventDetails.organizer.bio}</h3>
 									</div>
 									<ul className="stats">
 										<li>
@@ -385,7 +365,44 @@ const EventDetails = () => {
 					</div>
 				</aside>
 			</div>
-		</div>
+			<div id="second-half-group-details">
+				<div className="second-half-headers-groups">
+					{activeSection !== "Images" ? (
+						<h1 onClick={() => setActiveSection("Images")}>IMAGES</h1>
+					) : (
+						<h1
+							onClick={() => setActiveSection("Images")}
+							style={{ color: `var(--peach)` }}
+						>
+							IMAGES
+						</h1>
+					)}
+					{activeSection !== "Meet the Group" ? (
+						<h1 onClick={() => setActiveSection("Meet the Group")}>
+							MEET THE GROUP
+						</h1>
+					) : (
+						<h1
+							onClick={() => setActiveSection("Meet the Group")}
+							style={{ color: `var(--peach)` }}
+						>
+							MEET THE GROUP
+						</h1>
+					)}
+					{activeSection !== "Attendees" ? (
+						<h1 onClick={() => setActiveSection("Attendees")}>ATTENDEES</h1>
+					) : (
+						<h1
+							onClick={() => setActiveSection("Attendees")}
+							style={{ color: `var(--peach)` }}
+						>
+							ATTENDEES
+						</h1>
+					)}
+				</div>
+				<div id="render-content">{renderContent()}</div>
+			</div>
+		</>
 	);
 };
 
