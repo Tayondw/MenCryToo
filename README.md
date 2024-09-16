@@ -1,6 +1,6 @@
 # Men Cry Too
 
-## Link to live site
+## Live Link
 
 https://mencrytoo.onrender.com/
 
@@ -11,21 +11,9 @@ Tayon Williams
 
 ### Summary
 
-Men Cry Too is an effort to break through stigma of men not being allowed to express their feelings, improve help-seeking behavior and reduce male suicide. Let's check the stats that led to why we're both here.
+Men Cry Too is an effort to break through stigma of men not being allowed to express their feelings, improve help-seeking behavior and reduce male suicide.
 
 This is a capstone project for the App Academy 24-week program.
-
-### Splash Page
-
-![image](./react-vite/src/assets/splash-page.png)
-
-### Groups
-
-![image](./react-vite/src/assets/groups.png)
-
-### Events
-
-![image](./react-vite/src/assets/events.png)
 
 ## Technologies
 
@@ -59,7 +47,27 @@ This is a capstone project for the App Academy 24-week program.
 
 #### Hosting
 
+## Index
+
+[Feature List](https://github.com/Tayondw/MenCryToo/wiki/Feature-List) | [Database Schema](https://github.com/Tayondw/MenCryToo/wiki/DB-Schema) | [User Stories](https://github.com/Tayondw/MenCryToo/wiki/User-Stories) | [Wireframes](https://github.com/Tayondw/MenCryToo/wiki/Wireframe)
+
 ![image](https://img.shields.io/badge/Render-%236086D6.svg?style=for-the-badge&logo=render&logoColor=white)
+
+### Splash Page
+
+![image](./react-vite/src/assets/splash-page.png)
+
+### Groups
+
+![image](./react-vite/src/assets/groups.png)
+
+### Events
+
+![image](./react-vite/src/assets/events.png)
+
+### Group Details
+
+![image](./react-vite/src/assets/group-details.gif)
 
 ## Getting started
 
