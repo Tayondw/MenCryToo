@@ -4,7 +4,7 @@ https://mencrytoo.onrender.com/
 
 ### Creator
 Tayon Williams
-[Github](https://github.com/Tayondw) | [LinkedIn](https://www.linkedin.com/in/tayon/) | [Portfolio] (https://tayondw.github.io/)
+[Github](https://github.com/Tayondw) | [LinkedIn](https://www.linkedin.com/in/tayon/) | [Portfolio](https://tayondw.github.io/)
 
 ## Getting started
 
