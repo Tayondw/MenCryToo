@@ -47,11 +47,11 @@ This is a capstone project for the App Academy 24-week program.
 
 #### Hosting
 
+![image](https://img.shields.io/badge/Render-%236086D6.svg?style=for-the-badge&logo=render&logoColor=white)
+
 ## Index
 
 [Feature List](https://github.com/Tayondw/MenCryToo/wiki/Feature-List) | [Database Schema](https://github.com/Tayondw/MenCryToo/wiki/DB-Schema) | [User Stories](https://github.com/Tayondw/MenCryToo/wiki/User-Stories) | [Wireframes](https://github.com/Tayondw/MenCryToo/wiki/Wireframe)
-
-![image](https://img.shields.io/badge/Render-%236086D6.svg?style=for-the-badge&logo=render&logoColor=white)
 
 ### Splash Page
 
@@ -68,6 +68,9 @@ This is a capstone project for the App Academy 24-week program.
 ### Group Details
 
 ![image](./react-vite/src/assets/group-details.gif)
+
+### Event Details
+![image](./react-vite/src/assets/event-details.gif)
 
 ## Getting started
 
