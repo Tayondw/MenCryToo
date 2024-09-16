@@ -1,6 +1,10 @@
-# Flask React Project
+# Men Cry Too
+### Link to live site: 
+https://mencrytoo.onrender.com/
 
-This is the starter for the Flask React project.
+### Creator
+Tayon Williams
+[Github](https://github.com/Tayondw) | [LinkedIn](https://www.linkedin.com/in/tayon/) | [Portfolio] (https://tayondw.github.io/)
 
 ## Getting started
 
