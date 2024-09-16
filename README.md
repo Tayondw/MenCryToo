@@ -1,10 +1,65 @@
 # Men Cry Too
-### Link to live site: 
+
+## Link to live site
+
 https://mencrytoo.onrender.com/
 
 ### Creator
+
 Tayon Williams
 [Github](https://github.com/Tayondw) | [LinkedIn](https://www.linkedin.com/in/tayon/) | [Portfolio](https://tayondw.github.io/)
+
+### Summary
+
+Men Cry Too is an effort to break through stigma of men not being allowed to express their feelings, improve help-seeking behavior and reduce male suicide. Let's check the stats that led to why we're both here.
+
+This is a capstone project for the App Academy 24-week program.
+
+### Splash Page
+
+![image](./react-vite/src/assets/splash-page.png)
+
+### Groups
+
+![image](./react-vite/src/assets/groups.png)
+
+### Events
+
+![image](./react-vite/src/assets/events.png)
+
+## Technologies
+
+### Languages
+
+![image](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)
+![image](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)
+![image](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
+![image](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+
+### Frameworks/Libraries
+
+![image](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
+![image](https://img.shields.io/badge/SQLAlchemy-red?style=for-the-badge&logo=SQLAlchemy&logoColor=white)
+![image](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![image](https://img.shields.io/badge/redux-%23593d88.svg?style=for-the-badge&logo=redux&logoColor=white)
+
+#### Database
+
+![image](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)
+![image](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![image](https://img.shields.io/badge/Alembic-%23F79A32.svg?style=for-the-badge&logo=alembic&logoColor=white)
+
+#### APIs and Services
+
+![image](https://img.shields.io/badge/Amazon_S3-569A31?style=for-the-badge&logo=amazon-s3&logoColor=white)
+
+#### Development Tools
+
+![image](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+
+#### Hosting
+
+![image](https://img.shields.io/badge/Render-%236086D6.svg?style=for-the-badge&logo=render&logoColor=white)
 
 ## Getting started
 
