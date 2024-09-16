@@ -70,6 +70,7 @@ This is a capstone project for the App Academy 24-week program.
 ![image](./react-vite/src/assets/group-details.gif)
 
 ### Event Details
+
 ![image](./react-vite/src/assets/event-details.gif)
 
 ## Getting started
