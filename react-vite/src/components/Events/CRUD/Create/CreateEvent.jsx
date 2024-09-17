@@ -96,7 +96,7 @@ const CreateEvent = () => {
 							<div id="event-status">
 								<h3>Type of Event</h3>
 								<label>
-									Is this an in-person or online group?
+									Is this an in-person or online event?
 									<select
 										name="type"
 										id="event-privacy-select"
