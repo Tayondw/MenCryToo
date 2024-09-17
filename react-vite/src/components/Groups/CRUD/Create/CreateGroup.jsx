@@ -23,12 +23,12 @@ const CreateGroup = () => {
 
 	return (
 		<div id="new-group">
-			{/* <img
+			<img
 				src="https://mencrytoo.s3.amazonaws.com/group-images/mens-mental-health.png"
 				alt="create-group"
 				id="fit-image-content"
-			/> */}
-			<div id="group-fit-image-content"></div>
+			/>
+			{/* <div id="group-fit-image-content"></div> */}
 			{sessionUser ? (
 				<Form
 					method="post"
