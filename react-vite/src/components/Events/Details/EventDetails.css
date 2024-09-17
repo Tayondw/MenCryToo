@@ -1,3 +1,7 @@
+#events-details-page {
+      background: linear-gradient(135deg, #dddddc, #e08f2c); 
+}
+
 #events-details {
 	/* display: flex;
 	justify-content: center;
@@ -9,7 +13,7 @@
 	/* gap: 35px; */
 	width: 100%;
 	/* max-width: 100%; */
-	padding: 1% 5%;
+	padding: 1% 5%; 
 }
 
 #event-link {
