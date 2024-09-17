@@ -1,7 +1,34 @@
+#update-group-page {
+     background: linear-gradient(135deg, #e08f2c, #dddddc); 
+}
+
 #update-group {
-	display: flex;
-	flex-direction: column;
-	margin: 0px 10% 2%;
-	align-items: center;
-	justify-content: center;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	width: 100%;
+	height: 100%;
+	gap: 50px;
+      
+}
+
+#update-group h3 {
+      font-weight: 800;
+}
+
+#update-group p {
+      font-weight: 550;
+}
+
+#update-group #file-upload {
+      font-weight: 550;
+}
+
+.type-questions #type-questions-label {
+      font-weight: 550;
+}
+
+#update-groups-link-holder {
+      font-weight: 800;
+      color: #223f5c;
+      text-decoration: none;
 }
