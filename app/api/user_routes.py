@@ -3,6 +3,8 @@ from flask_login import login_required, current_user
 from app.models import db, User, Group, Event, Post, UserTags, Tag
 from app.forms import UserForm, EditUserForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
+import requests
+import json
 
 user_routes = Blueprint("users", __name__)
 
