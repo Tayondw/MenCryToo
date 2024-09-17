@@ -302,7 +302,7 @@ const EventDetails = () => {
 												eventDetails={eventDetails}
 												className="button"
 												id="delete-group"
-												buttonText="Delete"
+												buttonText="Delete Event"
 												style={{
 													backgroundColor: `red`,
 													color: `#dddddc`,

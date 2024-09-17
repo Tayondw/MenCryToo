@@ -39,7 +39,7 @@ const DeleteEvent = ({ eventDetails }) => {
 						style={{ backgroundColor: "red" }}
 						value="delete-event"
 						id="button-text"
-						className="event-delete-button-modal"
+						className="button"
 					>
 						Yes (Delete Event)
 					</button>
@@ -47,6 +47,7 @@ const DeleteEvent = ({ eventDetails }) => {
 						id="button-text"
 						style={{ backgroundColor: "darkgray" }}
 						onClick={onClose}
+						className="button"
 					>
 						No (Keep Event)
 					</button>
