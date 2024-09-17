@@ -5,6 +5,7 @@
       margin: 0;
 	align-items: center;
 	justify-content: center;
+      background: linear-gradient(135deg, #e08f2c, #dddddc); 
 }
 
 #events-section-1 {
@@ -78,6 +79,7 @@
 	/* flex-direction: column; */
 	width: 100%;
 	gap: 15px;
+      font-weight: 550;
 }
 
 #event-name-input {
@@ -156,4 +158,12 @@ input[type="file"] {
 	cursor: pointer;
 	color: var(--white-smoke);
       margin-right: 15px;
+}
+
+#new-event #file-upload {
+      font-weight: 550;
+}
+
+#new-event .create-event-form h3 {
+      font-weight: 600;
 }
