@@ -57,24 +57,23 @@ const AuthHome = () => {
 		<div id="auth-home">
 			{sessionUser ? (
 				<>
-					<div id="auth-hero-section">
-						<HeroSection />
-					</div>
+					
+					<div id="auth-hero-section"><HeroSection /></div>
 					<div id="create-profile">
 						<div id="create-profile-header">
 							<h2>CONNECT WITH OTHERS</h2>
 							<h4>
-								A better way to connect with others is to create a profile and
-								let others get to know who you are and allow you to better find
-								others who are like you
+								A better way to connect with others is to check the posts feed
+								for users who have similar tags to you and let others get to
+								know who you are and allow you to better find others who are
+								like you
 							</h4>
 						</div>
 						<div id="create-profile-button">
-							<Link
-								style={{ cursor: `text` }}
-								// to={`/users/${sessionUser.id}/profile/create`}
-							>
-								<button className="button">CREATE PROFILE</button>
+							<Link to="/signup">
+								<button className="button" style={{ cursor: `pointer` }}>
+									POSTS FEED
+								</button>
 							</Link>
 						</div>
 					</div>

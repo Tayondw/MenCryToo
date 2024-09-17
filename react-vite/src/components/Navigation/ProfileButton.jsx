@@ -108,7 +108,7 @@ function ProfileButton({ user, navigate }) {
 								</div>
 							) : (
 								<div id="options-modal">
-									{/* <OpenModalButton
+									<OpenModalButton
 										className="logout"
 										buttonText="Profile"
 										onButtonClick={() => {
@@ -143,7 +143,7 @@ function ProfileButton({ user, navigate }) {
 											color: `#223f5c`,
 											backgroundColor: `#FAF5E4`,
 										}}
-									/> */}
+									/>
 									<OpenModalButton
 										className="logout"
 										buttonText="View Groups"

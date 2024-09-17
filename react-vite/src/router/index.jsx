@@ -11,12 +11,12 @@ import Events from "../components/Events";
 import EventDetails from "../components/Events/Details";
 import CreateEvent from "../components/Events/CRUD/Create";
 import UpdateEvent from "../components/Events/CRUD/Update";
-// import Profile from "../components/Profile";
-// import ProfileDetails from "../components/Profile/Details";
+import Profile from "../components/Profile";
+import ProfileDetails from "../components/Profile/Details";
 // import CreateProfile from "../components/Profile/CRUD/Create";
-// import UpdateProfile from "../components/Profile/CRUD/Update";
-// import Posts from "../components/Posts";
-// import PostDetails from "../components/Posts/Details";
+import UpdateProfile from "../components/Profile/CRUD/Update";
+import Posts from "../components/Posts";
+import PostDetails from "../components/Posts/Details";
 // import Comments from "../components/Comments";
 // import CommentDetails from "../components/Comments/Details";
 // import Tags from "../components/Tags";
@@ -29,8 +29,8 @@ import {
 	groupDetailsLoader,
 	eventDetailsLoader,
 	// venueDetailsLoader,
-	// userDetailsLoader,
-	// postDetailsLoader,
+	userDetailsLoader,
+	postDetailsLoader,
 	// tagDetailsLoader,
 } from "./loaders";
 import {
@@ -41,8 +41,8 @@ import {
 	// groupMemberActions,
 	// eventAttendeeActions,
 	// venueActions,
-	// profileActions,
-	// postActions,
+	profileActions,
+	postActions,
 } from "./actions";
 import Layout from "./Layout";
 
@@ -193,24 +193,24 @@ export const router = createBrowserRouter([
 			// },
 			// ! PROFILE
 			// ? your profile only you can access
-			// {
-			// 	path: "profile",
-			// 	loader: getLoader,
-			// 	element: <Profile />,
-			// 	action: profileActions,
-			// },
+			{
+				path: "profile",
+				loader: getLoader,
+				element: <Profile />,
+				action: profileActions,
+			},
 			// {
 			// 	path: "users/:userId/profile/create",
 			// 	loader: userDetailsLoader,
 			// 	element: <CreateProfile />,
 			// 	action: profileActions,
 			// },
-			// {
-			// 	path: "users/:userId/profile/update",
-			// 	loader: userDetailsLoader,
-			// 	element: <UpdateProfile />,
-			// 	action: profileActions,
-			// },
+			{
+				path: "users/:userId/profile/update",
+				loader: userDetailsLoader,
+				element: <UpdateProfile />,
+				action: profileActions,
+			},
 			// {
 			// 	path: "users/:userId/profile/delete",
 			// 	loader: userDetailsLoader,
@@ -218,23 +218,23 @@ export const router = createBrowserRouter([
 			// 	action: profileActions,
 			// },
 			// ? other users profiles when you click on their profile
-			// {
-			// 	path: "users/:userId",
-			// 	loader: userDetailsLoader,
-			// 	element: <ProfileDetails />,
-			// 	action: postActions,
-			// },
-			// {
-			// 	path: "posts",
-			// 	element: <Posts />,
-			// 	action: postActions,
-			// },
-			// {
-			// 	path: "posts/:postId",
-			// 	loader: postDetailsLoader,
-			// 	element: <PostDetails />,
-			// 	action: postActions,
-			// },
+			{
+				path: "users/:userId",
+				loader: userDetailsLoader,
+				element: <ProfileDetails />,
+				action: postActions,
+			},
+			{
+				path: "posts",
+				element: <Posts />,
+				action: postActions,
+			},
+			{
+				path: "posts/:postId",
+				loader: postDetailsLoader,
+				element: <PostDetails />,
+				action: postActions,
+			},
 			// {
 			// 	path: "comments",
 			// 	element: <Comments />,

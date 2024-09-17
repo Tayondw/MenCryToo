@@ -1,8 +1,8 @@
 import { Link, Outlet } from "react-router-dom";
 import { useLoaderData } from "react-router-dom";
 import { useSelector } from "react-redux";
-import OpenModalButton from "../../OpenModalButton";
-import SignupFormModal from "../../SignupFormModal";
+// import OpenModalButton from "../../OpenModalButton";
+// import SignupFormModal from "../../SignupFormModal";
 import "./NotAuthHome.css";
 import "react-tooltip/dist/react-tooltip.css";
 
@@ -24,7 +24,8 @@ export const HeroSection = () => {
 							TAKE INSPECTION
 						</Link>
 						{sessionUser ? (
-							<Link
+                                          <Link
+                                                to={``}
 								className="hollow-button all-caps"
 								style={{ cursor: `text` }}
 							>
@@ -207,7 +208,32 @@ const NotAuthHome = () => {
 				{sessionUser ? null : (
 					<>
 						<h2>BECOME A MEMBER - START IMPROVING YOUR MENTAL TODAY</h2>
-						<OpenModalButton
+						<Link
+							to="/signup"
+							style={{
+								background: `#223f5c`,
+								width: `200px`,
+								cursor: `pointer`,
+								borderRadius: `4px`,
+								color: `#fff`,
+								textAlign: `center`,
+								letterSpacing: `2px`,
+								textTransform: `uppercase`,
+								marginLeft: `10px`,
+								marginRight: `10px`,
+								padding: `12px 30px`,
+								fontSize: `16px`,
+								fontWeight: 600,
+								lineHeight: `21px`,
+								textDecoration: `none`,
+								transition: `background-color 0.3s`,
+								display: `inline-block`,
+								border: 0,
+							}}
+						>
+							Join Us
+						</Link>
+						{/* <OpenModalButton
 							buttonText="Join Us"
 							style={{
 								background: `#223f5c`,
@@ -230,7 +256,7 @@ const NotAuthHome = () => {
 								border: 0,
 							}}
 							modalComponent={<SignupFormModal />}
-						/>
+						/> */}
 					</>
 				)}
 			</div>

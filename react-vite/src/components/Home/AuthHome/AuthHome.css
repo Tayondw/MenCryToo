@@ -7,12 +7,13 @@
 }
 
 #auth-hero-section {
-      display: flex;
+      /* display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 70px;
+      margin-bottom: 70px; */
       /* margin: 0 10px 50px;
       padding: 0 30px 40px; */
+      padding-bottom: 70px;
 }
 
 #create-profile {
@@ -25,6 +26,7 @@
 	padding: 4% 10% 3%;
 	background-color: #223f5c;
       border-radius: 80px;
+      width: 85%;
 }
 
 #create-profile-header {
