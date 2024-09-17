@@ -11,7 +11,7 @@ const CreateProfile = () => {
 	const [lastName, setLastName] = useState("");
 	const [bio, setBio] = useState("");
 	const [userTags, setUserTags] = useState(["ANGER"]);
-	// const [profileImage, setProfileImage] = useState("");
+	const [profileImage, setProfileImage] = useState("");
 
 	// Ensure user is logged in
 	useEffect(() => {

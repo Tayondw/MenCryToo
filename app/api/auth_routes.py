@@ -61,14 +61,14 @@ def sign_up():
     form = SignUpForm()
     form["csrf_token"].data = request.cookies["csrf_token"]
     if form.validate_on_submit():
-        profile_image = form.profileImage.data
+        profile_image_url = form.profileImage.data
 
-        if not profile_image:
+        if not profile_image_url:
             return {"message": "An image is required to create a profile."}, 400
 
         try:
-            profile_image.filename = get_unique_filename(profile_image.filename)
-            upload = upload_file_to_s3(profile_image)
+            profile_image_url.filename = get_unique_filename(profile_image_url.filename)
+            upload = upload_file_to_s3(profile_image_url)
         except Exception as e:
             return {"message": f"Image upload failed: {str(e)}"}, 500
 
@@ -90,16 +90,22 @@ def sign_up():
             bio=form.data["bio"],
             profile_image_url=url,
         )
-        
+
         # Update the user's tags
         selected_tags = form.userTags.data  # This returns a list of selected tags
         tags_to_add = Tag.query.filter(Tag.name.in_(selected_tags)).all()
         user.users_tags = tags_to_add
-        
+
         db.session.add(user)
         db.session.commit()
         login_user(user)
-        return user.to_dict()
+        return user.to_dict(
+            posts=True,
+            user_comments=True,
+            user_memberships=True,
+            user_attendances=True,
+            users_tags=True,
+        )
     return form.errors, 401
 
 

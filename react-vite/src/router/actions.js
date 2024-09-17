@@ -12,7 +12,9 @@ export const groupActions = async ({ request }) => {
 		const city = formData.get("city");
 		const state = formData.get("state");
 		const image = formData.get("image");
-		const errors = {};
+            const errors = {};
+            console.log("image", image);
+            
 
 		if (!name.length || name.length < 3 || name.length > 50)
 			errors.name = "Group name must be between 3 and 50 characters";

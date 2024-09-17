@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { thunkLogout } from "../../redux/session";
 import OpenModalMenuItem from "./OpenModalMenuItem";
 import LoginFormModal from "../LoginFormModal";
-import SignupFormModal from "../SignupFormModal";
+// import SignupFormModal from "../SignupFormModal";
+// import SignupFormPage from "../SignupFormPage";
 import OpenModalButton from "../OpenModalButton";
 import { CgProfile } from "react-icons/cg";
 import { GoChevronDown, GoChevronUp } from "react-icons/go";
@@ -188,12 +190,15 @@ function ProfileButton({ user, navigate }) {
 						className="auth-login"
 						modalComponent={<LoginFormModal navigate={navigate} />}
 					/>
-					<OpenModalMenuItem
+					<Link to={`/signup`}>
+						<p className="auth-signup">Sign up</p>
+					</Link>
+					{/* <OpenModalMenuItem
 						itemText="Sign Up"
 						onItemClick={closeMenu}
 						className="auth-signup"
 						modalComponent={<SignupFormModal navigate={navigate} />}
-					/>
+					/> */}
 				</div>
 			)}
 		</>

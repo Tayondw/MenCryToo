@@ -80,7 +80,6 @@ function SignupFormModal() {
 			error.confirmPassword =
 				"Confirm Password field must be the same as the Password field";
 		if (Object.keys(error).length > 0) {
-			console.log("EERR", error);
 			return setErrors(error);
 		}
 

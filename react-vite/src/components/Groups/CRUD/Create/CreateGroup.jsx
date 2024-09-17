@@ -215,7 +215,8 @@ const CreateGroup = () => {
 						<Link to="/groups">
 							<button id="update-group-cancel">Cancel</button>
 						</Link>
-						<input type="hidden" name="organizer_id" value={sessionUser.id} />
+                                    <input type="hidden" name="organizer_id" value={sessionUser.id} />
+                                     
 					</div>
 				</Form>
 			) : (
