@@ -1,7 +1,6 @@
 import { useLoaderData, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import Footer from "../Footer";
 import OpenModalButton from "../OpenModalButton";
 import AddTag from "../Tags/AddTag";
 import DeleteProfile from "./CRUD/Delete";
@@ -10,7 +9,9 @@ import "./Profile.css";
 const Profile = () => {
 	const sessionUser = useSelector((state) => state.session.user);
 	const { allProfiles } = useLoaderData();
-	const navigate = useNavigate();
+      const navigate = useNavigate();
+      console.log(allProfiles);
+      
 	const userProfile = allProfiles.users_profile.find(
 		(profile) => profile.id === sessionUser.id,
 	);
@@ -75,7 +76,7 @@ const Profile = () => {
 							style={{ textDecoration: `none`, color: `inherit` }}
 						>
 							<div id="second-half-groups" className="second-half-cards">
-								<img src={group.groupImage[0].groupImage} alt={group.name} />
+								<img src={group.image[0].image} alt={group.name} />
 								<div id="display-style-direction">
 									<div>
 										<h2>{group.name}</h2>
@@ -113,7 +114,7 @@ const Profile = () => {
 							style={{ textDecoration: `none`, color: `inherit` }}
 						>
 							<div id="second-half-events" className="second-half-cards">
-								<img src={event.eventImage[0].eventImage} alt={event.name} />
+								<img src={event.image[0].image} alt={event.name} />
 								<div id="display-style-direction">
 									<div>
 										<h2>{event.name}</h2>
@@ -259,7 +260,6 @@ const Profile = () => {
 					</div>
 				</div>
 			</div>
-			<Footer />
 		</div>
 	);
 };

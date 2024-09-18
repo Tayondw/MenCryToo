@@ -7,7 +7,7 @@ export const getLoader = async () => {
 		// `/api/users/`,
 		// `/api/venues/`,
 		// `/api/posts/feed`,
-		// `/api/users/profile-feed`,
+		`/api/users/profile-feed`,
 		`/api/tags/`,
 	];
 
@@ -21,7 +21,7 @@ export const getLoader = async () => {
 		// allUsers,
 		// allVenues,
 		// allPosts,
-		// allProfiles,
+		allProfiles,
 		allTags,
 	] = await Promise.all(fetchPromises);
 
@@ -31,7 +31,7 @@ export const getLoader = async () => {
 		// allUsers,
 		// allVenues,
 		// allPosts,
-		// allProfiles,
+		allProfiles,
 		allTags,
 	});
 };
