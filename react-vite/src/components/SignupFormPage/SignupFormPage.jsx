@@ -95,7 +95,7 @@ function SignupFormPage() {
 		<div id="new-group">
 			{errors.server && <p>{errors.server}</p>}
 			<img
-				src="/src/assets/signup.png"
+				src="https://mencrytoo.s3.amazonaws.com/signup.png"
 				alt="signup"
 				id="fit-signup-image-content"
 			/>
