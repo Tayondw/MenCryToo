@@ -217,6 +217,13 @@ export const router = createBrowserRouter([
 			// 	element: <DeleteProfile />,
 			// 	action: profileActions,
 			// },
+			// ? profile feed for users with similar tags
+			{
+				path: "profile-feed",
+				loader: userDetailsLoader,
+				element: <ProfileDetails />,
+				action: postActions,
+			},
 			// ? other users profiles when you click on their profile
 			{
 				path: "users/:userId",

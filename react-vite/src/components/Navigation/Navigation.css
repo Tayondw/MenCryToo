@@ -95,3 +95,13 @@
       text-transform: uppercase;
 }
 
+#authentication a {
+      text-decoration: none;
+      color: #223f5c;
+}
+
+#authentication a:hover, #authentication .auth-login:hover {
+      color: #ea8d89;
+}
+
+

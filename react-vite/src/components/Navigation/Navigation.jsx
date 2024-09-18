@@ -32,42 +32,42 @@ function Navigation({ isLoaded }) {
 							// to="/tags"
 							className="navigation-link w-nav-link"
 							aria-current="page"
-							style={{ cursor: `text` }}
+							style={{ cursor: `pointer` }}
 						>
 							EXPLORE TAGS
 						</p>
-                                    <p
+                                    {/* <p
                                           // to="/get-help"
 							style={{ cursor: `text` }}
 							className="navigation-link w-nav-link"
 						>
 							GET HELP
-						</p>
-						<p
+						</p> */}
+						{/* <p
 							style={{ cursor: `text` }}
 							className="navigation-link w-nav-link"
 						>
 							ABOUT
-						</p>
+						</p> */}
 						{/* <p to="/partner" className="navigation-link w-nav-link">
 							BECOME A PARTNER
 						</p> */}
-						<p
+						{/* <p
 							// to="/i-believe-campaign"
 							className="navigation-link w-nav-link"
 							style={{ cursor: `text` }}
 						>
 							&ldquo;I BELIEVE&ldquo; CAMPAIGN
-						</p>
+						</p> */}
 						{/* <p to="/posts/create" className="navigation-link w-nav-link">
 							SHARE YOUR STORY
 						</p> */}
-						<p
+						{/* <p
 							className="navigation-link current w-nav-link"
 							style={{ cursor: `text` }}
 						>
 							CRISIS SUPPORT
-						</p>
+						</p> */}
 						{isLoaded && (
 							<ProfileButton user={sessionUser} navigate={navigate} />
 						)}
@@ -92,11 +92,11 @@ function Navigation({ isLoaded }) {
 							// to="/tags"
 							className="navigation-link w-nav-link"
 							aria-current="page"
-							style={{ cursor: `text` }}
+							style={{ cursor: `pointer` }}
 						>
 							EXPLORE TAGS
 						</p>
-						<p
+						{/* <p
 							// to="/get-help"
 							className="navigation-link w-nav-link"
 							style={{ cursor: `text` }}
@@ -123,7 +123,7 @@ function Navigation({ isLoaded }) {
 							style={{ cursor: `text` }}
 						>
 							&ldquo;I BELIEVE&ldquo; CAMPAIGN
-						</p>
+						</p> */}
 						<p
 							// to="/posts/create"
 							className="navigation-link w-nav-link"
@@ -131,12 +131,12 @@ function Navigation({ isLoaded }) {
 						>
 							SHARE YOUR STORY
 						</p>
-						<p
+						{/* <p
 							className="navigation-link current w-nav-link"
 							style={{ cursor: `text` }}
 						>
 							CRISIS SUPPORT
-						</p>
+						</p> */}
 						{isLoaded && (
 							<ProfileButton user={sessionUser} navigate={navigate} />
 						)}

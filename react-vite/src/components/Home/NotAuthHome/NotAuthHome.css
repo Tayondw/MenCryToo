@@ -133,8 +133,8 @@
 	text-decoration: none;
 	color: #222222;
 	text-align: left;
-	margin-left: auto;
-	margin-right: auto;
+	/* margin-left: auto;
+	margin-right: auto; */
 }
 .w-nav-link.w--current {
 	color: #0082f3;
@@ -282,11 +282,11 @@
 }
 
 .navigation-menu {
-	justify-content: space-between;
+	justify-content: flex-end;
 	display: flex;
 	margin-left: auto;
 	align-items: center;
-	/* gap: 10px; */
+	gap: 20px;
 	padding-top: 20px;
 	padding-bottom: 20px;
 	width: 80%;

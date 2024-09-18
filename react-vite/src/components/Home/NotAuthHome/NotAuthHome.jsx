@@ -20,14 +20,14 @@ export const HeroSection = () => {
 						<h4 className="heading-3">Take control of your mental health.</h4>
 					</div>
 					<div className="div-block">
-						<Link className="button" style={{ cursor: `text` }}>
+						{/* <Link className="button" style={{ cursor: `text` }}>
 							TAKE INSPECTION
-						</Link>
+						</Link> */}
 						{sessionUser ? (
                                           <Link
-                                                to={``}
+                                                to={`/profile-feed`}
 								className="hollow-button all-caps"
-								style={{ cursor: `text` }}
+								style={{ cursor: `pointer` }}
 							>
 								FIND SOMEONE LIKE YOU
 							</Link>
@@ -61,7 +61,7 @@ export const SectionOne = () => {
 				<div className="div-block-2">
 					{allTags.tags.map((tag) => (
 						<Link
-							// to={`/tags/${tag.id}/${tag.name}`}
+							to={`/tags/${tag.id}/${tag.name}`}
 							key={tag.id}
 							className="w-button"
 							style={{ cursor: `text` }}
@@ -155,13 +155,13 @@ export const AccentSection = () => {
 								behavior and reduce male suicide. Let&apos;s check the stats that
 								led to why we&apos;re both here.
 							</p>
-							<Link
+							{/* <Link
 								// to="/about"
 								style={{ cursor: `text` }}
 								className="hollow-button"
 							>
 								Learn more
-							</Link>
+							</Link> */}
 						</div>
 					</div>
 					<div className="w-col w-col-6">
@@ -180,13 +180,13 @@ export const AccentSection = () => {
 								single person up to full-scale businesses, so you&apos;ll fit
 								right in.
 							</p>
-							<Link
-								// to="/partnership"
+							{/* <Link
+								to="/partnership"
 								style={{ cursor: `text` }}
 								className="hollow-button"
 							>
 								GET STARTED
-							</Link>
+							</Link> */}
 						</div>
 					</div>
 				</div>
@@ -202,7 +202,7 @@ const NotAuthHome = () => {
 		<>
 			<HeroSection />
 			<SectionOne />
-			<SectionTwo />
+			{/* <SectionTwo /> */}
 			<AccentSection />
 			<div id="section-4">
 				{sessionUser ? null : (
