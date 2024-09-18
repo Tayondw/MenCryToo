@@ -24,7 +24,7 @@ const CreateGroup = () => {
 	return (
 		<div id="new-group">
 			<img
-				src="https://mencrytoo.s3.amazonaws.com/group-images/mens-mental-health.png"
+				src="https://mencrytoo.s3.amazonaws.com/groups-page.png"
 				alt="create-group"
 				id="fit-image-content"
 			/>
@@ -215,8 +215,7 @@ const CreateGroup = () => {
 						<Link to="/groups">
 							<button id="update-group-cancel">Cancel</button>
 						</Link>
-                                    <input type="hidden" name="organizer_id" value={sessionUser.id} />
-                                     
+						<input type="hidden" name="organizer_id" value={sessionUser.id} />
 					</div>
 				</Form>
 			) : (
