@@ -1,17 +1,18 @@
 import { json } from "react-router-dom";
 
 export const getLoader = async () => {
-	const urls = [`/api/groups/`, `/api/events/`];
+	const urls = [`/api/groups/`, `/api/events/`, `/api/tags/`];
 
 	const fetchPromises = urls.map((url) =>
 		fetch(url).then((response) => response.json()),
 	);
 
-	const [allGroups, allEvents] = await Promise.all(fetchPromises);
+	const [allGroups, allEvents, allTags] = await Promise.all(fetchPromises);
 
 	return json({
 		allGroups,
 		allEvents,
+		allTags,
 	});
 };
 

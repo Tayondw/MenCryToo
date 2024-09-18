@@ -48,7 +48,7 @@ export const HeroSection = () => {
 };
 
 export const SectionOne = () => {
-	const { allTags } = useLoaderData();
+      const {allTags} = useLoaderData();
 	return (
 		<div className="section">
 			<div className="w-container-tag-div">
@@ -61,7 +61,7 @@ export const SectionOne = () => {
 				<div className="div-block-2">
 					{allTags.tags.map((tag) => (
 						<Link
-							to={`/tags/${tag.id}/${tag.name}`}
+							// to={`/tags/${tag.id}/${tag.name}`}
 							key={tag.id}
 							className="w-button"
 							style={{ cursor: `text` }}
