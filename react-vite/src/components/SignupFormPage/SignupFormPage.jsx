@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate, useNavigate, Form, Link } from "react-router-dom";
 import { thunkAuthenticate } from "../../redux/session";
+import OpenModalMenuItem from "../Navigation/OpenModalMenuItem";
+import LoginFormModal from "../LoginFormModal";
+import "./SignupForm.css";
 
 function SignupFormPage() {
 	const dispatch = useDispatch();
@@ -80,9 +83,9 @@ function SignupFormPage() {
 			body: formData,
 		});
 		if (response.ok) {
-                  await response.json();
-                  dispatch(thunkAuthenticate())
-                  navigate("/");
+			await response.json();
+			dispatch(thunkAuthenticate());
+			navigate("/");
 		} else {
 			console.error("Error: ", error);
 		}
@@ -91,26 +94,30 @@ function SignupFormPage() {
 	return (
 		<div id="new-group">
 			{errors.server && <p>{errors.server}</p>}
-			<img src="" alt="" />
+			<img
+				src="/src/assets/signup.png"
+				alt="signup"
+				id="fit-signup-image-content"
+			/>
 			<Form
 				onSubmit={handleSubmit}
-				className="create-group"
+				className="create-group-form"
 				encType="multipart/form-data"
 				type="file"
 				method="post"
 				action="/signup"
 			>
 				<div id="header">
-					<h1>Create a Profile</h1>
-					<h2>
+					<h3>Create a Profile</h3>
+					<p>
 						We&apos;ll walk you through a few steps to build your presence on
 						the site
-					</h2>
+					</p>
 					<hr />
 				</div>
-				<div id="section-1-create">
+				<div id="section-0-create">
 					<div id="set-first-name">
-						<h2>What is your first name?</h2>
+						<h3 style={{ fontSize: `15px` }}>First Name</h3>
 						<div id="first-name-input">
 							<input
 								id="first-name-input-text"
@@ -128,7 +135,7 @@ function SignupFormPage() {
 						</p>
 					)}
 					<div id="set-last-name">
-						<h2>What is your last name?</h2>
+						<h3 style={{ fontSize: `15px` }}>Last Name</h3>
 						<div id="state-input">
 							<input
 								id="last-name-input-text"
@@ -146,7 +153,7 @@ function SignupFormPage() {
 						</p>
 					)}
 					<div id="set-email">
-						<h2>What is your email?</h2>
+						<h3 style={{ fontSize: `15px` }}>Email</h3>
 						<div id="email-input">
 							<input
 								id="email-input-text"
@@ -164,7 +171,7 @@ function SignupFormPage() {
 						</p>
 					)}
 					<div id="set-username">
-						<h2>What would you like to be your username?</h2>
+						<h3 style={{ fontSize: `15px` }}>Username</h3>
 						<div id="username-input">
 							<input
 								id="username-input-text"
@@ -182,7 +189,7 @@ function SignupFormPage() {
 						</p>
 					)}
 					<div id="set-password">
-						<h2>Password</h2>
+						<h3 style={{ fontSize: `15px` }}>Password</h3>
 						<div id="password-input">
 							<input
 								id="password-input-text"
@@ -200,7 +207,7 @@ function SignupFormPage() {
 						</p>
 					)}
 					<div id="set-confirm-password">
-						<h2>Confirm Password</h2>
+						<h3 style={{ fontSize: `15px` }}>Confirm Password</h3>
 						<div id="password-input">
 							<input
 								id="confirm-password-input-text"
@@ -221,24 +228,12 @@ function SignupFormPage() {
 				<hr />
 				<div id="section-3-create">
 					<div id="set-description">
-						<h2>Describe why you are are.</h2>
-						<div className="caption">
-							<p>
-								People will see this when we promote you, but you&apos;ll be
-								able to add to it later, too.
-								<br />
-								<br />
-								1. What are you here for?
-								<br />
-								2. What group do you want to join?
-								<br />
-								3. What do you hope to gain out of this?
-							</p>
-						</div>
+						<h3 style={{ fontSize: `17px` }}>Describe why you are here</h3>
+						<br />
 						<div id="bio-input">
 							<textarea
 								name="bio"
-								id="group-name-textarea"
+								id="profile-desc-textarea"
 								placeholder="Please write at least 50 characters"
 								value={bio}
 								onChange={(event) => setBio(event.target.value)}
@@ -251,12 +246,13 @@ function SignupFormPage() {
 						</p>
 					)}
 				</div>
+				<hr />
 				<div id="event-status">
+					<h3 style={{ fontSize: `17px` }}>Select one or more tags</h3>
 					<label>
-						Select the one or more tags that best describes you
 						<select
 							name="userTags"
-							id="event-privacy-select"
+							id="tag-select"
 							value={userTags}
 							multiple={true}
 							onChange={(event) => {
@@ -307,17 +303,28 @@ function SignupFormPage() {
 					)}
 				</div>
 				<hr />
-				<button
-					id="create-group-submit"
-					type="submit"
-					style={{ cursor: isDisabled ? "not-allowed" : "pointer" }}
-					disabled={isDisabled}
-				>
-					Sign Up
-				</button>
-				<Link to="/groups">
-					<button id="update-group-cancel">Cancel</button>
-				</Link>
+				<div id="signup-section-6">
+					<button
+						id="create-group-submit"
+						type="submit"
+						style={{ cursor: isDisabled ? "not-allowed" : "pointer" }}
+						disabled={isDisabled}
+					>
+						Sign Up
+					</button>
+					<Link to="/">
+						<button id="update-group-cancel">Cancel</button>
+					</Link>
+				</div>
+				<div id="login-link">
+					<p>Already have an account?</p>
+					<OpenModalMenuItem
+						itemText="Log in here"
+						className="auth-login"
+						style={{ color: `#EA8D89`, cursor: `pointer` }}
+						modalComponent={<LoginFormModal navigate={navigate} />}
+					/>
+				</div>
 			</Form>
 		</div>
 	);
