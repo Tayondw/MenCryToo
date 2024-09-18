@@ -6,14 +6,12 @@ import Groups from "../components/Groups";
 import GroupDetails from "../components/Groups/Details";
 import CreateGroup from "../components/Groups/CRUD/Create";
 import UpdateGroup from "../components/Groups/CRUD/Update";
-import DeleteGroup from "../components/Groups/CRUD/Delete";
 import Events from "../components/Events";
 import EventDetails from "../components/Events/Details";
 import CreateEvent from "../components/Events/CRUD/Create";
 import UpdateEvent from "../components/Events/CRUD/Update";
 import Profile from "../components/Profile";
 import ProfileDetails from "../components/Profile/Details";
-// import CreateProfile from "../components/Profile/CRUD/Create";
 import UpdateProfile from "../components/Profile/CRUD/Update";
 import Posts from "../components/Posts";
 import PostDetails from "../components/Posts/Details";
@@ -29,8 +27,11 @@ import {
 	groupDetailsLoader,
 	eventDetailsLoader,
 	// venueDetailsLoader,
-	userDetailsLoader,
-	postDetailsLoader,
+      userDetailsLoader,
+      postsLoader,
+      postDetailsLoader,
+      profilesLoader,
+      tagsLoader,
 	// tagDetailsLoader,
 } from "./loaders";
 import {
@@ -49,7 +50,7 @@ import Layout from "./Layout";
 export const router = createBrowserRouter([
 	{
 		element: <Layout />,
-		loader: getLoader,
+		loader: tagsLoader,
 		children: [
 			{
 				path: "/",
@@ -87,12 +88,6 @@ export const router = createBrowserRouter([
 				path: "groups/:groupId/edit",
 				loader: groupDetailsLoader,
 				element: <UpdateGroup />,
-				action: groupActions,
-			},
-			{
-				path: "groups/:groupId/delete",
-				loader: groupDetailsLoader,
-				element: <DeleteGroup />,
 				action: groupActions,
 			},
 			// ! GROUP - IMAGES
@@ -199,28 +194,16 @@ export const router = createBrowserRouter([
 				element: <Profile />,
 				action: profileActions,
 			},
-			// {
-			// 	path: "users/:userId/profile/create",
-			// 	loader: userDetailsLoader,
-			// 	element: <CreateProfile />,
-			// 	action: profileActions,
-			// },
 			{
 				path: "users/:userId/profile/update",
 				loader: userDetailsLoader,
 				element: <UpdateProfile />,
 				action: profileActions,
 			},
-			// {
-			// 	path: "users/:userId/profile/delete",
-			// 	loader: userDetailsLoader,
-			// 	element: <DeleteProfile />,
-			// 	action: profileActions,
-			// },
 			// ? profile feed for users with similar tags
 			{
 				path: "profile-feed",
-				loader: userDetailsLoader,
+				loader: profilesLoader,
 				element: <ProfileDetails />,
 				action: postActions,
 			},
@@ -232,7 +215,8 @@ export const router = createBrowserRouter([
 				action: postActions,
 			},
 			{
-				path: "posts",
+                        path: "posts",
+                        loader: postsLoader,
 				element: <Posts />,
 				action: postActions,
 			},
