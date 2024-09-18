@@ -28,14 +28,14 @@ function Navigation({ isLoaded }) {
 						</div>
 					</div>
 					<nav role="navigation" className="navigation-menu w-nav-menu">
-						<p
+						{/* <p
 							// to="/tags"
 							className="navigation-link w-nav-link"
 							aria-current="page"
 							style={{ cursor: `pointer` }}
 						>
 							EXPLORE TAGS
-						</p>
+						</p> */}
                                     {/* <p
                                           // to="/get-help"
 							style={{ cursor: `text` }}
