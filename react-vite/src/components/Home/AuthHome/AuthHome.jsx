@@ -57,8 +57,9 @@ const AuthHome = () => {
 		<div id="auth-home">
 			{sessionUser ? (
 				<>
-					
-					<div id="auth-hero-section"><HeroSection /></div>
+					<div id="auth-hero-section">
+						<HeroSection />
+					</div>
 					<div id="create-profile">
 						<div id="create-profile-header">
 							<h2>CONNECT WITH OTHERS</h2>
@@ -70,7 +71,7 @@ const AuthHome = () => {
 							</h4>
 						</div>
 						<div id="create-profile-button">
-							<Link to="/signup">
+							<Link to="/posts">
 								<button className="button" style={{ cursor: `pointer` }}>
 									POSTS FEED
 								</button>

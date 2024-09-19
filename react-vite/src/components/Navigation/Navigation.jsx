@@ -36,7 +36,7 @@ function Navigation({ isLoaded }) {
 						>
 							EXPLORE TAGS
 						</p> */}
-                                    {/* <p
+						{/* <p
                                           // to="/get-help"
 							style={{ cursor: `text` }}
 							className="navigation-link w-nav-link"
@@ -124,6 +124,13 @@ function Navigation({ isLoaded }) {
 						>
 							&ldquo;I BELIEVE&ldquo; CAMPAIGN
 						</p> */}
+						<NavLink
+							to="/groups/new"
+							className="navigation-link w-nav-link"
+							style={{ margin: `10px 0px`, lineHeight: `25px` }}
+						>
+							CREATE A GROUP
+						</NavLink>
 						<p
 							// to="/posts/create"
 							className="navigation-link w-nav-link"
@@ -131,6 +138,13 @@ function Navigation({ isLoaded }) {
 						>
 							SHARE YOUR STORY
 						</p>
+						<NavLink
+							to="/profile-feed"
+							className="navigation-link w-nav-link"
+							style={{ margin: `10px 0px`, lineHeight: `25px` }}
+						>
+							SOMEONE LIKE YOU
+						</NavLink>
 						{/* <p
 							className="navigation-link current w-nav-link"
 							style={{ cursor: `text` }}

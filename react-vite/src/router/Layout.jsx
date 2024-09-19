@@ -5,6 +5,7 @@ import { ModalProvider, Modal } from "../context/Modal";
 import { thunkAuthenticate } from "../redux/session";
 import Navigation from "../components/Navigation/Navigation";
 import Footer from "../components/Footer";
+import ScrollToTop from "../components/ScrollToTop";
 
 export default function Layout() {
 	const dispatch = useDispatch();
@@ -17,7 +18,8 @@ export default function Layout() {
 	return (
 		<>
 			<ModalProvider>
-				<Navigation isLoaded={isLoaded} />
+                        <Navigation isLoaded={isLoaded} />
+                        <ScrollToTop />
 				{isLoaded && <Outlet />}
                         <Footer />
                         <Modal />
