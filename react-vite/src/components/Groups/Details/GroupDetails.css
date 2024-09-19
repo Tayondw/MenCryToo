@@ -521,3 +521,17 @@
 	font-size: 16px;
 	margin: 0 0 20px;
 }
+
+#join {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+}
+
+#crud-buttons-delete {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+}

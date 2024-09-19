@@ -87,13 +87,20 @@ export const groupActions = async ({ request }) => {
 	if (intent === "join-group") {
 		data.id = +data.id;
 		data.userId = +data.userId;
-		data.memberId = +data.memberId;
-		await fetch(`/api/groups/${data.id}/join-group`, {
+		// data.memberId = +data.memberId;
+		console.log("data id", +data.id);
+		console.log("data userid", +data.userId);
+		// console.log("data memberid", data.memberId);
+
+		await fetch(`/api/groups/${+data.id}/join-group`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
-			body: formData,
+			body: JSON.stringify({
+				group_id: data.id,
+				user_id: data.userId,
+			}),
 		});
 		return redirect(`/groups/${data.id}`);
 	}

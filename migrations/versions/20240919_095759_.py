@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 1c9710d356b4
+Revision ID: e7532f13e8b7
 Revises: 
-Create Date: 2024-08-23 12:54:20.533730
+Create Date: 2024-09-19 09:57:59.445174
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1c9710d356b4'
+revision = 'e7532f13e8b7'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -30,7 +30,7 @@ def upgrade():
     sa.Column('username', sa.String(length=40), nullable=False),
     sa.Column('email', sa.String(length=255), nullable=False),
     sa.Column('hashed_password', sa.String(length=255), nullable=False),
-    sa.Column('bio', sa.String(length=500), nullable=False),
+    sa.Column('bio', sa.String(length=500), nullable=True),
     sa.Column('profile_image_url', sa.String(length=500), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
@@ -46,6 +46,7 @@ def upgrade():
     sa.Column('type', sa.Enum('online', 'in-person', name='group_location'), nullable=False),
     sa.Column('city', sa.String(length=30), nullable=False),
     sa.Column('state', sa.String(length=2), nullable=False),
+    sa.Column('image', sa.String(length=500), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['organizer_id'], ['users.id'], ),
@@ -98,12 +99,13 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('user_id', 'post_id')
     )
-    op.create_table('members',
+    op.create_table('memberships',
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('group_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['group_id'], ['groups.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('user_id', 'group_id')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('venues',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -112,8 +114,8 @@ def upgrade():
     sa.Column('city', sa.String(length=30), nullable=False),
     sa.Column('state', sa.String(length=2), nullable=False),
     sa.Column('zip_code', sa.String(length=5), nullable=False),
-    sa.Column('latitude', sa.Numeric(scale=10, asdecimal=False), nullable=False),
-    sa.Column('longitude', sa.Numeric(scale=10, asdecimal=False), nullable=False),
+    sa.Column('latitude', sa.Numeric(scale=10, asdecimal=False), nullable=True),
+    sa.Column('longitude', sa.Numeric(scale=10, asdecimal=False), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['group_id'], ['groups.id'], ),
@@ -127,6 +129,7 @@ def upgrade():
     sa.Column('description', sa.String(length=150), nullable=False),
     sa.Column('type', sa.Enum('online', 'in-person', name='event_location'), nullable=False),
     sa.Column('capacity', sa.Integer(), nullable=False),
+    sa.Column('image', sa.String(length=500), nullable=True),
     sa.Column('start_date', sa.DateTime(), nullable=False),
     sa.Column('end_date', sa.DateTime(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
@@ -160,7 +163,7 @@ def downgrade():
     op.drop_table('attendances')
     op.drop_table('events')
     op.drop_table('venues')
-    op.drop_table('members')
+    op.drop_table('memberships')
     op.drop_table('likes')
     op.drop_table('group_images')
     op.drop_table('comments')

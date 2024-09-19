@@ -90,7 +90,7 @@ function LoginFormModal() {
 							required
 						/>
 					</label>
-					{errors.email && <p>{errors.email}</p>}
+					{errors.email && <p style={{ color: `red` }}>{errors.email}</p>}
 					<label>
 						Password
 						<input
@@ -101,7 +101,7 @@ function LoginFormModal() {
 							required
 						/>
 					</label>
-					{errors.password && <p>{errors.password}</p>}
+					{errors.password && <p style={{ color: `red` }}>{errors.password}</p>}
 					<button
 						className="login-button"
 						disabled={isDisabled}

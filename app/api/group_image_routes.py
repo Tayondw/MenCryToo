@@ -5,7 +5,7 @@ from app.models import (
     Group,
     GroupImage,
     User,
-    Memberships,
+    Membership,
 )
 from app.aws import remove_file_from_s3
 

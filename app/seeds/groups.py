@@ -1,4 +1,4 @@
-from app.models import db, Group, GroupImage, User, Memberships, environment, SCHEMA
+from app.models import db, Group, GroupImage, User, Membership, environment, SCHEMA
 from sqlalchemy.sql import text
 from app.seeds.data.groups import groups
 from app.seeds.data.group_images import group_images
@@ -22,13 +22,24 @@ def seed_groups():
         db.session.add(group)
         db.session.flush()  # Ensure the group.id is available before adding memberships
 
-        for username in group_data["group_memberships"]:
+        for username in group_data["memberships"]:
             user = user_map.get(username)
             if user:
-                if user not in group.group_memberships:
-                    group.group_memberships.append(user)
+                if not any(
+                    membership.user_id == user.id for membership in group.memberships
+                ):
+                    membership = Membership(group_id=group.id, user_id=user.id)
+                    db.session.add(membership)
             else:
                 print(f"User with username {username} not found")
+
+    #   for username in group_data["memberships"]:
+    #       user = user_map.get(username)
+    #       if user:
+    #           if user not in group.memberships:
+    #               group.memberships.append(user)
+    #       else:
+    #           print(f"User with username {username} not found")
 
     db.session.commit()
 

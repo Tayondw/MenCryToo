@@ -8,7 +8,7 @@ from .event import Event
 from .group import Group
 from .group_image import GroupImage
 from .like import likes as Likes
-from .member import members as Memberships
+from .member import Membership
 from .post import Post
 from .tag import Tag
 from .user_tag import user_tags as UserTags

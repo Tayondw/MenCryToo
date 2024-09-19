@@ -10,7 +10,7 @@ groups = [
         "city": "Tucker",
         "state": "GA",
         "image": "https://mencrytoo.s3.amazonaws.com/group-images/allGroups.png",
-        "group_memberships": [
+        "memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -22,7 +22,7 @@ groups = [
         "city": "San Francisco",
         "state": "CA",
         "image": "https://mencrytoo.s3.amazonaws.com/group-images/collageGroup-1.png",
-        "group_memberships": [
+        "memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -34,7 +34,7 @@ groups = [
         "city": "Austin",
         "state": "TX ",
         "image": "https://mencrytoo.s3.amazonaws.com/group-images/collageGroup-2.png",
-        "group_memberships": [
+        "memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -46,7 +46,7 @@ groups = [
         "city": "Alexandria",
         "state": "VA",
         "image": "https://mencrytoo.s3.amazonaws.com/group-images/collageGroup-3.png",
-        "group_memberships": [
+        "memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -58,7 +58,7 @@ groups = [
         "city": "Atlanta",
         "state": "GA",
         "image": "https://mencrytoo.s3.amazonaws.com/group-images/collageGroup-4.png",
-        "group_memberships": [
+        "memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -70,7 +70,7 @@ groups = [
         "city": "Seattle",
         "state": "WA",
         "image": "https://mencrytoo.s3.amazonaws.com/group-images/meetup-6.png",
-        "group_memberships": [
+        "memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -82,7 +82,7 @@ groups = [
         "city": "New York City",
         "state": "NY",
         "image": "https://mencrytoo.s3.amazonaws.com/group-images/mencrytoo.png",
-        "group_memberships": [
+        "memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -94,7 +94,7 @@ groups = [
         "city": "Petaluma",
         "state": "CA",
         "image": "https://mencrytoo.s3.amazonaws.com/group-images/newGroup.png",
-        "group_memberships": [
+        "memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -106,7 +106,7 @@ groups = [
         "city": "Boston",
         "state": "MA",
         "image": "https://mencrytoo.s3.amazonaws.com/group-images/swe-study.png",
-        "group_memberships": [
+        "memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -118,7 +118,7 @@ groups = [
         "city": "Chicago",
         "state": "IL",
         "image": "https://mencrytoo.s3.amazonaws.com/group-images/swe-talk.png",
-        "group_memberships": [
+        "memberships": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },

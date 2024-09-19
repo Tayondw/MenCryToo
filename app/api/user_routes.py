@@ -22,7 +22,7 @@ def users():
                 user.to_dict(
                     posts=True,
                     user_comments=True,
-                    user_memberships=True,
+                    memberships=True,
                     user_attendances=True,
                     users_tags=True,
                 )
@@ -43,7 +43,7 @@ def user(userId):
         user.to_dict(
             posts=True,
             user_comments=True,
-            user_memberships=True,
+            memberships=True,
             user_attendances=True,
             users_tags=True,
         )
@@ -64,7 +64,7 @@ def view_all_profiles():
                 user.to_dict(
                     posts=True,
                     user_comments=True,
-                    user_memberships=True,
+                    memberships=True,
                     user_attendances=True,
                     users_tags=True,
                 )
@@ -139,7 +139,7 @@ def create_profile(userId):
             "profile": user.to_dict(
                 posts=True,
                 user_comments=True,
-                user_memberships=True,
+                memberships=True,
                 user_attendances=True,
                 users_tags=True,
             )
@@ -209,7 +209,7 @@ def update_profile(userId):
             "profile": user_to_edit.to_dict(
                 posts=True,
                 user_comments=True,
-                user_memberships=True,
+                memberships=True,
                 user_attendances=True,
                 users_tags=True,
             )

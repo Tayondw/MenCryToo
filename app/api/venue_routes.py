@@ -4,7 +4,7 @@ from app.models import (
     db,
     Group,
     User,
-    Memberships,
+    Membership,
     Venue,
 )
 

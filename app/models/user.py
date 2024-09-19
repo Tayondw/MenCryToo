@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from datetime import datetime
 from .like import likes
-from .member import members
+from .member import Membership
 from .attendance import attendances
 from .user_tag import user_tags
 
@@ -48,11 +48,13 @@ class User(db.Model, UserMixin):
         back_populates="event_attendances",
     )
 
-    user_memberships = db.relationship(
-        "Group",
-        secondary=members,
-        back_populates="group_memberships",
-    )
+    memberships = db.relationship("Membership", back_populates="user")
+
+    #     user_memberships = db.relationship(
+    #         "Group",
+    #         secondary=members,
+    #         back_populates="group_memberships",
+    #     )
 
     users_tags = db.relationship(
         "Tag",
@@ -81,7 +83,8 @@ class User(db.Model, UserMixin):
         self,
         posts=False,
         user_comments=False,
-        user_memberships=False,
+      #   user_memberships=False,
+        memberships=False,
         user_attendances=False,
         users_tags=False,
     ):
@@ -104,10 +107,14 @@ class User(db.Model, UserMixin):
             dict_user["userComments"] = [
                 comment.to_dict() for comment in self.user_comments
             ]
-        if user_memberships:
+        if memberships:
             dict_user["userMembership"] = [
-                user_membership.to_dict() for user_membership in self.user_memberships
+                user_membership.to_dict() for user_membership in self.memberships
             ]
+      #   if user_memberships:
+      #       dict_user["userMembership"] = [
+      #           user_membership.to_dict() for user_membership in self.user_memberships
+      #       ]
         if user_attendances:
             dict_user["userAttendances"] = [
                 user_attendance.to_dict() for user_attendance in self.user_attendances
@@ -120,7 +127,8 @@ class User(db.Model, UserMixin):
 
     def to_dict_no_posts(
         self,
-        user_memberships=False,
+      #   user_memberships=False,
+        memberships=False,
         user_attendances=False,
         users_tags=False,
     ):
@@ -138,10 +146,14 @@ class User(db.Model, UserMixin):
             "updatedAt": self.updated_at,
         }
 
-        if user_memberships:
+        if memberships:
             dict_user["userMembership"] = [
-                user_membership.to_dict() for user_membership in self.user_memberships
+                user_membership.to_dict() for user_membership in self.memberships
             ]
+      #   if user_memberships:
+      #       dict_user["userMembership"] = [
+      #           user_membership.to_dict() for user_membership in self.user_memberships
+      #       ]
         if user_attendances:
             dict_user["userAttendances"] = [
                 user_attendance.to_dict() for user_attendance in self.user_attendances

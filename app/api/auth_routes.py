@@ -102,7 +102,7 @@ def sign_up():
         return user.to_dict(
             posts=True,
             user_comments=True,
-            user_memberships=True,
+            memberships=True,
             user_attendances=True,
             users_tags=True,
         )

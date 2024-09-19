@@ -4,7 +4,7 @@ from app.models import (
     db,
     Group,
     GroupImage,
-    Memberships,
+    Membership,
     Venue,
     Event,
 )
@@ -539,14 +539,23 @@ def join_group(groupId):
         return {"message": "User is the organizer of the group"}, 403
 
     # Check if the user is already a member of the group
-    membership = Memberships.query.filter_by(
+    membership = Membership.query.filter_by(
         group_id=groupId, user_id=current_user.id
     ).first()
 
     if membership:
         return {"message": "Already a member of this group"}, 400
 
-    new_membership = Memberships(group_id=group.id, user_id=current_user.id)
+    # Parse JSON request body
+    data = request.get_json()
+    user_id = data.get("user_id")
+    group_id = data.get("group_id")
+
+    # Ensure data is valid
+    if user_id != current_user.id:
+        return jsonify({"message": "Invalid user ID"}), 400
+
+    new_membership = Membership(group_id=group_id, user_id=current_user.id)
     db.session.add(new_membership)
     db.session.commit()
 
@@ -562,7 +571,7 @@ def leave_group(groupId, memberId):
         return {"errors": {"message": "Group not found"}}, 404
 
     # Check if the user to be removed is a member of the group
-    member = Memberships.query.filter_by(group_id=groupId, user_id=memberId).first()
+    member = Membership.query.filter_by(group_id=groupId, user_id=memberId).first()
 
     if not member:
         return {"message": "User is not a member of this group"}, 400

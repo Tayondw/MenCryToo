@@ -1,6 +1,6 @@
 from .db import db, environment, SCHEMA, add_prefix_for_prod
 from datetime import datetime
-from .member import members
+from .member import Membership
 
 
 class Group(db.Model):
@@ -30,11 +30,16 @@ class Group(db.Model):
     organizer = db.relationship("User", back_populates="groups")
     events = db.relationship("Event", back_populates="groups")
     venues = db.relationship("Venue", back_populates="groups")
-    group_memberships = db.relationship(
-        "User",
-        secondary=members,
-        back_populates="user_memberships",
+    memberships = db.relationship(
+        'Membership',
+        back_populates='group',
+        cascade='all, delete-orphan'
     )
+#     group_memberships = db.relationship(
+#         "User",
+#         secondary=members,
+#         back_populates="user_memberships",
+#     )
     group_images = db.relationship(
         "GroupImage", back_populates="group", cascade="all, delete-orphan"
     )
@@ -43,7 +48,8 @@ class Group(db.Model):
         events = [event.to_dict() for event in self.events if event.group_id == self.id]
         venues = [venue.to_dict() for venue in self.venues if venue.group_id == self.id]
         organizer = self.organizer.to_dict() if self.organizer else None
-        members = [member.to_dict() for member in self.group_memberships]
+      #   members = [member.to_dict() for member in self.group_memberships]
+        members = [member.to_dict() for member in self.memberships]
         image = [group_image.to_dict() for group_image in self.group_images]
         return {
             "id": self.id,
@@ -58,6 +64,7 @@ class Group(db.Model):
             "venues": venues,
             "organizer": organizer,
             "groupImage": image,
-            "numMembers": len(self.group_memberships),
+            "numMembers": len(self.memberships),
+            # "numMembers": len(self.group_memberships),
             "members": members,
         }
