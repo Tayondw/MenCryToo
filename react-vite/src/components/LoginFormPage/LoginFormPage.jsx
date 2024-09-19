@@ -58,7 +58,7 @@ function LoginFormPage() {
 
 			{errors.length > 0 &&
 				errors.map((message) => <p key={message}>{message}</p>)}
-			<form className="create-group-form" onSubmit={handleSubmit}>
+			<form className="create-group-form" onSubmit={handleSubmit} id="form-login">
 				<div id="header-login">
 					<h3>Log In</h3>
 					<hr />
