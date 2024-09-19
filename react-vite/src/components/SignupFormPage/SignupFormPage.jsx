@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Navigate, useNavigate, Form, Link } from "react-router-dom";
+import {
+	Navigate,
+	useNavigate,
+	Form,
+	Link,
+	useLocation,
+} from "react-router-dom";
 import { thunkAuthenticate } from "../../redux/session";
 import OpenModalMenuItem from "../Navigation/OpenModalMenuItem";
 import LoginFormModal from "../LoginFormModal";
@@ -9,7 +15,10 @@ import "./SignupForm.css";
 function SignupFormPage() {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+	const location = useLocation(); // access the location object
 	const sessionUser = useSelector((state) => state.session.user);
+
+	// Form state
 	const [email, setEmail] = useState("");
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -22,15 +31,22 @@ function SignupFormPage() {
 	const [errors, setErrors] = useState({});
 	const isDisabled = username.length < 3 || password.length < 8;
 
+	// Get the page to redirect to after signup from the location state
+	// This captures the URL the user came from or defaults to "/"
+	const from = location.state?.from || "/"; // Default to home if no "from" state
+	const groupId = location.state?.groupId; // captures the groupId from state
+
 	useEffect(() => {
 		dispatch(thunkAuthenticate());
 	}, [dispatch]);
 
-	if (sessionUser) return <Navigate to="/" replace={true} />;
+	// If already logged in, redirect to the home page
+	if (sessionUser) return <Navigate to={from} replace={true} />;
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
+		// Password confirmation
 		if (password !== confirmPassword) {
 			return setErrors({
 				confirmPassword:
@@ -64,6 +80,8 @@ function SignupFormPage() {
 		if (!profileImage) error.profileImage = "Please add a profile image";
 		if (!userTags)
 			error.userTags = "Please select 1 or more tags that fit your description";
+
+		// Set errors if any
 		if (Object.keys(error).length > 0) {
 			return setErrors(error);
 		}
@@ -78,14 +96,32 @@ function SignupFormPage() {
 		formData.append("profileImage", profileImage);
 		userTags.forEach((tag) => formData.append("userTags", tag));
 
+		// Signup request
 		const response = await fetch("/api/auth/signup", {
 			method: "POST",
 			body: formData,
 		});
 		if (response.ok) {
-			await response.json();
+			const data = await response.json();
+			console.log("this is data", data);
 			dispatch(thunkAuthenticate());
-			navigate("/");
+
+			// If there's a groupId, auto-join the group after signing up
+			if (groupId) {
+				await fetch(`/api/groups/${groupId}/join-group`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						group_id: groupId,
+						user_id: data.id,
+					}),
+				});
+			}
+
+			// Redirect to the intended page or homepage after signup
+			navigate(from);
 		} else {
 			console.error("Error: ", error);
 		}

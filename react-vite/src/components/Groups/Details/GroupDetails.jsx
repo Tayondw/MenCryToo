@@ -299,121 +299,136 @@ const GroupDetails = () => {
 								) : (
 									<p>Currently there is no organizer for this group</p>
 								)}
-								{sessionUser && sessionUser.id !== groupDetails.organizerId ? (
-									// If the sessionUser is not the organizer
-									<>
-										{groupDetails.members.some(
-											(member) => member.user.id === sessionUser.id,
-										) ? (
-											// If the sessionUser is already a member
-											<div id="join">
-												<button
-													onClick={(event) => {
-														event.preventDefault();
-														fetch(
-															`/api/groups/${groupDetails.id}/leave-group/${sessionUser.id}`,
-															{
-																method: "DELETE",
-															},
-														)
-															.then((response) => {
-																if (response.ok) {
-																	return response.json();
-																}
-																throw new Error("Network response was not ok.");
-															})
-															.then(() => {
-																// Handle the redirect or update the UI as needed
-																window.location.href = `/groups/${groupDetails.id}`;
-															})
-															.catch((error) => {
-																console.error(
-																	"There was a problem with the fetch operation:",
-																	error,
-																);
-															});
-													}}
-													name="intent"
-													value="leave-group"
-													style={{
-														backgroundColor: "red",
-														width: `250px`,
-														cursor: `pointer`,
-														borderRadius: `40px`,
-														padding: `12px 25px`,
-														fontSize: `1em`,
-													}}
-												>
-													Leave group
-												</button>
-											</div>
-										) : (
-											// If the sessionUser is not a member
-											<div id="join">
-												<button
-													onClick={(event) => {
-														event.preventDefault();
-														fetch(`/api/groups/${groupDetails.id}/join-group`, {
-															method: "POST",
-															headers: {
-																"Content-Type": "application/json",
-															},
-															body: JSON.stringify({
-																group_id: groupDetails.id,
-																user_id: sessionUser.id,
-															}),
-														})
-															.then((response) => {
-																if (response.ok) {
-																	return response.json();
-																}
-																throw new Error("Network response was not ok.");
-															})
-															.then(() => {
-																// Handle the redirect or update the UI as needed
-																window.location.href = `/groups/${groupDetails.id}`;
-															})
-															.catch((error) => {
-																console.error(
-																	"There was a problem with the fetch operation:",
-																	error,
-																);
-															});
-													}}
-													name="intent"
-													value="join-group"
-													className={"button"}
-													style={{ cursor: `pointer` }}
-													// style={{
-													// 	backgroundColor: "red",
-													// 	width: `250px`,
-													// 	cursor: `pointer`,
-													// 	borderRadius: `40px`,
-													// 	padding: `12px 25px`,
-													// 	fontSize: `1em`,
-													// }}
-												>
-													Join this group
-												</button>
-											</div>
-										)}
-									</>
-								) : (
+								{!sessionUser ? (
 									<div id="join">
 										<p>You must have an account in order to join this group</p>
 										<button
 											onClick={(event) => {
 												event.preventDefault();
+												// Redirect to signup page with the return URL
+												navigate("/signup", {
+													state: { from: `/groups/${groupDetails.id}`, groupId: groupDetails.id },
+												});
 											}}
-											name="intent"
-											value="join-group"
-											disabled={isDisabled}
-											className="button disabled"
-											style={{ cursor: isDisabled ? "not-allowed" : "pointer" }}
+											// name="intent"
+											// value="join-group"
+											// disabled={isDisabled}
+											className="button"
+											style={{ cursor: "pointer" }}
 										>
 											Join this group
 										</button>
 									</div>
+								) : (
+									<>
+										{sessionUser.id !== groupDetails.organizerId ? (
+											// If the sessionUser is not the organizer
+											<>
+												{groupDetails.members.some(
+													(member) => member.user.id === sessionUser.id,
+												) ? (
+													// If the sessionUser is already a member
+													<div id="join">
+														<button
+															onClick={(event) => {
+																event.preventDefault();
+																fetch(
+																	`/api/groups/${groupDetails.id}/leave-group/${sessionUser.id}`,
+																	{
+																		method: "DELETE",
+																	},
+																)
+																	.then((response) => {
+																		if (response.ok) {
+																			return response.json();
+																		}
+																		throw new Error(
+																			"Network response was not ok.",
+																		);
+																	})
+																	.then(() => {
+																		// Handle the redirect or update the UI as needed
+																		window.location.href = `/groups/${groupDetails.id}`;
+																	})
+																	.catch((error) => {
+																		console.error(
+																			"There was a problem with the fetch operation:",
+																			error,
+																		);
+																	});
+															}}
+															name="intent"
+															value="leave-group"
+															style={{
+																backgroundColor: "red",
+																width: `250px`,
+																cursor: `pointer`,
+																borderRadius: `40px`,
+																padding: `12px 25px`,
+																fontSize: `1em`,
+															}}
+														>
+															Leave group
+														</button>
+													</div>
+												) : (
+													// If the sessionUser is not a member
+													<div id="join">
+														<button
+															onClick={(event) => {
+																event.preventDefault();
+																fetch(
+																	`/api/groups/${groupDetails.id}/join-group`,
+																	{
+																		method: "POST",
+																		headers: {
+																			"Content-Type": "application/json",
+																		},
+																		body: JSON.stringify({
+																			group_id: groupDetails.id,
+																			user_id: sessionUser.id,
+																		}),
+																	},
+																)
+																	.then((response) => {
+																		if (response.ok) {
+																			return response.json();
+																		}
+																		throw new Error(
+																			"Network response was not ok.",
+																		);
+																	})
+																	.then(() => {
+																		// Handle the redirect or update the UI as needed
+																		window.location.href = `/groups/${groupDetails.id}`;
+																	})
+																	.catch((error) => {
+																		console.error(
+																			"There was a problem with the fetch operation:",
+																			error,
+																		);
+																	});
+															}}
+															name="intent"
+															value="join-group"
+															className={"button"}
+															style={{ cursor: `pointer` }}
+															// style={{
+															// 	backgroundColor: "red",
+															// 	width: `250px`,
+															// 	cursor: `pointer`,
+															// 	borderRadius: `40px`,
+															// 	padding: `12px 25px`,
+															// 	fontSize: `1em`,
+															// }}
+														>
+															Join this group
+														</button>
+													</div>
+												)}
+											</>
+										) : null}
+									</>
 								)}
 
 								{/* {!sessionUser ||
