@@ -46,7 +46,8 @@ const EventDetails = () => {
 								<Link
 									// to={`/groups/${eventDetails.id}/images/${image.id}`}
 									key={image.id}
-									className="box"
+                                                      className="box"
+                                                      style={{cursor: `default`}}
 								>
 									<img src={image.eventImage} alt={image.name} />
 								</Link>
