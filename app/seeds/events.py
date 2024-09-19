@@ -1,4 +1,4 @@
-from app.models import db, Event, EventImage, User, environment, SCHEMA
+from app.models import db, Event, EventImage, User, Attendance, environment, SCHEMA
 from sqlalchemy.sql import text
 from app.seeds.data.events import events
 from app.seeds.data.event_images import event_images
@@ -23,11 +23,14 @@ def seed_events():
         db.session.add(event)
         db.session.flush()  # Ensure the event.id is available before adding attendees
 
-        for username in event_data["event_attendances"]:
+        for username in event_data["attendances"]:
             user = user_map.get(username)
             if user:
-                if user not in event.event_attendances:
-                    event.event_attendances.append(user)
+                if not any(
+                    attendance.user_id == user.id for attendance in event.attendances
+                ):
+                    attendance = Attendance(event_id=event.id, user_id=user.id)
+                    db.session.add(attendance)
             else:
                 print(f"User with username {username} not found")
     db.session.commit()

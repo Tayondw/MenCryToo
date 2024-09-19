@@ -5,7 +5,7 @@ from app.models import (
     Group,
     User,
     Membership,
-    Attendances,
+    Attendance,
     Venue,
     Event,
     EventImage,
@@ -189,7 +189,7 @@ def edit_event_images(eventId, imageId):
 
 
 # ! EVENT - ATTENDEES
-@event_routes.route("/<int:eventId>/attend-event", methods=["GET","POST"])
+@event_routes.route("/<int:eventId>/attend-event", methods=["GET", "POST"])
 @login_required
 def attend_event(eventId):
     event = Event.query.get(eventId)
@@ -205,14 +205,23 @@ def attend_event(eventId):
         }, 403
 
     # Check if the user is currently attending the event
-    attendance = Attendances.query.filter_by(
+    attendance = Attendance.query.filter_by(
         event_id=eventId, user_id=current_user.id
     ).first()
 
     if attendance:
         return {"message": "Currently attending the event"}, 400
 
-    new_attendance = Attendances(event_id=event.id, user_id=current_user.id)
+    # Parse JSON request body
+    data = request.get_json()
+    user_id = data.get("user_id")
+    event_id = data.get("event_id")
+
+    # Ensure data is valid
+    if user_id != current_user.id:
+        return jsonify({"message": "Invalid user ID"}), 400
+
+    new_attendance = Attendance(event_id=event_id, user_id=user_id)
     db.session.add(new_attendance)
     db.session.commit()
 
@@ -229,7 +238,7 @@ def leave_event(eventId, attendeeId):
         return {"errors": {"message": "Event not found"}}, 404
 
     # Check if the attendee to be removed is attending the event
-    attendee = Attendances.query.filter_by(event_id=eventId, user_id=attendeeId).first()
+    attendee = Attendance.query.filter_by(event_id=eventId, user_id=attendeeId).first()
 
     if not attendee:
         return {"message": "User is not a attendee of this event"}, 400

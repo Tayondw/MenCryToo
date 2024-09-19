@@ -13,7 +13,6 @@ const GroupDetails = () => {
 	const sessionUser = useSelector((state) => state.session.user);
 	const [activeSection, setActiveSection] = useState("Images"); // State to track the active section
 	const { closeModal } = useModal();
-	const isDisabled = !sessionUser;
 	useEffect(() => {
 		if (!groupDetails.id) navigate("/groups");
 	}, [groupDetails, navigate]);
@@ -47,8 +46,6 @@ const GroupDetails = () => {
 		}));
 	const formattedUpcomingEvents = formatEventDate(upcomingEvents);
 	const formattedPastEvents = formatEventDate(pastEvents);
-	console.log(groupDetails);
-
 	const renderContent = () => {
 		switch (activeSection) {
 			case "Images":

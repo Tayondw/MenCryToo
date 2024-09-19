@@ -35,6 +35,7 @@ function SignupFormPage() {
 	// This captures the URL the user came from or defaults to "/"
 	const from = location.state?.from || "/"; // Default to home if no "from" state
 	const groupId = location.state?.groupId; // captures the groupId from state
+	const eventId = location.state?.eventId; // captures the eventId from state
 
 	useEffect(() => {
 		dispatch(thunkAuthenticate());
@@ -103,7 +104,6 @@ function SignupFormPage() {
 		});
 		if (response.ok) {
 			const data = await response.json();
-			console.log("this is data", data);
 			dispatch(thunkAuthenticate());
 
 			// If there's a groupId, auto-join the group after signing up
@@ -115,6 +115,19 @@ function SignupFormPage() {
 					},
 					body: JSON.stringify({
 						group_id: groupId,
+						user_id: data.id,
+					}),
+				});
+			}
+			// If there's an eventId, auto-join the event after signing up
+			if (eventId) {
+				await fetch(`/api/events/${eventId}/attend-event`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						event_id: eventId,
 						user_id: data.id,
 					}),
 				});

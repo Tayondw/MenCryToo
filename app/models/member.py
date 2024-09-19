@@ -15,7 +15,6 @@ class Membership(db.Model):
         db.Integer, db.ForeignKey(add_prefix_for_prod("groups.id")), nullable=False
     )
 
-    # You can add relationships if needed
     user = db.relationship("User", back_populates="memberships")
     group = db.relationship("Group", back_populates="memberships")
 

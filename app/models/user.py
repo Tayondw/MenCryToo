@@ -4,7 +4,7 @@ from flask_login import UserMixin
 from datetime import datetime
 from .like import likes
 from .member import Membership
-from .attendance import attendances
+from .attendance import Attendance
 from .user_tag import user_tags
 
 
@@ -42,11 +42,12 @@ class User(db.Model, UserMixin):
         back_populates="commenter",
     )
 
-    user_attendances = db.relationship(
-        "Event",
-        secondary=attendances,
-        back_populates="event_attendances",
-    )
+    attendances = db.relationship("Attendance", back_populates="user")
+    #     user_attendances = db.relationship(
+    #         "Event",
+    #         secondary=attendances,
+    #         back_populates="event_attendances",
+    #     )
 
     memberships = db.relationship("Membership", back_populates="user")
 
@@ -83,9 +84,10 @@ class User(db.Model, UserMixin):
         self,
         posts=False,
         user_comments=False,
-      #   user_memberships=False,
+        #   user_memberships=False,
         memberships=False,
-        user_attendances=False,
+        attendances=False,
+      #   user_attendances=False,
         users_tags=False,
     ):
         dict_user = {
@@ -111,14 +113,18 @@ class User(db.Model, UserMixin):
             dict_user["userMembership"] = [
                 user_membership.to_dict() for user_membership in self.memberships
             ]
-      #   if user_memberships:
-      #       dict_user["userMembership"] = [
-      #           user_membership.to_dict() for user_membership in self.user_memberships
-      #       ]
-        if user_attendances:
+        #   if user_memberships:
+        #       dict_user["userMembership"] = [
+        #           user_membership.to_dict() for user_membership in self.user_memberships
+        #       ]
+        if attendances:
             dict_user["userAttendances"] = [
-                user_attendance.to_dict() for user_attendance in self.user_attendances
+                user_attendance.to_dict() for user_attendance in self.attendances
             ]
+      #   if user_attendances:
+      #       dict_user["userAttendances"] = [
+      #           user_attendance.to_dict() for user_attendance in self.user_attendances
+      #       ]
         if users_tags:
             dict_user["usersTags"] = [
                 user_tag.to_dict() for user_tag in self.users_tags
@@ -127,9 +133,10 @@ class User(db.Model, UserMixin):
 
     def to_dict_no_posts(
         self,
-      #   user_memberships=False,
+        #   user_memberships=False,
         memberships=False,
-        user_attendances=False,
+        attendances=False,
+      #   user_attendances=False,
         users_tags=False,
     ):
 
@@ -150,14 +157,18 @@ class User(db.Model, UserMixin):
             dict_user["userMembership"] = [
                 user_membership.to_dict() for user_membership in self.memberships
             ]
-      #   if user_memberships:
-      #       dict_user["userMembership"] = [
-      #           user_membership.to_dict() for user_membership in self.user_memberships
-      #       ]
-        if user_attendances:
+        #   if user_memberships:
+        #       dict_user["userMembership"] = [
+        #           user_membership.to_dict() for user_membership in self.user_memberships
+        #       ]
+        if attendances:
             dict_user["userAttendances"] = [
-                user_attendance.to_dict() for user_attendance in self.user_attendances
+                user_attendance.to_dict() for user_attendance in self.attendances
             ]
+      #   if user_attendances:
+      #       dict_user["userAttendances"] = [
+      #           user_attendance.to_dict() for user_attendance in self.user_attendances
+      #       ]
         if users_tags:
             dict_user["usersTags"] = [
                 user_tag.to_dict() for user_tag in self.users_tags

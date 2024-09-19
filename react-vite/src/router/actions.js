@@ -87,11 +87,6 @@ export const groupActions = async ({ request }) => {
 	if (intent === "join-group") {
 		data.id = +data.id;
 		data.userId = +data.userId;
-		// data.memberId = +data.memberId;
-		console.log("data id", +data.id);
-		console.log("data userid", +data.userId);
-		// console.log("data memberid", data.memberId);
-
 		await fetch(`/api/groups/${+data.id}/join-group`, {
 			method: "POST",
 			headers: {
@@ -213,13 +208,31 @@ export const eventActions = async ({ request }) => {
 		return redirect(`/events/${data.eventId}`);
 	}
 
-	// if (intent === "delete-event-image") {
-	// 	data.eventId = +data.eventId;
-	// 	data.imageId = +data.imageId;
-	// 	return await fetch(`/api/event-images/${data.eventId}`, {
-	// 		method: "DELETE",
-	// 	});
-	// }
+	if (intent === "attend-event") {
+		data.id = +data.id;
+		data.userId = +data.userId;
+		data.attendeeId = +data.attendeeId;
+		await fetch(`/api/events/${data.id}/attend-event`, {
+			method: "POST",
+			body: JSON.stringify({
+				event_id: data.id,
+				user_id: data.userId,
+			}),
+		});
+            return redirect(`/events/${data.id}`)
+	}
+
+	if (intent === "leave-event") {
+		data.id = +data.id;
+		data.userId = +data.userId;
+		data.attendeeId = +data.attendeeId;
+		return await fetch(
+			`/api/events/${data.id}/leave-event/${data.attendeeId}`,
+			{
+				method: "DELETE",
+			},
+		);
+	}
 };
 
 export const venueActions = async ({ request }) => {
@@ -268,30 +281,30 @@ export const venueActions = async ({ request }) => {
 // 	}
 // };
 
-export const eventAttendeeActions = async ({ request }) => {
-	let formData = await request.formData();
-	let data = Object.fromEntries(formData);
-	let intent = formData.get("intent");
-	data.id = +data.id;
-	data.userId = +data.userId;
-	data.attendeeId = +data.attendeeId;
+// export const eventAttendeeActions = async ({ request }) => {
+// 	let formData = await request.formData();
+// 	let data = Object.fromEntries(formData);
+// 	let intent = formData.get("intent");
+// 	data.id = +data.id;
+// 	data.userId = +data.userId;
+// 	data.attendeeId = +data.attendeeId;
 
-	if (intent === "attend-event") {
-		return await fetch(`/api/events/${data.id}/attend-event`, {
-			method: "POST",
-			body: formData,
-		});
-	}
+// 	if (intent === "attend-event") {
+// 		return await fetch(`/api/events/${data.id}/attend-event`, {
+// 			method: "POST",
+// 			body: formData,
+// 		});
+// 	}
 
-	if (intent === "leave-event") {
-		return await fetch(
-			`/api/events/${data.id}/leave-event/${data.attendeeIdId}`,
-			{
-				method: "DELETE",
-			},
-		);
-	}
-};
+// 	if (intent === "leave-event") {
+// 		return await fetch(
+// 			`/api/events/${data.id}/leave-event/${data.attendeeIdId}`,
+// 			{
+// 				method: "DELETE",
+// 			},
+// 		);
+// 	}
+// };
 
 export const profileActions = async ({ request }) => {
 	const formData = await request.formData();

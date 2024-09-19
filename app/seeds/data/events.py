@@ -14,7 +14,7 @@ events = [
         "image": "https://mencrytoo.s3.amazonaws.com/event-images/event-1.png",
         "start_date": datetime(2024, 6, 5, 9, 0),
         "end_date": datetime(2024, 6, 5, 17, 0),
-        "event_attendances": [
+        "attendances": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -28,7 +28,7 @@ events = [
         "image": "https://mencrytoo.s3.amazonaws.com/event-images/allEvents.png",
         "start_date": datetime(2024, 7, 5, 9, 0),
         "end_date": datetime(2024, 7, 5, 17, 0),
-        "event_attendances": [
+        "attendances": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -42,7 +42,7 @@ events = [
         "image": "https://mencrytoo.s3.amazonaws.com/event-images/event-growth.png",
         "start_date": datetime(2024, 12, 5, 9, 0),
         "end_date": datetime(2024, 12, 5, 17, 0),
-        "event_attendances": [
+        "attendances": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -56,7 +56,7 @@ events = [
         "image": "https://mencrytoo.s3.amazonaws.com/event-images/event.png",
         "start_date": datetime(2024, 11, 5, 9, 0),
         "end_date": datetime(2024, 11, 5, 17, 0),
-        "event_attendances": [
+        "attendances": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -70,7 +70,7 @@ events = [
         "image": "https://mencrytoo.s3.amazonaws.com/event-images/meetup-1.png",
         "start_date": datetime(2024, 9, 5, 9, 0),
         "end_date": datetime(2024, 9, 5, 17, 0),
-        "event_attendances": [
+        "attendances": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -84,7 +84,7 @@ events = [
         "image": "https://mencrytoo.s3.amazonaws.com/event-images/meetup-2.png",
         "start_date": datetime(2024, 8, 12, 9, 0),
         "end_date": datetime(2024, 8, 12, 17, 0),
-        "event_attendances": [
+        "attendances": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -98,7 +98,7 @@ events = [
         "image": "https://mencrytoo.s3.amazonaws.com/event-images/meetup-3.png",
         "start_date": datetime(2024, 8, 5, 9, 0),
         "end_date": datetime(2024, 8, 5, 17, 0),
-        "event_attendances": [
+        "attendances": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -112,7 +112,7 @@ events = [
         "image": "https://mencrytoo.s3.amazonaws.com/event-images/meetup-4.png",
         "start_date": datetime(2024, 10, 3, 9, 0),
         "end_date": datetime(2024, 10, 3, 17, 0),
-        "event_attendances": [
+        "attendances": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -126,7 +126,7 @@ events = [
         "image": "https://mencrytoo.s3.amazonaws.com/event-images/meetup-5.png",
         "start_date": datetime(2024, 10, 4, 9, 0),
         "end_date": datetime(2024, 10, 4, 17, 0),
-        "event_attendances": [
+        "attendances": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },
@@ -140,7 +140,7 @@ events = [
         "image": "https://mencrytoo.s3.amazonaws.com/event-images/meetup-5.png",
         "start_date": datetime(2024, 10, 5, 9, 0),
         "end_date": datetime(2024, 10, 5, 17, 0),
-        "event_attendances": [
+        "attendances": [
             user["username"] for user in sample(users, randint(0, len(users)))
         ],
     },

@@ -15,7 +15,7 @@ from .models import (
     EventImage,
     Venue,
     Membership,
-    Attendances,
+    Attendance,
     Tag,
     Likes,
     UserTags,

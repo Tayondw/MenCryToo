@@ -146,31 +146,31 @@ const EventDetails = () => {
 							<>
 								{eventDetails.attendees.map((attendee) => (
 									<Link
-										to={`users/${attendee.id}`}
+										to={`users/${attendee.user.id}`}
 										style={{
 											textDecoration: "none",
 											color: "inherit",
 										}}
-										key={attendee.id}
+										key={attendee.user.id}
 									>
 										<div className="members-group-cards">
 											<img
-												src={attendee.profileImage}
-												alt={attendee.username}
+												src={attendee.user.profileImage}
+												alt={attendee.user.username}
 											/>
 											<div id="members-group-display-style-direction">
 												<div id="members-group-keep-in-style">
 													<h2>
-														{attendee.firstName} {attendee.lastName}
+														{attendee.user.firstName} {attendee.user.lastName}
 													</h2>
 												</div>
 												<ul className="stats">
 													<li>
-														<var>{attendee.username}</var>
+														<var>{attendee.user.username}</var>
 														<label>Username</label>
 													</li>
 													<li>
-														<var>{attendee.email}</var>
+														<var>{attendee.user.email}</var>
 														<label>Email</label>
 													</li>
 												</ul>
@@ -187,19 +187,47 @@ const EventDetails = () => {
 							No attendees in this group yet. Attend to be the first attendee!
 						</p>
 						<button
-							className="revoke"
 							onClick={(event) => {
 								event.preventDefault();
-								alert("Feature Coming Soon...");
+								fetch(`/api/events/${eventDetails.id}/attend-event`, {
+									method: "POST",
+									headers: {
+										"Content-Type": "application/json",
+									},
+									body: JSON.stringify({
+										event_id: eventDetails.id,
+										user_id: sessionUser.id,
+									}),
+								})
+									.then((response) => {
+										if (response.ok) {
+											return response.json();
+										}
+										throw new Error("Network response was not ok.");
+									})
+									.then(() => {
+										// Handle the redirect or update the UI as needed
+										window.location.href = `/groups/${eventDetails.id}`;
+									})
+									.catch((error) => {
+										console.error(
+											"There was a problem with the fetch operation:",
+											error,
+										);
+									});
 							}}
-							style={{
-								backgroundColor: "red",
-								width: `250px`,
-								cursor: `pointer`,
-								borderRadius: `40px`,
-								padding: `12px 25px`,
-								fontSize: `1em`,
-							}}
+							name="intent"
+							value="attend-event"
+							className="button"
+							style={{ cursor: `pointer` }}
+							// style={{
+							// 	backgroundColor: "red",
+							// 	width: `250px`,
+							// 	cursor: `pointer`,
+							// 	borderRadius: `40px`,
+							// 	padding: `12px 25px`,
+							// 	fontSize: `1em`,
+							// }}
 						>
 							Attend Event
 						</button>
@@ -268,6 +296,140 @@ const EventDetails = () => {
 								</div>
 							</div>
 							<div id="events-update-delete">
+								{!sessionUser ? (
+									<div id="join">
+										<p>You must have an account in order to attend this event</p>
+										<button
+											onClick={(event) => {
+												event.preventDefault();
+												// Redirect to signup page with the return URL
+												navigate("/signup", {
+													state: {
+														from: `/events/${eventDetails.id}`,
+														eventId: eventDetails.id,
+													},
+												});
+											}}
+											// name="intent"
+											// value="join-group"
+											// disabled={isDisabled}
+											className="button"
+											style={{ cursor: "pointer" }}
+										>
+											Attend Event
+										</button>
+									</div>
+								) : (
+									<>
+										{sessionUser.id !== eventDetails.organizer.id ? (
+											// If the sessionUser is not the organizer
+											<>
+												{eventDetails.attendees.some(
+													(attendee) => attendee.user.id === sessionUser.id,
+												) ? (
+													// If the sessionUser is already an attendee
+													<div id="join">
+														<button
+															onClick={(event) => {
+																event.preventDefault();
+																fetch(
+																	`/api/events/${eventDetails.id}/leave-event/${sessionUser.id}`,
+																	{
+																		method: "DELETE",
+																	},
+																)
+																	.then((response) => {
+																		if (response.ok) {
+																			return response.json();
+																		}
+																		throw new Error(
+																			"Network response was not ok.",
+																		);
+																	})
+																	.then(() => {
+																		// Handle the redirect or update the UI as needed
+																		window.location.href = `/events/${eventDetails.id}`;
+																	})
+																	.catch((error) => {
+																		console.error(
+																			"There was a problem with the fetch operation:",
+																			error,
+																		);
+																	});
+															}}
+															name="intent"
+															value="leave-event"
+															style={{
+																backgroundColor: "red",
+																width: `250px`,
+																cursor: `pointer`,
+																borderRadius: `40px`,
+																padding: `12px 25px`,
+																fontSize: `1em`,
+															}}
+														>
+															Leave Event
+														</button>
+													</div>
+												) : (
+													// If the sessionUser is not an attendee
+													<div id="join">
+														<button
+															onClick={(event) => {
+																event.preventDefault();
+																fetch(
+																	`/api/events/${eventDetails.id}/attend-event`,
+																	{
+																		method: "POST",
+																		headers: {
+																			"Content-Type": "application/json",
+																		},
+																		body: JSON.stringify({
+																			event_id: eventDetails.id,
+																			user_id: sessionUser.id,
+																		}),
+																	},
+																)
+																	.then((response) => {
+																		if (response.ok) {
+																			return response.json();
+																		}
+																		throw new Error(
+																			"Network response was not ok.",
+																		);
+																	})
+																	.then(() => {
+																		// Handle the redirect or update the UI as needed
+																		window.location.href = `/events/${eventDetails.id}`;
+																	})
+																	.catch((error) => {
+																		console.error(
+																			"There was a problem with the fetch operation:",
+																			error,
+																		);
+																	});
+															}}
+															name="intent"
+															value="attend-event"
+															className={"button"}
+															style={{ cursor: `pointer` }}
+															// style={{
+															// 	backgroundColor: "red",
+															// 	width: `250px`,
+															// 	cursor: `pointer`,
+															// 	borderRadius: `40px`,
+															// 	padding: `12px 25px`,
+															// 	fontSize: `1em`,
+															// }}
+														>
+															Attend Event
+														</button>
+													</div>
+												)}
+											</>
+										) : null}
+									</>
+								)}
 								{sessionUser &&
 								eventDetails.organizer &&
 								sessionUser.id === eventDetails.organizer.id ? (
@@ -316,25 +478,7 @@ const EventDetails = () => {
 											/>
 										</div>
 									</>
-								) : (
-									<button
-										className="revoke"
-										onClick={(event) => {
-											event.preventDefault();
-											alert("Feature Coming Soon...");
-										}}
-										style={{
-											backgroundColor: "red",
-											width: `250px`,
-											cursor: `pointer`,
-											borderRadius: `40px`,
-											padding: `12px 25px`,
-											fontSize: `1em`,
-										}}
-									>
-										Attend Event
-									</button>
-								)}
+								) : null}
 							</div>
 						</div>
 					</div>

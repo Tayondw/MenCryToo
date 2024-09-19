@@ -1,6 +1,6 @@
 from .db import db, environment, SCHEMA, add_prefix_for_prod
 from datetime import datetime
-from .attendance import attendances
+from .attendance import Attendance
 
 
 class Event(db.Model):
@@ -36,11 +36,14 @@ class Event(db.Model):
     event_images = db.relationship(
         "EventImage", back_populates="event", cascade="all, delete-orphan"
     )
-    event_attendances = db.relationship(
-        "User",
-        secondary=attendances,
-        back_populates="user_attendances",
+    attendances = db.relationship(
+        "Attendance", back_populates="event", cascade="all, delete-orphan"
     )
+    #     event_attendances = db.relationship(
+    #         "User",
+    #         secondary=attendances,
+    #         back_populates="user_attendances",
+    #     )
 
     def to_dict(self):
 
@@ -56,7 +59,7 @@ class Event(db.Model):
             group_image.to_dict() for group_image in self.groups.group_images
         ]
 
-        attendees = [attendee.to_dict() for attendee in self.event_attendances]
+        attendees = [attendee.to_dict() for attendee in self.attendances]
 
         organizerInfo = (
             {
@@ -108,7 +111,7 @@ class Event(db.Model):
             "startDate": self.start_date,
             "endDate": self.end_date,
             "attendees": attendees,
-            "numAttendees": len(self.event_attendances),
+            "numAttendees": len(self.attendances),
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }

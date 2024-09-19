@@ -1,7 +1,7 @@
 from .db import db
 from .db import environment, SCHEMA
 from .user import User
-from .attendance import attendances as Attendances
+from .attendance import Attendance
 from .comment import Comment
 from .event_image import EventImage
 from .event import Event

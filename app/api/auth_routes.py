@@ -103,7 +103,7 @@ def sign_up():
             posts=True,
             user_comments=True,
             memberships=True,
-            user_attendances=True,
+            attendances=True,
             users_tags=True,
         )
     return form.errors, 401

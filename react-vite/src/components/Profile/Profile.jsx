@@ -10,7 +10,7 @@ const Profile = () => {
 	const sessionUser = useSelector((state) => state.session.user);
 	const { allProfiles } = useLoaderData();
       const navigate = useNavigate();
-      console.log(allProfiles);
+      // console.log(allProfiles);
       
 	const userProfile = allProfiles.users_profile.find(
 		(profile) => profile.id === sessionUser.id,

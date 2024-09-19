@@ -23,7 +23,7 @@ def users():
                     posts=True,
                     user_comments=True,
                     memberships=True,
-                    user_attendances=True,
+                    attendances=True,
                     users_tags=True,
                 )
                 for user in users
@@ -44,7 +44,7 @@ def user(userId):
             posts=True,
             user_comments=True,
             memberships=True,
-            user_attendances=True,
+            attendances=True,
             users_tags=True,
         )
     )
@@ -65,7 +65,7 @@ def view_all_profiles():
                     posts=True,
                     user_comments=True,
                     memberships=True,
-                    user_attendances=True,
+                    attendances=True,
                     users_tags=True,
                 )
                 for user in users
@@ -140,7 +140,7 @@ def create_profile(userId):
                 posts=True,
                 user_comments=True,
                 memberships=True,
-                user_attendances=True,
+                attendances=True,
                 users_tags=True,
             )
         }, 201
@@ -210,7 +210,7 @@ def update_profile(userId):
                 posts=True,
                 user_comments=True,
                 memberships=True,
-                user_attendances=True,
+                attendances=True,
                 users_tags=True,
             )
         }, 201
