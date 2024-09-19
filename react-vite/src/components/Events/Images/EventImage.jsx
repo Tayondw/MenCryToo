@@ -26,7 +26,7 @@ const EventImage = ({ eventDetails, onClose }) => {
 				method="post"
 				encType="multipart/form-data"
 				type="file"
-				action={`/events/${eventDetails.id}/images`}
+				action={`/events/${eventDetails.id}`}
 				onSubmit={onClose}
 				className="image-upload-form"
 			>

@@ -12,9 +12,7 @@ export const groupActions = async ({ request }) => {
 		const city = formData.get("city");
 		const state = formData.get("state");
 		const image = formData.get("image");
-            const errors = {};
-            console.log("image", image);
-            
+		const errors = {};
 
 		if (!name.length || name.length < 3 || name.length > 50)
 			errors.name = "Group name must be between 3 and 50 characters";
@@ -85,37 +83,29 @@ export const groupActions = async ({ request }) => {
 		});
 		return redirect(`/groups/${data.id}`);
 	}
-};
 
-export const groupImageActions = async ({ request }) => {
-	let formData = await request.formData();
-	let data = Object.fromEntries(formData);
-	let intent = formData.get("intent");
-
-	// console.log("this is data", data);
-	// console.log("this is intent", intent);
-
-	if (intent === "add-group-image") {
-		await fetch(`/api/groups/${data.id}/images`, {
+	if (intent === "join-group") {
+		data.id = +data.id;
+		data.userId = +data.userId;
+		data.memberId = +data.memberId;
+		await fetch(`/api/groups/${data.id}/join-group`, {
 			method: "POST",
-			body: formData,
-		});
-
-		return redirect(`/groups/${data.id}`);
-	}
-
-	if (intent === "edit-group-image") {
-		await fetch(`/api/groups/${data.id}/images/${data.imageId}/edit`, {
-			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
 			body: formData,
 		});
 		return redirect(`/groups/${data.id}`);
 	}
 
-	if (intent === "delete-group-image") {
-		return await fetch(`/api/group-images/${data.id}`, {
+	if (intent === "leave-group") {
+		data.id = +data.id;
+		data.userId = +data.userId;
+		data.memberId = +data.memberId;
+		await fetch(`/api/groups/${data.id}/leave-group/${data.memberId}`, {
 			method: "DELETE",
 		});
+		return redirect(`/groups`);
 	}
 };
 
@@ -195,19 +185,10 @@ export const eventActions = async ({ request }) => {
 		});
 		return redirect("/events");
 	}
-};
-
-export const eventImageActions = async ({ request }) => {
-	const formData = await request.formData();
-	const data = Object.fromEntries(formData);
-	const intent = formData.get("intent");
-	data.eventId = +data.eventId;
-	data.imageId = +data.imageId;
-
-	// console.log("data", data);
-	// console.log("intent", intent);
 
 	if (intent === "add-event-image") {
+		data.eventId = +data.eventId;
+		data.imageId = +data.imageId;
 		await fetch(`/api/events/${data.eventId}/images`, {
 			method: "POST",
 			body: formData,
@@ -216,6 +197,8 @@ export const eventImageActions = async ({ request }) => {
 	}
 
 	if (intent === "edit-event-image") {
+		data.eventId = +data.eventId;
+		data.imageId = +data.imageId;
 		await fetch(`/api/events/${data.eventId}/images/${data.imageId}/edit`, {
 			method: "POST",
 			body: formData,
@@ -223,11 +206,13 @@ export const eventImageActions = async ({ request }) => {
 		return redirect(`/events/${data.eventId}`);
 	}
 
-	if (intent === "delete-event-image") {
-		return await fetch(`/api/event-images/${data.eventId}`, {
-			method: "DELETE",
-		});
-	}
+	// if (intent === "delete-event-image") {
+	// 	data.eventId = +data.eventId;
+	// 	data.imageId = +data.imageId;
+	// 	return await fetch(`/api/event-images/${data.eventId}`, {
+	// 		method: "DELETE",
+	// 	});
+	// }
 };
 
 export const venueActions = async ({ request }) => {
@@ -251,30 +236,30 @@ export const venueActions = async ({ request }) => {
 	}
 };
 
-export const groupMemberActions = async ({ request }) => {
-	let formData = await request.formData();
-	let data = Object.fromEntries(formData);
-	let intent = formData.get("intent");
-	data.id = +data.id;
-	data.userId = +data.userId;
-	data.memberId = +data.memberId;
+// export const groupMemberActions = async ({ request }) => {
+// 	let formData = await request.formData();
+// 	let data = Object.fromEntries(formData);
+// 	let intent = formData.get("intent");
+// 	data.id = +data.id;
+// 	data.userId = +data.userId;
+// 	data.memberId = +data.memberId;
 
-	if (intent === "join-group") {
-		return await fetch(`/api/groups/${data.id}/join-group`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: formData,
-		});
-	}
+// 	if (intent === "join-group") {
+// 		return await fetch(`/api/groups/${data.id}/join-group`, {
+// 			method: "POST",
+// 			headers: {
+// 				"Content-Type": "application/json",
+// 			},
+// 			body: formData,
+// 		});
+// 	}
 
-	if (intent === "leave-group") {
-		return await fetch(`/api/groups/${data.id}/leave-group/${data.memberId}`, {
-			method: "DELETE",
-		});
-	}
-};
+// 	if (intent === "leave-group") {
+// 		return await fetch(`/api/groups/${data.id}/leave-group/${data.memberId}`, {
+// 			method: "DELETE",
+// 		});
+// 	}
+// };
 
 export const eventAttendeeActions = async ({ request }) => {
 	let formData = await request.formData();

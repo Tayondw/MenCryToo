@@ -36,9 +36,9 @@ import {
 } from "./loaders";
 import {
 	groupActions,
-	groupImageActions,
+	// groupImageActions,
 	eventActions,
-	eventImageActions,
+	// eventImageActions,
 	// groupMemberActions,
 	// eventAttendeeActions,
 	// venueActions,
@@ -91,18 +91,18 @@ export const router = createBrowserRouter([
 				action: groupActions,
 			},
 			// ! GROUP - IMAGES
-			{
-				path: "groups/:groupId/images/:imageId",
-				loader: getLoader,
-				element: <Groups />,
-				action: groupImageActions,
-			},
-			{
-				path: "groups/:groupId/images/:imageId/edit",
-				loader: getLoader,
-				element: <Groups />,
-				action: groupImageActions,
-			},
+			// {
+			// 	path: "groups/:groupId/images/:imageId",
+			// 	loader: getLoader,
+			// 	element: <Groups />,
+			// 	action: groupImageActions,
+			// },
+			// {
+			// 	path: "groups/:groupId/images/:imageId/edit",
+			// 	loader: getLoader,
+			// 	element: <Groups />,
+			// 	action: groupImageActions,
+			// },
 			// ! VENUES
 			// {
 			// 	path: "venues",
@@ -138,7 +138,7 @@ export const router = createBrowserRouter([
 				path: "events",
 				loader: getLoader,
 				element: <Events />,
-				action: eventImageActions,
+				action: eventActions,
 			},
 			{
 				path: "events/:eventId",
@@ -160,19 +160,19 @@ export const router = createBrowserRouter([
 			},
 			// ! EVENT - IMAGES
 			// ? to add event images
-			{
-				path: "events/:eventId/images",
-				loader: eventDetailsLoader,
-				element: <EventDetails />,
-				action: eventImageActions,
-			},
+			// {
+			// 	path: "events/:eventId/images",
+			// 	loader: eventDetailsLoader,
+			// 	element: <EventDetails />,
+			// 	action: eventImageActions,
+			// },
 			// ? to edit event images
-			{
-				path: "events/:eventId/images/:imageId/edit",
-				loader: eventDetailsLoader,
-				element: <EventDetails />,
-				action: eventImageActions,
-			},
+			// {
+			// 	path: "events/:eventId/images/:imageId/edit",
+			// 	loader: eventDetailsLoader,
+			// 	element: <EventDetails />,
+			// 	action: eventImageActions,
+			// },
 			// ! EVENT - ATTENDANCES
 			// {
 			// 	path: "events/:eventId/attend-event",

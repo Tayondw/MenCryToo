@@ -59,7 +59,7 @@ const GroupDetails = () => {
 						<div id="group-details-images">
 							{groupDetails.groupImage.map((image) => (
 								<Link
-									to={`/groups/${groupDetails.id}/images/${image.id}`}
+									// to={`/groups/${groupDetails.id}/images/${image.id}`}
 									key={image.id}
 									className="box"
 								>
@@ -402,27 +402,25 @@ const GroupDetails = () => {
 										</h3>
 										<div id="event-list-upcoming" className="event-list">
 											{formattedUpcomingEvents.map((event) => (
-												<div
+												<Link
 													key={event.id}
-													className="group-details-event-cards"
+													to={`/events/${event.id}`}
+													style={{ textDecoration: `none`, color: `inherit` }}
+													className="group-details-event-item "
 												>
-													<div
-														className="group-details-event-item"
-														onClick={() => navigate(`/events/${event.id}`)}
-													>
+													<div className="group-details-event-cards">
 														<img
 															src={event.image}
 															alt={event.name}
 															className="event-image"
 														/>
-
 														<div className="event-item-dates">
 															<p className="event-item-dates-p">
-																{event.startDate}
+																Start Date: {event.startDate}
 															</p>
-															<h4 className="event-item-name-h4">
+															<h2 className="event-item-name-h4">
 																{event.name}
-															</h4>
+															</h2>
 															{event?.venueInfo ? (
 																<p className="event-item-dates-venue">
 																	{event.venueInfo.city ? (
@@ -437,12 +435,12 @@ const GroupDetails = () => {
 															) : (
 																<p className="event-item-dates-venue">Online</p>
 															)}
+															<h3 className="event-desc-group">
+																{event.description}
+															</h3>
 														</div>
 													</div>
-													<div className="event-desc-group">
-														{event.description}
-													</div>
-												</div>
+												</Link>
 											))}
 										</div>
 									</>

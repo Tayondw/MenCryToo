@@ -45,6 +45,7 @@
 
 #event-section-1 {
 	display: grid;
+      /* grid-template-columns: repeat(2, 1fr); */
 	grid-template-columns: 1fr 2fr;
 	/* column-gap: 30px; */
 }
@@ -58,7 +59,9 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+      align-items: center;
 	margin-right: 25px;
+     max-width: 900px;
 	/* align-items: center; */
 }
 
@@ -233,7 +236,7 @@
 #events-details-image {
 	padding: 0;
 	margin: 0;
-	width: fit-content;
+	width: 500px;
 	height: fit-content;
 	align-self: center;
 }
@@ -291,12 +294,23 @@
 	justify-content: center;
 }
 
+#eventDetailInfo {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 70%;
+}
+
 #eventDetailName {
 	padding-bottom: 15px;
 }
 
-#eventDetailInfo h3 {
+#eventDetailInfo #eventDetailDesc {
 	font-size: 16px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      width: 60%;
 }
 
 .meet-group-cards {

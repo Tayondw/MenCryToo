@@ -268,10 +268,6 @@
 	padding-top: 35px;
 }
 
-.event-desc-group {
-	font-family: "Open Sans", sans-serif;
-	font-weight: 500;
-}
 
 .event-item-dates-venue {
 	font-family: "Open Sans", sans-serif;
@@ -281,7 +277,7 @@
 .event-item-name-h4 {
 	font-family: "Open Sans", sans-serif;
 	font-size: 2em;
-	margin: 0;
+      text-transform: uppercase;
 }
 
 #events-section {
@@ -319,7 +315,7 @@
 
 
 .group-details-event-cards {
-	display: grid;
+	/* display: grid;
       grid-template-columns: 40% 60%;
 	align-items: center;
 	width: fit-content;
@@ -330,13 +326,23 @@
 	height: 350px;
 	margin: 8px;
 	flex-wrap: wrap;
-      flex-direction: row;
+      flex-direction: row; */
+      display: flex;
+	align-items: center;
+      /* justify-content: center; */
+	width: 550px;
+	max-width: 670px;
+	padding: 100px 40px 100px 20px;
+	border-radius: 60px;
+	background: #dddddc;
+	height: 420px;
+	margin: 8px;
 }
 
 .group-details-event-cards img {
-	max-width: 180px;
+	max-width: 230px;
 	width: 32vw;
-	height: 170px;
+	height: 270px;
 	object-fit: cover;
 	margin-left: -40px;
 	margin-right: 20px;
@@ -455,25 +461,31 @@
       align-items: center;
 }
 
-.event-item-dates-p,
+.event-item-dates-p {
+      margin-top: 35px;
+      padding: 2px 0;
+}
+
 .event-item-name-h4,
 .event-item-dates-venue {
 	margin: 0;
 	padding: 2px 0;
 }
 
-.event-desc-group {
+.group-details-event-cards .event-desc-group {
 	font-family: "Open Sans", sans-serif;
-	font-size: 0.9em;
+	font-size: 12px;
 	color: #666;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	display: -webkit-box;
+	/* overflow: hidden; */
+	/* text-overflow: ellipsis; */
+	/* display: -webkit-box; */
       line-clamp: 3;
 	-webkit-line-clamp: 3; /* Limit to 3 lines */
 	-webkit-box-orient: vertical;
       word-wrap: break-word;
-      width: 50%;
+      width: 100%;
+      font-weight: 500;
+      text-transform: uppercase;
 }
 
 #members-display-style-direction {

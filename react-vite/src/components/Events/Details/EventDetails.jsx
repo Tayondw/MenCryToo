@@ -31,7 +31,7 @@ const EventDetails = () => {
 		startDate: formatDate(eventDetails.startDate),
 		endDate: formatDate(eventDetails.endDate),
 	};
-	// console.log(eventDetails);
+	console.log(eventDetails);
 	const renderContent = () => {
 		switch (activeSection) {
 			case "Images":
@@ -44,7 +44,7 @@ const EventDetails = () => {
 						<div id="group-details-images">
 							{eventDetails.eventImage.map((image) => (
 								<Link
-									to={`/groups/${eventDetails.id}/images/${image.id}`}
+									// to={`/groups/${eventDetails.id}/images/${image.id}`}
 									key={image.id}
 									className="box"
 								>
@@ -58,7 +58,8 @@ const EventDetails = () => {
 						<p>
 							Currently no images have been uploaded by the group organizer.
 						</p>
-						{(sessionUser && eventDetails.organizer.id !== sessionUser.id) || !sessionUser ? (
+						{(sessionUser && eventDetails.organizer.id !== sessionUser.id) ||
+						!sessionUser ? (
 							<div id="events-deets-crud-buttons-delete">
 								<p>
 									You must be the group organizer to add images to this event
@@ -85,6 +86,7 @@ const EventDetails = () => {
 									className="button"
 									id="add-group-image"
 									buttonText="Add Images"
+									style={{ cursor: `pointer` }}
 									modalComponent={
 										<EventImage
 											eventDetails={eventDetails}
@@ -229,7 +231,7 @@ const EventDetails = () => {
 								<h2 id="eventDetailName" className="add-padding">
 									{eventDetails.name}
 								</h2>
-								<h3>{eventDetails.description}</h3>
+								<h3 id="eventDetailDesc">{eventDetails.description}</h3>
 							</div>
 							<div id="event-event">
 								<div id="events-details-date">
@@ -249,7 +251,7 @@ const EventDetails = () => {
 								<div id="events-details-location">
 									<GrLocationPin className="events-details-location" />
 									<div>
-										{!eventDetails.venueInfo ? (
+										{!eventDetails.venueInfo.address ? (
 											<p>Currently no venue has been selected</p>
 										) : (
 											<p style={{ marginLeft: `5px` }}>

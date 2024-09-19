@@ -69,7 +69,7 @@ def delete_event(eventId):
 
 
 # ! EVENT IMAGES
-@event_routes.route("/<int:eventId>/images", methods=["POST"])
+@event_routes.route("/<int:eventId>/images", methods=["GET", "POST"])
 @login_required
 def add_event_image(eventId):
     """
