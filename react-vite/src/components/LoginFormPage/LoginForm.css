@@ -1,0 +1,19 @@
+#login {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      justify-content: center;
+      align-items: center;
+}
+
+#login #login-email label, #login #login-password label{
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+}
+
+#login #login-email input, #login #login-password input {
+      border: 2px solid black;
+      box-sizing: border-box;
+      
+}

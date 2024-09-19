@@ -11,6 +11,7 @@ function LoginFormPage() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [errors, setErrors] = useState({});
+	const isDisabled = email.length < 4 || password.length < 6;
 
 	if (sessionUser) return <Navigate to="/" replace={true} />;
 
@@ -23,7 +24,6 @@ function LoginFormPage() {
 				password,
 			}),
 		);
-
 		if (serverResponse) {
 			setErrors(serverResponse);
 		} else {
@@ -31,35 +31,87 @@ function LoginFormPage() {
 		}
 	};
 
+	const demoUserLogin = async (event) => {
+		event.preventDefault();
+
+		const demoServerResponse = await dispatch(
+			thunkLogin({
+				email: "demo@aa.io",
+				password: "password",
+			}),
+		);
+
+		if (demoServerResponse) {
+			setErrors(demoServerResponse);
+		} else {
+			navigate("/");
+		}
+	};
+
 	return (
-		<>
-			<h1>Log In</h1>
+		<div id="new-group">
+			<img
+				src="https://mencrytoo.s3.amazonaws.com/login-1.png"
+				alt="login-image"
+				id="fit-image-content"
+			/>
+
 			{errors.length > 0 &&
 				errors.map((message) => <p key={message}>{message}</p>)}
-			<form onSubmit={handleSubmit}>
-				<label>
-					Email
-					<input
-						type="text"
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
-						required
-					/>
-				</label>
-				{errors.email && <p>{errors.email}</p>}
-				<label>
-					Password
-					<input
-						type="password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						required
-					/>
-				</label>
-				{errors.password && <p>{errors.password}</p>}
-				<button type="submit">Log In</button>
+			<form className="create-group-form" onSubmit={handleSubmit}>
+				<div id="header-login">
+					<h3>Log In</h3>
+					<hr />
+				</div>
+				<div id="login">
+					<div id="login-email">
+						<label>
+							Email
+							<input
+								type="text"
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+								placeholder="Email"
+								required
+							/>
+						</label>
+						{errors.email && <p style={{ color: `red` }}>{errors.email}</p>}
+					</div>
+					<div id="login-password">
+						<label>
+							Password
+							<input
+								type="password"
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+								placeholder="Password"
+								required
+							/>
+						</label>
+						{errors.password && (
+							<p style={{ color: `red` }}>{errors.password}</p>
+						)}
+					</div>
+				</div>
+                        <hr />
+				<button
+					type="submit"
+					className="login-button"
+					disabled={isDisabled}
+					style={{ cursor: isDisabled ? "not-allowed" : "pointer", marginRight: `15px` }}
+				>
+					Log In
+				</button>
+				<button
+					type="submit"
+					className="demo-login-button"
+                              onClick={demoUserLogin}
+                              style={{width: `fit-content`}}
+				>
+					Log in as Demo User
+				</button>
 			</form>
-		</>
+		</div>
 	);
 }
 
