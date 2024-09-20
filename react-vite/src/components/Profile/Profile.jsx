@@ -70,8 +70,8 @@ const Profile = () => {
 				return userGroups.length > 0 ? (
 					userGroups.map((group) => (
 						<Link
-							to={`/groups/${group.id}`}
-							key={group.id}
+							to={`/groups/${group.groupId}`}
+							key={group.groupId}
 							style={{ textDecoration: `none`, color: `inherit` }}
 						>
 							<div id="second-half-groups" className="second-half-cards">

@@ -1,7 +1,7 @@
 from .db import db, environment, SCHEMA, add_prefix_for_prod
 from datetime import datetime
 from .attendance import Attendance
-
+from sqlalchemy.ext.associationproxy import association_proxy
 
 class Event(db.Model):
     __tablename__ = "events"
@@ -39,6 +39,7 @@ class Event(db.Model):
     attendances = db.relationship(
         "Attendance", back_populates="event", cascade="all, delete-orphan"
     )
+    users = association_proxy("attendances", "user")
     #     event_attendances = db.relationship(
     #         "User",
     #         secondary=attendances,

@@ -24,7 +24,6 @@ class Membership(db.Model):
             "groupId": self.group_id,
             "userId": self.user_id,
             "user": self.user.to_dict_no_posts() if self.user else None,
-            # "group": self.group.to_dict() if self.group else None,
         }
 
 

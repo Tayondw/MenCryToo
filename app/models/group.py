@@ -1,6 +1,7 @@
 from .db import db, environment, SCHEMA, add_prefix_for_prod
 from datetime import datetime
 from .member import Membership
+from sqlalchemy.ext.associationproxy import association_proxy
 
 
 class Group(db.Model):
@@ -35,20 +36,21 @@ class Group(db.Model):
         back_populates='group',
         cascade='all, delete-orphan'
     )
-#     group_memberships = db.relationship(
-#         "User",
-#         secondary=members,
-#         back_populates="user_memberships",
-#     )
+    #     group_memberships = db.relationship(
+    #         "User",
+    #         secondary=members,
+    #         back_populates="user_memberships",
+    #     )
     group_images = db.relationship(
         "GroupImage", back_populates="group", cascade="all, delete-orphan"
     )
+    users = association_proxy("memberships", "user")
 
     def to_dict(self):
         events = [event.to_dict() for event in self.events if event.group_id == self.id]
         venues = [venue.to_dict() for venue in self.venues if venue.group_id == self.id]
         organizer = self.organizer.to_dict() if self.organizer else None
-      #   members = [member.to_dict() for member in self.group_memberships]
+        #   members = [member.to_dict() for member in self.group_memberships]
         members = [member.to_dict() for member in self.memberships]
         image = [group_image.to_dict() for group_image in self.group_images]
         return {

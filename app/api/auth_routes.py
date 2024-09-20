@@ -40,7 +40,15 @@ def login():
         # Add the user to the session, we are logged in!
         user = User.query.filter(User.email == form.data["email"]).first()
         login_user(user)
-        return user.to_dict()
+        return user.to_dict(
+            posts=True,
+            user_comments=True,
+            memberships=True,
+            attendances=True,
+            users_tags=True,
+            events=True,
+            group=True,
+        )
     return form.errors, 401
 
 
@@ -105,6 +113,8 @@ def sign_up():
             memberships=True,
             attendances=True,
             users_tags=True,
+            events=True,
+            group=True,
         )
     return form.errors, 401
 

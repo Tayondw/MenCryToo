@@ -1,5 +1,6 @@
 from .db import db, environment, SCHEMA, add_prefix_for_prod
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.ext.associationproxy import association_proxy
 from flask_login import UserMixin
 from datetime import datetime
 from .like import likes
@@ -64,6 +65,8 @@ class User(db.Model, UserMixin):
     )
 
     groups = db.relationship("Group", back_populates="organizer")
+    events = association_proxy("attendances", "event")
+    group = association_proxy("memberships", "group")
 
     @property
     def password(self):
@@ -87,8 +90,10 @@ class User(db.Model, UserMixin):
         #   user_memberships=False,
         memberships=False,
         attendances=False,
-      #   user_attendances=False,
+        #   user_attendances=False,
         users_tags=False,
+        events=False,
+        group=False,
     ):
         dict_user = {
             "id": self.id,
@@ -121,14 +126,18 @@ class User(db.Model, UserMixin):
             dict_user["userAttendances"] = [
                 user_attendance.to_dict() for user_attendance in self.attendances
             ]
-      #   if user_attendances:
-      #       dict_user["userAttendances"] = [
-      #           user_attendance.to_dict() for user_attendance in self.user_attendances
-      #       ]
+        #   if user_attendances:
+        #       dict_user["userAttendances"] = [
+        #           user_attendance.to_dict() for user_attendance in self.user_attendances
+        #       ]
         if users_tags:
             dict_user["usersTags"] = [
                 user_tag.to_dict() for user_tag in self.users_tags
             ]
+        if events:
+            dict_user["events"] = [event.to_dict() for event in self.events]
+        if group:
+            dict_user["group"] = [group.to_dict() for group in self.group]
         return dict_user
 
     def to_dict_no_posts(
@@ -136,8 +145,10 @@ class User(db.Model, UserMixin):
         #   user_memberships=False,
         memberships=False,
         attendances=False,
-      #   user_attendances=False,
+        #   user_attendances=False,
         users_tags=False,
+        events=False,
+        group=False,
     ):
 
         dict_user = {
@@ -165,12 +176,16 @@ class User(db.Model, UserMixin):
             dict_user["userAttendances"] = [
                 user_attendance.to_dict() for user_attendance in self.attendances
             ]
-      #   if user_attendances:
-      #       dict_user["userAttendances"] = [
-      #           user_attendance.to_dict() for user_attendance in self.user_attendances
-      #       ]
+        #   if user_attendances:
+        #       dict_user["userAttendances"] = [
+        #           user_attendance.to_dict() for user_attendance in self.user_attendances
+        #       ]
         if users_tags:
             dict_user["usersTags"] = [
                 user_tag.to_dict() for user_tag in self.users_tags
             ]
+        if events:
+            dict_user["events"] = [event.to_dict() for event in self.events]
+        if group:
+            dict_user["group"] = [group.to_dict() for group in self.group]    
         return dict_user
