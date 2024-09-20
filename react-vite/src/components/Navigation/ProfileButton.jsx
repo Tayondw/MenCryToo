@@ -113,7 +113,7 @@ function ProfileButton({ user, navigate }) {
 										buttonText="Profile"
 										onButtonClick={() => {
 											closeMenu();
-											navigate("/profile");
+											navigate(`/profile/${sessionUser.id}`);
 										}}
 										style={{
 											color: `#223f5c`,
