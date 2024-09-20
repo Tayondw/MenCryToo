@@ -189,8 +189,8 @@ export const router = createBrowserRouter([
 			// ! PROFILE
 			// ? your profile only you can access
 			{
-				path: "profile",
-				loader: getLoader,
+				path: "profile/:userId",
+				loader: userDetailsLoader,
 				element: <Profile />,
 				action: profileActions,
 			},

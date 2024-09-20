@@ -1,18 +1,86 @@
 #user-profile-page {
 	background: linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c);
+      display: grid;
+      grid-template-columns: 80% 20%;
+      padding: 5%;
+}
+
+#user-profile-basic {
+      display: grid;
+      grid-template-rows: 0.5fr 3fr;
 }
 
 #user-profile-img-wdetails {
-	display: flex;
+	display: grid;
+	grid-template-columns: 1fr 2fr;
+      align-content: center;
+      justify-self: center;
+      column-gap: 10px;
+}
+
+#user-profile-image img {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+}
+
+#photo-plus {
+      font-size: 50px;
+      position: relative;
+      left: -80px;
+      bottom: -140px;
+      border: 2px solid #e08f2c;
+      border-radius: 50%;
+      color: #E08F2C;
+      font-weight: 1000;
+}
+
+#user-profile-details {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+}
+
+#user-profile-details h3 {
+      font-size: 120px;
+}
+
+#profile-stats {
+      display: flex;
+	gap: 130px;
+	list-style: none;
+	padding: 0;
+	flex-wrap: wrap; /* Enable wrapping for the stats */
+      font-size: 25px;
+      margin-bottom: 0;
+}
+
+#profile-stats var {
+      display: flex;
+	font-style: normal;
+      color: #E08F2C;
+      font-weight: 900;
 	align-items: center;
 	justify-content: center;
-	gap: 150px;
-	padding-top: 120px;
+      padding-bottom: 15px;
+	flex-wrap: wrap; /* Enable wrapping for the stats */
+	word-wrap: break-word; /* Ensure long words break to the next line */
+      /* overflow-wrap: break-word;  */
+      /* Better word breaking for long words */
+}
+
+#profile-stats label {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #676770;
+      font-weight: 900;
 }
 
 #second-half-profile {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
+	display: flex;
+	flex-direction: column;
 	margin: 50px;
 	padding: 50px;
 	gap: 50px;
@@ -113,13 +181,13 @@
 	margin-bottom: 50px;
 }
 
-#user-profile-details {
+/* #user-profile-details {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	margin-bottom: 25px;
-}
+} */
 
 #profile-home-edit-profile {
 	display: flex;

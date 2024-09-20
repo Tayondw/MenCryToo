@@ -4,21 +4,19 @@ import { useSelector } from "react-redux";
 import OpenModalButton from "../OpenModalButton";
 import AddTag from "../Tags/AddTag";
 import DeleteProfile from "./CRUD/Delete";
+import { BiSolidPencil } from "react-icons/bi";
 import "./Profile.css";
 
 const Profile = () => {
 	const sessionUser = useSelector((state) => state.session.user);
-	const { allProfiles } = useLoaderData();
-      const navigate = useNavigate();
-      // console.log(allProfiles);
-      
-	const userProfile = allProfiles.users_profile.find(
-		(profile) => profile.id === sessionUser.id,
-	);
-	const userTags = userProfile.usersTags;
-	const userPosts = userProfile.posts;
-	const userGroups = userProfile.userMembership;
-	const userEvents = userProfile.userAttendances;
+	const userDetails = useLoaderData();
+	const navigate = useNavigate();
+	console.log(userDetails);
+
+	const userTags = userDetails.usersTags;
+	const userPosts = userDetails.posts;
+	const userGroups = userDetails.userMembership;
+	const userEvents = userDetails.userAttendances;
 
 	const [activeSection, setActiveSection] = useState("posts"); // State to track the active section
 
@@ -64,7 +62,8 @@ const Profile = () => {
 					))
 				) : (
 					<p>
-						Currently no posts available. You will see something after you make a post
+						Currently no posts available. You will see something after you make
+						a post
 					</p>
 				);
 			case "groups":
@@ -102,7 +101,8 @@ const Profile = () => {
 					))
 				) : (
 					<p>
-						Currently no groups available. You will see something after you join a group
+						Currently no groups available. You will see something after you join
+						a group
 					</p>
 				);
 			case "events":
@@ -147,7 +147,10 @@ const Profile = () => {
 						</Link>
 					))
 				) : (
-					<p>Currently no events available. You will see something after you add an event</p>
+					<p>
+						Currently no events available. You will see something after you add
+						an event
+					</p>
 				);
 			default:
 				return null;
@@ -156,29 +159,43 @@ const Profile = () => {
 
 	return (
 		<div id="user-profile-page">
-			<div id="user-profile-basic">
+			<main id="user-profile-basic">
 				<div id="user-profile-img-wdetails">
 					<div id="user-profile-image">
-						<img src={userProfile.profileImage} alt={userProfile.username} />
+						<img src={userDetails.profileImage} alt={userDetails.username} />
+						<Link to={`/users/${sessionUser.id}/profile/update`}>
+							<BiSolidPencil id="photo-plus" />
+						</Link>
 					</div>
-					<div>
-						<div id="user-profile-details">
-							<h5>{userProfile.username}</h5>
-							<h4>First Name: {userProfile.firstName}</h4>
-							<h4>Last Name: {userProfile.lastName}</h4>
-							<h4>Email: {userProfile.email}</h4>
+					<div id="user-profile-details">
+						<div>
+							<h3>{userDetails.username}</h3>
 						</div>
+						<ul id="profile-stats">
+							<li>
+								<var>{userDetails.firstName}</var>
+								<label>First Name</label>
+							</li>
+							<li>
+								<var>{userDetails.lastName}</var>
+								<label>Last Name</label>
+							</li>
+							<li>
+								<var>{userDetails.email}</var>
+								<label>Email</label>
+							</li>
+						</ul>
 						<div id="profile-home-edit-profile">
 							<Link to={`/users/${sessionUser.id}/profile/update`}>
-								<button id="profile-home-edit-profile-button">
+								<button className="button" id="profile-home-edit-profile-button">
 									Edit Profile
 								</button>
 							</Link>
 							<div id="crud-buttons-delete">
 								<OpenModalButton
-									userProfile={userProfile}
+									userDetails={userDetails}
 									navigate={navigate}
-									className="group-delete-button"
+									className="group-delete-button button"
 									id="delete-group"
 									buttonText="Delete Profile"
 									style={{
@@ -193,13 +210,14 @@ const Profile = () => {
 										textTransform: `uppercase`,
 										boxSizing: `border-box`,
 										transition: `background-color 0.3s`,
-										fontSize: `12px`,
+										fontSize: `16px`,
 										fontWeight: 600,
-										letterSpacing: `2px`,
+                                                            letterSpacing: `2px`,
+                                                            height: `45px`
 									}}
 									modalComponent={
 										<DeleteProfile
-											userProfile={userProfile}
+											userDetails={userDetails}
 											navigate={navigate}
 										/>
 									}
@@ -209,57 +227,53 @@ const Profile = () => {
 					</div>
 				</div>
 				<div id="second-half-profile">
-					<div id="left-second-half">
-						<div className="second-half-headers">
-							<h1 onClick={() => setActiveSection("posts")}>POSTS</h1>
-							<h1 onClick={() => setActiveSection("groups")}>GROUPS</h1>
-							<h1 onClick={() => setActiveSection("events")}>EVENTS</h1>
-						</div>
-						<div id="left-second-half-content">{renderContent()}</div>
+					<div className="second-half-headers">
+						<h1 onClick={() => setActiveSection("posts")}>POSTS</h1>
+						<h1 onClick={() => setActiveSection("groups")}>GROUPS</h1>
+						<h1 onClick={() => setActiveSection("events")}>EVENTS</h1>
 					</div>
-					<div id="right-second-half">
-						<div className="second-half-headers">
-							<h1>TAGS</h1>
-							<h1>SIMILAR TO YOU</h1>
-						</div>
-						<div id="right-second-half-content">
-							<div id="user-profile-tags">
-								<div id="users-tags-grid">
-									<div id="users-tags" className="div-block-2">
-										<h1 id="user-tags-header">Here are your tags</h1>
-										{userTags.map((tag) => (
-											<div id="each-tag" key={tag.id}>
-												<Link
-													to={`/tags/${tag.id}/${tag.name}`}
-													className="w-button"
-													id="each-profile-tag"
-												>
-													{tag.name}
-												</Link>
-											</div>
-										))}
-									</div>
-									<div id="add-tags-div" className="div-block-2">
-										<h1>You can add more tags too!</h1>
-										<div id="add-tags-button">
-											<OpenModalButton
-												buttonText="Add Tags"
-												className="w-button"
-												modalComponent={<AddTag />}
-											/>
-										</div>
-									</div>
+					<div id="left-second-half-content">{renderContent()}</div>
+				</div>
+			</main>
+			<aside id="aside-content">
+				<div id="tag-content">
+					<div>
+						<h1>TAGS</h1>
+					</div>
+					<div id="users-tags-grid">
+						<div id="users-tags" className="div-block-2">
+							<h1 id="user-tags-header">Here are your tags</h1>
+							{userTags.map((tag) => (
+								<div id="each-tag" key={tag.id}>
+									<Link
+										to={`/tags/${tag.id}/${tag.name}`}
+										className="w-button"
+										id="each-profile-tag"
+									>
+										{tag.name}
+									</Link>
 								</div>
-							</div>
-							<div id="become-a-partner-userprofile">
-								<h1>
-									SOON YOU CAN BECOME A PARTNER - WE WILL RENDER THIS LATER
-								</h1>
+							))}
+						</div>
+						<div id="add-tags-div" className="div-block-2">
+							<h1>You can add more tags too!</h1>
+							<div id="add-tags-button">
+								<OpenModalButton
+									buttonText="Add Tags"
+									className="w-button"
+									modalComponent={<AddTag />}
+								/>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
+				<div id="similar-to-you-button">
+					<h1>SIMILAR TO YOU</h1>
+					<Link to="/profile-feed">
+						<button className="button">SIMILAR TO YOU</button>
+					</Link>
+				</div>
+			</aside>
 		</div>
 	);
 };
