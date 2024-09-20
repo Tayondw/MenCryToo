@@ -1,22 +1,29 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import OpenModalButton from "../OpenModalButton";
-import AddTag from "../Tags/AddTag";
 import DeleteProfile from "./CRUD/Delete";
 import { BiSolidPencil } from "react-icons/bi";
 import "./Profile.css";
 
 const Profile = () => {
-      const sessionUser = useSelector((state) => state.session.user);
-      const navigate = useNavigate();
-	const userTags = sessionUser?.usersTags;
-	const userPosts = sessionUser?.posts;
-	const userGroups = sessionUser?.group;
-	const userEvents = sessionUser?.events;
-	const [activeSection, setActiveSection] = useState("posts"); // State to track the active section
-	const renderContent = () => {
-		switch (activeSection) {
+	const sessionUser = useSelector((state) => state.session.user);
+	const navigate = useNavigate();
+	const [activeMainSection, setActiveMainSection] = useState("posts"); // State to track the main active section
+	const [activeAsideSection, setActiveAsideSection] = useState("tags"); // State to track the aside active section
+	// UseEffect to navigate on logout immediately
+	useEffect(() => {
+		if (!sessionUser) {
+			window.location.href = "/"; // Immediate navigation when sessionUser becomes null
+		}
+	}, [sessionUser, navigate]);
+	// Memoized user-related values
+	const userTags = useMemo(() => sessionUser?.usersTags, [sessionUser]);
+	const userPosts = useMemo(() => sessionUser?.posts, [sessionUser]);
+	const userGroups = useMemo(() => sessionUser?.group, [sessionUser]);
+	const userEvents = useMemo(() => sessionUser?.events, [sessionUser]);
+	const renderContent = useCallback(() => {
+		switch (activeMainSection) {
 			case "posts":
 				return userPosts?.length > 0 ? (
 					userPosts?.map((post) => (
@@ -145,7 +152,37 @@ const Profile = () => {
 			default:
 				return null;
 		}
-	};
+	}, [activeMainSection, userPosts, userGroups, userEvents]);
+	const renderTagContent = useCallback(() => {
+		switch (activeAsideSection) {
+			case "tags":
+				return userTags?.length > 0 ? (
+					<div id="tag-content">
+						{userTags?.map((tag) => (
+							<div id="each-tag" key={tag?.id}>
+								<button
+									className="button"
+									id="each-profile-tag"
+									style={{ cursor: `default` }}
+								>
+									{tag?.name}
+								</button>
+							</div>
+						))}
+					</div>
+				) : (
+					<p>Currently no tags available.</p>
+				);
+			case "similar to you":
+				return (
+					<Link to="/profile-feed">
+						<button className="button" style={{cursor: `pointer`}}>SIMILAR TO YOU</button>
+					</Link>
+				);
+			default:
+				return null;
+		}
+	}, [activeAsideSection, userTags]);
 
 	return (
 		<div id="user-profile-page">
@@ -179,7 +216,8 @@ const Profile = () => {
 							<Link to={`/users/${sessionUser?.id}/profile/update`}>
 								<button
 									className="button"
-									id="profile-home-edit-profile-button"
+                                                      id="profile-home-edit-profile-button"
+                                                      style={{cursor: `pointer`}}
 								>
 									Edit Profile
 								</button>
@@ -221,31 +259,31 @@ const Profile = () => {
 				</div>
 				<div id="second-half-profile">
 					<div className="second-half-headers">
-						{activeSection !== "posts" ? (
-							<h1 onClick={() => setActiveSection("posts")}>POSTS</h1>
+						{activeMainSection !== "posts" ? (
+							<h1 onClick={() => setActiveMainSection("posts")}>POSTS</h1>
 						) : (
 							<h1
-								onClick={() => setActiveSection("posts")}
+								onClick={() => setActiveMainSection("posts")}
 								style={{ color: `var(--peach)` }}
 							>
 								POSTS
 							</h1>
 						)}
-						{activeSection !== "groups" ? (
-							<h1 onClick={() => setActiveSection("groups")}>GROUPS</h1>
+						{activeMainSection !== "groups" ? (
+							<h1 onClick={() => setActiveMainSection("groups")}>GROUPS</h1>
 						) : (
 							<h1
-								onClick={() => setActiveSection("groups")}
+								onClick={() => setActiveMainSection("groups")}
 								style={{ color: `var(--peach)` }}
 							>
 								GROUPS
 							</h1>
 						)}
-						{activeSection !== "events" ? (
-							<h1 onClick={() => setActiveSection("events")}>EVENTS</h1>
+						{activeMainSection !== "events" ? (
+							<h1 onClick={() => setActiveMainSection("events")}>EVENTS</h1>
 						) : (
 							<h1
-								onClick={() => setActiveSection("events")}
+								onClick={() => setActiveMainSection("events")}
 								style={{ color: `var(--peach)` }}
 							>
 								EVENTS
@@ -256,44 +294,31 @@ const Profile = () => {
 				</div>
 			</main>
 			<aside id="aside-content">
-				<div id="tag-content">
-					<div>
-						<h1>TAGS</h1>
-					</div>
-					<div id="users-tags-grid">
-						<div id="users-tags">
-							<h3 id="user-tags-header">your tags</h3>
-							{userTags?.map((tag) => (
-								<div id="each-tag" key={tag?.id}>
-									<button
-										className="button"
-										id="each-profile-tag"
-										style={{ cursor: `text` }}
-									>
-										{tag?.name}
-									</button>
-								</div>
-							))}
-						</div>
-						<div id="add-tags-div">
-							<h3 id="user-tags-header">Want to add more?!</h3>
-							<div id="add-tags-button">
-								<OpenModalButton
-									buttonText="Add Tags"
-									className="button"
-									style={{ cursor: `pointer` }}
-									modalComponent={<AddTag />}
-								/>
-							</div>
-						</div>
-					</div>
+				<div className="second-half-headers">
+					{activeAsideSection !== "tags" ? (
+						<h1 onClick={() => setActiveAsideSection("tags")}>YOUR TAGS</h1>
+					) : (
+						<h1
+							onClick={() => setActiveAsideSection("tags")}
+							style={{ color: `var(--peach)` }}
+						>
+							YOUR TAGS
+						</h1>
+					)}
+					{activeAsideSection !== "similar to you" ? (
+						<h1 onClick={() => setActiveAsideSection("similar to you")}>
+							SIMILAR TO YOU
+						</h1>
+					) : (
+						<h1
+							onClick={() => setActiveAsideSection("similar to you")}
+							style={{ color: `var(--peach)` }}
+						>
+							SIMILAR TO YOU
+						</h1>
+					)}
 				</div>
-				<div id="similar-to-you-button">
-					<h1>SIMILAR TO YOU</h1>
-					<Link to="/profile-feed">
-						<button className="button">SIMILAR TO YOU</button>
-					</Link>
-				</div>
+				<div id="users-tags">{renderTagContent()}</div>
 			</aside>
 		</div>
 	);

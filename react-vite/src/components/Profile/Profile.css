@@ -1,8 +1,9 @@
 #user-profile-page {
 	background: linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c);
       display: grid;
-      grid-template-columns: 80% 20%;
+      grid-template-columns: 75% 15%;
       padding: 5%;
+      column-gap: 30px;
 }
 
 #user-profile-basic {
@@ -174,11 +175,60 @@
       height: fit-content;
       position: sticky;
       top: 180px;
-      width: 350px;
+      width: 500px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      padding-top: 5%;
+      padding-bottom: 5%;
+}
+
+#aside-content .second-half-headers {
+      display: flex;
+      flex-direction: row;
+      gap: 26px;
+      justify-content: space-between;
+}
+
+#aside-content .second-half-headers h1 {
+      font-size: 30px;
+}
+
+#users-tags {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: center;
+}
+
+#users-tags #tag-content {
+      display: flex;
+      flex-direction: row;
+      width: 500px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      gap: 15px;
+}
+
+#users-tags #each-tag {
+      width: 240px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+}
+
+#users-tags #each-tag button, #users-tags button {
+      width: 200px;
+      padding: 12px 20px;
+      margin: 0;
+      height: 70px;
+}
+
+#users-tags button {
+      justify-self: center;
 }
 
 @media (width <= 720px) {
