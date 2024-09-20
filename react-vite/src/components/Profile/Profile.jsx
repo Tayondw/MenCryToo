@@ -8,7 +8,7 @@ import { BiSolidPencil } from "react-icons/bi";
 import "./Profile.css";
 
 const Profile = () => {
-	const sessionUser = useSelector((state) => state.session.user);
+      const sessionUser = useSelector((state) => state.session.user);
       const navigate = useNavigate();
 	const userTags = sessionUser?.usersTags;
 	const userPosts = sessionUser?.posts;

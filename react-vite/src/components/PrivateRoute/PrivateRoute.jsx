@@ -1,12 +1,12 @@
-// import { Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 const PrivateRoute = ({ children }) => {
 	const sessionUser = useSelector((state) => state.session.user);
 
 	if (!sessionUser) {
-            // return <Navigate to="/" replace />;
-            window.location.href = "/"
+            return <Navigate to="/" replace />;
+            // window.location.href = "/"
 	}
 
 	return children;
