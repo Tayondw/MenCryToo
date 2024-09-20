@@ -15,6 +15,7 @@ import ProfileDetails from "../components/Profile/Details";
 import UpdateProfile from "../components/Profile/CRUD/Update";
 import Posts from "../components/Posts";
 import PostDetails from "../components/Posts/Details";
+import PrivateRoute from "../components/PrivateRoute";
 // import Comments from "../components/Comments";
 // import CommentDetails from "../components/Comments/Details";
 // import Tags from "../components/Tags";
@@ -27,11 +28,11 @@ import {
 	groupDetailsLoader,
 	eventDetailsLoader,
 	// venueDetailsLoader,
-      userDetailsLoader,
-      postsLoader,
-      postDetailsLoader,
-      profilesLoader,
-      tagsLoader,
+	userDetailsLoader,
+	postsLoader,
+	postDetailsLoader,
+	profilesLoader,
+	tagsLoader,
 	// tagDetailsLoader,
 } from "./loaders";
 import {
@@ -189,9 +190,12 @@ export const router = createBrowserRouter([
 			// ! PROFILE
 			// ? your profile only you can access
 			{
-				path: "profile/:userId",
-				loader: userDetailsLoader,
-				element: <Profile />,
+				path: "profile",
+				element: (
+					<PrivateRoute>
+						<Profile />
+					</PrivateRoute>
+				),
 				action: profileActions,
 			},
 			{
@@ -215,8 +219,8 @@ export const router = createBrowserRouter([
 				action: postActions,
 			},
 			{
-                        path: "posts",
-                        loader: postsLoader,
+				path: "posts",
+				loader: postsLoader,
 				element: <Posts />,
 				action: postActions,
 			},

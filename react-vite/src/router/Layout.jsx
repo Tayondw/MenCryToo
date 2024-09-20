@@ -18,11 +18,11 @@ export default function Layout() {
 	return (
 		<>
 			<ModalProvider>
-                        <Navigation isLoaded={isLoaded} />
-                        <ScrollToTop />
+				<Navigation isLoaded={isLoaded} />
+				<ScrollToTop />
 				{isLoaded && <Outlet />}
-                        <Footer />
-                        <Modal />
+				<Footer />
+				<Modal />
 			</ModalProvider>
 		</>
 	);

@@ -59,14 +59,14 @@ export const SectionOne = () => {
 					</div>
 				</div>
 				<div className="div-block-2">
-					{allTags.tags.map((tag) => (
+					{allTags?.tags?.map((tag) => (
 						<Link
 							// to={`/tags/${tag.id}/${tag.name}`}
-							key={tag.id}
+							key={tag?.id}
 							className="w-button"
 							style={{ cursor: `text` }}
 						>
-							{tag.name}
+							{tag?.name}
 						</Link>
 					))}
 				</div>

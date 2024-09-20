@@ -2,10 +2,10 @@
 
 :root {
 	--steel-blue: #3b99d9;
-	--peach: #EA8D89;
-      --orangy: #E08F2C;
-      --light-gray: #DDDDDC;
-      --deep-blue: #223F5C;
+	--peach: #ea8d89;
+	--orangy: #e08f2c;
+	--light-gray: #dddddc;
+	--deep-blue: #223f5c;
 	--white-smoke: #ecf0f1;
 	--silver: #bec3c7;
 	--dim-gray-2: #49647b;
@@ -106,6 +106,13 @@ p {
 	line-height: 25px;
 }
 
+.loader {
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
 .w-icon-nav-menu:before {
 	content: "\e602";
 }
@@ -113,19 +120,19 @@ p {
 .w-container {
 	margin-left: auto;
 	margin-right: auto;
-      justify-content: flex-start;
-      width: 40%;
+	justify-content: flex-start;
+	width: 40%;
 	/* max-width: 940px; */
 }
 
 .w-container-tag-div {
 	margin-left: auto;
 	margin-right: auto;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      width: 50%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 50%;
 	/* max-width: 1500px; */
 }
 

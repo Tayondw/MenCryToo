@@ -41,7 +41,7 @@ function ProfileButton({ user, navigate }) {
 	const logout = () => {
 		dispatch(thunkLogout());
 		closeMenu();
-		navigate("/");
+		navigate("/", {replace: true});
 	};
 
 	return (
@@ -113,7 +113,7 @@ function ProfileButton({ user, navigate }) {
 										buttonText="Profile"
 										onButtonClick={() => {
 											closeMenu();
-											navigate(`/profile/${sessionUser.id}`);
+											navigate(`/profile`);
 										}}
 										style={{
 											color: `#223f5c`,

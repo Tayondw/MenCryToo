@@ -1,5 +1,5 @@
-import { useLoaderData, Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import OpenModalButton from "../OpenModalButton";
 import AddTag from "../Tags/AddTag";
@@ -9,42 +9,32 @@ import "./Profile.css";
 
 const Profile = () => {
 	const sessionUser = useSelector((state) => state.session.user);
-	const userDetails = useLoaderData();
-	const navigate = useNavigate();
-	console.log(userDetails);
-
-	const userTags = userDetails.usersTags;
-	const userPosts = userDetails.posts;
-	const userGroups = userDetails.userMembership;
-	const userEvents = userDetails.userAttendances;
-
+      const navigate = useNavigate();
+	const userTags = sessionUser?.usersTags;
+	const userPosts = sessionUser?.posts;
+	const userGroups = sessionUser?.group;
+	const userEvents = sessionUser?.events;
 	const [activeSection, setActiveSection] = useState("posts"); // State to track the active section
-
-	useEffect(() => {
-		if (!sessionUser || (sessionUser && !sessionUser.profileImage))
-			navigate("/");
-	}, [sessionUser, navigate]);
-
 	const renderContent = () => {
 		switch (activeSection) {
 			case "posts":
-				return userPosts.length > 0 ? (
-					userPosts.map((post) => (
+				return userPosts?.length > 0 ? (
+					userPosts?.map((post) => (
 						<Link
 							key={post.id}
-							to={`/posts/${post.id}`}
+							to={`/posts/${post?.id}`}
 							style={{ textDecoration: `none`, color: `inherit` }}
 						>
 							<div id="second-half-posts" className="second-half-cards">
-								<img src={post.image} alt={post.title} />
+								<img src={post?.image} alt={post?.title} />
 								<div id="display-style-direction">
 									<div>
-										<h2>{post.title}</h2>
-										<h3>{post.caption}</h3>
+										<h2>{post?.title}</h2>
+										<h3>{post?.caption}</h3>
 									</div>
 									<ul className="stats">
 										<li>
-											<var>{post.likes}</var>
+											<var>{post?.likes}</var>
 											<label>Likes</label>
 										</li>
 										<li>
@@ -67,31 +57,31 @@ const Profile = () => {
 					</p>
 				);
 			case "groups":
-				return userGroups.length > 0 ? (
-					userGroups.map((group) => (
+				return userGroups?.length > 0 ? (
+					userGroups?.map((group) => (
 						<Link
-							to={`/groups/${group.groupId}`}
-							key={group.groupId}
+							to={`/groups/${group?.id}`}
+							key={group?.id}
 							style={{ textDecoration: `none`, color: `inherit` }}
 						>
 							<div id="second-half-groups" className="second-half-cards">
-								<img src={group.image[0].image} alt={group.name} />
+								<img src={group?.image} alt={group?.name} />
 								<div id="display-style-direction">
 									<div>
-										<h2>{group.name}</h2>
-										<h3>{group.about}</h3>
+										<h2>{group?.name}</h2>
+										<h3>{group?.about}</h3>
 									</div>
 									<ul className="stats">
 										<li>
-											<var>{group.numMembers}</var>
+											<var>{group?.numMembers}</var>
 											<label>Members</label>
 										</li>
 										<li>
-											<var>{group.events.length}</var>
+											<var>{group?.events?.length}</var>
 											<label>Events</label>
 										</li>
 										<li>
-											<var>{group.type}</var>
+											<var>{group?.type}</var>
 											<label>Type</label>
 										</li>
 									</ul>
@@ -106,39 +96,39 @@ const Profile = () => {
 					</p>
 				);
 			case "events":
-				return userEvents.length > 0 ? (
-					userEvents.map((event) => (
+				return userEvents?.length > 0 ? (
+					userEvents?.map((event) => (
 						<Link
-							key={event.id}
-							to={`/events/${event.id}`}
+							key={event?.id}
+							to={`/events/${event?.id}`}
 							style={{ textDecoration: `none`, color: `inherit` }}
 						>
 							<div id="second-half-events" className="second-half-cards">
-								<img src={event.image[0].image} alt={event.name} />
+								<img src={event?.image} alt={event?.name} />
 								<div id="display-style-direction">
 									<div>
-										<h2>{event.name}</h2>
-										<h3>{event.description}</h3>
+										<h2>{event?.name}</h2>
+										<h3>{event?.description}</h3>
 									</div>
 									<ul className="stats">
 										<li>
-											<var>{event.numAttendees}</var>
+											<var>{event?.numAttendees}</var>
 											<label>Attendees</label>
 										</li>
 										<li>
-											<var>{event.capacity}</var>
+											<var>{event?.capacity}</var>
 											<label>Capacity</label>
 										</li>
 										<li>
-											<var>{event.type}</var>
+											<var>{event?.type}</var>
 											<label>Type</label>
 										</li>
 										<li>
-											<var>{new Date(event.startDate).toLocaleString()}</var>
+											<var>{new Date(event?.startDate).toLocaleString()}</var>
 											<label>Start Date</label>
 										</li>
 										<li>
-											<var>{new Date(event.endDate).toLocaleString()}</var>
+											<var>{new Date(event?.endDate).toLocaleString()}</var>
 											<label>End Date</label>
 										</li>
 									</ul>
@@ -162,38 +152,41 @@ const Profile = () => {
 			<main id="user-profile-basic">
 				<div id="user-profile-img-wdetails">
 					<div id="user-profile-image">
-						<img src={userDetails.profileImage} alt={userDetails.username} />
-						<Link to={`/users/${sessionUser.id}/profile/update`}>
+						<img src={sessionUser?.profileImage} alt={sessionUser?.username} />
+						<Link to={`/users/${sessionUser?.id}/profile/update`}>
 							<BiSolidPencil id="photo-plus" />
 						</Link>
 					</div>
 					<div id="user-profile-details">
 						<div>
-							<h3>{userDetails.username}</h3>
+							<h3>{sessionUser?.username}</h3>
 						</div>
 						<ul id="profile-stats">
 							<li>
-								<var>{userDetails.firstName}</var>
+								<var>{sessionUser?.firstName}</var>
 								<label>First Name</label>
 							</li>
 							<li>
-								<var>{userDetails.lastName}</var>
+								<var>{sessionUser?.lastName}</var>
 								<label>Last Name</label>
 							</li>
 							<li>
-								<var>{userDetails.email}</var>
+								<var>{sessionUser?.email}</var>
 								<label>Email</label>
 							</li>
 						</ul>
 						<div id="profile-home-edit-profile">
-							<Link to={`/users/${sessionUser.id}/profile/update`}>
-								<button className="button" id="profile-home-edit-profile-button">
+							<Link to={`/users/${sessionUser?.id}/profile/update`}>
+								<button
+									className="button"
+									id="profile-home-edit-profile-button"
+								>
 									Edit Profile
 								</button>
 							</Link>
 							<div id="crud-buttons-delete">
 								<OpenModalButton
-									userDetails={userDetails}
+									sessionUser={sessionUser}
 									navigate={navigate}
 									className="group-delete-button button"
 									id="delete-group"
@@ -212,12 +205,12 @@ const Profile = () => {
 										transition: `background-color 0.3s`,
 										fontSize: `16px`,
 										fontWeight: 600,
-                                                            letterSpacing: `2px`,
-                                                            height: `45px`
+										letterSpacing: `2px`,
+										height: `45px`,
 									}}
 									modalComponent={
 										<DeleteProfile
-											userDetails={userDetails}
+											sessionUser={sessionUser}
 											navigate={navigate}
 										/>
 									}
@@ -228,9 +221,36 @@ const Profile = () => {
 				</div>
 				<div id="second-half-profile">
 					<div className="second-half-headers">
-						<h1 onClick={() => setActiveSection("posts")}>POSTS</h1>
-						<h1 onClick={() => setActiveSection("groups")}>GROUPS</h1>
-						<h1 onClick={() => setActiveSection("events")}>EVENTS</h1>
+						{activeSection !== "posts" ? (
+							<h1 onClick={() => setActiveSection("posts")}>POSTS</h1>
+						) : (
+							<h1
+								onClick={() => setActiveSection("posts")}
+								style={{ color: `var(--peach)` }}
+							>
+								POSTS
+							</h1>
+						)}
+						{activeSection !== "groups" ? (
+							<h1 onClick={() => setActiveSection("groups")}>GROUPS</h1>
+						) : (
+							<h1
+								onClick={() => setActiveSection("groups")}
+								style={{ color: `var(--peach)` }}
+							>
+								GROUPS
+							</h1>
+						)}
+						{activeSection !== "events" ? (
+							<h1 onClick={() => setActiveSection("events")}>EVENTS</h1>
+						) : (
+							<h1
+								onClick={() => setActiveSection("events")}
+								style={{ color: `var(--peach)` }}
+							>
+								EVENTS
+							</h1>
+						)}
 					</div>
 					<div id="left-second-half-content">{renderContent()}</div>
 				</div>
@@ -241,26 +261,27 @@ const Profile = () => {
 						<h1>TAGS</h1>
 					</div>
 					<div id="users-tags-grid">
-						<div id="users-tags" className="div-block-2">
-							<h1 id="user-tags-header">Here are your tags</h1>
-							{userTags.map((tag) => (
-								<div id="each-tag" key={tag.id}>
-									<Link
-										to={`/tags/${tag.id}/${tag.name}`}
-										className="w-button"
+						<div id="users-tags">
+							<h3 id="user-tags-header">your tags</h3>
+							{userTags?.map((tag) => (
+								<div id="each-tag" key={tag?.id}>
+									<button
+										className="button"
 										id="each-profile-tag"
+										style={{ cursor: `text` }}
 									>
-										{tag.name}
-									</Link>
+										{tag?.name}
+									</button>
 								</div>
 							))}
 						</div>
-						<div id="add-tags-div" className="div-block-2">
-							<h1>You can add more tags too!</h1>
+						<div id="add-tags-div">
+							<h3 id="user-tags-header">Want to add more?!</h3>
 							<div id="add-tags-button">
 								<OpenModalButton
 									buttonText="Add Tags"
-									className="w-button"
+									className="button"
+									style={{ cursor: `pointer` }}
 									modalComponent={<AddTag />}
 								/>
 							</div>

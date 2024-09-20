@@ -23,7 +23,15 @@ def authenticate():
     Authenticates a user.
     """
     if current_user.is_authenticated:
-        return current_user.to_dict()
+        return current_user.to_dict(
+            posts=True,
+            user_comments=True,
+            memberships=True,
+            attendances=True,
+            users_tags=True,
+            events=True,
+            group=True,
+        )
     return {"errors": {"message": "Unauthorized"}}, 401
 
 
