@@ -199,8 +199,8 @@ export const router = createBrowserRouter([
 				action: profileActions,
 			},
 			{
-				path: "users/:userId/profile/update",
-				loader: userDetailsLoader,
+                        path: "users/:userId/profile/update",
+                        loader: userDetailsLoader,
 				element: <UpdateProfile />,
 				action: profileActions,
 			},

@@ -16,7 +16,7 @@ const Profile = () => {
 		if (!sessionUser) {
 			window.location.href = "/"; // Immediate navigation when sessionUser becomes null
 		}
-	}, [sessionUser, navigate]);
+	}, [sessionUser]);
 	// Memoized user-related values
 	const userTags = useMemo(() => sessionUser?.usersTags, [sessionUser]);
 	const userPosts = useMemo(() => sessionUser?.posts, [sessionUser]);

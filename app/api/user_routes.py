@@ -25,6 +25,8 @@ def users():
                     memberships=True,
                     attendances=True,
                     users_tags=True,
+                    group=True,
+                    events=True
                 )
                 for user in users
             ]
@@ -46,6 +48,8 @@ def user(userId):
             memberships=True,
             attendances=True,
             users_tags=True,
+            group=True,
+            events=True
         )
     )
 
@@ -67,92 +71,13 @@ def view_all_profiles():
                     memberships=True,
                     attendances=True,
                     users_tags=True,
+                    group=True,
+                    events=True
                 )
                 for user in users
             ]
         }
     )
-
-
-@user_routes.route("/<int:userId>/profile/create", methods=["POST"])
-@login_required
-def create_profile(userId):
-    """
-    Create a profile linked to the current user and submit to the database.
-
-    renders an empty form on get requests, validates and submits form on post requests
-
-    The commented out code was to test if the post request works
-    """
-    user = User.query.get(userId)
-
-    if not user:
-        return {"errors": {"message": "Not Found"}}, 404
-
-    if user.profile_image_url:
-        return {"errors": {"message": "User already has a profile"}}, 404
-
-    if user.id != current_user.id:
-        return {
-            "errors": {
-                "message": "User is not the current user and cannot create a profile for another user"
-            }
-        }, 404
-
-    form = UserForm()
-    form["csrf_token"].data = request.cookies["csrf_token"]
-
-    if form.validate_on_submit():
-        profile_image = form.profileImage.data
-
-        if not profile_image:
-            return {"message": "An image is required to create a profile."}, 400
-
-        try:
-            profile_image.filename = get_unique_filename(profile_image.filename)
-            upload = upload_file_to_s3(profile_image)
-        except Exception as e:
-            return {"message": f"Image upload failed: {str(e)}"}, 500
-
-        if "url" not in upload:
-            return {
-                "message": upload.get(
-                    "errors", "Image upload failed. Please try again."
-                )
-            }, 400
-
-        url = upload["url"]
-
-        # Update the existing user with profile details
-        user.first_name = form.data["firstName"]
-        user.last_name = form.data["lastName"]
-        user.bio = form.data["bio"]
-        user.profile_image_url = url
-
-        # Update the user's tags
-        selected_tags = form.userTags.data  # This returns a list of selected tags
-        tags_to_add = Tag.query.filter(Tag.name.in_(selected_tags)).all()
-        user.users_tags = tags_to_add
-
-        db.session.commit()
-        return {
-            "profile": user.to_dict(
-                posts=True,
-                user_comments=True,
-                memberships=True,
-                attendances=True,
-                users_tags=True,
-            )
-        }, 201
-
-    #     if form.errors:
-    #         print(form.errors)
-    #         return render_template(
-    #             "user_form.html", form=form, id=userId, errors=form.errors
-    #         )
-
-    #     return render_template("user_form.html", form=form, id=userId, errors=None)
-    return form.errors, 400
 
 
 @user_routes.route("/<int:userId>/profile/update", methods=["POST"])
@@ -198,11 +123,14 @@ def update_profile(userId):
         user_to_edit.first_name = form.data["firstName"]
         user_to_edit.last_name = form.data["lastName"]
         user_to_edit.bio = form.data["bio"]
+        user_to_edit.username = form.data["username"]
+        user_to_edit.email = form.data["email"]
 
         # Update the user's tags
         selected_tags = form.userTags.data
         tags_to_add = Tag.query.filter(Tag.name.in_(selected_tags)).all()
-        user_to_edit.users_tags = tags_to_add
+        if tags_to_add:
+            user_to_edit.users_tags = tags_to_add
 
         db.session.commit()
         return {
@@ -212,6 +140,8 @@ def update_profile(userId):
                 memberships=True,
                 attendances=True,
                 users_tags=True,
+                group=True,
+                events=True,
             )
         }, 201
 

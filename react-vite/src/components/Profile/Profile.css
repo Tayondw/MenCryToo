@@ -1,7 +1,7 @@
 #user-profile-page {
 	background: linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c);
       display: grid;
-      grid-template-columns: 75% 15%;
+      grid-template-columns: 70% 15%;
       padding: 5%;
       column-gap: 30px;
 }
@@ -45,7 +45,7 @@
 }
 
 #user-profile-details h3 {
-      font-size: 120px;
+      font-size: 40px;
 }
 
 #profile-stats {

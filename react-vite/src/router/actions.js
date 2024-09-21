@@ -219,7 +219,7 @@ export const eventActions = async ({ request }) => {
 				user_id: data.userId,
 			}),
 		});
-            return redirect(`/events/${data.id}`)
+		return redirect(`/events/${data.id}`);
 	}
 
 	if (intent === "leave-event") {
@@ -256,61 +256,11 @@ export const venueActions = async ({ request }) => {
 	}
 };
 
-// export const groupMemberActions = async ({ request }) => {
-// 	let formData = await request.formData();
-// 	let data = Object.fromEntries(formData);
-// 	let intent = formData.get("intent");
-// 	data.id = +data.id;
-// 	data.userId = +data.userId;
-// 	data.memberId = +data.memberId;
-
-// 	if (intent === "join-group") {
-// 		return await fetch(`/api/groups/${data.id}/join-group`, {
-// 			method: "POST",
-// 			headers: {
-// 				"Content-Type": "application/json",
-// 			},
-// 			body: formData,
-// 		});
-// 	}
-
-// 	if (intent === "leave-group") {
-// 		return await fetch(`/api/groups/${data.id}/leave-group/${data.memberId}`, {
-// 			method: "DELETE",
-// 		});
-// 	}
-// };
-
-// export const eventAttendeeActions = async ({ request }) => {
-// 	let formData = await request.formData();
-// 	let data = Object.fromEntries(formData);
-// 	let intent = formData.get("intent");
-// 	data.id = +data.id;
-// 	data.userId = +data.userId;
-// 	data.attendeeId = +data.attendeeId;
-
-// 	if (intent === "attend-event") {
-// 		return await fetch(`/api/events/${data.id}/attend-event`, {
-// 			method: "POST",
-// 			body: formData,
-// 		});
-// 	}
-
-// 	if (intent === "leave-event") {
-// 		return await fetch(
-// 			`/api/events/${data.id}/leave-event/${data.attendeeIdId}`,
-// 			{
-// 				method: "DELETE",
-// 			},
-// 		);
-// 	}
-// };
-
 export const profileActions = async ({ request }) => {
 	const formData = await request.formData();
-	const intent = formData.get("intent");
-	const errors = {};
-
+      const intent = formData.get("intent");
+      const data = Object.fromEntries(formData);
+      const errors = {};
 	// Handle profile deletion separately
 	if (intent === "delete-profile") {
 		const userId = formData.get("userId");
@@ -319,55 +269,68 @@ export const profileActions = async ({ request }) => {
 		});
 		return redirect("/");
 	}
-
-	// For other actions like create or update profile
-	const data = Object.fromEntries(formData);
-	const firstName = formData.get("firstName");
-	const lastName = formData.get("lastName");
-	const bio = formData.get("bio");
-	const profileImage = formData.get("profileImage");
-	const userTags = formData.get("userTags");
-
-	if (!firstName.length || firstName.length < 3 || firstName.length > 20)
-		errors.firstName = "First name must be between 3 and 20 characters";
-	if (!lastName.length || lastName.length < 3 || lastName.length > 20)
-		errors.lastName = "Last name must be between 3 and 20 characters";
-	if (!bio.length || bio.length < 50 || bio.length > 500)
-		errors.bio = "Please enter at least 50 characters describing yourself";
-
-	// Only require profileImage if the user does not already have one
-	if (intent === "create-profile" && !profileImage)
-		errors.profileImage = "Please add a profile image";
-	if (!userTags)
-		errors.userTags = "Please select 1 or more tags that fit your description";
-
-	if (Object.keys(errors).length) {
-		return errors;
-	}
-
-	data.userId = +data.userId;
-
-	if (intent === "create-profile") {
-		await fetch(`/api/users/${data.userId}/profile/create`, {
-			method: "POST",
-			body: formData,
-		});
-		return redirect("/");
-	}
-
 	if (intent === "update-profile") {
-		await fetch(`/api/users/${data.userId}/profile/update`, {
-			method: "POST",
-			body: formData,
-		});
-		return redirect("/profile");
-	}
+		// For other actions like create or update profile
+		const firstName = formData.get("firstName");
+		const lastName = formData.get("lastName");
+		const username = formData.get("username");
+		const email = formData.get("email");
+		const password = formData.get("password");
+		const confirmPassword = formData.get("confirmPassword");
+		const bio = formData.get("bio");
+		const profileImage = formData.get("profileImage");
+		const userTags = formData.getAll("userTags");
 
-	if (intent === "add-tags") {
-		return await fetch(`/api/users/${data.userId}/add-tags`, {
+		if (password !== confirmPassword)
+			errors.confirmPassword =
+				"Confirm Password field must be the same as the Password field";
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (email) {
+			if (email.length > 50)
+				errors.email = "Email must be less than 50 characters";
+		}
+		if (!emailRegex.test(email) || email.length <= 0)
+			errors.email = "Invalid email";
+		if (username) {
+			if (username.length > 20)
+				errors.username =
+					"Username too long! Come on, who ya tryna confuse? Yourself?";
+			if (username.length < 3)
+				errors.username = "Username is too short! At least 3 characters man!";
+			if (!username.length)
+				errors.username =
+					"Now you know you need a username, I need 3 to 20 characters for you to signup!";
+		}
+		if (password) {
+			if (password.length > 25) errors.password = "Password is too long!";
+			if (password.length < 8) errors.password = "Password is too short!";
+			if (password.length < 0) errors.password = "Password is required";
+		}
+		if (!firstName.length || firstName.length < 3 || firstName.length > 20)
+			errors.firstName = "First name must be between 3 and 20 characters";
+		if (!lastName.length || lastName.length < 3 || lastName.length > 20)
+			errors.lastName = "Last name must be between 3 and 20 characters";
+		if (!bio.length || bio.length < 50 || bio.length > 500)
+			errors.bio = "Please enter at least 50 characters describing yourself";
+
+		// Only require profileImage if the user does not already have one
+		if (intent === "create-profile" && !profileImage)
+			errors.profileImage = "Please add a profile image";
+
+		if (Object.keys(errors).length) {
+			return errors;
+		}
+
+            data.userId = +data.userId;
+
+		const response = await fetch(`/api/users/${data.userId}/profile/update`, {
 			method: "POST",
 			body: formData,
 		});
+            if (response.ok) {
+                  return window.location.href = "/profile"
+                  // return redirect("/profile")
+            }
 	}
 };
 

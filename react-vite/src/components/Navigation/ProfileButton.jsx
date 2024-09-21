@@ -41,8 +41,8 @@ function ProfileButton({ user, navigate }) {
 	const logout = () => {
 		dispatch(thunkLogout());
 		closeMenu();
-            // navigate("/", {replace: true});
-            window.location.href = "/";
+            navigate("/", {replace: true});
+            // window.location.href = "/";
 	};
 
 	return (

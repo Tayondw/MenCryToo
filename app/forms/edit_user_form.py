@@ -1,7 +1,15 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SelectMultipleField
+from wtforms import (
+    StringField,
+    TextAreaField,
+    SelectMultipleField,
+    EmailField,
+    PasswordField,
+)
 from flask_wtf.file import FileAllowed, FileField
-from wtforms.validators import DataRequired, Length
+from wtforms.validators import DataRequired, Length, ValidationError
+from flask_login import current_user
+from app.models import User
 
 ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "gif"}
 
@@ -17,6 +25,22 @@ tags = [
     ("COMING OUT", "COMING OUT"),
     ("SUICIDAL THOUGHTS", "SUICIDAL THOUGHTS"),
 ]
+
+
+def user_exists(form, field):
+    # Checking if user exists
+    email = field.data
+    user = User.query.filter(User.email == email).first()
+    if user and user.id != current_user.id:
+        raise ValidationError("Email address is already in use.")
+
+
+def username_exists(form, field):
+    # Checking if username is already in use
+    username = field.data
+    user = User.query.filter(User.username == username).first()
+    if user and user.id != current_user.id:
+        raise ValidationError("Username is already in use.")
 
 
 class EditUserForm(FlaskForm):
@@ -38,6 +62,17 @@ class EditUserForm(FlaskForm):
             ),
         ],
     )
+    username = StringField(
+        "username",
+        validators=[
+            DataRequired(),
+            Length(
+                min=3, max=20, message="Username must be between 3 and 20 characters"
+            ),
+            username_exists,
+        ],
+    )
+    email = EmailField("email", validators=[user_exists])
     bio = TextAreaField(
         "Bio",
         validators=[
@@ -56,6 +91,6 @@ class EditUserForm(FlaskForm):
     userTags = SelectMultipleField(
         "Tags",
         choices=tags,
-        validators=[DataRequired()],
+      #   validators=[DataRequired()],
         coerce=str,
     )

@@ -2,6 +2,7 @@ import { Link, Outlet } from "react-router-dom";
 import { useLoaderData } from "react-router-dom";
 import { useSelector } from "react-redux";
 import "./NotAuthHome.css";
+import "react-tooltip/dist/react-tooltip.css";
 
 export const HeroSection = () => {
 	const sessionUser = useSelector((state) => state.session.user);
