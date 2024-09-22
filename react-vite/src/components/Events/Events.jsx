@@ -3,7 +3,31 @@ import "./Events.css";
 
 const Events = () => {
 	const { allEvents } = useLoaderData();
-	if (!allEvents || !allEvents.events) return <p>No events available.</p>;
+      if (!allEvents || !allEvents.events) return <p>No events available.</p>;
+	const formatDate = (startDate) => {
+		const date = new Date(startDate);
+		const year = date.getUTCFullYear();
+		const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+		const day = String(date.getUTCDate()).padStart(2, "0");
+		const hours = String(date.getUTCHours()).padStart(2, "0");
+		const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+		const seconds = String(date.getUTCSeconds()).padStart(2, "0");
+		return `${year}-${month}-${day} • ${hours}:${minutes}:${seconds}`;
+	};
+	const formatEventDate = allEvents.events.map((event) => {
+		return {
+			...event,
+			formattedDate: formatDate(event.startDate),
+		};
+	});
+	const currentDate = new Date();
+	const upcomingEvents = formatEventDate
+		.filter((event) => new Date(event.startDate) >= currentDate)
+		.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+	const pastEvents = formatEventDate
+		.filter((event) => new Date(event.startDate) < currentDate)
+		.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+	const sortedEvents = [...upcomingEvents, ...pastEvents];
 
 	return (
 		<div id="events-body">
@@ -17,13 +41,13 @@ const Events = () => {
 			</div>
 			<div id="events">
 				{allEvents.events.length > 0 ? (
-					allEvents.events.map((event) => (
+					sortedEvents.map((event, index) => (
 						<Link
 							key={event.id}
 							to={`/events/${event.id}`}
 							style={{ textDecoration: `none`, color: `inherit` }}
 						>
-							<div className="event-cards">
+							<div className="event-cards" key={index}>
 								<img src={event.image} alt={event.name} />
 
 								<div id="display-style-direction">
