@@ -187,150 +187,178 @@ const Profile = () => {
 	}, [activeAsideSection, userTags]);
 
 	return (
-		<div id="user-profile-page">
-			<main id="user-profile-basic">
-				<div id="user-profile-img-wdetails">
-					<div id="user-profile-image">
-						<img src={sessionUser?.profileImage} alt={sessionUser?.username} />
-						<Link to={`/users/${sessionUser?.id}/profile/update`}>
-							<BiSolidPencil id="photo-plus" />
-						</Link>
-					</div>
-					<div id="user-profile-details">
-						<div>
-							<h3>{sessionUser?.username}</h3>
-						</div>
-						<div
-							style={{
-								display: `flex`,
-								justifyContent: `center`,
-								alignItems: `center`,
-							}}
-						>
-							<h4 style={{ margin: 0 }}>{sessionUser?.bio}</h4>
-						</div>
-						<ul id="profile-stats">
-							<li>
-								<var>{sessionUser?.firstName}</var>
-								<label>First Name</label>
-							</li>
-							<li>
-								<var>{sessionUser?.lastName}</var>
-								<label>Last Name</label>
-							</li>
-							<li>
-								<var>{sessionUser?.email}</var>
-								<label>Email</label>
-							</li>
-						</ul>
-						<div id="profile-home-edit-profile">
+		<div
+			style={{
+				background: `linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c)`,
+			}}
+		>
+			<div
+				className="create-group-link"
+				style={{
+					display: `flex`,
+					justifyContent: `space-between`,
+					width: `100%`,
+				}}
+			>
+				<Link to="/posts" className="nav-link">
+					{"< "}Posts
+				</Link>
+
+				<Link
+					to={`/users/${sessionUser.id}/profile/update`}
+					className="nav-link"
+				>
+					Create a Post{" >"}
+				</Link>
+			</div>
+			<div id="user-profile-page">
+				<main id="user-profile-basic">
+					<div id="user-profile-img-wdetails">
+						<div id="user-profile-image">
+							<img
+								src={sessionUser?.profileImage}
+								alt={sessionUser?.username}
+							/>
 							<Link to={`/users/${sessionUser?.id}/profile/update`}>
-								<button
-									className="button"
-									id="profile-home-edit-profile-button"
-									style={{ cursor: `pointer` }}
-								>
-									Edit Profile
-								</button>
+								<BiSolidPencil id="photo-plus" />
 							</Link>
-							<div id="crud-buttons-delete">
-								<OpenModalButton
-									sessionUser={sessionUser}
-									navigate={navigate}
-									className="group-delete-button button"
-									id="delete-group"
-									buttonText="Delete Profile"
-									style={{
-										backgroundColor: "red",
-										color: `#dddddc`,
-										textDecoration: `none`,
-										borderRadius: `4px`,
-										border: `none`,
-										padding: `12px 30px`,
-										lineHeight: 1,
-										cursor: `pointer`,
-										textTransform: `uppercase`,
-										boxSizing: `border-box`,
-										transition: `background-color 0.3s`,
-										fontSize: `16px`,
-										fontWeight: 600,
-										letterSpacing: `2px`,
-										height: `45px`,
-									}}
-									modalComponent={
-										<DeleteProfile
-											sessionUser={sessionUser}
-											navigate={navigate}
-										/>
-									}
-								/>
+						</div>
+						<div id="user-profile-details">
+							<div>
+								<h3>{sessionUser?.username}</h3>
+							</div>
+							<div
+								style={{
+									display: `flex`,
+									justifyContent: `center`,
+									alignItems: `center`,
+								}}
+							>
+								<h4 style={{ margin: 0 }}>{sessionUser?.bio}</h4>
+							</div>
+							<ul id="profile-stats">
+								<li>
+									<var>{sessionUser?.firstName}</var>
+									<label>First Name</label>
+								</li>
+								<li>
+									<var>{sessionUser?.lastName}</var>
+									<label>Last Name</label>
+								</li>
+								<li>
+									<var>{sessionUser?.email}</var>
+									<label>Email</label>
+								</li>
+							</ul>
+							<div id="profile-home-edit-profile">
+								<Link to={`/users/${sessionUser?.id}/profile/update`}>
+									<button
+										className="button"
+										id="profile-home-edit-profile-button"
+										style={{ cursor: `pointer` }}
+									>
+										Edit Profile
+									</button>
+								</Link>
+								<div id="crud-buttons-delete">
+									<OpenModalButton
+										sessionUser={sessionUser}
+										navigate={navigate}
+										className="group-delete-button button"
+										id="delete-group"
+										buttonText="Delete Profile"
+										style={{
+											backgroundColor: "red",
+											color: `#dddddc`,
+											textDecoration: `none`,
+											borderRadius: `4px`,
+											border: `none`,
+											padding: `12px 30px`,
+											lineHeight: 1,
+											cursor: `pointer`,
+											textTransform: `uppercase`,
+											boxSizing: `border-box`,
+											transition: `background-color 0.3s`,
+											fontSize: `16px`,
+											fontWeight: 600,
+											letterSpacing: `2px`,
+											height: `45px`,
+										}}
+										modalComponent={
+											<DeleteProfile
+												sessionUser={sessionUser}
+												navigate={navigate}
+											/>
+										}
+									/>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-				<div id="second-half-profile">
-					<div className="second-half-headers" style={{ margin: `0 5%` }}>
-						{activeMainSection !== "posts" ? (
-							<h1 onClick={() => setActiveMainSection("posts")}>POSTS</h1>
+					<div id="second-half-profile">
+						<div className="second-half-headers" style={{ margin: `0 5%` }}>
+							{activeMainSection !== "posts" ? (
+								<h1 onClick={() => setActiveMainSection("posts")}>POSTS</h1>
+							) : (
+								<h1
+									onClick={() => setActiveMainSection("posts")}
+									style={{ color: `var(--peach)` }}
+								>
+									POSTS
+								</h1>
+							)}
+							{activeMainSection !== "groups" ? (
+								<h1 onClick={() => setActiveMainSection("groups")}>GROUPS</h1>
+							) : (
+								<h1
+									onClick={() => setActiveMainSection("groups")}
+									style={{ color: `var(--peach)` }}
+								>
+									GROUPS
+								</h1>
+							)}
+							{activeMainSection !== "events" ? (
+								<h1 onClick={() => setActiveMainSection("events")}>EVENTS</h1>
+							) : (
+								<h1
+									onClick={() => setActiveMainSection("events")}
+									style={{ color: `var(--peach)` }}
+								>
+									EVENTS
+								</h1>
+							)}
+						</div>
+						<div id="left-second-half-content">{renderContent()}</div>
+					</div>
+				</main>
+				<aside id="aside-content">
+					<div className="second-half-headers">
+						{activeAsideSection !== "tags" ? (
+							<h1 onClick={() => setActiveAsideSection("tags")}>YOUR TAGS</h1>
 						) : (
 							<h1
-								onClick={() => setActiveMainSection("posts")}
-								style={{ color: `var(--peach)` }}
+								onClick={() => setActiveAsideSection("tags")}
+								style={{ color: `var(--deep-blue)` }}
 							>
-								POSTS
+								YOUR TAGS
 							</h1>
 						)}
-						{activeMainSection !== "groups" ? (
-							<h1 onClick={() => setActiveMainSection("groups")}>GROUPS</h1>
-						) : (
-							<h1
-								onClick={() => setActiveMainSection("groups")}
-								style={{ color: `var(--peach)` }}
-							>
-								GROUPS
+						{activeAsideSection !== "similar to you" ? (
+							<h1 onClick={() => setActiveAsideSection("similar to you")}>
+								SIMILAR TO YOU
 							</h1>
-						)}
-						{activeMainSection !== "events" ? (
-							<h1 onClick={() => setActiveMainSection("events")}>EVENTS</h1>
 						) : (
 							<h1
-								onClick={() => setActiveMainSection("events")}
-								style={{ color: `var(--peach)` }}
+								onClick={() => setActiveAsideSection("similar to you")}
+								style={{ color: `var(--deep-blue)` }}
 							>
-								EVENTS
+								SIMILAR TO YOU
 							</h1>
 						)}
 					</div>
-					<div id="left-second-half-content">{renderContent()}</div>
-				</div>
-			</main>
-			<aside id="aside-content">
-				<div className="second-half-headers">
-					{activeAsideSection !== "tags" ? (
-						<h1 onClick={() => setActiveAsideSection("tags")}>YOUR TAGS</h1>
-					) : (
-						<h1
-							onClick={() => setActiveAsideSection("tags")}
-							style={{ color: `var(--deep-blue)` }}
-						>
-							YOUR TAGS
-						</h1>
-					)}
-					{activeAsideSection !== "similar to you" ? (
-						<h1 onClick={() => setActiveAsideSection("similar to you")}>
-							SIMILAR TO YOU
-						</h1>
-					) : (
-						<h1
-							onClick={() => setActiveAsideSection("similar to you")}
-							style={{ color: `var(--deep-blue)` }}
-						>
-							SIMILAR TO YOU
-						</h1>
-					)}
-				</div>
-				<div id="users-tags">{renderTagContent()}</div>
-			</aside>
+					<div id="users-tags">{renderTagContent()}</div>
+				</aside>
+			</div>
 		</div>
 	);
 };

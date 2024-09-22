@@ -54,9 +54,7 @@ const ProfileDetails = () => {
 						</Link>
 					))
 				) : (
-					<p>
-						Currently no posts available.
-					</p>
+					<p>Currently no posts available.</p>
 				);
 			case "groups":
 				return userGroups?.length > 0 ? (
@@ -92,9 +90,7 @@ const ProfileDetails = () => {
 						</Link>
 					))
 				) : (
-					<p>
-						Currently no groups available.
-					</p>
+					<p>Currently no groups available.</p>
 				);
 			case "events":
 				return userEvents?.length > 0 ? (
@@ -138,9 +134,7 @@ const ProfileDetails = () => {
 						</Link>
 					))
 				) : (
-					<p>
-						Currently no events available.
-					</p>
+					<p>Currently no events available.</p>
 				);
 			default:
 				return null;
@@ -179,123 +173,155 @@ const ProfileDetails = () => {
 		}
 	}, [activeAsideSection, userTags]);
 	return (
-		<div id="user-profile-page">
-			<main
-				id="user-profile-basic"
-				style={{ display: `grid`, gridTemplateRows: `1fr`, rowGap: `80px` }}
+		<div
+			style={{
+				background: `linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c)`,
+			}}
+		>
+			<div
+				className="create-group-link"
+				style={{
+					display: `flex`,
+					justifyContent: `space-between`,
+					width: `100%`,
+				}}
 			>
-				<div
-					id="user-profile-img-wdetails"
+				<Link to="/posts" className="nav-link">
+					{"< "}Posts
+				</Link>
+
+				<Link
+					to={`/users/${sessionUser.id}/profile/update`}
+					className="nav-link"
+				>
+					Create a Post{" >"}
+				</Link>
+			</div>
+			<div id="user-profile-page">
+				<main
+					id="user-profile-basic"
 					style={{
 						display: `grid`,
-						gridTemplateColumns: `1fr 2fr`,
-						alignContent: `flex-start`,
+						gridTemplateRows: `1fr`,
+						rowGap: `80px`,
 					}}
 				>
-					<div id="user-profile-image">
-						<img src={userDetails?.profileImage} alt={userDetails?.username} />
-					</div>
 					<div
-						id="user-profile-details"
+						id="user-profile-img-wdetails"
 						style={{
-							display: `flex`,
-							flexDirection: `column`,
-							justifyContent: `space-evenly`,
-							alignItems: `center`,
-							gap: `25px`,
+							display: `grid`,
+							gridTemplateColumns: `1fr 2fr`,
+							alignContent: `flex-start`,
 						}}
 					>
-						<div>
-							<h3>{userDetails?.username}</h3>
+						<div id="user-profile-image">
+							<img
+								src={userDetails?.profileImage}
+								alt={userDetails?.username}
+							/>
 						</div>
 						<div
+							id="user-profile-details"
 							style={{
 								display: `flex`,
-								justifyContent: `center`,
+								flexDirection: `column`,
+								justifyContent: `space-evenly`,
 								alignItems: `center`,
+								gap: `25px`,
 							}}
 						>
-							<h4 style={{ margin: `0 2%` }}>{userDetails?.bio}</h4>
+							<div>
+								<h3>{userDetails?.username}</h3>
+							</div>
+							<div
+								style={{
+									display: `flex`,
+									justifyContent: `center`,
+									alignItems: `center`,
+								}}
+							>
+								<h4 style={{ margin: `0 2%` }}>{userDetails?.bio}</h4>
+							</div>
+							<ul id="profile-stats" style={{ margin: 0 }}>
+								<li>
+									<var>{userDetails?.firstName}</var>
+									<label>First Name</label>
+								</li>
+								<li>
+									<var>{userDetails?.lastName}</var>
+									<label>Last Name</label>
+								</li>
+								<li>
+									<var>{userDetails?.email}</var>
+									<label>Email</label>
+								</li>
+							</ul>
 						</div>
-						<ul id="profile-stats" style={{ margin: 0 }}>
-							<li>
-								<var>{userDetails?.firstName}</var>
-								<label>First Name</label>
-							</li>
-							<li>
-								<var>{userDetails?.lastName}</var>
-								<label>Last Name</label>
-							</li>
-							<li>
-								<var>{userDetails?.email}</var>
-								<label>Email</label>
-							</li>
-						</ul>
 					</div>
-				</div>
-				<div id="second-half-profile">
-					<div className="second-half-headers" style={{ margin: `0 2%` }}>
-						{activeMainSection !== "posts" ? (
-							<h1 onClick={() => setActiveMainSection("posts")}>POSTS</h1>
+					<div id="second-half-profile">
+						<div className="second-half-headers" style={{ margin: `0 2%` }}>
+							{activeMainSection !== "posts" ? (
+								<h1 onClick={() => setActiveMainSection("posts")}>POSTS</h1>
+							) : (
+								<h1
+									onClick={() => setActiveMainSection("posts")}
+									style={{ color: `var(--peach)` }}
+								>
+									POSTS
+								</h1>
+							)}
+							{activeMainSection !== "groups" ? (
+								<h1 onClick={() => setActiveMainSection("groups")}>GROUPS</h1>
+							) : (
+								<h1
+									onClick={() => setActiveMainSection("groups")}
+									style={{ color: `var(--peach)` }}
+								>
+									GROUPS
+								</h1>
+							)}
+							{activeMainSection !== "events" ? (
+								<h1 onClick={() => setActiveMainSection("events")}>EVENTS</h1>
+							) : (
+								<h1
+									onClick={() => setActiveMainSection("events")}
+									style={{ color: `var(--peach)` }}
+								>
+									EVENTS
+								</h1>
+							)}
+						</div>
+						<div id="left-second-half-content">{renderContent()}</div>
+					</div>
+				</main>
+				<aside id="aside-content">
+					<div className="second-half-headers">
+						{activeAsideSection !== "tags" ? (
+							<h1 onClick={() => setActiveAsideSection("tags")}>YOUR TAGS</h1>
 						) : (
 							<h1
-								onClick={() => setActiveMainSection("posts")}
-								style={{ color: `var(--peach)` }}
+								onClick={() => setActiveAsideSection("tags")}
+								style={{ color: `var(--deep-blue)` }}
 							>
-								POSTS
+								YOUR TAGS
 							</h1>
 						)}
-						{activeMainSection !== "groups" ? (
-							<h1 onClick={() => setActiveMainSection("groups")}>GROUPS</h1>
-						) : (
-							<h1
-								onClick={() => setActiveMainSection("groups")}
-								style={{ color: `var(--peach)` }}
-							>
-								GROUPS
+						{activeAsideSection !== "similar to you" ? (
+							<h1 onClick={() => setActiveAsideSection("similar to you")}>
+								SIMILAR TO YOU
 							</h1>
-						)}
-						{activeMainSection !== "events" ? (
-							<h1 onClick={() => setActiveMainSection("events")}>EVENTS</h1>
 						) : (
 							<h1
-								onClick={() => setActiveMainSection("events")}
-								style={{ color: `var(--peach)` }}
+								onClick={() => setActiveAsideSection("similar to you")}
+								style={{ color: `var(--deep-blue)` }}
 							>
-								EVENTS
+								SIMILAR TO YOU
 							</h1>
 						)}
 					</div>
-					<div id="left-second-half-content">{renderContent()}</div>
-				</div>
-			</main>
-			<aside id="aside-content">
-				<div className="second-half-headers">
-					{activeAsideSection !== "tags" ? (
-						<h1 onClick={() => setActiveAsideSection("tags")}>YOUR TAGS</h1>
-					) : (
-						<h1
-							onClick={() => setActiveAsideSection("tags")}
-							style={{ color: `var(--deep-blue)` }}
-						>
-							YOUR TAGS
-						</h1>
-					)}
-					{activeAsideSection !== "similar to you" ? (
-						<h1 onClick={() => setActiveAsideSection("similar to you")}>
-							SIMILAR TO YOU
-						</h1>
-					) : (
-						<h1
-							onClick={() => setActiveAsideSection("similar to you")}
-							style={{ color: `var(--deep-blue)` }}
-						>
-							SIMILAR TO YOU
-						</h1>
-					)}
-				</div>
-				<div id="users-tags">{renderTagContent()}</div>
-			</aside>
+					<div id="users-tags">{renderTagContent()}</div>
+				</aside>
+			</div>
 		</div>
 	);
 };

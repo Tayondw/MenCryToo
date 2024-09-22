@@ -1,8 +1,11 @@
 #user-profile-page {
-	background: linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c);
+	/* background: linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c); */
       display: grid;
       grid-template-columns: 70% 15%;
-      padding: 5%;
+      padding-top: 1%;
+      padding-bottom: 3%;
+      padding-left: 5%;
+      padding-right: 5%;
       column-gap: 30px;
 }
 
