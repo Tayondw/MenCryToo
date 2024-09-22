@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, render_template, request, redirect, abort
 from flask_login import login_required, current_user
-from app.models import db, User, Group, Event, Post, UserTags, Tag
+from app.models import db, User, Group, Event, Post, UserTags, Tag, Attendance, Membership, Comment, Venue
 from app.forms import UserForm, EditUserForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
 import requests
@@ -242,13 +242,22 @@ def delete_profile(userId):
     if user.id != current_user.id:
         return jsonify({"errors": {"message": "Unauthorized"}}), 403
 
-    # Clear profile-related fields
-    user.first_name = None
-    user.last_name = None
-    user.bio = None
-    user.profile_image_url = None
-    user.users_tags = []
+    # Delete related data for the user
+    Attendance.query.filter_by(user_id=userId).delete()
+    Membership.query.filter_by(user_id=userId).delete()
+    Post.query.filter_by(creator=userId).delete()
+    Comment.query.filter_by(user_id=userId).delete()
+    groups_to_delete = Group.query.filter_by(organizer_id=userId).all()
 
+    # Handle groups organized by the user
+    for group in groups_to_delete:
+        # Delete events associated with this group
+        Event.query.filter_by(group_id=group.id).delete()
+        Venue.query.filter_by(group_id=group.id).delete()
+        # Delete the group itself
+        db.session.delete(group)
+        
+    db.session.delete(user)
     db.session.commit()
     return jsonify({"message": "Profile deleted successfully"}), 200
 

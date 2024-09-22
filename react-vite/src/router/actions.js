@@ -267,7 +267,7 @@ export const profileActions = async ({ request }) => {
 		await fetch(`/api/users/${userId}/profile/delete`, {
 			method: "DELETE",
 		});
-		return redirect("/");
+		return window.location.href = "/";
 	}
 	if (intent === "update-profile") {
 		// For other actions like create or update profile
