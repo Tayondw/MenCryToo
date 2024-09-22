@@ -32,7 +32,10 @@ const ProfileFeed = () => {
 					{"< "}Posts
 				</Link>
 
-				<Link to={`/users/${sessionUser.id}/profile/update`} className="nav-link">
+				<Link
+					to={`/users/${sessionUser.id}/profile/update`}
+					className="nav-link"
+				>
 					Update Profile{" >"}
 				</Link>
 			</div>
@@ -56,35 +59,39 @@ const ProfileFeed = () => {
 					) : (
 						<>
 							{similarUsers.map((user) => (
-								<Link
-									to={`users/${user.id}`}
-									style={{
-										textDecoration: "none",
-										color: "inherit",
-									}}
-									key={user.id}
-								>
-									<div className="members-group-cards">
-										<img src={user.profileImage} alt={user.username} />
-										<div id="members-group-display-style-direction">
-											<div id="members-group-keep-in-style">
-												<h2>
-													{user.firstName} {user.lastName}
-												</h2>
+								<>
+									{user.id !== sessionUser.id ? (
+										<Link
+											to={`users/${user.id}`}
+											style={{
+												textDecoration: "none",
+												color: "inherit",
+											}}
+											key={user.id}
+										>
+											<div className="members-group-cards">
+												<img src={user.profileImage} alt={user.username} />
+												<div id="members-group-display-style-direction">
+													<div id="members-group-keep-in-style">
+														<h2>
+															{user.firstName} {user.lastName}
+														</h2>
+													</div>
+													<ul className="stats">
+														<li>
+															<var>{user.username}</var>
+															<label>Username</label>
+														</li>
+														<li>
+															<var>{user.email}</var>
+															<label>Email</label>
+														</li>
+													</ul>
+												</div>
 											</div>
-											<ul className="stats">
-												<li>
-													<var>{user.username}</var>
-													<label>Username</label>
-												</li>
-												<li>
-													<var>{user.email}</var>
-													<label>Email</label>
-												</li>
-											</ul>
-										</div>
-									</div>
-								</Link>
+										</Link>
+									) : null}
+								</>
 							))}
 						</>
 					)}
