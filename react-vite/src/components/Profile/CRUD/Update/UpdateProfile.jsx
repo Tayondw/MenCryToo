@@ -1,4 +1,4 @@
-import { useActionData, Form, Link } from "react-router-dom";
+import { useActionData, Form, Link, redirect } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import "./UpdateProfile.css";
@@ -18,7 +18,8 @@ const UpdateProfile = () => {
 	// Ensure user is logged in
 	useEffect(() => {
 		if (!sessionUser) {
-			window.location.href("/");
+                  // return window.location.href("/");
+                  redirect("/")
 		}
 	}, [sessionUser]);
 
@@ -222,7 +223,7 @@ const UpdateProfile = () => {
 						>
 							<h3 style={{fontSize: `12px`}}>Your Tags</h3>
 							<div style={{ display: `flex`, flexWrap: `wrap`, padding: 0}}>
-								{sessionUser.usersTags?.map((tag) => (
+								{sessionUser?.usersTags?.map((tag) => (
 									<div key={tag?.id} style={{padding: 0}}>
 										<h5
 											style={{
