@@ -16,6 +16,7 @@ import UpdateProfile from "../components/Profile/CRUD/Update";
 import Posts from "../components/Posts";
 import PostDetails from "../components/Posts/Details";
 import PrivateRoute from "../components/PrivateRoute";
+import ProfileFeed from "../components/Profile/CRUD/ProfileFeed";
 // import Comments from "../components/Comments";
 // import CommentDetails from "../components/Comments/Details";
 // import Tags from "../components/Tags";
@@ -91,19 +92,6 @@ export const router = createBrowserRouter([
 				element: <UpdateGroup />,
 				action: groupActions,
 			},
-			// ! GROUP - IMAGES
-			// {
-			// 	path: "groups/:groupId/images/:imageId",
-			// 	loader: getLoader,
-			// 	element: <Groups />,
-			// 	action: groupImageActions,
-			// },
-			// {
-			// 	path: "groups/:groupId/images/:imageId/edit",
-			// 	loader: getLoader,
-			// 	element: <Groups />,
-			// 	action: groupImageActions,
-			// },
 			// ! VENUES
 			// {
 			// 	path: "venues",
@@ -120,19 +108,6 @@ export const router = createBrowserRouter([
 			// 	loader: getLoader,
 			// 	element: <CreateVenue />,
 			// 	action: venueActions,
-			// },
-			// ! GROUP - MEMBERSHIPS
-			// {
-			// 	path: "groups/:groupId/join-group",
-			// 	loader: getLoader,
-			// 	element: <Groups />,
-			// 	action: groupMemberActions,
-			// },
-			// {
-			// 	path: "groups/:groupId/leave-group/:memberId",
-			// 	loader: getLoader,
-			// 	element: <Groups />,
-			// 	action: groupMemberActions,
 			// },
 			// ! EVENTS
 			{
@@ -159,34 +134,6 @@ export const router = createBrowserRouter([
 				element: <UpdateEvent />,
 				action: eventActions,
 			},
-			// ! EVENT - IMAGES
-			// ? to add event images
-			// {
-			// 	path: "events/:eventId/images",
-			// 	loader: eventDetailsLoader,
-			// 	element: <EventDetails />,
-			// 	action: eventImageActions,
-			// },
-			// ? to edit event images
-			// {
-			// 	path: "events/:eventId/images/:imageId/edit",
-			// 	loader: eventDetailsLoader,
-			// 	element: <EventDetails />,
-			// 	action: eventImageActions,
-			// },
-			// ! EVENT - ATTENDANCES
-			// {
-			// 	path: "events/:eventId/attend-event",
-			// 	loader: eventDetailsLoader,
-			// 	element: <SignupFormPage />,
-			// 	action: eventAttendeeActions,
-			// },
-			// {
-			// 	path: "events/:eventId/leave-event/:attendeeId",
-			// 	loader: eventDetailsLoader,
-			// 	element: <SignupFormPage />,
-			// 	action: eventAttendeeActions,
-			// },
 			// ! PROFILE
 			// ? your profile only you can access
 			{
@@ -208,7 +155,7 @@ export const router = createBrowserRouter([
 			{
 				path: "profile-feed",
 				loader: profilesLoader,
-				element: <ProfileDetails />,
+				element: <ProfileFeed />,
 				action: postActions,
 			},
 			// ? other users profiles when you click on their profile

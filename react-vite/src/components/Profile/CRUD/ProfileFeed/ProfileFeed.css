@@ -1,0 +1,17 @@
+#profile-feed-users {
+      background: linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c);
+      display: flex;
+      flex-direction: column;
+      padding: 0 3% 3% 3%;
+      justify-content: center;
+      align-items: center;
+}
+
+#profile-users {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 35px;
+      justify-content: center;
+      align-items: center;
+}
