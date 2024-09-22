@@ -1,11 +1,10 @@
-import { Link, useNavigate, useLoaderData } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 
 const ProfileDetails = () => {
 	const userDetails = useLoaderData();
 	const sessionUser = useSelector((state) => state.session.user);
-	const navigate = useNavigate();
 	const [activeMainSection, setActiveMainSection] = useState("posts"); // State to track the main active section
 	const [activeAsideSection, setActiveAsideSection] = useState("tags"); // State to track the aside active section
 	// UseEffect to navigate on logout immediately
@@ -191,7 +190,7 @@ const ProfileDetails = () => {
 				</Link>
 
 				<Link
-					to={`/users/${sessionUser.id}/profile/update`}
+					to="/posts/create"
 					className="nav-link"
 				>
 					Create a Post{" >"}

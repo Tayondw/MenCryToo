@@ -177,6 +177,18 @@ export const router = createBrowserRouter([
 				element: <PostDetails />,
 				action: postActions,
 			},
+			{
+				path: "posts/create",
+				loader: postDetailsLoader,
+				element: <PostDetails />,
+				action: postActions,
+			},
+			{
+				path: "posts/:postId/edit",
+				loader: postDetailsLoader,
+				element: <PostDetails />,
+				action: postActions,
+			},
 			// {
 			// 	path: "comments",
 			// 	element: <Comments />,

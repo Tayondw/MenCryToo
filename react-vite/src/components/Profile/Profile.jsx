@@ -205,7 +205,7 @@ const Profile = () => {
 				</Link>
 
 				<Link
-					to={`/users/${sessionUser.id}/profile/update`}
+					to="/posts/create"
 					className="nav-link"
 				>
 					Create a Post{" >"}
