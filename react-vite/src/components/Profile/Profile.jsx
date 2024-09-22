@@ -300,7 +300,7 @@ const Profile = () => {
 					) : (
 						<h1
 							onClick={() => setActiveAsideSection("tags")}
-							style={{ color: `var(--peach)` }}
+							style={{ color: `var(--deep-blue)` }}
 						>
 							YOUR TAGS
 						</h1>
@@ -312,7 +312,7 @@ const Profile = () => {
 					) : (
 						<h1
 							onClick={() => setActiveAsideSection("similar to you")}
-							style={{ color: `var(--peach)` }}
+							style={{ color: `var(--deep-blue)` }}
 						>
 							SIMILAR TO YOU
 						</h1>
