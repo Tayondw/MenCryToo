@@ -176,7 +176,9 @@ const Profile = () => {
 			case "similar to you":
 				return (
 					<Link to="/profile-feed">
-						<button className="button" style={{cursor: `pointer`}}>SIMILAR TO YOU</button>
+						<button className="button" style={{ cursor: `pointer` }}>
+							SIMILAR TO YOU
+						</button>
 					</Link>
 				);
 			default:
@@ -198,6 +200,15 @@ const Profile = () => {
 						<div>
 							<h3>{sessionUser?.username}</h3>
 						</div>
+						<div
+							style={{
+								display: `flex`,
+								justifyContent: `center`,
+								alignItems: `center`,
+							}}
+						>
+							<h4 style={{ margin: 0 }}>{sessionUser?.bio}</h4>
+						</div>
 						<ul id="profile-stats">
 							<li>
 								<var>{sessionUser?.firstName}</var>
@@ -216,8 +227,8 @@ const Profile = () => {
 							<Link to={`/users/${sessionUser?.id}/profile/update`}>
 								<button
 									className="button"
-                                                      id="profile-home-edit-profile-button"
-                                                      style={{cursor: `pointer`}}
+									id="profile-home-edit-profile-button"
+									style={{ cursor: `pointer` }}
 								>
 									Edit Profile
 								</button>
@@ -258,7 +269,7 @@ const Profile = () => {
 					</div>
 				</div>
 				<div id="second-half-profile">
-					<div className="second-half-headers">
+					<div className="second-half-headers" style={{ margin: `0 5%` }}>
 						{activeMainSection !== "posts" ? (
 							<h1 onClick={() => setActiveMainSection("posts")}>POSTS</h1>
 						) : (

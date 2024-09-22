@@ -62,7 +62,7 @@ const ProfileFeed = () => {
 								<div key={user.id}>
 									{user.id !== sessionUser.id ? (
 										<Link
-											to={`users/${user.id}`}
+											to={`/users/${user.id}`}
 											style={{
 												textDecoration: "none",
 												color: "inherit",
