@@ -59,7 +59,7 @@ const ProfileFeed = () => {
 					) : (
 						<>
 							{similarUsers.map((user) => (
-								<>
+								<div key={user.id}>
 									{user.id !== sessionUser.id ? (
 										<Link
 											to={`users/${user.id}`}
@@ -91,7 +91,7 @@ const ProfileFeed = () => {
 											</div>
 										</Link>
 									) : null}
-								</>
+								</div>
 							))}
 						</>
 					)}
