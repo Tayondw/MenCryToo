@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import OpenModalButton from "../OpenModalButton";
 import DeleteProfile from "./CRUD/Delete";
 import { BiSolidPencil } from "react-icons/bi";
+import { FaEllipsis, FaHeart, FaComments } from "react-icons/fa6";
 import "./Profile.css";
 
 const Profile = () => {
@@ -22,6 +23,7 @@ const Profile = () => {
 	const userPosts = useMemo(() => sessionUser?.posts, [sessionUser]);
 	const userGroups = useMemo(() => sessionUser?.group, [sessionUser]);
 	const userEvents = useMemo(() => sessionUser?.events, [sessionUser]);
+	const userComments = useMemo(() => sessionUser?.userComments, [sessionUser]);
 	const renderContent = useCallback(() => {
 		switch (activeMainSection) {
 			case "posts":
@@ -32,27 +34,42 @@ const Profile = () => {
 							to={`/posts/${post?.id}`}
 							style={{ textDecoration: `none`, color: `inherit` }}
 						>
-							<div id="second-half-posts" className="second-half-cards">
-								<img src={post?.image} alt={post?.title} />
-								<div id="display-style-direction">
+							<div id="second-half-posts" className="post-second-half-cards">
+								<div>
 									<div>
-										<h2>{post?.title}</h2>
-										<h3>{post?.caption}</h3>
+										<div>
+											<img src={sessionUser?.profileImage} alt="" />
+											<p>{sessionUser?.username}</p>
+										</div>
+										<div id="post-title">
+											<p>{post?.title}</p>
+										</div>
+										<FaEllipsis />
 									</div>
-									<ul className="stats">
-										<li>
-											<var>{post?.likes}</var>
-											<label>Likes</label>
-										</li>
-										<li>
-											<var>0</var>
-											<label>Comments</label>
-										</li>
-										<li>
-											<var>0</var>
-											<label>Shares</label>
-										</li>
-									</ul>
+									<img src={post?.image} alt={post?.title} />
+								</div>
+								<div id="posts-display-style-direction">
+									<div className="stats">
+										<div>
+											<var><FaHeart /></var>
+											<label>{post?.likes}</label>
+											
+										</div>
+										<div>
+											<var><FaComments /></var>
+											<label>{userComments?.length}</label>
+											
+										</div>
+									</div>
+									<div>
+										<p>{sessionUser?.username} {new Date().getDate() -
+												new Date(post?.updatedAt).getDate()}
+											d ago • {post?.caption}</p>
+										<p>
+											
+										</p>
+										<p></p>
+									</div>
 								</div>
 							</div>
 						</Link>
@@ -152,7 +169,7 @@ const Profile = () => {
 			default:
 				return null;
 		}
-	}, [activeMainSection, userPosts, userGroups, userEvents]);
+	}, [activeMainSection, userPosts, userGroups, userEvents, sessionUser]);
 	const renderTagContent = useCallback(() => {
 		switch (activeAsideSection) {
 			case "tags":
@@ -160,13 +177,13 @@ const Profile = () => {
 					<div id="tag-content">
 						{userTags?.map((tag) => (
 							<div id="each-tag" key={tag?.id}>
-								<button
+								<p
 									className="button"
 									id="each-profile-tag"
 									style={{ cursor: `default` }}
 								>
 									{tag?.name}
-								</button>
+								</p>
 							</div>
 						))}
 					</div>
@@ -204,10 +221,7 @@ const Profile = () => {
 					{"< "}Posts
 				</Link>
 
-				<Link
-					to="/posts/create"
-					className="nav-link"
-				>
+				<Link to="/posts/create" className="nav-link">
 					Create a Post{" >"}
 				</Link>
 			</div>

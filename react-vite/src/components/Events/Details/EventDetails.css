@@ -165,9 +165,13 @@
 	/* box-shadow: 2px 2px #ff6464; */
 }
 
+#events-update-delete button {
+      box-shadow: 4px 4px var(--light-gray);
+}
+
 #events-update-delete button:hover {
 	cursor: pointer;
-	box-shadow: 2px 2px #135c51;
+	box-shadow: 4px 4px #135c51;
 }
 
 #event-section-2 {

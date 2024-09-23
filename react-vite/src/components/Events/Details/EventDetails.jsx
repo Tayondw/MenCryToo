@@ -17,7 +17,7 @@ const EventDetails = () => {
 	const [activeSection, setActiveSection] = useState("Images"); // State to track the active section
 	const { closeModal } = useModal();
 	if (!eventDetails) return <div>Event not found</div>;
-	const currentDate = new Date()
+	const currentDate = new Date();
 	const renderContent = () => {
 		switch (activeSection) {
 			case "Images":
@@ -280,8 +280,7 @@ const EventDetails = () => {
 								</div>
 							</div>
 							<div id="events-update-delete">
-								{new Date(eventDetails.startDate) <
-								currentDate ? (
+								{new Date(eventDetails.startDate) < currentDate ? (
 									<h3>Event Closed</h3>
 								) : (
 									<>
@@ -312,8 +311,7 @@ const EventDetails = () => {
 												{sessionUser.id !== eventDetails.organizer.id ? (
 													// If the sessionUser is not the organizer
 													<>
-														{new Date(eventDetails.startDate) <
-														currentDate ? (
+														{new Date(eventDetails.startDate) < currentDate ? (
 															<h3>Event Closed</h3>
 														) : (
 															<>
@@ -426,49 +424,55 @@ const EventDetails = () => {
 								eventDetails.organizer &&
 								sessionUser.id === eventDetails.organizer.id ? (
 									<>
-										<div id="crud-buttons-update">
-											<button
-												className="button"
-												onClick={() => {
-													navigate(
-														`/groups/${eventDetails.groupId}/events/${eventDetails.id}`,
-													);
-												}}
-											>
-												Update Event
-											</button>
-										</div>
-										<div id="crud-buttons-update-image">
-											<OpenModalButton
-												eventDetails={eventDetails}
-												className="button"
-												id="add-group-image"
-												buttonText="Add Images"
-												onClose={closeModal}
-												modalComponent={
-													<EventImage
+										{new Date(eventDetails.startDate) < currentDate ? (
+											null
+										) : (
+											<>
+												<div id="crud-buttons-update">
+													<button
+														className="button"
+														onClick={() => {
+															navigate(
+																`/groups/${eventDetails.groupId}/events/${eventDetails.id}`,
+															);
+														}}
+													>
+														Update Event
+													</button>
+												</div>
+												<div id="crud-buttons-update-image">
+													<OpenModalButton
 														eventDetails={eventDetails}
+														className="button"
+														id="add-group-image"
+														buttonText="Add Images"
 														onClose={closeModal}
+														modalComponent={
+															<EventImage
+																eventDetails={eventDetails}
+																onClose={closeModal}
+															/>
+														}
 													/>
-												}
-											/>
-										</div>
-										<div id="crud-buttons-delete">
-											<OpenModalButton
-												eventDetails={eventDetails}
-												className="button"
-												id="delete-group"
-												buttonText="Delete Event"
-												style={{
-													backgroundColor: `red`,
-													color: `#dddddc`,
-													cursor: `pointer`,
-												}}
-												modalComponent={
-													<DeleteEvent eventDetails={eventDetails} />
-												}
-											/>
-										</div>
+												</div>
+												<div id="crud-buttons-delete">
+													<OpenModalButton
+														eventDetails={eventDetails}
+														className="button"
+														id="delete-group"
+														buttonText="Delete Event"
+														style={{
+															backgroundColor: `red`,
+															color: `#dddddc`,
+															cursor: `pointer`,
+														}}
+														modalComponent={
+															<DeleteEvent eventDetails={eventDetails} />
+														}
+													/>
+												</div>
+											</>
+										)}
 									</>
 								) : null}
 							</div>
