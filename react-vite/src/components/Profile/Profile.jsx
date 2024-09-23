@@ -1,10 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
+import PostMenu from "../Posts/PostMenu";
 import OpenModalButton from "../OpenModalButton";
 import DeleteProfile from "./CRUD/Delete";
 import { BiSolidPencil } from "react-icons/bi";
-import { FaEllipsis, FaHeart, FaComments } from "react-icons/fa6";
+import { FaHeart, FaComments } from "react-icons/fa6";
 import "./Profile.css";
 
 const Profile = () => {
@@ -12,11 +13,9 @@ const Profile = () => {
 	const navigate = useNavigate();
 	const [activeMainSection, setActiveMainSection] = useState("posts"); // State to track the main active section
 	const [activeAsideSection, setActiveAsideSection] = useState("tags"); // State to track the aside active section
-	// UseEffect to navigate on logout immediately
 	useEffect(() => {
-		if (!sessionUser) {
-			window.location.href = "/"; // Immediate navigation when sessionUser becomes null
-		}
+		// UseEffect to navigate on logout immediately
+		if (!sessionUser) window.location.href = "/"; // Immediate navigation when sessionUser becomes null
 	}, [sessionUser]);
 	// Memoized user-related values
 	const userTags = useMemo(() => sessionUser?.usersTags, [sessionUser]);
@@ -29,50 +28,53 @@ const Profile = () => {
 			case "posts":
 				return userPosts?.length > 0 ? (
 					userPosts?.map((post) => (
-						<Link
+						<div
+							id="second-half-posts"
+							className="post-second-half-cards"
 							key={post.id}
-							to={`/posts/${post?.id}`}
-							style={{ textDecoration: `none`, color: `inherit` }}
 						>
-							<div id="second-half-posts" className="post-second-half-cards">
-								<div>
-									<div>
-										<div>
-											<img src={sessionUser?.profileImage} alt="" />
-											<p>{sessionUser?.username}</p>
-										</div>
-										<div id="post-title">
-											<p>{post?.title}</p>
-										</div>
-										<FaEllipsis />
+							<div id="post-header-div">
+								<div id="space-between">
+									<div id="post-header-detail">
+										<img src={sessionUser?.profileImage} alt="" />
+										<p>{sessionUser?.username}</p>
 									</div>
-									<img src={post?.image} alt={post?.title} />
+									<div id="post-title">
+										<p>{post?.title}</p>
+									</div>
+									<div id="post-menu">
+										<PostMenu navigate={navigate} post={post} />
+									</div>
 								</div>
-								<div id="posts-display-style-direction">
-									<div className="stats">
-										<div>
-											<var><FaHeart /></var>
-											<label>{post?.likes}</label>
-											
-										</div>
-										<div>
-											<var><FaComments /></var>
-											<label>{userComments?.length}</label>
-											
-										</div>
+								<img src={post?.image} alt={post?.title} />
+							</div>
+							<div id="posts-display-style-direction">
+								<div className="stats">
+									<div>
+										<var>
+											<FaHeart />
+										</var>
+										<label>{post?.likes}</label>
 									</div>
 									<div>
-										<p>{sessionUser?.username} {new Date().getDate() -
-												new Date(post?.updatedAt).getDate()}
-											d ago • {post?.caption}</p>
-										<p>
-											
-										</p>
-										<p></p>
+										<var>
+											<FaComments />
+										</var>
+										<label>{userComments?.length}</label>
 									</div>
+								</div>
+								<div className="post-caption">
+									<p>{sessionUser?.username}</p>
+									<p style={{ color: `var(--light-gray)` }}>•</p>
+									<p style={{ color: `var(--light-gray)` }}>
+										{new Date().getDate() - new Date(post?.updatedAt).getDate()}
+										d ago
+									</p>
+									<p style={{ color: `var(--light-gray)` }}>•</p>
+									<p>{post?.caption}</p>
 								</div>
 							</div>
-						</Link>
+						</div>
 					))
 				) : (
 					<p>
@@ -169,7 +171,15 @@ const Profile = () => {
 			default:
 				return null;
 		}
-	}, [activeMainSection, userPosts, userGroups, userEvents, sessionUser, userComments]);
+	}, [
+		activeMainSection,
+		userPosts,
+		userGroups,
+		userEvents,
+		sessionUser,
+		userComments,
+		navigate,
+	]);
 	const renderTagContent = useCallback(() => {
 		switch (activeAsideSection) {
 			case "tags":
@@ -217,7 +227,7 @@ const Profile = () => {
 					width: `100%`,
 				}}
 			>
-				<Link to="/posts" className="nav-link">
+				<Link to="/posts-feed" className="nav-link">
 					{"< "}Posts
 				</Link>
 

@@ -166,8 +166,8 @@ export const router = createBrowserRouter([
 				action: postActions,
 			},
 			{
-				path: "posts",
-				loader: postsLoader,
+				path: "posts-feed",
+				loader: profilesLoader,
 				element: <Posts />,
 				action: postActions,
 			},

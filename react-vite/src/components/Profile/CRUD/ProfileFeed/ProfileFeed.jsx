@@ -28,7 +28,7 @@ const ProfileFeed = () => {
 					width: `100%`,
 				}}
 			>
-				<Link to="/posts" className="nav-link">
+				<Link to="/posts-feed" className="nav-link">
 					{"< "}Posts
 				</Link>
 
@@ -48,7 +48,7 @@ const ProfileFeed = () => {
 					WebkitTextFillColor: `transparent`,
 				}}
 			>
-				SIMILAR TO YOU!
+				USERS SIMILAR TO YOU!
 			</h3>
 			{!sessionUser ? (
 				<p>You must be a user in order to view attendees to this event</p>

@@ -185,7 +185,7 @@ const ProfileDetails = () => {
 					width: `100%`,
 				}}
 			>
-				<Link to="/posts" className="nav-link">
+				<Link to="/posts-feed" className="nav-link">
 					{"< "}Posts
 				</Link>
 

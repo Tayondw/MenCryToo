@@ -252,9 +252,10 @@
       /* padding: 0;
       margin: 0; */
       width: 100vw;
+      background: linear-gradient(3deg, #e08f2c, #223f5c);
 }
 
-#second-half-posts div{
+#second-half-posts #post-header-div {
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -262,53 +263,90 @@
       width: 100%;
 }
 
-#second-half-posts div div {
+#second-half-posts #post-header-div #space-between {
       display: flex;
       flex-direction: row;
-      justify-content: space-evenly;
+      justify-content: space-between;
       align-items: center;
-      width: 90%;
+      width: 100%;
       height: 50px;
 }
 
-#second-half-posts div svg {
+#second-half-posts #post-header-div #space-between #post-menu svg {
       font-size: 40px;
+      color: var(--orangy);
 }
 
-#second-half-posts div div div {
+#second-half-posts #post-header-detail {
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: flex-start;
       gap: 15px;
       width: 90%;
+      margin-bottom: 15px;
 }
 
-#second-half-posts div div #post-title {
+#second-half-posts #post-header-div #space-between #post-title {
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: flex-start;
       gap: 15px;
       width: 100%;
-      margin-right: 50px;
+      /* margin-right: 40px; */
 }
 
-#second-half-posts div div div img {
+#second-half-posts #post-header-div #space-between #post-header-detail img {
       height: 50px;
       width: 50px;
       border-radius: 50%;
       margin: 0;
-
 }
 
-#second-half-posts div img {
+#second-half-posts #post-header-div #space-between #post-header-detail p, #post-title p {
+     color: var(--orangy);
+}
+
+#second-half-posts #post-header-div img {
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: row;
       margin: 0;
-      width: 500px;
+      width: inherit;
+}
+
+#posts-display-style-direction {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      width: 100%;
+}
+
+#posts-display-style-direction .stats {
+      display: flex;
+      flex-direction: row;
+      gap: 25px;
+      justify-content: flex-start;
+      align-items: flex-start;
+      width: 100%;
+      margin-top: 20px;
+      color: var(--deep-blue);
+}
+
+#posts-display-style-direction .stats div {
+      display: flex;
+      flex-direction: row;
+      gap: 7px;
+}
+
+#posts-display-style-direction .post-caption {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      color: var(--deep-blue);
 }
 
 @media (width <= 720px) {

@@ -117,7 +117,7 @@ const GroupDetails = () => {
 					<p>Currently no group organizer. Create a group!</p>
 				) : (
 					<Link
-						to={`user/${groupDetails.organizer.id}`}
+						to={`/users/${groupDetails.organizer.id}`}
 						style={{
 							textDecoration: `none`,
 							color: `inherit`,
@@ -159,7 +159,7 @@ const GroupDetails = () => {
 							<>
 								{groupDetails.members.map((member) => (
 									<Link
-										to={`users/${member.user.id}`}
+										to={`/users/${member.user.id}`}
 										style={{
 											textDecoration: "none",
 											color: "inherit",

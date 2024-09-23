@@ -71,7 +71,7 @@ const AuthHome = () => {
 							</h4>
 						</div>
 						<div id="create-profile-button">
-							<Link to="/posts">
+							<Link to="/posts-feed">
 								<button className="button" style={{ cursor: `pointer` }}>
 									POSTS FEED
 								</button>

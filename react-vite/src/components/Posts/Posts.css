@@ -1,0 +1,17 @@
+#post-feed-users {
+      background: linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c);
+      display: flex;
+      flex-direction: column;
+      padding: 0 3% 4.175% 3%;
+      justify-content: center;
+      align-items: center;
+}
+
+#post-users {
+      display: flex;
+      flex-direction: column;
+      /* flex-wrap: wrap; */
+      /* gap: 35px; */
+      justify-content: center;
+      align-items: center;
+}

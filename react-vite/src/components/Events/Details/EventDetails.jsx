@@ -132,7 +132,7 @@ const EventDetails = () => {
 							<>
 								{eventDetails.attendees.map((attendee) => (
 									<Link
-										to={`users/${attendee.user.id}`}
+										to={`/users/${attendee.user.id}`}
 										style={{
 											textDecoration: "none",
 											color: "inherit",
@@ -483,7 +483,7 @@ const EventDetails = () => {
 					<div id="events-section-details">
 						<h3>Group Organizer</h3>
 						<Link
-							to={`user/${eventDetails.organizer.id}`}
+							to={`/users/${eventDetails.organizer.id}`}
 							style={{
 								textDecoration: `none`,
 								color: `inherit`,
