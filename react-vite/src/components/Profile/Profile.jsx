@@ -169,7 +169,7 @@ const Profile = () => {
 			default:
 				return null;
 		}
-	}, [activeMainSection, userPosts, userGroups, userEvents, sessionUser]);
+	}, [activeMainSection, userPosts, userGroups, userEvents, sessionUser, userComments]);
 	const renderTagContent = useCallback(() => {
 		switch (activeAsideSection) {
 			case "tags":
