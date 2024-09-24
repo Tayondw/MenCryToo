@@ -19,10 +19,10 @@ const Posts = () => {
 		allProfiles.users_profile,
 		sessionUserTags,
 	); // Use the function to get users with at least one similar tag
-	console.log(similarUsers);
+	// console.log(similarUsers);
       const posts = similarUsers.flatMap((user) => user.posts);
       const comments = similarUsers.map((user) => user.userComments);
-      console.log("posts", posts);
+      // console.log("posts", posts);
       
 	return (
 		<div id="post-feed-users">

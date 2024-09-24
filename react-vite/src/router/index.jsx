@@ -30,7 +30,7 @@ import {
 	eventDetailsLoader,
 	// venueDetailsLoader,
 	userDetailsLoader,
-	postsLoader,
+	// postsLoader,
 	postDetailsLoader,
 	profilesLoader,
 	tagsLoader,
