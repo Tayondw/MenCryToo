@@ -508,13 +508,14 @@
 	padding-bottom: 20px;
 	display: flex;
 	flex-direction: row;
+      padding-left: 2%;
 }
 
 .footer.center {
 	text-align: center;
 	background-color: #223f5c;
 	display: grid;
-	grid-template-columns: repeat(3, 1fr);
+	grid-template-columns: repeat(4, 1fr);
 }
 
 .footer-links {

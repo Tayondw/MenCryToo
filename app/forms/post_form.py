@@ -11,6 +11,11 @@ class PostForm(FlaskForm):
         "Title",
         validators=[
             DataRequired(),
+            Length(
+                min=5,
+                max=25,
+                message="The post title must be between 5 and 25 characters",
+            ),
         ],
     )
     caption = TextAreaField(

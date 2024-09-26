@@ -15,6 +15,7 @@ import ProfileDetails from "../components/Profile/Details";
 import UpdateProfile from "../components/Profile/CRUD/Update";
 import Posts from "../components/Posts";
 import PostDetails from "../components/Posts/Details";
+import CreatePost from "../components/Posts/CRUD/Create";
 import PrivateRoute from "../components/PrivateRoute";
 import ProfileFeed from "../components/Profile/CRUD/ProfileFeed";
 // import Comments from "../components/Comments";
@@ -179,8 +180,8 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "posts/create",
-				loader: postDetailsLoader,
-				element: <PostDetails />,
+				// loader: postDetailsLoader,
+				element: <CreatePost />,
 				action: postActions,
 			},
 			{

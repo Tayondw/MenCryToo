@@ -131,13 +131,12 @@ function Navigation({ isLoaded }) {
 						>
 							CREATE A GROUP
 						</NavLink>
-						<p
-							// to="/posts/create"
+						<NavLink
+							to="/posts/create"
 							className="navigation-link w-nav-link"
-							style={{ cursor: `text` }}
 						>
 							SHARE YOUR STORY
-						</p>
+						</NavLink>
 						<NavLink
 							to="/profile-feed"
 							className="navigation-link w-nav-link"

@@ -258,16 +258,16 @@ export const venueActions = async ({ request }) => {
 
 export const profileActions = async ({ request }) => {
 	const formData = await request.formData();
-      const intent = formData.get("intent");
-      const data = Object.fromEntries(formData);
-      const errors = {};
+	const intent = formData.get("intent");
+	const data = Object.fromEntries(formData);
+	const errors = {};
 	// Handle profile deletion separately
 	if (intent === "delete-profile") {
 		const userId = formData.get("userId");
 		await fetch(`/api/users/${userId}/profile/delete`, {
 			method: "DELETE",
 		});
-		return window.location.href = "/";
+		return (window.location.href = "/");
 	}
 	if (intent === "update-profile") {
 		// For other actions like create or update profile
@@ -321,16 +321,16 @@ export const profileActions = async ({ request }) => {
 			return errors;
 		}
 
-            data.userId = +data.userId;
+		data.userId = +data.userId;
 
 		const response = await fetch(`/api/users/${data.userId}/profile/update`, {
 			method: "POST",
 			body: formData,
 		});
-            if (response.ok) {
-                  return window.location.href = "/profile"
-                  // return redirect("/profile")
-            }
+		if (response.ok) {
+			return (window.location.href = "/profile");
+			// return redirect("/profile")
+		}
 	}
 };
 
@@ -338,54 +338,67 @@ export const postActions = async ({ request }) => {
 	let formData = await request.formData();
 	let data = Object.fromEntries(formData);
 	let intent = formData.get("intent");
-	data.id = +data.id;
-	data.commentId = +data.commentId;
+	const errors = {};
 
 	if (intent === "create-post") {
-		return await fetch(`/api/posts/create`, {
+		data.userId = +data.userId;
+		const title = formData.get("title");
+		const caption = formData.get("caption");
+		const image = formData.get("image");
+
+		if (!title.length || title.length < 5 || title.length > 25)
+			errors.title = "Title must be between 3 and 20 characters";
+		if (!caption.length || caption.length < 50 || caption.length > 500)
+			errors.caption = "Caption must be between 5 and 250 characters";
+		if (intent === "create-post" && !image)
+			errors.image = "Please add an image";
+		if (Object.keys(errors).length) return errors;
+		await fetch(`/api/users/${data.userId}/posts/create`, {
 			method: "POST",
 			body: formData,
 		});
+		return (window.location.href = "/posts-feed");
 	}
 
-	if (intent === "add-comment") {
-		return await fetch(`/api/posts/${data.id}/comments`, {
-			method: "POST",
-			body: formData,
-		});
-	}
+	// if (intent === "add-comment") {
+	// 	data.commentId = +data.commentId;
+	// 	return await fetch(`/api/posts/${data.id}/comments`, {
+	// 		method: "POST",
+	// 		body: formData,
+	// 	});
+	// }
 
-	if (intent === "remove-comment") {
-		return await fetch(`/api/posts/${data.id}/comments/${data.commentId}`, {
-			method: "DELETE",
-			body: formData,
-		});
-	}
+	// if (intent === "remove-comment") {
+	// 	return await fetch(`/api/posts/${data.id}/comments/${data.commentId}`, {
+	// 		method: "DELETE",
+	// 		body: formData,
+	// 	});
+	// }
 
-	if (intent === "add-like") {
-		return await fetch(`/api/posts/${data.id}/like`, {
-			method: "POST",
-			body: formData,
-		});
-	}
+	// if (intent === "add-like") {
+	// 	return await fetch(`/api/posts/${data.id}/like`, {
+	// 		method: "POST",
+	// 		body: formData,
+	// 	});
+	// }
 
-	if (intent === "remove-like") {
-		return await fetch(`/api/posts/${data.id}/unlike`, {
-			method: "POST",
-			body: formData,
-		});
-	}
+	// if (intent === "remove-like") {
+	// 	return await fetch(`/api/posts/${data.id}/unlike`, {
+	// 		method: "POST",
+	// 		body: formData,
+	// 	});
+	// }
 
-	if (intent === "edit-post") {
-		return await fetch(`/api/posts/${data.id}/edit`, {
-			method: "POST",
-			body: formData,
-		});
-	}
+	// if (intent === "edit-post") {
+	// 	return await fetch(`/api/posts/${data.id}/edit`, {
+	// 		method: "POST",
+	// 		body: formData,
+	// 	});
+	// }
 
-	if (intent === "delete-post") {
-		return await fetch(`/api/posts/${data.id}/delete`, {
-			method: "DELETE",
-		});
-	}
+	// if (intent === "delete-post") {
+	// 	return await fetch(`/api/posts/${data.id}/delete`, {
+	// 		method: "DELETE",
+	// 	});
+	// }
 };

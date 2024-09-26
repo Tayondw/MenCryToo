@@ -253,6 +253,7 @@
       margin: 0; */
       width: 100vw;
       background: linear-gradient(3deg, #e08f2c, #223f5c);
+      /* margin: 2%; */
 }
 
 #second-half-posts #post-header-div {
@@ -315,6 +316,7 @@
       flex-direction: row;
       margin: 0;
       width: inherit;
+      height: 500px;
 }
 
 #posts-display-style-direction {
@@ -347,6 +349,21 @@
       flex-direction: row;
       gap: 10px;
       color: var(--deep-blue);
+      width: 100%;
+      overflow-wrap: break-word;
+      /* word-break: break-word; */
+      height: fit-content;
+}
+
+#posts-display-style-direction .post-caption #post-caption-caption {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      color: var(--deep-blue);
+      overflow-wrap: break-word;
+      word-break: break-word;
+      flex-wrap: wrap;
+      width: 100%;
 }
 
 @media (width <= 720px) {

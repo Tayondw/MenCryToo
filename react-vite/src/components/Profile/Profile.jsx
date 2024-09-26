@@ -22,12 +22,16 @@ const Profile = () => {
 	const userPosts = useMemo(() => sessionUser?.posts, [sessionUser]);
 	const userGroups = useMemo(() => sessionUser?.group, [sessionUser]);
 	const userEvents = useMemo(() => sessionUser?.events, [sessionUser]);
-	const userComments = useMemo(() => sessionUser?.userComments, [sessionUser]);
+      const userComments = useMemo(() => sessionUser?.userComments, [sessionUser]);
+      const sortedUserPosts = userPosts.sort(
+				(a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
+			);
+
 	const renderContent = useCallback(() => {
 		switch (activeMainSection) {
 			case "posts":
 				return userPosts?.length > 0 ? (
-					userPosts?.map((post) => (
+					sortedUserPosts?.map((post) => (
 						<div
 							id="second-half-posts"
 							className="post-second-half-cards"
@@ -71,7 +75,7 @@ const Profile = () => {
 										d ago
 									</p>
 									<p style={{ color: `var(--light-gray)` }}>•</p>
-									<p>{post?.caption}</p>
+									<p id="post-caption-caption">{post?.caption}</p>
 								</div>
 							</div>
 						</div>
@@ -216,7 +220,7 @@ const Profile = () => {
 	return (
 		<div
 			style={{
-				background: `linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c)`,
+                        background: `linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c)`
 			}}
 		>
 			<div

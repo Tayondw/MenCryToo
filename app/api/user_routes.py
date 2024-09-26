@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, render_template, request, redirect, abort
 from flask_login import login_required, current_user
 from app.models import db, User, Group, Event, Post, UserTags, Tag, Attendance, Membership, Comment, Venue
-from app.forms import UserForm, EditUserForm
+from app.forms import UserForm, EditUserForm,PostForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
 import requests
 import json
@@ -291,3 +291,68 @@ def add_tags(userId):
 
     db.session.commit()
     return jsonify({"message": "Tags added successfully"}), 200
+
+
+@user_routes.route("<int:userId>/posts/create", methods=["POST"])
+@login_required
+def create_post(userId):
+    """
+    Create a new post linked to the current user and submit to the database
+
+    renders an empty form on get requests, validates and submits form on post requests
+
+    The commented out code was to test if the post request works
+    """
+    # query for the user you want to add the post to
+    user = User.query.get(userId)
+
+    # check if there is a group
+    if not user:
+        return {"errors": {"message": "Not Found"}}, 404
+  
+    # check if current user 
+    if current_user.id != userId:
+        return {"errors": {"message": "Unauthorized"}}, 401
+  
+    form = PostForm()
+    form["csrf_token"].data = request.cookies["csrf_token"]
+
+    if form.validate_on_submit():
+        post_image = form.image.data
+
+        if not post_image:
+            return {"message": "An image is required to create a post."}, 400
+
+        try:
+            post_image.filename = get_unique_filename(post_image.filename)
+            upload = upload_file_to_s3(post_image)
+        except Exception as e:
+            return {"message": f"Image upload failed: {str(e)}"}, 500
+
+        # Check if the upload was successful
+        if "url" not in upload:
+            # if the dictionary doesn't have a url key
+            # it means that there was an error when you tried to upload
+            # so you send back that error message (and you printed it above)
+            return {
+                "message": upload.get(
+                    "errors", "Image upload failed. Please try again."
+                )
+            }, 400
+
+        url = upload["url"]
+        create_post = Post(
+            creator=userId,
+            title=form.data["title"],
+            caption=form.data["caption"],
+            image=url,
+        )
+        db.session.add(create_post)
+        db.session.commit()
+        return {"post": create_post.to_dict()}, 201
+    #     if form.errors:
+    #         print(form.errors)
+    #         return render_template("post_form.html", form=form, errors=form.errors)
+    #     return render_template("post_form.html", form=form, errors=None)
+
+    return form.errors, 400
