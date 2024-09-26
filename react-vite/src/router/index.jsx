@@ -186,7 +186,7 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "posts/:postId/edit",
-				loader: postDetailsLoader,
+				// loader: postDetailsLoader,
 				element: <PostDetails />,
 				action: postActions,
 			},

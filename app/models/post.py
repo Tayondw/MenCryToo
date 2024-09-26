@@ -55,7 +55,7 @@ class Post(db.Model):
     def __repr__(self):
         return f"< Post id: {self.id} by: {self.user.username} >"
 
-    def to_dict(self, post_comments=False):
+    def to_dict(self, post_comments=False, post_likes=False):
         dict_post = {
             "id": self.id,
             "title": self.title,
@@ -70,5 +70,9 @@ class Post(db.Model):
         if post_comments:
             dict_post["postComments"] = [
                 post_comment.to_dict() for post_comment in self.post_comments
+            ]
+        if post_likes:
+            dict_post["postLikes"] = [
+                post_like.to_dict() for post_like in self.post_likes
             ]
         return dict_post

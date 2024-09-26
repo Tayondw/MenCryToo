@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, render_template, request, redirect, abort
 from flask_login import login_required, current_user
 from app.models import db, User, Group, Event, Post, UserTags, Tag, Attendance, Membership, Comment, Venue
-from app.forms import UserForm, EditUserForm,PostForm
+from app.forms import UserForm, EditUserForm, PostForm, EditPostForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
 import requests
 import json
@@ -309,11 +309,11 @@ def create_post(userId):
     # check if there is a group
     if not user:
         return {"errors": {"message": "Not Found"}}, 404
-  
-    # check if current user 
+
+    # check if current user
     if current_user.id != userId:
         return {"errors": {"message": "Unauthorized"}}, 401
-  
+
     form = PostForm()
     form["csrf_token"].data = request.cookies["csrf_token"]
 
@@ -349,10 +349,81 @@ def create_post(userId):
         )
         db.session.add(create_post)
         db.session.commit()
-        return {"post": create_post.to_dict()}, 201
+        return {"post": create_post.to_dict(post_likes=True, post_comments=True)}, 201
     #     if form.errors:
     #         print(form.errors)
     #         return render_template("post_form.html", form=form, errors=form.errors)
     #     return render_template("post_form.html", form=form, errors=None)
 
     return form.errors, 400
+
+
+@user_routes.route("/<int:userId>/posts/<int:postId>", methods=["POST"])
+def edit_post(userId, postId):
+    """
+    will generate an update post form on get requests and validate/save on post requests
+
+    Returns 401 Unauthorized if the current user's id does not match the post's user id
+
+    Returns 404 Not Found if the post is not in the database or if the user is not found in the database
+
+    The commented out code was to test if the post request works
+    """
+
+    post_to_edit = Post.query.get(postId)
+
+    # check if there is a post to edit
+    if not post_to_edit:
+        return {"errors": {"message": "Not Found"}}, 404
+
+    user = User.query.get(userId)
+
+    # check if there is a user who created the post
+    if not user:
+        return {"errors": {"message": "Not Found"}}, 404
+
+    # check if current user is post creator - post creator is only allowed to update
+    if current_user.id != userId:
+        return {"errors": {"message": "Unauthorized"}}, 401
+
+    form = EditPostForm()
+    form["csrf_token"].data = request.cookies["csrf_token"]
+
+    if form.validate_on_submit():
+        post_to_edit.creator = userId
+        post_to_edit.title = form.data["title"]
+        post_to_edit.caption = form.data["caption"]
+
+        if form.image.data:
+            post_image = form.image.data
+
+            post_image.filename = get_unique_filename(post_image.filename)
+
+            upload = upload_file_to_s3(post_image)
+            if "url" not in upload:
+                return {"message": "Upload failed"}, 400
+
+            # Remove the old image from S3
+            remove_file_from_s3(post_to_edit.image)
+            post_to_edit.image = upload["url"]
+        db.session.commit()
+        return {"post": post_to_edit.to_dict(post_comments=True, post_likes=True)}, 200
+    #   return redirect(f"/api/posts/{postId}")
+    #     elif form.errors:
+    #         print(form.errors)
+    #         return render_template(
+    #             "post_form.html", form=form, type="update", id=postId, errors=form.errors
+    #         )
+
+    #     else:
+    #         current_data = Post.query.get(postId)
+    #         print(current_data)
+    #         form.process(obj=current_data)
+    #         return render_template(
+    #             "post_form.html", form=form, type="update", id=postId, errors=None
+    #         )
+    elif form.errors:
+        return {"errors": form.errors}, 400
+
+    else:
+        return {"post": post_to_edit.to_dict(post_comments=True, post_likes=True)}, 200
