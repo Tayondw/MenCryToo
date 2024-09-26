@@ -185,12 +185,12 @@ export const router = createBrowserRouter([
 				element: <CreatePost />,
 				action: postActions,
 			},
-			{
-				path: "posts/:postId/edit",
-				loader: postDetailsLoader,
-				element: <UpdatePost />,
-				action: postActions,
-			},
+			// {
+			// 	path: "posts/:postId/edit",
+			// 	loader: postDetailsLoader,
+			// 	element: <UpdatePost />,
+			// 	action: postActions,
+			// },
 			// {
 			// 	path: "comments",
 			// 	element: <Comments />,
