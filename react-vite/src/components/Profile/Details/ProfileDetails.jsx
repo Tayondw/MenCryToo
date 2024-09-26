@@ -22,9 +22,9 @@ const ProfileDetails = () => {
 			case "posts":
 				return userPosts?.length > 0 ? (
 					userPosts?.map((post) => (
-						<Link
+						<div
 							key={post.id}
-							to={`/posts/${post?.id}`}
+							// to={`/posts/${post?.id}`}
 							style={{ textDecoration: `none`, color: `inherit` }}
 						>
 							<div id="second-half-posts" className="second-half-cards">
@@ -50,7 +50,7 @@ const ProfileDetails = () => {
 									</ul>
 								</div>
 							</div>
-						</Link>
+						</div>
 					))
 				) : (
 					<p>Currently no posts available.</p>

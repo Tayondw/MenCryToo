@@ -76,10 +76,10 @@ const Posts = () => {
 								>
 									<div id="post-header-div">
 										<div id="space-between">
-											<div id="post-header-detail">
+											<Link id="post-header-detail" to={`/users/${post.creator}`} style={{textDecoration: `none`}}>
 												<img src={post?.user?.profileImage} alt="" />
-												<p>{post?.user?.username}</p>
-											</div>
+                                                                        <p>{post?.user?.username}</p>
+											</Link>
 											<div id="post-title">
 												<p>{post?.title}</p>
 											</div>
