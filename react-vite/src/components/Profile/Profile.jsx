@@ -22,10 +22,10 @@ const Profile = () => {
 	const userPosts = useMemo(() => sessionUser?.posts, [sessionUser]);
 	const userGroups = useMemo(() => sessionUser?.group, [sessionUser]);
 	const userEvents = useMemo(() => sessionUser?.events, [sessionUser]);
-      const userComments = useMemo(() => sessionUser?.userComments, [sessionUser]);
-      const sortedUserPosts = userPosts.sort(
-				(a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
-			);
+	const userComments = useMemo(() => sessionUser?.userComments, [sessionUser]);
+	const sortedUserPosts = userPosts.sort(
+		(a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
+	);
 
 	const renderContent = useCallback(() => {
 		switch (activeMainSection) {
@@ -183,6 +183,7 @@ const Profile = () => {
 		sessionUser,
 		userComments,
 		navigate,
+		sortedUserPosts,
 	]);
 	const renderTagContent = useCallback(() => {
 		switch (activeAsideSection) {
@@ -220,7 +221,7 @@ const Profile = () => {
 	return (
 		<div
 			style={{
-                        background: `linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c)`
+				background: `linear-gradient(-140deg, #e08f2c, #dddddc, #223f5c)`,
 			}}
 		>
 			<div
