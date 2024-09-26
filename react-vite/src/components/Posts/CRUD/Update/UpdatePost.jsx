@@ -1,5 +1,5 @@
 const UpdatePost = () => {
-	return null;
+	return <h1>Hello</h1>;
 };
 
 export default UpdatePost;

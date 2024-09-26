@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import OpenModalButton from "../../OpenModalButton";
+import UpdatePost from "../CRUD/Update";
 import DeletePost from "../CRUD/Delete";
 import { FaEllipsis } from "react-icons/fa6";
 import "./PostMenu.css";
@@ -42,8 +43,9 @@ const PostMenu = ({ navigate, post }) => {
 						buttonText="Edit Post"
 						onButtonClick={() => {
 							closeMenu();
-							navigate(`/posts/${post.id}/edit`);
+							// navigate(`/posts/${post.id}/edit`);
 						}}
+						modalComponent={<UpdatePost post={post} navigate={navigate} />}
 						style={{
 							color: `#223f5c`,
 							backgroundColor: `#FAF5E4`,
@@ -52,13 +54,11 @@ const PostMenu = ({ navigate, post }) => {
 					<OpenModalButton
 						className="logout"
 						buttonText="Delete Post"
-						// onButtonClick={() => {
-						// 	closeMenu();
-						// 	navigate("/events");
-						// }}
-						modalComponent={
-							<DeletePost post={post} navigate={navigate} />
-						}
+						onButtonClick={() => {
+							closeMenu();
+							// navigate("/events");
+						}}
+						modalComponent={<DeletePost post={post} navigate={navigate} />}
 						style={{
 							color: `#223f5c`,
 							backgroundColor: `#FAF5E4`,
