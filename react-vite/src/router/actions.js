@@ -279,7 +279,7 @@ export const profileActions = async ({ request }) => {
 		const confirmPassword = formData.get("confirmPassword");
 		const bio = formData.get("bio");
 		const profileImage = formData.get("profileImage");
-		const userTags = formData.getAll("userTags");
+		// const userTags = formData.getAll("userTags");
 
 		if (password !== confirmPassword)
 			errors.confirmPassword =
@@ -401,4 +401,54 @@ export const postActions = async ({ request }) => {
 	// 		method: "DELETE",
 	// 	});
 	// }
+};
+
+export const partnershipActions = async ({ request }) => {
+	let formData = await request.formData();
+	// let data = Object.fromEntries(formData);
+	let intent = formData.get("intent");
+	const errors = {};
+
+	if (intent === "create-partnership") {
+		const firstName = formData.get("firstName");
+		const lastName = formData.get("lastName");
+		const phone = formData.get("phone");
+		const email = formData.get("email");
+		const subject = formData.get("subject");
+		const message = formData.get("message");
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (email) {
+			if (email.length > 50)
+				errors.email = "Email must be less than 50 characters";
+		}
+		if (!emailRegex.test(email) || email.length <= 0)
+			errors.email = "Invalid email";
+		if (!firstName.length || firstName.length < 3 || firstName.length > 20)
+			errors.firstName = "First name must be between 3 and 20 characters";
+		if (!lastName.length || lastName.length < 3 || lastName.length > 20)
+			errors.lastName = "Last name must be between 3 and 20 characters";
+		if (isNaN(Number(phone))) {
+			// console.log("BAD phone");
+			errors.phone = "Invalid phone number";
+		}
+		if (!subject.length || subject.length < 3 || subject.length > 20)
+			errors.subject = "Subject must be between 3 and 20 characters";
+		if (!message.length || message.length < 10 || message.length > 500)
+			errors.message =
+				"Please enter at least 10 characters describing yourself";
+		if (Object.keys(errors).length) {
+			return errors;
+		}
+
+		const response = await fetch(`/api/partnerships/`, {
+			method: "POST",
+			body: formData,
+            });
+            console.log(response);
+            
+		if (response.ok) {
+			return (window.location.href = "/");
+			// return redirect("/")
+		}
+	}
 };

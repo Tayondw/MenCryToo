@@ -12,3 +12,4 @@ from .edit_post_form import EditPostForm
 from .user_form import UserForm
 from .edit_user_form import EditUserForm
 from .venue_form import VenueForm
+from .partnership_form import PartnershipForm

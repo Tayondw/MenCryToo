@@ -26,7 +26,6 @@ const Profile = () => {
 	const sortedUserPosts = userPosts.sort(
 		(a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
 	);
-
 	const renderContent = useCallback(() => {
 		switch (activeMainSection) {
 			case "posts":

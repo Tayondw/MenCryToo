@@ -14,11 +14,12 @@ import Profile from "../components/Profile";
 import ProfileDetails from "../components/Profile/Details";
 import UpdateProfile from "../components/Profile/CRUD/Update";
 import Posts from "../components/Posts";
-import PostDetails from "../components/Posts/Details";
+// import PostDetails from "../components/Posts/Details";
 import CreatePost from "../components/Posts/CRUD/Create";
 import UpdatePost from "../components/Posts/CRUD/Update";
 import PrivateRoute from "../components/PrivateRoute";
 import ProfileFeed from "../components/Profile/CRUD/ProfileFeed";
+import Partnership from "../components/Partnership";
 // import Comments from "../components/Comments";
 // import CommentDetails from "../components/Comments/Details";
 // import Tags from "../components/Tags";
@@ -47,7 +48,8 @@ import {
 	// eventAttendeeActions,
 	// venueActions,
 	profileActions,
-	postActions,
+      postActions,
+      partnershipActions
 } from "./actions";
 import Layout from "./Layout";
 
@@ -219,12 +221,12 @@ export const router = createBrowserRouter([
 			// 	element: <SignupFormPage />,
 			// 	action: profileActions,
 			// },
-			// {
-			// 	path: "partnership",
-			// 	loader: tagDetailsLoader,
-			// 	element: <SignupFormPage />,
-			// 	action: profileActions,
-			// },
+			{
+				path: "partnership",
+				// loader: tagDetailsLoader,
+				element: <Partnership />,
+				action: partnershipActions,
+			},
 			// {
 			// 	path: "assets/resume",
 			// 	loader: tagDetailsLoader,
