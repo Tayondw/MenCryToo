@@ -167,7 +167,7 @@ export const router = createBrowserRouter([
 				path: "users/:userId",
 				loader: userDetailsLoader,
 				element: <ProfileDetails />,
-				action: postActions,
+				// action: postActions,
 			},
 			{
 				path: "posts-feed",

@@ -161,7 +161,7 @@ export const eventActions = async ({ request }) => {
 		}
 
 		data.capacity = +data.capacity;
-		data.group_id = +data.group_id;
+            data.group_id = +data.group_id;
 	}
 
 	// Execute action based on the intent
@@ -173,12 +173,15 @@ export const eventActions = async ({ request }) => {
 		return redirect("/events");
 	}
 
-	if (intent === "edit-event") {
+      if (intent === "edit-event") {
+            data.eventId = +data.eventId
+            console.log(data);
+            
 		await fetch(`/api/groups/${data.group_id}/events/${data.eventId}`, {
 			method: "POST",
 			body: formData,
 		});
-		return redirect(`/events/${data.eventId}`);
+		return window.location.href = `/events/${data.eventId}`;
 	}
 
 	if (intent === "delete-event") {
@@ -361,7 +364,7 @@ export const postActions = async ({ request }) => {
 			method: "POST",
 			body: formData,
 		});
-		if (response.ok) return window.location.href = "/posts-feed";
+		if (response.ok) return (window.location.href = "/posts-feed");
 		else console.log(errors);
 	}
 
@@ -373,10 +376,19 @@ export const postActions = async ({ request }) => {
 				body: formData,
 			},
 		);
-		if (response.ok) return window.location.href = "/profile";
+		if (response.ok) return (window.location.href = "/profile");
 		else console.log(errors);
+      }
+      
+      if (intent === "delete-post") {
+            data.postId = +data.postId;
+            console.log(data);
+            
+		await fetch(`/api/posts/${data.postId}/delete`, {
+			method: "DELETE",
+            });
+            return window.location.href = "/profile"
 	}
-
 	// if (intent === "add-comment") {
 	// 	data.commentId = +data.commentId;
 	// 	return await fetch(`/api/posts/${data.id}/comments`, {
@@ -403,12 +415,6 @@ export const postActions = async ({ request }) => {
 	// 	return await fetch(`/api/posts/${data.id}/unlike`, {
 	// 		method: "POST",
 	// 		body: formData,
-	// 	});
-	// }
-
-	// if (intent === "delete-post") {
-	// 	return await fetch(`/api/posts/${data.id}/delete`, {
-	// 		method: "DELETE",
 	// 	});
 	// }
 };

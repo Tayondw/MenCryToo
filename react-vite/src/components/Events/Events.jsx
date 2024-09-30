@@ -2,7 +2,7 @@ import { useLoaderData, Link } from "react-router-dom";
 import "./Events.css";
 
 const Events = () => {
-	const { allEvents } = useLoaderData();
+      const { allEvents } = useLoaderData();
       if (!allEvents || !allEvents.events) return <p>No events available.</p>;
 	const formatDate = (startDate) => {
 		const date = new Date(startDate);
@@ -34,7 +34,7 @@ const Events = () => {
 			<div id="groups-link-holder">
 				<Link to="/groups" id="group-link">
 					{"< "}Groups
-				</Link>
+                        </Link>
 			</div>
 			<div id="events-body-header">
 				<h3>See what each group does to help each other</h3>

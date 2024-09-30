@@ -69,8 +69,11 @@ def delete_post(postId):
     # Delete associated post comments
     Comment.query.filter_by(post_id=postId).delete()
 
+    # Delete associated post likes (use db.session for many-to-many table)
+    db.session.execute(Likes.delete().where(Likes.c.post_id == postId))
+
     # Delete associated post likes
-    Likes.query.filter_by(post_id=postId).delete()
+    #     Likes.query.filter_by(post_id=postId).delete()
 
     db.session.delete(post_to_delete)
     db.session.commit()
