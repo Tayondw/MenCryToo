@@ -9,26 +9,6 @@ from email.mime.multipart import MIMEMultipart
 
 partnership_routes = Blueprint("partnerships", __name__)
 
-# sender = "hello@demomailtrap.com"
-# receiver = os.environ.get("RECEIVER_EMAIL")
-# username = os.environ.get("EMAIL_USERNAME")
-# password = os.environ.get("EMAIL_PASSWORD")
-# host = os.environ.get("EMAIL_HOST")
-# port = os.environ.get("EMAIL_PORT")
-
-# message = f"""\
-# Subject: Hi Tayon!
-# To: {receiver}
-# From: {sender}
-
-# This is a test e-mail message."""
-
-# with smtplib.SMTP(host, port) as server:
-#     server.starttls()
-#     server.login(username, password)
-#     server.sendmail(sender, receiver, message)
-
-
 @partnership_routes.route("/", methods=["POST"])
 def partnerships():
     """
@@ -77,21 +57,6 @@ def partnerships():
             print("Email sent successfully!")
         except Exception as e:
             print(f"Failed to send email: {e}")
-
-        """"
-        This is message is from
-        First Name: {form.data["firstName"]}
-        Last Name: {form.data["lastName"]}
-        Email: {form.data["email"]}
-        Phone: {form.data["phone"]}
-        Topic: {form.data["subject"]}
-        Message: {form.data["message"]}
-        """
-
-        #   with smtplib.SMTP(host, port) as server:
-        #       server.starttls()
-        #       server.login(username, password)
-        #       server.sendmail(sender, receiver, message)
 
         new_partnership = Partnership(
             first_name=form.data["firstName"],
