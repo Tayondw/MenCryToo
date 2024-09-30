@@ -124,7 +124,7 @@ const CreatePost = () => {
 					</div>
 				</Form>
 			) : (
-				<h1>Please log in to make a group!</h1>
+				<h1>Please log in to create your post!</h1>
 			)}
 		</div>
 	);

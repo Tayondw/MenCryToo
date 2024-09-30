@@ -77,7 +77,9 @@ export const postDetailsLoader = async ({ params }) => {
 	if (response.ok) {
 		const postDetails = await response.json();
 		return postDetails;
-	}
+      } else {
+            return window.location.href = "/"
+      }
 };
 
 export const tagsLoader = async () => {

@@ -340,8 +340,9 @@ export const postActions = async ({ request }) => {
 	let intent = formData.get("intent");
 	const errors = {};
 
-	if (intent === "create-post") {
+	if (intent === "create-post" || intent === "edit-post") {
 		data.userId = +data.userId;
+		data.postId = +data.postId;
 		const title = formData.get("title");
 		const caption = formData.get("caption");
 		const image = formData.get("image");
@@ -353,11 +354,27 @@ export const postActions = async ({ request }) => {
 		if (intent === "create-post" && !image)
 			errors.image = "Please add an image";
 		if (Object.keys(errors).length) return errors;
-		await fetch(`/api/users/${data.userId}/posts/create`, {
+	}
+
+	if (intent === "create-post") {
+		const response = await fetch(`/api/users/${data.userId}/posts/create`, {
 			method: "POST",
 			body: formData,
 		});
-		return (window.location.href = "/posts-feed");
+		if (response.ok) return window.location.href = "/posts-feed";
+		else console.log(errors);
+	}
+
+	if (intent === "edit-post") {
+		const response = await fetch(
+			`/api/users/${data.userId}/posts/${data.postId}`,
+			{
+				method: "POST",
+				body: formData,
+			},
+		);
+		if (response.ok) return window.location.href = "/profile";
+		else console.log(errors);
 	}
 
 	// if (intent === "add-comment") {
@@ -384,13 +401,6 @@ export const postActions = async ({ request }) => {
 
 	// if (intent === "remove-like") {
 	// 	return await fetch(`/api/posts/${data.id}/unlike`, {
-	// 		method: "POST",
-	// 		body: formData,
-	// 	});
-	// }
-
-	// if (intent === "edit-post") {
-	// 	return await fetch(`/api/posts/${data.id}/edit`, {
 	// 		method: "POST",
 	// 		body: formData,
 	// 	});
@@ -428,7 +438,6 @@ export const partnershipActions = async ({ request }) => {
 		if (!lastName.length || lastName.length < 3 || lastName.length > 20)
 			errors.lastName = "Last name must be between 3 and 20 characters";
 		if (isNaN(Number(phone))) {
-			// console.log("BAD phone");
 			errors.phone = "Invalid phone number";
 		}
 		if (!subject.length || subject.length < 3 || subject.length > 20)
@@ -443,12 +452,7 @@ export const partnershipActions = async ({ request }) => {
 		const response = await fetch(`/api/partnerships/`, {
 			method: "POST",
 			body: formData,
-            });
-            console.log(response);
-            
-		if (response.ok) {
-			return (window.location.href = "/");
-			// return redirect("/")
-		}
+		});
+		if (response.ok) return redirect("/");
 	}
 };
