@@ -175,8 +175,6 @@ export const eventActions = async ({ request }) => {
 
       if (intent === "edit-event") {
             data.eventId = +data.eventId
-            console.log(data);
-            
 		await fetch(`/api/groups/${data.group_id}/events/${data.eventId}`, {
 			method: "POST",
 			body: formData,
@@ -382,8 +380,6 @@ export const postActions = async ({ request }) => {
       
       if (intent === "delete-post") {
             data.postId = +data.postId;
-            console.log(data);
-            
 		await fetch(`/api/posts/${data.postId}/delete`, {
 			method: "DELETE",
             });

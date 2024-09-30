@@ -5,8 +5,6 @@ import "./DeletePost.css";
 
 const DeletePost = ({ post }) => {
       const { closeModal } = useModal();
-      console.log(post);
-      
 	const onClose = async (event) => {
 		event.preventDefault();
 		closeModal();
@@ -54,7 +52,6 @@ const DeletePost = ({ post }) => {
 						No (Keep Post)
 					</button>
 					<input type="hidden" name="postId" value={post.id} />
-					{/* <input type="hidden" name="id" value={groupDetails.id} /> */}
 				</Form>
 			</div>
 		</div>
