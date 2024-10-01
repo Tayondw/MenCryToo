@@ -141,7 +141,7 @@ export const router = createBrowserRouter([
 			// ! PROFILE
 			// ? your profile only you can access
 			{
-				path: "profile",
+                        path: "profile",
 				element: (
 					<PrivateRoute>
 						<Profile />

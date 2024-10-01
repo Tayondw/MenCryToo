@@ -161,7 +161,7 @@ export const eventActions = async ({ request }) => {
 		}
 
 		data.capacity = +data.capacity;
-            data.group_id = +data.group_id;
+		data.group_id = +data.group_id;
 	}
 
 	// Execute action based on the intent
@@ -173,13 +173,13 @@ export const eventActions = async ({ request }) => {
 		return redirect("/events");
 	}
 
-      if (intent === "edit-event") {
-            data.eventId = +data.eventId
+	if (intent === "edit-event") {
+		data.eventId = +data.eventId;
 		await fetch(`/api/groups/${data.group_id}/events/${data.eventId}`, {
 			method: "POST",
 			body: formData,
 		});
-		return window.location.href = `/events/${data.eventId}`;
+		return (window.location.href = `/events/${data.eventId}`);
 	}
 
 	if (intent === "delete-event") {
@@ -262,6 +262,7 @@ export const profileActions = async ({ request }) => {
 	const intent = formData.get("intent");
 	const data = Object.fromEntries(formData);
 	const errors = {};
+
 	// Handle profile deletion separately
 	if (intent === "delete-profile") {
 		const userId = formData.get("userId");
@@ -270,6 +271,7 @@ export const profileActions = async ({ request }) => {
 		});
 		return (window.location.href = "/");
 	}
+
 	if (intent === "update-profile") {
 		// For other actions like create or update profile
 		const firstName = formData.get("firstName");
@@ -333,6 +335,23 @@ export const profileActions = async ({ request }) => {
 			// return redirect("/profile")
 		}
 	}
+
+	if (intent === "add-tags") {
+		data.userId = +data.userId;
+		const userTags = formData.getAll("userTags");
+		const requestBody = {
+			userTags: userTags,
+			userId: data.userId,
+		};
+		await fetch(`/api/users/${data.userId}/add-tags`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(requestBody),
+		});
+		return (window.location.href = "/profile");
+	}
 };
 
 export const postActions = async ({ request }) => {
@@ -376,14 +395,14 @@ export const postActions = async ({ request }) => {
 		);
 		if (response.ok) return (window.location.href = "/profile");
 		else console.log(errors);
-      }
-      
-      if (intent === "delete-post") {
-            data.postId = +data.postId;
+	}
+
+	if (intent === "delete-post") {
+		data.postId = +data.postId;
 		await fetch(`/api/posts/${data.postId}/delete`, {
 			method: "DELETE",
-            });
-            return window.location.href = "/profile"
+		});
+		return (window.location.href = "/profile");
 	}
 	// if (intent === "add-comment") {
 	// 	data.commentId = +data.commentId;
@@ -417,7 +436,6 @@ export const postActions = async ({ request }) => {
 
 export const partnershipActions = async ({ request }) => {
 	let formData = await request.formData();
-	// let data = Object.fromEntries(formData);
 	let intent = formData.get("intent");
 	const errors = {};
 

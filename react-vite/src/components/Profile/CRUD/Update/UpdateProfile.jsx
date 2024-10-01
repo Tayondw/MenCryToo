@@ -40,14 +40,15 @@ const UpdateProfile = () => {
 			<img
 				src="https://mencrytoo.s3.amazonaws.com/signup.png"
 				alt="signup"
-				id="fit-signup-image-content"
+				id="fit-image-content"
 			/>
 			<Form
 				method="post"
 				encType="multipart/form-data"
 				type="file"
 				action={`/users/${sessionUser?.id}/profile/update`}
-				className="create-group-form"
+                        className="create-group-form"
+                        // style={{marginTop: `50px`}}
 			>
 				<div id="header">
 					<h3>Update Profile</h3>
@@ -187,7 +188,8 @@ const UpdateProfile = () => {
 				</div>
 				<hr />
 				<div id="event-status">
-					<h3 style={{ fontSize: `17px` }}>Select one or more tags - Update</h3>
+                              <h3 style={{ fontSize: `17px` }}>Select one or more tags - Update</h3>
+                              <p>This will reset your current tags - you must have a tag to associate yourself with</p>
 					<label>
 						<select
                                           name="userTags"
@@ -221,7 +223,7 @@ const UpdateProfile = () => {
 								width: `600px`,
 							}}
 						>
-							<h3 style={{fontSize: `12px`}}>Your Tags</h3>
+							<h3 style={{fontSize: `12px`}}>Your Current Tags</h3>
 							<div style={{ display: `flex`, flexWrap: `wrap`, padding: 0}}>
 								{sessionUser?.usersTags?.map((tag) => (
 									<div key={tag?.id} style={{padding: 0}}>

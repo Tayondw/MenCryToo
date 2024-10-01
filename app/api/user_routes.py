@@ -274,7 +274,7 @@ def add_tags(userId):
         return jsonify({"errors": {"message": "Unauthorized"}}), 403
 
     form = request.json
-    new_tag_names = form.get("tags", [])
+    new_tag_names = form.get("userTags", [])
 
     # Fetch existing tags
     existing_tags = user.users_tags

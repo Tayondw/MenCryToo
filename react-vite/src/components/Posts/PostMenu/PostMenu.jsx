@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import OpenModalButton from "../../OpenModalButton";
-// import UpdatePost from "../CRUD/Update";
 import DeletePost from "../CRUD/Delete";
 import { FaEllipsis } from "react-icons/fa6";
 import "./PostMenu.css";
@@ -8,25 +7,19 @@ import "./PostMenu.css";
 const PostMenu = ({ navigate, post }) => {
 	const [showMenu, setShowMenu] = useState(false);
 	const menuRef = useRef();
-
 	const toggleMenu = useCallback((e) => {
 		e.stopPropagation();
 		setShowMenu((prev) => !prev);
 	}, []);
-
 	const closeMenu = useCallback(() => {
 		setShowMenu(false);
 	}, []);
 
 	useEffect(() => {
 		if (!showMenu) return;
-
 		const handleClickOutside = (e) => {
-			if (menuRef.current && !menuRef.current.contains(e.target)) {
-				closeMenu();
-			}
+			if (menuRef.current && !menuRef.current.contains(e.target)) closeMenu();
 		};
-
 		document.addEventListener("click", handleClickOutside);
 		return () => document.removeEventListener("click", handleClickOutside);
 	}, [showMenu, closeMenu]);
@@ -45,7 +38,6 @@ const PostMenu = ({ navigate, post }) => {
 							closeMenu();
 							navigate(`/posts/${post.id}/edit`);
 						}}
-						// modalComponent={<UpdatePost post={post} navigate={navigate} />}
 						style={{
 							color: `#223f5c`,
 							backgroundColor: `#FAF5E4`,
@@ -56,7 +48,6 @@ const PostMenu = ({ navigate, post }) => {
 						buttonText="Delete Post"
 						onButtonClick={() => {
 							closeMenu();
-							// navigate("/events");
 						}}
 						modalComponent={<DeletePost post={post} navigate={navigate} />}
 						style={{

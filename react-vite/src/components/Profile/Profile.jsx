@@ -4,12 +4,15 @@ import { useSelector } from "react-redux";
 import PostMenu from "../Posts/PostMenu";
 import OpenModalButton from "../OpenModalButton";
 import DeleteProfile from "./CRUD/Delete";
+import AddTag from "../Tags/AddTags";
 import { BiSolidPencil } from "react-icons/bi";
 import { FaHeart, FaComments } from "react-icons/fa6";
 import "./Profile.css";
 
 const Profile = () => {
 	const sessionUser = useSelector((state) => state.session.user);
+	// const allTags = useLoaderData();
+	// const tags = allTags.tags;
 	const navigate = useNavigate();
 	const [activeMainSection, setActiveMainSection] = useState("posts"); // State to track the main active section
 	const [activeAsideSection, setActiveAsideSection] = useState("tags"); // State to track the aside active section
@@ -194,28 +197,73 @@ const Profile = () => {
 								<p
 									className="button"
 									id="each-profile-tag"
-									style={{ cursor: `default` }}
+									style={{ cursor: `default`, width: `100%`, height: `100%` }}
 								>
 									{tag?.name}
 								</p>
 							</div>
 						))}
+						<div id="add-tags">
+							<OpenModalButton
+								// tags={tags}
+								navigate={navigate}
+								className="group-delete-button button"
+								buttonText="Add Tags"
+								style={{
+									backgroundColor: `var(--peach)`,
+									color: `#dddddc`,
+									lineHeight: 1,
+									boxSizing: `border-box`,
+									fontWeight: 600,
+									height: `45px`,
+									width: `220px`,
+								}}
+								modalComponent={
+									<AddTag
+										// tags={tags}
+										navigate={navigate}
+									/>
+								}
+							/>
+						</div>
 					</div>
 				) : (
 					<p>Currently no tags available.</p>
 				);
 			case "similar to you":
 				return (
-					<Link to="/profile-feed">
-						<button className="button" style={{ cursor: `pointer` }}>
-							SIMILAR TO YOU
-						</button>
-					</Link>
+					<div
+						style={{
+							display: `flex`,
+							flexDirection: `column`,
+							justifyContent: `center`,
+							alignItems: `center`,
+							marginBottom: `25px`,
+							marginLeft: `50px`,
+							marginRight: `50px`,
+						}}
+					>
+						<h3
+							style={{
+								fontSize: `15px`,
+								textWrap: `balance`,
+								width: `370px`,
+								marginBottom: `15px`,
+							}}
+						>
+							Find users similar to you based on your tags
+						</h3>
+						<Link to="/profile-feed">
+							<button className="button" style={{ cursor: `pointer` }}>
+								SIMILAR TO YOU
+							</button>
+						</Link>
+					</div>
 				);
 			default:
 				return null;
 		}
-	}, [activeAsideSection, userTags]);
+	}, [activeAsideSection, userTags, navigate]);
 
 	return (
 		<div
