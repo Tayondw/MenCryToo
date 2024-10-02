@@ -28,7 +28,8 @@ const UpdatePost = () => {
 			setTitle(postDetails.title || "");
 			setCaption(postDetails.caption || "");
 		}
-	}, [postDetails, sessionUser]);
+      }, [postDetails, sessionUser]);
+      
 	return (
 		<div id="new-group">
 			<img src={postDetails.image} alt="create-group" id="fit-image-content" />
