@@ -44,6 +44,8 @@ oauthlib = "*"
 requests-oauthlib = "*"
 requests = "*"
 rsa = "*"
+bs4 = "*"
+beautifulsoup4 = "*"
 
 [dev-packages]
 
