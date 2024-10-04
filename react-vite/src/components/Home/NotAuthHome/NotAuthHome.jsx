@@ -21,7 +21,7 @@ export const HeroSection = () => {
 						<Link
 							to="/partnership"
 							className="button"
-							style={{ cursor: `pointer` }}
+							style={{ cursor: `pointer`, alignContent: `center`}}
 						>
 							Partnership
 						</Link>
@@ -245,30 +245,6 @@ const NotAuthHome = () => {
 						>
 							Join Us
 						</Link>
-						{/* <OpenModalButton
-							buttonText="Join Us"
-							style={{
-								background: `#223f5c`,
-								width: `200px`,
-								cursor: `pointer`,
-								borderRadius: `4px`,
-								color: `#fff`,
-								textAlign: `center`,
-								letterSpacing: `2px`,
-								textTransform: `uppercase`,
-								marginLeft: `10px`,
-								marginRight: `10px`,
-								padding: `12px 30px`,
-								fontSize: `16px`,
-								fontWeight: 600,
-								lineHeight: `21px`,
-								textDecoration: `none`,
-								transition: `background-color 0.3s`,
-								display: `inline-block`,
-								border: 0,
-							}}
-							modalComponent={<SignupFormModal />}
-						/> */}
 					</>
 				)}
 			</div>

@@ -62,9 +62,18 @@ function LoginFormModal() {
 
 	// Close modal when clicking outside of the modal content
 	useEffect(() => {
-		const handleClickOutside = (event) => {
-			if (event.target.classList.contains("body")) {
-				closeModal();
+            const handleClickOutside = (event) => {
+                  const navElement = document.querySelector(".w-nav");
+                  const modalTrigger = document.querySelector(".auth-login");
+
+			if (
+				event.target.classList.contains("body") ||
+				navElement?.contains(event.target)
+			) {
+				// Do not close the modal if the click is on the login button
+				if (!modalTrigger?.contains(event.target)) {
+					closeModal();
+				}
 			}
 		};
 
