@@ -51,10 +51,15 @@ const Posts = () => {
 			<h3
 				style={{
 					fontSize: `70px`,
-					padding: `3% 0px 4% 3%`,
+                              padding: `3% 0px 4% 3%`,
+                              margin: `0 5%`,
 					backgroundImage: `linear-gradient(35deg, #E08F2C, #223f5c)`,
 					backgroundClip: `text`,
-					WebkitTextFillColor: `transparent`,
+                              WebkitTextFillColor: `transparent`,
+                              lineHeight: `60px`,
+                              display: `flex`,
+                              alignItems: `center`,
+                              justifyContent: `center`
 				}}
 			>
 				POSTS FROM USERS SIMILAR TO YOU!

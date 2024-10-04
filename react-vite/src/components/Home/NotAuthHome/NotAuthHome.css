@@ -208,10 +208,10 @@
       border: none;
 }
 
-.button:hover,
+/* .button:hover,
 .w-button:hover {
 	background-color: #ea8d89;
-}
+} */
 
 .button.w--current {
 	background-color: #2e80b6;
@@ -345,7 +345,6 @@
 .white-box:hover {
       background-color: #ea8d89;
       color: #223f5c;
-      cursor: pointer;
 }
 
 .white-box.transparent {

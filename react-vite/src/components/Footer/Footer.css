@@ -1,0 +1,94 @@
+/* Media Query for Medium Devices (below 1190px) */
+@media (max-width: 1190px) {
+	.footer {
+		flex-direction: column;
+		text-align: center;
+		padding: 15px;
+            align-items: center;
+            justify-content: center;
+	}
+
+	#personal-info-footer,
+	#personal-profile-footer {
+		margin-bottom: 0px;
+	}
+
+	#personal-profile-footer {
+		gap: 15px;
+	}
+
+	.footer img {
+		width: 150px;
+		height: 150px;
+	}
+}
+
+/* Media Query for Small Devices (below 768px) */
+@media (max-width: 768px) {
+
+      .footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2%;
+      }
+
+      #personal-profile-footer {
+            display: flex;
+            flex-direction: column;
+      }
+
+      #personal-info-footer {
+            margin: 0;
+      }
+
+	#personal-profile-footer a {
+		font-size: 20px;
+	}
+
+	#personal-info-footer h2 {
+		font-size: 20px;
+	}
+
+	#personal-info-footer h3 {
+		font-size: 18px;
+	}
+
+	#personal-info-footer p {
+		font-size: 16px;
+	}
+
+	.footer img {
+		width: 120px;
+		height: 120px;
+            margin-left: 15px;
+	}
+
+	.footer-text {
+		font-size: 14px;
+	}
+}
+
+/* Media Query for Extra Small Devices (below 480px) */
+@media (max-width: 480px) {
+	#personal-info-footer h2 {
+		font-size: 18px;
+	}
+
+	#personal-info-footer h3 {
+		font-size: 16px;
+	}
+
+	#personal-profile-footer a {
+		font-size: 18px;
+	}
+
+	.footer img {
+		width: 100px;
+		height: 100px;
+	}
+
+	.footer-text {
+		font-size: 12px;
+	}
+}

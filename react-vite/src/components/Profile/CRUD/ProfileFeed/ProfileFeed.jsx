@@ -6,16 +6,16 @@ const ProfileFeed = () => {
 	const allProfiles = useLoaderData();
 	const sessionUser = useSelector((state) => state.session.user);
 	if (!sessionUser) window.location.href = "/";
-	const sessionUserTags = sessionUser.usersTags.map((tag) => tag.id); // Get an array of the session user's tag IDs
+	const sessionUserTags = sessionUser?.usersTags?.map((tag) => tag?.id); // Get an array of the session user's tag IDs
 	const findSimilarUsers = (users, sessionTags) => {
 		// Function to find users with at least one matching tag
-		return users.filter((user) => {
-			const userTags = user.usersTags.map((tag) => tag.id); // Get the tag IDs for each user
-			return userTags.some((tagId) => sessionTags.includes(tagId)); // Check if there is any common tag between the session user and the current user
+		return users?.filter((user) => {
+			const userTags = user?.usersTags?.map((tag) => tag?.id); // Get the tag IDs for each user
+			return userTags?.some((tagId) => sessionTags?.includes(tagId)); // Check if there is any common tag between the session user and the current user
 		});
 	};
 	const similarUsers = findSimilarUsers(
-		allProfiles.users_profile,
+		allProfiles?.users_profile,
 		sessionUserTags,
 	); // Use the function to get users with at least one similar tag
 	return (
@@ -33,7 +33,7 @@ const ProfileFeed = () => {
 				</Link>
 
 				<Link
-					to={`/users/${sessionUser.id}/profile/update`}
+					to={`/users/${sessionUser?.id}/profile/update`}
 					className="nav-link"
 				>
 					Update Profile{" >"}
@@ -59,31 +59,31 @@ const ProfileFeed = () => {
 					) : (
 						<>
 							{similarUsers.map((user) => (
-								<div key={user.id}>
-									{user.id !== sessionUser.id ? (
+								<div key={user?.id}>
+									{user?.id !== sessionUser?.id ? (
 										<Link
-											to={`/users/${user.id}`}
+											to={`/users/${user?.id}`}
 											style={{
 												textDecoration: "none",
 												color: "inherit",
 											}}
-											key={user.id}
+											key={user?.id}
 										>
 											<div className="members-group-cards">
-												<img src={user.profileImage} alt={user.username} />
+												<img src={user?.profileImage} alt={user?.username} />
 												<div id="members-group-display-style-direction">
 													<div id="members-group-keep-in-style">
 														<h2>
-															{user.firstName} {user.lastName}
+															{user?.firstName} {user?.lastName}
 														</h2>
 													</div>
 													<ul className="stats">
 														<li>
-															<var>{user.username}</var>
+															<var>{user?.username}</var>
 															<label>Username</label>
 														</li>
 														<li>
-															<var>{user.email}</var>
+															<var>{user?.email}</var>
 															<label>Email</label>
 														</li>
 													</ul>

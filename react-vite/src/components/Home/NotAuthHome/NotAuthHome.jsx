@@ -18,24 +18,38 @@ export const HeroSection = () => {
 						<h4 className="heading-3">Take control of your mental health.</h4>
 					</div>
 					<div className="div-block">
-						{/* <Link className="button" style={{ cursor: `text` }}>
-							TAKE INSPECTION
-						</Link> */}
+						<Link
+							to="/partnership"
+							className="button"
+							style={{ cursor: `pointer` }}
+						>
+							Partnership
+						</Link>
 						{sessionUser ? (
-                                          <Link
-                                                to={`/profile-feed`}
+							<Link
+								to={`/profile-feed`}
 								className="hollow-button all-caps"
 								style={{ cursor: `pointer` }}
 							>
 								FIND SOMEONE LIKE YOU
 							</Link>
 						) : (
-							<Link
-								className="hollow-button all-caps disabled"
-								style={{ cursor: `text` }}
-							>
-								FIND SOMEONE LIKE YOU
-							</Link>
+							<>
+								<Link
+									to="/login"
+									className="hollow-button all-caps"
+									style={{ cursor: `pointer` }}
+								>
+									LOGIN
+								</Link>
+								<Link
+									to="/signup"
+									className="hollow-button all-caps"
+									style={{ cursor: `pointer` }}
+								>
+									SIGN UP
+								</Link>
+							</>
 						)}
 					</div>
 				</div>
@@ -46,7 +60,7 @@ export const HeroSection = () => {
 };
 
 export const SectionOne = () => {
-      const {allTags} = useLoaderData();
+	const { allTags } = useLoaderData();
 	return (
 		<div className="section">
 			<div className="w-container-tag-div">
@@ -62,7 +76,7 @@ export const SectionOne = () => {
 							// to={`/tags/${tag.id}/${tag.name}`}
 							key={tag?.id}
 							className="w-button"
-							style={{ cursor: `text` }}
+							style={{ cursor: `default` }}
 						>
 							{tag?.name}
 						</Link>
@@ -150,8 +164,8 @@ export const AccentSection = () => {
 							<p className="white-text">
 								Men Cry Too is an effort to break through stigma of men not
 								being allowed to express their feelings, improve help-seeking
-								behavior and reduce male suicide. Let&apos;s check the stats that
-								led to why we&apos;re both here.
+								behavior and reduce male suicide. Let&apos;s check the stats
+								that led to why we&apos;re both here.
 							</p>
 							{/* <Link
 								// to="/about"
@@ -200,7 +214,7 @@ const NotAuthHome = () => {
 		<>
 			<HeroSection />
 			<SectionOne />
-			{/* <SectionTwo /> */}
+			<SectionTwo />
 			<AccentSection />
 			<div id="section-4">
 				{sessionUser ? null : (

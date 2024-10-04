@@ -132,7 +132,6 @@ function SignupFormPage() {
 					}),
 				});
 			}
-
 			// Redirect to the intended page or homepage after signup
 			navigate(from);
 		} else {
