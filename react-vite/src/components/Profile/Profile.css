@@ -44,6 +44,7 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
+      gap: 45px;
 	align-items: center;
 }
 
@@ -53,7 +54,7 @@
 
 #profile-stats {
 	display: flex;
-	gap: 130px;
+	gap: 50px;
 	list-style: none;
 	padding: 0;
 	flex-wrap: wrap; /* Enable wrapping for the stats */
@@ -81,6 +82,7 @@
 	align-items: center;
 	color: #676770;
 	font-weight: 900;
+      font-size: 20px;
 }
 
 #second-half-profile {
