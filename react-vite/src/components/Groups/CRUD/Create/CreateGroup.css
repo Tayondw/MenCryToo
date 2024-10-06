@@ -292,6 +292,7 @@ select {
 	#update-group-cancel {
 		font-size: 12px;
 		padding: 6px 12px;
+            width: 100%;
 	}
 
 	input,

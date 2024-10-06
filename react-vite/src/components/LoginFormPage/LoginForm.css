@@ -1,27 +1,89 @@
 #login {
-      display: flex;
-      flex-direction: column;
-      gap: 25px;
-      /* justify-content: center;
+	display: flex;
+	flex-direction: column;
+	gap: 25px;
+	/* justify-content: center;
       align-items: center; */
 }
 
 #form-login {
-      margin: 25%;
+	margin: 25%;
 }
 
-#login #login-email label, #login #login-password label{
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      font-size: 15px;
-      text-transform: uppercase;
-      font-weight: 800;
+#login #login-email label,
+#login #login-password label {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	font-size: 15px;
+	text-transform: uppercase;
+	font-weight: 800;
 }
 
-#login #login-email input, #login #login-password input {
-      border: 2px solid black;
-      box-sizing: border-box;
-      width: 40%;
-      
+#login #login-email input,
+#login #login-password input {
+	border: 2px solid black;
+	box-sizing: border-box;
+	width: 40%;
+}
+
+@media (max-width: 1600px) {
+	.login-button {
+		margin-bottom: 20px;
+	}
+}
+
+/* Media query for medium screens (tablets) */
+@media (max-width: 768px) {
+	#create-group-form {
+		width: 90%;
+		padding: 15px;
+	}
+
+	#header-login h3 {
+		font-size: 1.5rem;
+	}
+
+	#login-password {
+		width: 160px;
+	}
+
+	.login-button,
+	.demo-login-button {
+		width: 100%;
+		margin-top: 10px;
+	}
+
+	.login-button {
+		margin-right: 0; /* Remove margin for better stacking */
+		max-width: 100%;
+	}
+}
+
+/* Media query for smaller screens (phones) */
+@media (max-width: 480px) {
+	#create-group-form {
+		width: 100%;
+		padding: 10px;
+	}
+
+	#header-login h3 {
+		font-size: 1.2rem;
+	}
+
+	input {
+		width: 100%;
+		font-size: 0.9rem;
+	}
+
+	.login-button,
+	.demo-login-button {
+		width: 100%;
+		padding: 10px;
+		font-size: 0.9rem;
+	}
+
+	.login-button {
+		max-width: 100%;
+	}
 }

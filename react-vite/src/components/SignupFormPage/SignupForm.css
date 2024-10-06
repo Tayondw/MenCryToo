@@ -1,6 +1,6 @@
 #fit-signup-image-content {
       width: 100%;
-      height: 100vh;
+      height: 100%;
 }
 
 #section-0-create {
@@ -34,4 +34,41 @@
       display: flex;
       gap: 15px;
       padding-top: 10px;
+}
+
+@media (max-width: 1500px) {
+      #profile-desc-textarea {
+            max-width: 450px;
+      }
+}
+
+@media (max-width: 900px) {
+      #profile-desc-textarea {
+            max-width: 400px;
+      }
+}
+
+@media (max-width: 768px) {
+      #profile-desc-textarea {
+            max-width: 400px;
+      }
+}
+
+@media (max-width: 620px) {
+      #section-0-create {
+            margin-right: 45px;
+      }
+
+      #first-name-input-text, #last-name-input-text, #email-input-text, #username-input-text, #password-input-text, #confirm-password-input-text {
+            max-width: 100px;
+      }
+
+      #profile-desc-textarea {
+            max-width: 200px;
+      }
+
+      #signup-section-6 {
+            display: flex;
+            flex-direction: column;
+      }
 }
