@@ -44,7 +44,7 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-      gap: 45px;
+	gap: 45px;
 	align-items: center;
 }
 
@@ -82,7 +82,7 @@
 	align-items: center;
 	color: #676770;
 	font-weight: 900;
-      font-size: 20px;
+	font-size: 20px;
 }
 
 #second-half-profile {
@@ -395,13 +395,37 @@
 	}
 }
 
+@media (min-width: 1201px) and (max-width: 1500px) {
+	#photo-plus {
+		font-size: 50px;
+		position: relative;
+		left: 210px;
+		bottom: 60px;
+		border: 2px solid #e08f2c;
+		border-radius: 50%;
+		color: #e08f2c;
+		font-weight: 1000;
+	}
+}
+
 /* Large Desktops and Laptops */
 @media (min-width: 1200px) {
-	#user-profile-page {
+	/* #user-profile-page {
 		display: flex;
 		justify-content: space-between;
 		padding: 20px;
-	}
+	} */
+
+	/* #photo-plus {
+		font-size: 50px;
+		position: relative;
+		left: -40px;
+		bottom: 60px;
+		border: 2px solid #e08f2c;
+		border-radius: 50%;
+		color: #e08f2c;
+		font-weight: 1000;
+	} */
 
 	#user-profile-basic {
 		flex: 1;
@@ -427,11 +451,11 @@
 }
 
 /* Tablets (Portrait and Landscape) */
-@media (max-width: 1200px) and (min-width: 768px) {
-	#user-profile-page {
+@media (max-width: 1199px) and (min-width: 768px) {
+	/* #user-profile-page {
 		flex-direction: column;
 		align-items: center;
-	}
+	} */
 
 	#user-profile-img-wdetails {
 		flex-direction: column;
@@ -455,6 +479,17 @@
 
 	#crud-buttons-delete {
 		margin-top: 20px;
+	}
+
+	#photo-plus {
+		font-size: 50px;
+		position: relative;
+		left: 180px;
+		bottom: 60px;
+		border: 2px solid #e08f2c;
+		border-radius: 50%;
+		color: #e08f2c;
+		font-weight: 1000;
 	}
 }
 
