@@ -20,6 +20,7 @@ import UpdatePost from "../components/Posts/CRUD/Update";
 import PrivateRoute from "../components/PrivateRoute";
 import ProfileFeed from "../components/Profile/CRUD/ProfileFeed";
 import Partnership from "../components/Partnership";
+import Contact from "../components/Contact";
 // import Comments from "../components/Comments";
 // import CommentDetails from "../components/Comments/Details";
 // import Tags from "../components/Tags";
@@ -49,7 +50,8 @@ import {
 	// venueActions,
 	profileActions,
       postActions,
-      partnershipActions
+      partnershipActions,
+      contactActions
 } from "./actions";
 import Layout from "./Layout";
 
@@ -226,6 +228,11 @@ export const router = createBrowserRouter([
 				// loader: tagDetailsLoader,
 				element: <Partnership />,
 				action: partnershipActions,
+			},
+			{
+				path: "contact",
+				element: <Contact />,
+				action: contactActions,
 			},
 			// {
 			// 	path: "assets/resume",

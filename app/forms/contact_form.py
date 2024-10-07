@@ -1,15 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, EmailField, IntegerField
 from wtforms.validators import DataRequired, Length, ValidationError
-from app.models import Partnership
-
-
-def partner_exists(form, field):
-    # Checking if user exists
-    email = field.data
-    partner = Partnership.query.filter(Partnership.email == email).first()
-    if partner:
-        raise ValidationError("Email address is already in use.")
 
 
 def correct_phone(form, field):
@@ -18,7 +9,7 @@ def correct_phone(form, field):
         raise ValidationError("Invalid Phone Number")
 
 
-class PartnershipForm(FlaskForm):
+class ContactForm(FlaskForm):
     firstName = StringField(
         "First Name",
         validators=[
@@ -37,7 +28,7 @@ class PartnershipForm(FlaskForm):
             ),
         ],
     )
-    email = EmailField("email", validators=[DataRequired(), partner_exists])
+    email = EmailField("email", validators=[DataRequired()])
     phone = IntegerField("phone", validators=[DataRequired(), correct_phone])
     subject = StringField(
         "Subject",

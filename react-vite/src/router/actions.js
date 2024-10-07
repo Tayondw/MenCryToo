@@ -1,4 +1,4 @@
-import { redirect } from "react-router-dom";
+import { redirect, json } from "react-router-dom";
 
 export const groupActions = async ({ request }) => {
 	const formData = await request.formData();
@@ -30,6 +30,7 @@ export const groupActions = async ({ request }) => {
 			errors.image = "Group image is required to create a group";
 
 		if (Object.keys(errors).length) {
+			console.log("Errors being returned:", errors);
 			return errors;
 		}
 
@@ -447,6 +448,69 @@ export const partnershipActions = async ({ request }) => {
 		const subject = formData.get("subject");
 		const message = formData.get("message");
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+		if (email) {
+			const errorResponse = await fetch(`/api/partnerships/`, {
+				method: "POST",
+				body: formData,
+			});
+
+			if (!errorResponse.ok) {
+				const errorData = await errorResponse.json();
+				console.log("Error from backend:", errorData);
+				errors.email = "Email already in use";
+				// return json({
+				// 	backendError: errorData.email || "Something went wrong",
+				// });
+			}
+		}
+		if (email.length > 50)
+			errors.email = "Email must be less than 50 characters";
+		if (!emailRegex.test(email) || email.length <= 0)
+			errors.email = "Invalid email";
+		if (!firstName.length || firstName.length < 3 || firstName.length > 20)
+			errors.firstName = "First name must be between 3 and 20 characters";
+		if (!lastName.length || lastName.length < 3 || lastName.length > 20)
+			errors.lastName = "Last name must be between 3 and 20 characters";
+		if (isNaN(Number(phone))) {
+			errors.phone = "Invalid phone number";
+		}
+		if (!subject.length || subject.length < 3 || subject.length > 20)
+			errors.subject = "Subject must be between 3 and 20 characters";
+		if (!message.length || message.length < 10 || message.length > 500)
+			errors.message =
+				"Please enter at least 10 characters describing yourself";
+		if (Object.keys(errors).length) {
+			return json(errors);
+		}
+
+		await fetch(`/api/partnerships/`, {
+			method: "POST",
+			body: formData,
+		});
+		// if (response.ok) return redirect("/");
+		// if (!response.ok) {
+		// 	const errorData = await response.json();
+		// 	console.log("Error from backend:", errorData);
+		// 	return json({ backendError: errorData.email || "Something went wrong" });
+		// }
+		return redirect("/");
+	}
+};
+
+export const contactActions = async ({ request }) => {
+	let formData = await request.formData();
+	let intent = formData.get("intent");
+	const errors = {};
+
+	if (intent === "create-contact") {
+		const firstName = formData.get("firstName");
+		const lastName = formData.get("lastName");
+		const phone = formData.get("phone");
+		const email = formData.get("email");
+		const subject = formData.get("subject");
+		const message = formData.get("message");
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (email) {
 			if (email.length > 50)
 				errors.email = "Email must be less than 50 characters";
@@ -469,7 +533,7 @@ export const partnershipActions = async ({ request }) => {
 			return errors;
 		}
 
-		const response = await fetch(`/api/partnerships/`, {
+		const response = await fetch(`/api/contact/`, {
 			method: "POST",
 			body: formData,
 		});

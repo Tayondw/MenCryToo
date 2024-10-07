@@ -1,9 +1,9 @@
 import { useActionData, Form, Link } from "react-router-dom";
 import { useState } from "react";
-import "./Partnership.css";
+import "./Contact.css";
 
-const Partnership = () => {
-      const errors = useActionData() || {};
+const Contact = () => {
+	const errors = useActionData();
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
 	const [email, setEmail] = useState("");
@@ -15,12 +15,12 @@ const Partnership = () => {
 		<div id="new-group">
 			<img
 				src="https://mencrytoo.s3.amazonaws.com/MENCRYTOO4.jpg"
-				alt="partnership"
+				alt="contact"
 				id="fit-image-content"
 			/>
 			<Form
 				id="contact-form"
-				action="/partnership"
+				action="/contact"
 				method="post"
 				// type="file"
 				encType="multipart/form-data"
@@ -28,23 +28,15 @@ const Partnership = () => {
 				style={{ paddingTop: `25px` }}
 			>
 				<div id="header">
-					<h3 style={{ paddingBottom: `15px` }}>BECOME A PARTNER</h3>
+					<h3 style={{ paddingBottom: `15px` }}>LET US HELP</h3>
 					<p>
-						Men Cry Too is an member-based, ready-made program for organizations
-						and communities that want to promote mental health and reduce
-						suicide among men. Our licensing model and partnership network help
-						us expand Men Cry Too&apos;s reach and impact through a proven
-						solution that connects men with lifesaving tools and resources.
-						Learn how you can join our thriving network and put this innovative,
-						prevention campaign to work in your community.
+						We can all struggle at times and just need some help to work through
+						it. We will send you some documentation for getting started, what to
+						look out for, how to break the ice, and what is next once we receive
+						your request.
 					</p>
 					<hr />
 				</div>
-				{/* {errors.backendError && (
-					<p style={{ color: "red" }} className="errors">
-						{errors.backendError}
-					</p>
-				)} */}
 				<div id="section-0-create">
 					<div id="set-first-name">
 						<h3 style={{ fontSize: `15px` }}>First Name</h3>
@@ -126,21 +118,21 @@ const Partnership = () => {
 				<hr />
 				<div id="section-2-create">
 					<div id="set-name">
-						<h3 style={{ fontSize: `15px` }}>Specify who you are</h3>
+						<h3 style={{ fontSize: `15px` }}>Topic of Concern</h3>
 						<div className="caption">
 							<p>
-								Are you an individual or a professional?
+								What are you concerned about?
 								<br />
-								If professional, specify which organization (i.e Non-Profit,
-								Government, Privately Licensed Professional, Industry Specific
-								Organization)
+								What does your loved one need support with at the moment? (i.e
+								ANGER, ANXIETY, DEPRESSION, SUICIDAL THOUGHTS, SUBSTANCE ABUSE,
+								COMING OUT, GRIEF, TRAUMA, RELATIONSHIPS, STRESS)
 							</p>
 						</div>
 						<div id="name-input">
 							<input
 								id="name-input-text"
 								type="text"
-								placeholder="Individual or Professional?"
+								placeholder="Topic of Concern?"
 								name="subject"
 								value={subject}
 								onChange={(event) => setSubject(event.target.value)}
@@ -158,7 +150,7 @@ const Partnership = () => {
 				<div id="section-3-create">
 					<div id="set-description">
 						<h3 style={{ fontSize: `15px`, paddingBottom: `10px` }}>
-							Describe your journey to here
+							Describe your what&apos;s been going on.
 						</h3>
 						<div id="description-input">
 							<textarea
@@ -191,7 +183,7 @@ const Partnership = () => {
 						id="create-group-submit"
 						type="submit"
 						name="intent"
-						value="create-partnership"
+						value="create-contact"
 					>
 						Submit
 					</button>
@@ -204,4 +196,4 @@ const Partnership = () => {
 	);
 };
 
-export default Partnership;
+export default Contact;

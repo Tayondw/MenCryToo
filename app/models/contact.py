@@ -2,8 +2,8 @@ from .db import db, environment, SCHEMA
 from datetime import datetime
 
 
-class Partnership(db.Model):
-    __tablename__ = "partnerships"
+class Contact(db.Model):
+    __tablename__ = "contacts"
 
     if environment == "production":
         __table_args__ = {"schema": SCHEMA}
@@ -11,7 +11,7 @@ class Partnership(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(20), nullable=False)
     last_name = db.Column(db.String(20), nullable=False)
-    email = db.Column(db.String(255), nullable=False, unique=True)
+    email = db.Column(db.String(255), nullable=False)
     phone = db.Column(db.Numeric(10, 0), nullable=False)
     subject = db.Column(db.String(255), nullable=False)
     message = db.Column(db.String(500), nullable=True)

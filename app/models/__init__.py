@@ -14,3 +14,4 @@ from .tag import Tag
 from .user_tag import user_tags as UserTags
 from .venue import Venue
 from .partnership import Partnership
+from .contact import Contact

@@ -13,3 +13,4 @@ from .user_form import UserForm
 from .edit_user_form import EditUserForm
 from .venue_form import VenueForm
 from .partnership_form import PartnershipForm
+from .contact_form import ContactForm

@@ -133,12 +133,12 @@ export const SectionTwo = () => {
 				<h2 className="heading-2 bottom">Its not you, it&apos;s them</h2>
 				<h1 className="heading bottom">WORRIED ABOUT SOMEONE?</h1>
 				<div className="div-block">
-					<a
-						// href="#"
+					<Link
+						to="/contact"
 						className="button"
 					>
 						LET US HELP
-					</a>
+					</Link>
 				</div>
 			</div>
 			<Outlet />

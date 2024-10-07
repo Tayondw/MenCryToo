@@ -19,7 +19,8 @@ from .models import (
     Tag,
     Likes,
     UserTags,
-    Partnership
+    Partnership,
+    Contact
 )
 from .api.user_routes import user_routes
 from .api.auth_routes import auth_routes
@@ -32,6 +33,7 @@ from .api.venue_routes import venue_routes
 from .api.post_routes import post_routes
 from .api.comment_routes import comment_routes
 from .api.partnership_routes import partnership_routes
+from .api.contact_routes import contact_routes
 from .seeds import seed_commands
 from .config import Config
 
@@ -62,6 +64,7 @@ app.register_blueprint(post_routes, url_prefix="/api/posts")
 app.register_blueprint(comment_routes, url_prefix="/api/comments")
 app.register_blueprint(tag_routes, url_prefix="/api/tags")
 app.register_blueprint(partnership_routes, url_prefix="/api/partnerships")
+app.register_blueprint(contact_routes, url_prefix="/api/contact")
 db.init_app(app)
 Migrate(app, db)
 
