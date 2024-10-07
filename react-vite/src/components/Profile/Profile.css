@@ -395,7 +395,8 @@
 	}
 }
 
-@media (min-width: 1201px) and (max-width: 1500px) {
+
+@media (min-width: 1201px) and (max-width: 1493px) {
 	#photo-plus {
 		font-size: 50px;
 		position: relative;
@@ -405,7 +406,49 @@
 		border-radius: 50%;
 		color: #e08f2c;
 		font-weight: 1000;
+            display: inline-block;
 	}
+
+      #user-profile-img-wdetails #user-profile-details #profile-stats {
+		display: flex;
+		align-items: center;
+            margin: 0;
+            gap: 10px;
+            flex-shrink: 0;
+	}
+
+      #profile-home-edit-profile {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+            height: 100px;
+	}
+
+      #profile-home-edit-profile a {
+		text-decoration: none;
+            padding: 0;
+            margin: 0;
+            width: fit-content;
+
+	}
+
+	#profile-home-edit-profile button {
+		height: 45px;
+		width: 100%;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+            line-height: 15px;
+            letter-spacing: 2px;
+	}
+
+      #profile-home-edit-profile #crud-buttons-delete {
+            padding: 0;
+            margin: 0;
+      }
+
 }
 
 /* Large Desktops and Laptops */
@@ -421,6 +464,17 @@
 		position: relative;
 		left: -40px;
 		bottom: 60px;
+		border: 2px solid #e08f2c;
+		border-radius: 50%;
+		color: #e08f2c;
+		font-weight: 1000;
+	} */
+
+      /* #photo-plus {
+		font-size: 50px;
+		position: relative;
+		left: 200px;
+		bottom: 50px;
 		border: 2px solid #e08f2c;
 		border-radius: 50%;
 		color: #e08f2c;
@@ -447,6 +501,10 @@
 
 	.second-half-cards {
 		flex-basis: 33%;
+	}
+
+	#aside-content {
+		width: 350px;
 	}
 }
 
@@ -491,10 +549,144 @@
 		color: #e08f2c;
 		font-weight: 1000;
 	}
+
+	#aside-content {
+		width: 340px;
+	}
+
+      #user-profile-basic {
+            gap: 50px;
+            height: 100%;
+            max-height: fit-content;
+            padding-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+      }
+
+	#second-half-posts {
+		width: 100%;
+	}
+
+      #second-half-groups, #second-half-events {
+            width: fit-content;
+            margin: 1%;
+      }
+
+      #second-half-groups .stats {
+            display: flex;
+            flex-direction: row;
+      }
+
+      #second-half-events .stats {
+            align-items: center;
+            gap: 15px;
+      }
+
+	#user-profile-page {
+		display: flex;
+		flex-direction: column;
+	}
+
+	#user-profile-img-wdetails,
+	#user-profile-details {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+            height: fit-content;
+	}
+
+	#profile-stats {
+		gap: 15px;
+		display: flex;
+		flex-direction: column;
+	}
+
+	#user-profile-image {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
+
+	#user-profile-image img {
+		width: 200px;
+		height: 200px;
+	}
+
+	#profile-stats var {
+		padding-bottom: 0;
+	}
+
+	#photo-plus {
+		font-size: 50px;
+		position: relative;
+		left: 70px;
+		bottom: 40px;
+		border: 2px solid var(--deep-blue);
+		border-radius: 50%;
+		color: var(--deep-blue);
+		font-weight: 1000;
+	}
+
+	#profile-home-edit-profile {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+            height: 100px;
+	}
+
+	#profile-home-edit-profile a {
+		text-decoration: none;
+            padding: 0;
+            margin: 0;
+
+	}
+
+	#profile-home-edit-profile button {
+		height: 45px;
+		width: 100%;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+            line-height: 15px;
+            letter-spacing: 2px;
+	}
+
+      #profile-home-edit-profile #crud-buttons-delete {
+            padding: 0;
+            margin: 0;
+      }
+
+      #aside-content {
+            width: 750px;
+      }
 }
 
 /* Smartphones */
 @media (max-width: 768px) {
+      #user-profile-basic {
+            gap: 50px;
+            height: 100%;
+            max-height: 6000px;
+      }
+
+      #second-half-posts {
+		width: 100%;
+	}
+
+      #second-half-groups, #second-half-events {
+            width: fit-content;
+            margin: 1%;
+      }
+
+      #second-half-groups .stats {
+            display: flex;
+            flex-direction: row;
+      }
+
 	#user-profile-img-wdetails {
 		text-align: center;
 	}
@@ -522,5 +714,228 @@
 	.second-half-cards {
 		flex-direction: column;
 		margin-bottom: 15px;
+		width: 100%;
 	}
+
+	.post-second-half-cards {
+		width: 100px;
+	}
+
+	.second-half-headers {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.second-half-headers h1 {
+		font-size: 25px;
+	}
+
+      #user-profile-basic {
+            gap: 50px;
+            height: 100%;
+            max-height: fit-content;
+            padding-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+      }
+
+	#second-half-posts {
+		width: 100%;
+	}
+
+      #second-half-groups, #second-half-events {
+            width: fit-content;
+            margin: 1%;
+      }
+
+      #second-half-groups .stats {
+            display: flex;
+            flex-direction: row;
+      }
+
+      #second-half-events .stats {
+            align-items: center;
+            gap: 0px;
+      }
+
+	#user-profile-page {
+		display: flex;
+		flex-direction: column;
+	}
+
+	#user-profile-img-wdetails,
+	#user-profile-details {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+            height: fit-content;
+	}
+
+	#profile-stats {
+		gap: 15px;
+		display: flex;
+		flex-direction: column;
+	}
+
+	#user-profile-image {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
+
+	#user-profile-image img {
+		width: 200px;
+		height: 200px;
+	}
+
+	#profile-stats var {
+		padding-bottom: 0;
+	}
+
+	#photo-plus {
+		font-size: 50px;
+		position: relative;
+		left: 70px;
+		bottom: 40px;
+		border: 2px solid var(--deep-blue);
+		border-radius: 50%;
+		color: var(--deep-blue);
+		font-weight: 1000;
+	}
+
+	#profile-home-edit-profile {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+            height: 100px;
+	}
+
+	#profile-home-edit-profile a {
+		text-decoration: none;
+            padding: 0;
+            margin: 0;
+
+	}
+
+	#profile-home-edit-profile button {
+		height: 45px;
+		width: 100px;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+      #aside-content {
+            width: 450px;
+      }
+}
+
+@media (max-width: 501px) {
+
+      #user-profile-basic {
+            gap: 50px;
+            height: 100%;
+            max-height: fit-content;
+            padding-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+      }
+
+	#second-half-posts {
+		width: 100%;
+	}
+
+      #second-half-groups, #second-half-events {
+            width: fit-content;
+            margin: 1%;
+      }
+
+      #second-half-groups .stats {
+            display: flex;
+            flex-direction: row;
+      }
+
+      #second-half-events .stats {
+            align-items: center;
+            gap: 0px;
+      }
+
+	#user-profile-page {
+		display: flex;
+		flex-direction: column;
+	}
+
+	#user-profile-img-wdetails,
+	#user-profile-details {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+            height: fit-content;
+	}
+
+	#profile-stats {
+		gap: 15px;
+		display: flex;
+		flex-direction: column;
+	}
+
+	#user-profile-image {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
+
+	#user-profile-image img {
+		width: 200px;
+		height: 200px;
+	}
+
+	#profile-stats var {
+		padding-bottom: 0;
+	}
+
+	#photo-plus {
+		font-size: 50px;
+		position: relative;
+		left: 70px;
+		bottom: 40px;
+		border: 2px solid var(--deep-blue);
+		border-radius: 50%;
+		color: var(--deep-blue);
+		font-weight: 1000;
+	}
+
+	#profile-home-edit-profile {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+            height: 100px;
+	}
+
+	#profile-home-edit-profile a {
+		text-decoration: none;
+            padding: 0;
+            margin: 0;
+
+	}
+
+	#profile-home-edit-profile button {
+		height: 45px;
+		width: 100px;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+      #aside-content {
+            width: 450px;
+      }
 }
