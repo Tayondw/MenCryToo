@@ -5,9 +5,10 @@
       padding: 5%;
       align-items: center;
       justify-content: center;
+      height: 62.1vh;
 }
 
 #success-header {
-      width: 50%;
+      width: 40%;
       margin-bottom: 5%;
 }

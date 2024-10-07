@@ -1,0 +1,18 @@
+#error-page {
+	background: linear-gradient(135deg, #e08f2c, #dddddc);
+	display: flex;
+	flex-direction: column;
+	padding: 6.37%;
+	align-items: center;
+	justify-content: center;
+}
+
+#error-page-header {
+      font-size: 100px;
+      margin-bottom: 100px;
+}
+
+#error-page-p {
+      font-size: 30px;
+      margin-bottom: 100px;
+}
