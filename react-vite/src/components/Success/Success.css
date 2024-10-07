@@ -1,0 +1,13 @@
+#success {
+      background: linear-gradient(135deg, #e08f2c, #dddddc);
+      display: flex;
+      flex-direction: column;
+      padding: 5%;
+      align-items: center;
+      justify-content: center;
+}
+
+#success-header {
+      width: 50%;
+      margin-bottom: 5%;
+}

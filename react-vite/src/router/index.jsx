@@ -21,6 +21,8 @@ import PrivateRoute from "../components/PrivateRoute";
 import ProfileFeed from "../components/Profile/CRUD/ProfileFeed";
 import Partnership from "../components/Partnership";
 import Contact from "../components/Contact";
+import Success from "../components/Success";
+import FourZeroFourPage from "../components/404Page";
 // import Comments from "../components/Comments";
 // import CommentDetails from "../components/Comments/Details";
 // import Tags from "../components/Tags";
@@ -49,9 +51,9 @@ import {
 	// eventAttendeeActions,
 	// venueActions,
 	profileActions,
-      postActions,
-      partnershipActions,
-      contactActions
+	postActions,
+	partnershipActions,
+	contactActions,
 } from "./actions";
 import Layout from "./Layout";
 
@@ -143,7 +145,7 @@ export const router = createBrowserRouter([
 			// ! PROFILE
 			// ? your profile only you can access
 			{
-                        path: "profile",
+				path: "profile",
 				element: (
 					<PrivateRoute>
 						<Profile />
@@ -152,8 +154,8 @@ export const router = createBrowserRouter([
 				action: profileActions,
 			},
 			{
-                        path: "users/:userId/profile/update",
-                        loader: userDetailsLoader,
+				path: "users/:userId/profile/update",
+				loader: userDetailsLoader,
 				element: <UpdateProfile />,
 				action: profileActions,
 			},
@@ -225,7 +227,6 @@ export const router = createBrowserRouter([
 			// },
 			{
 				path: "partnership",
-				// loader: tagDetailsLoader,
 				element: <Partnership />,
 				action: partnershipActions,
 			},
@@ -234,23 +235,13 @@ export const router = createBrowserRouter([
 				element: <Contact />,
 				action: contactActions,
 			},
-			// {
-			// 	path: "assets/resume",
-			// 	loader: tagDetailsLoader,
-			// 	element: <SignupFormPage />,
-			// 	action: profileActions,
-			// },
+			{
+				path: "success",
+				element: <Success />,
+			},
 			{
 				path: "*",
-				element: (
-					<div>
-						<h1>404 Page not found</h1>
-						<p>
-							Not all those who wander are lost, but it seems you may have taken
-							a wrong turn.
-						</p>
-					</div>
-				),
+				element: <FourZeroFourPage />,
 			},
 		],
 	},

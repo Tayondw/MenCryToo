@@ -494,7 +494,7 @@ export const partnershipActions = async ({ request }) => {
 		// 	console.log("Error from backend:", errorData);
 		// 	return json({ backendError: errorData.email || "Something went wrong" });
 		// }
-		return redirect("/");
+		return redirect("/success");
 	}
 };
 
@@ -537,6 +537,6 @@ export const contactActions = async ({ request }) => {
 			method: "POST",
 			body: formData,
 		});
-		if (response.ok) return redirect("/");
+		if (response.ok) return redirect("/success");
 	}
 };
