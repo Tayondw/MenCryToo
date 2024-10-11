@@ -26,7 +26,7 @@ const Profile = () => {
 	const userGroups = useMemo(() => sessionUser?.group, [sessionUser]);
 	const userEvents = useMemo(() => sessionUser?.events, [sessionUser]);
 	const userComments = useMemo(() => sessionUser?.userComments, [sessionUser]);
-	const sortedUserPosts = userPosts.sort(
+	const sortedUserPosts = userPosts?.sort(
 		(a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
 	);
 	const renderContent = useCallback(() => {
