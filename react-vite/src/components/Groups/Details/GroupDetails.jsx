@@ -60,8 +60,8 @@ const GroupDetails = () => {
 								<Link
 									// to={`/groups/${groupDetails.id}/images/${image.id}`}
 									key={image.id}
-                                                      className="box"
-                                                      style={{cursor: `default`}}
+									className="box"
+									style={{ cursor: `default` }}
 								>
 									<img src={image.groupImage} alt={image.name} />
 								</Link>
@@ -231,14 +231,6 @@ const GroupDetails = () => {
 							value="join-group"
 							className="button"
 							style={{ cursor: `pointer` }}
-							// style={{
-							// 	backgroundColor: "red",
-							// 	width: `250px`,
-							// 	cursor: `pointer`,
-							// 	borderRadius: `40px`,
-							// 	padding: `12px 25px`,
-							// 	fontSize: `1em`,
-							// }}
 						>
 							Join this group
 						</button>
@@ -305,12 +297,12 @@ const GroupDetails = () => {
 												event.preventDefault();
 												// Redirect to signup page with the return URL
 												navigate("/signup", {
-													state: { from: `/groups/${groupDetails.id}`, groupId: groupDetails.id },
+													state: {
+														from: `/groups/${groupDetails.id}`,
+														groupId: groupDetails.id,
+													},
 												});
 											}}
-											// name="intent"
-											// value="join-group"
-											// disabled={isDisabled}
 											className="button"
 											style={{ cursor: "pointer" }}
 										>
@@ -411,14 +403,6 @@ const GroupDetails = () => {
 															value="join-group"
 															className={"button"}
 															style={{ cursor: `pointer` }}
-															// style={{
-															// 	backgroundColor: "red",
-															// 	width: `250px`,
-															// 	cursor: `pointer`,
-															// 	borderRadius: `40px`,
-															// 	padding: `12px 25px`,
-															// 	fontSize: `1em`,
-															// }}
 														>
 															Join this group
 														</button>
@@ -428,48 +412,6 @@ const GroupDetails = () => {
 										) : null}
 									</>
 								)}
-
-								{/* {!sessionUser ||
-								sessionUser.id === groupDetails.organizerId ? null : (
-                                                            <>
-                                                                  {groupDetails.members.map((member) => (
-                                                                  <>
-                                                                        {(sessionUser.id === member.user.id) && (sessionUser.id !== groupDetails.organizerId) }
-                                                                  </>)
-                                                                  )}
-										<div id="join">
-											<button
-												// className="revoke"
-												onClick={(event) => {
-													event.preventDefault();
-													fetch(`/api/groups/${groupDetails.id}/join-group`, {
-														method: "POST",
-														headers: {
-															"Content-Type": "application/json",
-														},
-														body: JSON.stringify({
-															group_id: groupDetails.id,
-															user_id: sessionUser.id,
-														}),
-													});
-													return redirect(`/groups/${groupDetails.id}`);
-												}}
-												name="intent"
-												value="join-group"
-												style={{
-													backgroundColor: "red",
-													width: `250px`,
-													cursor: `pointer`,
-													borderRadius: `40px`,
-													padding: `12px 25px`,
-													fontSize: `1em`,
-												}}
-											>
-												Join this group
-											</button>
-										</div>{" "}
-									</>
-								)} */}
 								{sessionUser && sessionUser.id === groupDetails.organizerId ? (
 									<div id="crud-buttons">
 										<div id="crud-buttons-create">
