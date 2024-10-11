@@ -544,7 +544,7 @@
 }
 
 /* Medium screens (e.g., tablets) */
-@media (min-width: 500px) {
+@media (min-width: 500px) and (max-width: 764px) {
 	#groupDetailImage {
 		flex: 1;
 	}
@@ -579,16 +579,65 @@
 	}
 
 	#body-page {
-		margin-right: 550px;
+		/* margin-right: 550px; */
+		width: 100%;
+	}
+
+	#events-section {
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+	}
+	.group-details-event-cards {
+		display: flex;
+		flex-direction: column;
+		width: 370px;
+		height: fit-content;
+		padding: 0;
+		margin: 0;
+		align-items: center;
+		justify-content: center;
+            position: relative;
+		/* right: 65px; */
+	}
+
+      #past-events, #upcoming-events,#event-list-upcoming, .group-details-event-item {
+            width: fit-content;
+      }
+
+	.group-details-past-event-cards {
+		display: flex;
+		flex-direction: column;
+		width: 370px;
+		height: fit-content;
+		padding: 0;
+		margin: 0;
+		align-items: center;
+		justify-content: center;
+		margin-left: 5px;
+	}
+
+	.group-details-event-cards h3,
+	#group-details-past-keep-in-style h3 {
+		font-size: 15px;
+		margin: 10px;
+	}
+
+	.group-details-event-cards img,
+	.group-details-past-event-cards img {
+		margin: 0;
+		padding: 0;
+		width: 200px;
 	}
 
 	#crud-buttons {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-            flex-direction: column;
-            gap: 20px;
-            width: 100%;
+		flex-direction: column;
+		gap: 20px;
+		width: 100%;
 	}
 
 	#groupDetailImage img {
@@ -597,7 +646,7 @@
 
 	#crud-buttons-delete {
 		margin: 0 !important;
-            width: 100% !important;
+		width: 100% !important;
 	}
 
 	.second-half-headers-groups {
@@ -611,7 +660,7 @@
 		display: flex;
 		justify-content: center;
 		width: 100%;
-            font-size: 20px;
+		font-size: 20px;
 	}
 
 	.cards .stats {
@@ -622,7 +671,7 @@
 	}
 }
 
-@media (min-width: 765px) {
+@media (min-width: 765px) and (max-width: 842px) {
 	/* #each-groupDetail {
 		flex-direction: row;
 		gap: 40px;
