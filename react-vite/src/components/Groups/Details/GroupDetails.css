@@ -544,7 +544,7 @@
 }
 
 /* Medium screens (e.g., tablets) */
-@media (min-width: 600px) {
+@media (max-width: 600px) {
 	#each-groupDetail {
 		flex-direction: row;
 		gap: 40px;
@@ -571,7 +571,54 @@
 }
 
 /* Larger screens (e.g., laptops and desktops) */
-@media (min-width: 1024px) {
+
+@media (min-width: 601px) and (max-width: 1023px) {
+
+      #groupDetailImage {
+		flex: 1;
+	}
+
+	#groupDetailInfo {
+		flex: 4;
+	}
+
+	#event-list-upcoming,
+	#event-list-past {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+       #each-groupDetail {
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            margin: auto;
+            justify-content: center;
+            align-items: center;
+      }
+
+      #top-each-groupDetail {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            left: 650;
+            
+      }
+
+      #body-page {
+            margin-right: 550px;
+      }
+
+      #crud-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+      }
+
+      #crud-buttons-delete {
+            margin: 0 !important; 
+      }
+}
+/* @media (min-width: 1024px) {
 	#group-details-background {
 		padding: 40px;
 	}
@@ -616,10 +663,10 @@
 		grid-template-columns: repeat(2, 1fr);
 		gap: 20px;
 	}
-}
+} */
 
 /* Extra-large screens (e.g., large desktops) */
-@media (min-width: 1440px) {
+@media (min-width: 1024px) and (max-width: 1900px) {
 	#groupDetailImage {
 		flex: 1;
 	}
@@ -632,4 +679,35 @@
 	#event-list-past {
 		grid-template-columns: repeat(3, 1fr);
 	}
+
+      #each-groupDetail {
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            margin: auto;
+            justify-content: center;
+            align-items: center;
+      }
+
+      #top-each-groupDetail {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            left: 650;
+            
+      }
+
+      #body-page {
+            margin-right: 550px;
+      }
+
+      #crud-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+      }
+
+      #crud-buttons-delete {
+            margin: 0 !important; 
+      }
 }
