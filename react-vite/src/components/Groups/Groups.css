@@ -11,8 +11,8 @@
 
 .create-group-link {
 	padding: 30px;
-      display: flex;
-      justify-content: space-between;
+	display: flex;
+	justify-content: space-between;
 }
 
 #groups-body-header {
@@ -48,7 +48,7 @@
 }
 
 .group-details-past-event-cards {
-      display: flex;
+	display: flex;
 	align-items: center;
 	width: 500px;
 	max-width: 670px;
@@ -60,7 +60,7 @@
 }
 
 .members-groups-cards {
-      display: flex;
+	display: flex;
 	align-items: center;
 	width: 360px;
 	max-width: 670px;
@@ -71,7 +71,7 @@
 }
 
 .members-groups-cards img {
-      max-width: 180px;
+	max-width: 180px;
 	width: 20vw;
 	height: 200px;
 	object-fit: cover;
@@ -94,7 +94,7 @@
 }
 
 #members-groups-display-style-direction {
-      flex: 1; /* Allow the content area to take available space */
+	flex: 1; /* Allow the content area to take available space */
 	display: flex;
 	flex-direction: column;
 	flex-wrap: wrap; /* Enable wrapping for the content */
@@ -103,11 +103,11 @@
 }
 
 #members-groups-display-style-direction h2 {
-      font-size: 18px;
+	font-size: 18px;
 }
 
 #members-groups-display-style-direction .stats {
-      display: flex;
+	display: flex;
 	gap: 10px;
 	list-style: none;
 	width: 150px;
@@ -126,7 +126,7 @@
 }
 
 .group-details-past-event-cards img {
-      max-width: 280px;
+	max-width: 280px;
 	width: 10vw;
 	height: 220px;
 	object-fit: cover;
@@ -136,11 +136,11 @@
 }
 
 #group-details-past-display-style-direction h2 {
-      font-size: 20px;
+	font-size: 20px;
 }
 
 #group-details-past-display-style-direction h3 {
-      font-size: 12px;
+	font-size: 12px;
 }
 
 .cards img {
@@ -154,28 +154,28 @@
 }
 
 #display-style-direction {
-      /* border: 2px solid blue; */
-      width: 100%;
-      max-width: 650px;
-      /* display: flex;
+	/* border: 2px solid blue; */
+	width: 100%;
+	max-width: 650px;
+	/* display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column; */
 }
 
 #keep-in-style {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      /* border: 2px solid red; */
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	/* border: 2px solid red; */
 }
 
 #keep-in-style h2,
 #keep-in-style h3 {
 	font-weight: 400;
-      width: 65%;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
+	width: 65%;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
 }
 
 #keep-in-style h3,
@@ -211,14 +211,17 @@
 	align-items: flex-end;
 }
 
-@media (width <= 720px) {
+@media (width <= 768px) {
 	.cards {
-		margin: 0 40px;
+		/* margin: 0 40px;
 		padding-left: 50px;
 		padding-right: 50px;
 		width: 100%;
 		text-align: center;
-		flex-direction: column;
+		flex-direction: column; */
+		flex-direction: row;
+		gap: 20px;
+		padding: 20px;
 	}
 
 	.cards div h2 {
@@ -226,13 +229,111 @@
 	}
 
 	.cards img {
-		max-width: 1000px;
-		width: 100%;
-		margin: -100px 0 30px 0;
+		width: 40%;
+		height: auto;
+		margin-right: 16px;
 	}
 
 	.cards .stats var {
 		min-width: 90px;
+	}
+}
+
+/* Media query for medium screens (768px to 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+	#groups-body-header h3 {
+		font-size: 32px;
+	}
+
+	.cards {
+		flex-direction: row;
+		gap: 20px;
+		padding: 20px;
+	}
+
+	img {
+		width: 40%;
+		height: auto;
+		margin-right: 16px;
+	}
+
+	#display-style-direction {
+		flex-direction: column;
+		width: 60%;
+	}
+
+	.stats {
+		flex-direction: row;
+		gap: 10px;
+	}
+}
+
+/* Media query for large screens (1024px to 1199px) */
+@media (min-width: 1024px) and (max-width: 1199px) {
+	#groups-body-header h3 {
+		font-size: 36px;
+	}
+
+	.cards {
+		flex-direction: row;
+		gap: 20px;
+		padding: 20px;
+	}
+
+	img {
+		width: 30%;
+		height: auto;
+	}
+
+	#display-style-direction {
+		flex-direction: column;
+		width: 70%;
+	}
+}
+
+/* Media query for larger screens (1200px to 1493px) */
+@media (min-width: 1200px) and (max-width: 1493px) {
+	.cards {
+		flex-direction: row;
+		gap: 20px;
+		padding: 24px;
+	}
+
+	img {
+		width: 25%;
+	}
+
+	#display-style-direction {
+		width: 75%;
+	}
+
+	.stats li {
+		font-size: 14px;
+	}
+}
+
+/* Media query for very large screens (1494px and above) */
+@media (min-width: 1494px) {
+	#groups-body-header h3 {
+		font-size: 48px;
+	}
+
+	.cards {
+		flex-direction: row;
+		gap: 24px;
+		padding: 32px;
+	}
+
+	img {
+		width: 20%;
+	}
+
+	#display-style-direction {
+		width: 80%;
+	}
+
+	.stats li {
+		font-size: 16px;
 	}
 }
 
