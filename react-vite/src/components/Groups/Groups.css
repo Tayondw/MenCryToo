@@ -211,32 +211,23 @@
 	align-items: flex-end;
 }
 
-@media (width <= 768px) {
-	.cards {
-		/* margin: 0 40px;
-		padding-left: 50px;
-		padding-right: 50px;
+@media (max-width: 767px) {
+	#groups-body {
+		padding: 10px;
+	}
+
+      .cards {
+            padding: 5%;
+            height: fit-content;
+      }
+
+	/* .cards img {
 		width: 100%;
-		text-align: center;
-		flex-direction: column; */
-		flex-direction: row;
-		gap: 20px;
-		padding: 20px;
-	}
-
-	.cards div h2 {
-		font-size: 30px;
-	}
-
-	.cards img {
-		width: 40%;
 		height: auto;
-		margin-right: 16px;
-	}
+		margin-bottom: 10px;
+	} */
 
-	.cards .stats var {
-		min-width: 90px;
-	}
+
 }
 
 /* Media query for medium screens (768px to 1023px) */

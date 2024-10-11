@@ -34,7 +34,7 @@ const Groups = () => {
 							key={group.id}
 							style={{ textDecoration: `none`, color: `inherit` }}
 						>
-							<div className="cards">
+							<div id="second-half-groups" className="cards">
 								<img src={group.image} alt={group.name} />
 
 								<div id="display-style-direction">
