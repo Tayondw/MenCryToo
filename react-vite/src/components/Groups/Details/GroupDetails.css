@@ -544,8 +544,12 @@
 }
 
 /* Medium screens (e.g., tablets) */
-@media (max-width: 600px) {
-	#each-groupDetail {
+@media (min-width: 500px) {
+
+}
+
+@media (min-width: 765px) {
+	/* #each-groupDetail {
 		flex-direction: row;
 		gap: 40px;
 	}
@@ -567,14 +571,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 20px;
-	}
-}
+	} */
 
-/* Larger screens (e.g., laptops and desktops) */
-
-@media (min-width: 601px) and (max-width: 1023px) {
-
-      #groupDetailImage {
+	#groupDetailImage {
 		flex: 1;
 	}
 
@@ -587,36 +586,131 @@
 		grid-template-columns: repeat(3, 1fr);
 	}
 
-       #each-groupDetail {
-            display: flex;
-            flex-direction: column;
-            padding: 0;
-            margin: auto;
-            justify-content: center;
-            align-items: center;
-      }
+	#each-groupDetail {
+		display: flex;
+		flex-direction: column;
+		padding: 0;
+		margin: auto;
+		justify-content: center;
+		align-items: center;
+	}
 
-      #top-each-groupDetail {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            left: 650;
-            
-      }
+	#top-each-groupDetail {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin-right: 25px;
+	}
 
-      #body-page {
-            margin-right: 550px;
-      }
+	#top-group-details {
+		display: grid;
+	}
 
-      #crud-buttons {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-      }
+	#body-page {
+		margin-right: 550px;
+	}
 
-      #crud-buttons-delete {
-            margin: 0 !important; 
+	#crud-buttons {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	#groupDetailImage img {
+		width: 100%;
+	}
+
+	#crud-buttons-delete {
+		margin: 0 !important;
+	}
+
+	.second-half-headers-groups {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 55px;
+	}
+
+	.second-half-headers-groups h1 {
+		display: flex;
+		justify-content: center;
+		width: 100%;
+	}
+
+      .cards .stats {
+            align-items: flex-start;
+            width: fit-content;
+            align-self: center;
+            margin-right: 100px;
       }
+}
+
+/* Larger screens (e.g., laptops and desktops) */
+
+@media (min-width: 843px) and (max-width: 1023px) {
+	#groupDetailImage {
+		flex: 1;
+	}
+
+	#groupDetailInfo {
+		flex: 4;
+	}
+
+	#event-list-upcoming,
+	#event-list-past {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	#each-groupDetail {
+		display: flex;
+		flex-direction: column;
+		padding: 0;
+		margin: auto;
+		justify-content: center;
+		align-items: center;
+	}
+
+	#top-each-groupDetail {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin-right: 85px;
+	}
+
+	#top-group-details {
+		display: grid;
+	}
+
+	#body-page {
+		margin-right: 550px;
+	}
+
+	#crud-buttons {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	#groupDetailImage img {
+		width: 100%;
+	}
+
+	#crud-buttons-delete {
+		margin: 0 !important;
+	}
+
+	.second-half-headers-groups {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 105px;
+	}
+
+	.second-half-headers-groups h1 {
+		display: flex;
+		justify-content: center;
+		width: 100%;
+	}
 }
 /* @media (min-width: 1024px) {
 	#group-details-background {
@@ -680,34 +774,33 @@
 		grid-template-columns: repeat(3, 1fr);
 	}
 
-      #each-groupDetail {
-            display: flex;
-            flex-direction: column;
-            padding: 0;
-            margin: auto;
-            justify-content: center;
-            align-items: center;
-      }
+	#each-groupDetail {
+		display: flex;
+		flex-direction: column;
+		padding: 0;
+		margin: auto;
+		justify-content: center;
+		align-items: center;
+	}
 
-      #top-each-groupDetail {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            left: 650;
-            
-      }
+	#top-each-groupDetail {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		left: 650;
+	}
 
-      #body-page {
-            margin-right: 550px;
-      }
+	#body-page {
+		margin-right: 550px;
+	}
 
-      #crud-buttons {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-      }
+	#crud-buttons {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
 
-      #crud-buttons-delete {
-            margin: 0 !important; 
-      }
+	#crud-buttons-delete {
+		margin: 0 !important;
+	}
 }
