@@ -333,7 +333,6 @@ export const profileActions = async ({ request }) => {
 		});
 		if (response.ok) {
 			return (window.location.href = "/profile");
-			// return redirect("/profile")
 		}
 	}
 
