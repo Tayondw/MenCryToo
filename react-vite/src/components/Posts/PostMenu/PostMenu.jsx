@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import OpenModalButton from "../../OpenModalButton";
 import DeletePost from "../CRUD/Delete";
-import { FaEllipsis } from "react-icons/fa6";
+// import { FaEllipsis } from "react-icons/fa6";
+import { Edit3 } from "lucide-react";
 import "./PostMenu.css";
 
 const PostMenu = ({ navigate, post }) => {
@@ -27,7 +28,7 @@ const PostMenu = ({ navigate, post }) => {
 	return (
 		<div className="post-menu" ref={menuRef}>
 			<button className="post-button" onClick={toggleMenu}>
-				<FaEllipsis />
+				<Edit3 size={20} />
 			</button>
 			{showMenu && (
 				<div className="post-dropdown">
