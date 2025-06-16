@@ -1,5 +1,9 @@
 /* TODO: Add sitewide styles */
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
 	--steel-blue: #3b99d9;
 	--peach: #ea8d89;
