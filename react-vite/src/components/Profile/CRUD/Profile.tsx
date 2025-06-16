@@ -16,7 +16,6 @@ import PostMenu from "../../Posts/PostMenu-TSX/PostMenu";
 import "./Profile2.css";
 
 const Profile: React.FC = () => {
-	// const sessionUser = mockUser; // Using mock data
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
 	const sessionUser = useSelector((state: RootState) => state.session.user);
