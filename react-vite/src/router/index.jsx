@@ -13,7 +13,8 @@ import UpdateEvent from "../components/Events/CRUD/Update";
 // import Profile from "../components/Profile";
 import Profile from "../components/Profile/CRUD";
 import ProfileDetails from "../components/Profile/Details";
-import UpdateProfile from "../components/Profile/CRUD/Update";
+// import UpdateProfile from "../components/Profile/CRUD/Update";
+import UpdateProfile from "../components/Profile/CRUD-TSX/Update";
 import Posts from "../components/Posts";
 // import PostDetails from "../components/Posts/Details";
 import CreatePost from "../components/Posts/CRUD/Create";
@@ -156,7 +157,7 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "users/:userId/profile/update",
-				loader: userDetailsLoader,
+				// loader: userDetailsLoader,
 				element: <UpdateProfile />,
 				action: profileActions,
 			},
