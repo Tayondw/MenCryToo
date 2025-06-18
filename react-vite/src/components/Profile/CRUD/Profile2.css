@@ -57,10 +57,6 @@
 	transition: color 0.2s ease;
 }
 
-.nav-link:hover {
-	color: var(--primary-orange);
-}
-
 /* Profile Layout */
 .profile-layout {
 	display: grid;
