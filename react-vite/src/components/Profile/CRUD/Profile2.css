@@ -776,7 +776,7 @@
 	.post-header {
 		grid-template-columns: 180px 1fr 50px;
 		gap: var(--spacing-lg);
-		padding: var(--spacing-lg);
+		padding: var(--spacing-sm);
 		min-height: 80px;
 		align-items: center;
 	}
