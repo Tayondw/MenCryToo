@@ -89,9 +89,10 @@
 
 .profile-info {
 	display: grid;
-	grid-template-columns: auto 1fr;
-	gap: var(--spacing-xl);
-	align-items: start;
+	grid-template-columns: 1fr 1fr;
+	/* gap: var(--spacing-xl); */
+	align-items: center;
+      /* justify-items: center; */
 }
 
 .profile-avatar-section {
@@ -238,6 +239,7 @@
 
 .content-nav {
 	display: flex;
+      justify-content: space-between;
 	gap: var(--spacing-md);
 	margin-bottom: var(--spacing-lg);
 	border-bottom: 2px solid var(--light-gray);
