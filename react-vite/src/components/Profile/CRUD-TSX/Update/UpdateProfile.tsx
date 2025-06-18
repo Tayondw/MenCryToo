@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import {
+	Link,
+	useLoaderData,
+	useActionData,
+	Form,
+	useNavigation,
+} from "react-router-dom";
 import { Upload, Eye, EyeOff, ArrowLeft } from "lucide-react";
-import { RootState } from "../../../../types";
+import { User } from "../../../../types";
 import "./UpdateProfile.css";
 
 interface FormErrors {
@@ -15,13 +20,15 @@ interface FormErrors {
 	bio?: string;
 	profileImage?: string;
 	userTags?: string;
+	server?: string;
 }
 
-type FormFieldValue = string | string[] | File | null;
-
 const UpdateProfile: React.FC = () => {
-	const navigate = useNavigate();
-	const sessionUser = useSelector((state: RootState) => state.session.user);
+	const loaderData = useLoaderData() as { user: User } | null;
+	const actionData = useActionData() as { errors?: FormErrors } | null;
+	const navigation = useNavigation();
+
+	const sessionUser = loaderData?.user;
 
 	// Form state
 	const [formData, setFormData] = useState({
@@ -33,13 +40,10 @@ const UpdateProfile: React.FC = () => {
 		lastName: "",
 		bio: "",
 		userTags: ["ANGER"] as string[],
-		profileImage: null as File | null,
 	});
 
-	const [errors, setErrors] = useState<FormErrors>({});
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [previewImage, setPreviewImage] = useState<string | null>(null);
 
 	const tagOptions = [
@@ -57,40 +61,30 @@ const UpdateProfile: React.FC = () => {
 
 	// Initialize form data from session user
 	useEffect(() => {
-		if (!sessionUser) {
-			navigate("/");
-			return;
+		if (sessionUser) {
+			setFormData({
+				firstName: sessionUser.firstName || "",
+				lastName: sessionUser.lastName || "",
+				email: sessionUser.email || "",
+				password: "",
+				username: sessionUser.username || "",
+				bio: sessionUser.bio || "",
+				userTags: sessionUser.usersTags?.map((tag) => tag.name) || ["ANGER"],
+				confirmPassword: "",
+			});
 		}
-
-		setFormData({
-			firstName: sessionUser.firstName || "",
-			lastName: sessionUser.lastName || "",
-			email: sessionUser.email || "",
-			password: "",
-			username: sessionUser.username || "",
-			bio: sessionUser.bio || "",
-			userTags: sessionUser.usersTags?.map((tag) => tag.name) || ["ANGER"],
-			confirmPassword: "",
-			profileImage: null,
-		});
-	}, [sessionUser, navigate]);
+	}, [sessionUser]);
 
 	const handleInputChange = (
 		field: keyof typeof formData,
-		value: FormFieldValue,
+		value: string | string[],
 	) => {
 		setFormData((prev) => ({ ...prev, [field]: value }));
-		// Clear error when user starts typing
-		if (errors[field as keyof FormErrors]) {
-			setErrors((prev) => ({ ...prev, [field]: undefined }));
-		}
 	};
 
 	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
-			setFormData((prev) => ({ ...prev, profileImage: file }));
-
 			// Create preview
 			const reader = new FileReader();
 			reader.onload = (e) => {
@@ -100,121 +94,17 @@ const UpdateProfile: React.FC = () => {
 		}
 	};
 
-	const validateForm = (): boolean => {
-		const newErrors: FormErrors = {};
-
-		if (
-			!formData.firstName ||
-			formData.firstName.length < 3 ||
-			formData.firstName.length > 20
-		) {
-			newErrors.firstName = "First name must be between 3 and 20 characters";
-		}
-
-		if (
-			!formData.lastName ||
-			formData.lastName.length < 3 ||
-			formData.lastName.length > 20
-		) {
-			newErrors.lastName = "Last name must be between 3 and 20 characters";
-		}
-
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!formData.email || !emailRegex.test(formData.email)) {
-			newErrors.email = "Please enter a valid email address";
-		} else if (formData.email.length > 50) {
-			newErrors.email = "Email must be less than 50 characters";
-		}
-
-		if (
-			!formData.username ||
-			formData.username.length < 3 ||
-			formData.username.length > 20
-		) {
-			newErrors.username = "Username must be between 3 and 20 characters";
-		}
-
-		if (
-			formData.password &&
-			(formData.password.length < 8 || formData.password.length > 25)
-		) {
-			newErrors.password = "Password must be between 8 and 25 characters";
-		}
-
-		if (formData.password !== formData.confirmPassword) {
-			newErrors.confirmPassword = "Passwords do not match";
-		}
-
-		if (
-			!formData.bio ||
-			formData.bio.length < 50 ||
-			formData.bio.length > 500
-		) {
-			newErrors.bio = "Bio must be between 50 and 500 characters";
-		}
-
-		if (formData.userTags.length === 0) {
-			newErrors.userTags = "Please select at least one tag";
-		}
-
-		setErrors(newErrors);
-		return Object.keys(newErrors).length === 0;
-	};
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-
-		if (!validateForm()) return;
-
-		setIsSubmitting(true);
-
-		try {
-			const submitFormData = new FormData();
-			submitFormData.append("intent", "update-profile");
-			submitFormData.append("userId", sessionUser?.id.toString() || "");
-			submitFormData.append("firstName", formData.firstName);
-			submitFormData.append("lastName", formData.lastName);
-			submitFormData.append("email", formData.email);
-			submitFormData.append("username", formData.username);
-			submitFormData.append("bio", formData.bio);
-
-			if (formData.password) {
-				submitFormData.append("password", formData.password);
-				submitFormData.append("confirmPassword", formData.confirmPassword);
-			}
-
-			formData.userTags.forEach((tag) => {
-				submitFormData.append("userTags", tag);
-			});
-
-			if (formData.profileImage) {
-				submitFormData.append("profileImage", formData.profileImage);
-			}
-
-			const response = await fetch(
-				`/api/users/${sessionUser?.id}/profile/update`,
-				{
-					method: "POST",
-					body: submitFormData,
-				},
-			);
-
-			if (response.ok) {
-				navigate("/profile");
-			} else {
-				const errorData = await response.json();
-				setErrors(errorData);
-			}
-		} catch (error) {
-			console.error("Error updating profile:", error);
-			setErrors({ bio: "An error occurred while updating your profile" });
-		} finally {
-			setIsSubmitting(false);
-		}
-	};
+	const isSubmitting = navigation.state === "submitting";
+	const errors = actionData?.errors || {};
 
 	if (!sessionUser) {
-		return null;
+		return (
+			<div className="update-profile-container">
+				<div className="update-profile-content">
+					<p>Loading...</p>
+				</div>
+			</div>
+		);
 	}
 
 	return (
@@ -229,7 +119,18 @@ const UpdateProfile: React.FC = () => {
 					<h1 className="page-title">My Profile</h1>
 				</div>
 
-				<form onSubmit={handleSubmit} className="profile-form">
+				<Form
+					method="post"
+					encType="multipart/form-data"
+					className="profile-form"
+				>
+					<input type="hidden" name="intent" value="update-profile" />
+					<input
+						type="hidden"
+						name="userId"
+						value={sessionUser.id.toString()}
+					/>
+
 					{/* Profile Photo Section */}
 					<div className="form-section">
 						<div className="section-header">
@@ -261,6 +162,7 @@ const UpdateProfile: React.FC = () => {
 								</p>
 								<input
 									id="profile-image"
+									name="profileImage"
 									type="file"
 									accept="image/*"
 									onChange={handleImageChange}
@@ -290,6 +192,7 @@ const UpdateProfile: React.FC = () => {
 								<label htmlFor="firstName">First Name</label>
 								<input
 									id="firstName"
+									name="firstName"
 									type="text"
 									value={formData.firstName}
 									onChange={(e) =>
@@ -307,6 +210,7 @@ const UpdateProfile: React.FC = () => {
 								<label htmlFor="lastName">Last Name</label>
 								<input
 									id="lastName"
+									name="lastName"
 									type="text"
 									value={formData.lastName}
 									onChange={(e) =>
@@ -324,6 +228,7 @@ const UpdateProfile: React.FC = () => {
 								<label htmlFor="email">Email</label>
 								<input
 									id="email"
+									name="email"
 									type="email"
 									value={formData.email}
 									onChange={(e) => handleInputChange("email", e.target.value)}
@@ -339,6 +244,7 @@ const UpdateProfile: React.FC = () => {
 								<label htmlFor="username">Username</label>
 								<input
 									id="username"
+									name="username"
 									type="text"
 									value={formData.username}
 									onChange={(e) =>
@@ -360,32 +266,18 @@ const UpdateProfile: React.FC = () => {
 							<div className="section-info">
 								<h2 className="section-title">Password</h2>
 								<p className="section-description">
-									Enter your current password to make update
+									Leave blank to keep current password
 								</p>
 							</div>
 						</div>
 
 						<div className="form-grid">
 							<div className="form-group">
-								<label htmlFor="currentPassword">Current Password</label>
-								<div className="password-input">
-									<input
-										id="currentPassword"
-										type="password"
-										placeholder="Ltmp2024@#"
-										className="password-field"
-									/>
-									<button type="button" className="password-toggle">
-										<Eye size={16} />
-									</button>
-								</div>
-							</div>
-
-							<div className="form-group">
 								<label htmlFor="password">New Password</label>
 								<div className="password-input">
 									<input
 										id="password"
+										name="password"
 										type={showPassword ? "text" : "password"}
 										value={formData.password}
 										onChange={(e) =>
@@ -414,6 +306,7 @@ const UpdateProfile: React.FC = () => {
 								<div className="password-input">
 									<input
 										id="confirmPassword"
+										name="confirmPassword"
 										type={showConfirmPassword ? "text" : "password"}
 										value={formData.confirmPassword}
 										onChange={(e) =>
@@ -458,6 +351,7 @@ const UpdateProfile: React.FC = () => {
 							<label htmlFor="bio">Bio</label>
 							<textarea
 								id="bio"
+								name="bio"
 								value={formData.bio}
 								onChange={(e) => handleInputChange("bio", e.target.value)}
 								placeholder="Hi, my name is Demo User and I have anger management issues."
@@ -486,6 +380,8 @@ const UpdateProfile: React.FC = () => {
 								<label key={tag} className="tag-checkbox">
 									<input
 										type="checkbox"
+										name="userTags"
+										value={tag}
 										checked={formData.userTags.includes(tag)}
 										onChange={(e) => {
 											if (e.target.checked) {
@@ -525,6 +421,18 @@ const UpdateProfile: React.FC = () => {
 						)}
 					</div>
 
+					{/* Server Error Display */}
+					{errors.server && (
+						<div className="form-section">
+							<div
+								className="error-message"
+								style={{ textAlign: "center", fontSize: "1rem" }}
+							>
+								{errors.server}
+							</div>
+						</div>
+					)}
+
 					{/* Final Form Actions */}
 					<div className="final-actions">
 						<Link to="/profile" className="cancel-btn">
@@ -538,7 +446,7 @@ const UpdateProfile: React.FC = () => {
 							{isSubmitting ? "Updating..." : "Update Profile"}
 						</button>
 					</div>
-				</form>
+				</Form>
 			</div>
 		</div>
 	);
