@@ -27,7 +27,7 @@
 }
 
 .back-link:hover {
-	color: #e08f2c;
+	color: #334155;
 }
 
 .page-title {
@@ -76,7 +76,6 @@
 	font-size: 0.875rem;
 	margin: 0;
 	line-height: 1.5;
-      justify-self: center;
 }
 
 /* Photo Upload Section */
@@ -92,8 +91,8 @@
 }
 
 .profile-photo {
-	width: 150px;
-	height: 150px;
+	width: 80px;
+	height: 80px;
 	border-radius: 50%;
 	object-fit: cover;
 	border: 3px solid #e2e8f0;
@@ -118,7 +117,7 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 0.5rem;
-	background: var(--orangy);
+	background: #3b82f6;
 	color: white;
 	padding: 0.5rem 1rem;
 	border-radius: 6px;
@@ -131,7 +130,7 @@
 }
 
 .upload-btn:hover {
-	background: var(--peach);
+	background: #2563eb;
 }
 
 .upload-text {
@@ -323,15 +322,6 @@
 	font-weight: 500;
 }
 
-/* Section Actions */
-.section-actions {
-	display: flex;
-	justify-content: flex-end;
-	gap: 1rem;
-	padding-top: 1rem;
-	border-top: 1px solid #f1f5f9;
-}
-
 /* Final Actions */
 .final-actions {
 	display: flex;
@@ -368,7 +358,7 @@
 }
 
 .save-btn {
-	background: var(--orangy);
+	background: #64748b;
 	color: white;
 }
 
@@ -414,7 +404,6 @@
 		text-align: center;
 	}
 
-	.section-actions,
 	.final-actions {
 		flex-direction: column-reverse;
 	}
