@@ -200,7 +200,7 @@ const UpdateProfile: React.FC = () => {
 			);
 
 			if (response.ok) {
-				navigate("/profile");
+				window.location.href = "/profile";
 			} else {
 				const errorData = await response.json();
 				setErrors(errorData);
