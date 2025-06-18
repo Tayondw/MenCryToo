@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { User, Post, Group, Event, Tag } from "../../../types";
 import PostMenu from "../../Posts/PostMenu-TSX/PostMenu";
+import DeleteProfile from "../CRUD-TSX/Delete/DeleteProfile";
 import "./Profile2.css";
 
 // Mock data for demonstration when no backend data is available
@@ -118,6 +119,7 @@ const Profile: React.FC = () => {
 	const [activeAsideSection, setActiveAsideSection] = useState<
 		"tags" | "similar"
 	>("tags");
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 	// Memoized user-related values with proper null checks and default arrays
 	const userTags = useMemo(() => currentUser?.usersTags ?? [], [currentUser]);
@@ -144,6 +146,19 @@ const Profile: React.FC = () => {
 		);
 		return `${diffInDays}d ago`;
 	};
+
+	const handleDeleteProfile = useCallback(() => {
+		setShowDeleteModal(true);
+	}, []);
+
+	const closeDeleteModal = useCallback(() => {
+		setShowDeleteModal(false);
+	}, []);
+
+	const confirmDeleteProfile = useCallback(() => {
+		setShowDeleteModal(false);
+		// The DeleteProfile component handles the actual deletion
+	}, []);
 
 	const renderContent = useCallback(() => {
 		switch (activeMainSection) {
@@ -427,7 +442,12 @@ const Profile: React.FC = () => {
 									<Link to={`/users/${currentUser?.id}/profile/update`}>
 										<button className="edit-profile-btn">Edit Profile</button>
 									</Link>
-									<button className="delete-profile-btn">Delete Profile</button>
+									<button
+										className="delete-profile-btn"
+										onClick={handleDeleteProfile}
+									>
+										Delete Profile
+									</button>
 								</div>
 							</div>
 						</div>
@@ -507,6 +527,19 @@ const Profile: React.FC = () => {
 					<div className="mobile-tags-content">{renderTagContent()}</div>
 				</section>
 			</div>
+
+			{/* Delete Profile Modal */}
+			{showDeleteModal && (
+				<div className="modal-overlay">
+					<div className="modal-container">
+						<DeleteProfile
+							user={currentUser}
+							onClose={closeDeleteModal}
+							onConfirm={confirmDeleteProfile}
+						/>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 };
