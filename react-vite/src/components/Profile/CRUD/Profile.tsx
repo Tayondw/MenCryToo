@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useState, useMemo, useCallback } from "react";
+import { Link, useLoaderData } from "react-router-dom";
 import {
 	Heart,
 	MessageCircle,
@@ -10,17 +9,7 @@ import {
 	Expand,
 	Edit3,
 } from "lucide-react";
-import { thunkAuthenticate } from "../../../store/session";
-import {
-	RootState,
-	User,
-	Post,
-	Group,
-	Event,
-	Tag,
-	// Comment,
-	AppDispatch,
-} from "../../../types";
+import { User, Post, Group, Event, Tag } from "../../../types";
 import PostMenu from "../../Posts/PostMenu-TSX/PostMenu";
 import "./Profile2.css";
 
@@ -117,14 +106,11 @@ const mockUser: User = {
 };
 
 const Profile: React.FC = () => {
-	const dispatch = useDispatch<AppDispatch>();
-	const navigate = useNavigate();
+	// Get data from React Router loader
+	const loaderData = useLoaderData() as { user: User } | null;
 
-	// Get user from Redux store with proper typing
-	const sessionUser = useSelector((state: RootState) => state.session.user);
-
-	// Use mock data if no session user (for development/testing)
-	const currentUser = sessionUser || mockUser;
+	// Use loader data or fallback to mock data
+	const currentUser = loaderData?.user || mockUser;
 
 	const [activeMainSection, setActiveMainSection] = useState<
 		"posts" | "groups" | "events"
@@ -132,22 +118,6 @@ const Profile: React.FC = () => {
 	const [activeAsideSection, setActiveAsideSection] = useState<
 		"tags" | "similar"
 	>("tags");
-
-	// Authenticate user on component mount
-	useEffect(() => {
-		if (!sessionUser) {
-			dispatch(thunkAuthenticate());
-		}
-	}, [dispatch, sessionUser]);
-
-	// Navigate to home if no user after authentication attempt
-	useEffect(() => {
-		// Only redirect if we've attempted authentication and still no user
-		// You might want to add a loading state here instead
-		if (sessionUser === null && currentUser === mockUser) {
-			navigate('/');
-		}
-	}, [sessionUser, navigate, currentUser]);
 
 	// Memoized user-related values with proper null checks and default arrays
 	const userTags = useMemo(() => currentUser?.usersTags ?? [], [currentUser]);
@@ -195,7 +165,7 @@ const Profile: React.FC = () => {
 									</div>
 									<h3 className="post-title">{post?.title}</h3>
 									<div className="post-menu-btn">
-										<PostMenu navigate={navigate} post={post} />
+										<PostMenu navigate={() => {}} post={post} />
 									</div>
 								</div>
 								<div className="post-image-container">
@@ -364,7 +334,6 @@ const Profile: React.FC = () => {
 		currentUser,
 		userComments,
 		sortedUserPosts,
-		navigate,
 	]);
 
 	const renderTagContent = useCallback(() => {
