@@ -1,5 +1,4 @@
 import { redirect, json } from "react-router-dom";
-// import { User } from "../types";
 
 // Loader to fetch current user profile data
 export const profileLoader = async ({
@@ -39,6 +38,34 @@ export const profileUpdateAction = async ({
 }) => {
 	const formData = await request.formData();
 	const intent = formData.get("intent");
+
+	if (intent === "delete-profile") {
+		const userId = formData.get("userId") as string;
+
+		if (!userId) {
+			return json({ error: "User ID is required" }, { status: 400 });
+		}
+
+		try {
+			const response = await fetch(`/api/users/${userId}/profile/delete`, {
+				method: "DELETE",
+				body: formData,
+			});
+
+			if (response.ok) {
+				// Redirect to home page after successful deletion
+				return redirect("/");
+			} else {
+				return json({ error: "Failed to delete profile" }, { status: 500 });
+			}
+		} catch (error) {
+			console.error("Error deleting profile:", error);
+			return json(
+				{ error: "Network error. Please try again" },
+				{ status: 500 },
+			);
+		}
+	}
 
 	if (intent !== "update-profile") {
 		return json({ error: "Invalid form submission" }, { status: 400 });
@@ -134,5 +161,42 @@ export const profileUpdateAction = async ({
 			},
 			{ status: 500 },
 		);
+	}
+};
+
+// Action to handle profile deletion
+export const profileDeleteAction = async ({
+	request,
+}: {
+	request: Request;
+}) => {
+	const formData = await request.formData();
+	const intent = formData.get("intent");
+
+	if (intent !== "delete-profile") {
+		return json({ error: "Invalid form submission" }, { status: 400 });
+	}
+
+	const userId = formData.get("userId") as string;
+
+	if (!userId) {
+		return json({ error: "User ID is required" }, { status: 400 });
+	}
+
+	try {
+		const response = await fetch(`/api/users/${userId}/profile/delete`, {
+			method: "DELETE",
+			body: formData,
+		});
+
+		if (response.ok) {
+			// Redirect to home page after successful deletion
+			return redirect("/");
+		} else {
+			return json({ error: "Failed to delete profile" }, { status: 500 });
+		}
+	} catch (error) {
+		console.error("Error deleting profile:", error);
+		return json({ error: "Network error. Please try again" }, { status: 500 });
 	}
 };
