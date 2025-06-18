@@ -531,7 +531,7 @@ const Profile: React.FC = () => {
 			{/* Delete Profile Modal */}
 			{showDeleteModal && (
 				<div className="modal-overlay">
-					<div className="modal-container">
+					<div className="delete-modal-container">
 						<DeleteProfile
 							user={currentUser}
 							onClose={closeDeleteModal}
