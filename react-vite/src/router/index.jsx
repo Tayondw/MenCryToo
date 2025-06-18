@@ -57,6 +57,7 @@ import {
 	partnershipActions,
 	contactActions,
 } from "./actions";
+import {profileLoader, profileUpdateAction} from "../loaders/profileLoaders";
 import Layout from "./Layout";
 
 export const router = createBrowserRouter([
@@ -147,7 +148,8 @@ export const router = createBrowserRouter([
 			// ! PROFILE
 			// ? your profile only you can access
 			{
-				path: "profile",
+                        path: "profile",
+                        loader: profileLoader,
 				element: (
 					<PrivateRoute>
 						<Profile />
@@ -157,9 +159,9 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "users/:userId/profile/update",
-				// loader: userDetailsLoader,
+				loader: profileLoader,
 				element: <UpdateProfile />,
-				action: profileActions,
+				action: profileUpdateAction,
 			},
 			// ? profile feed for users with similar tags
 			{
