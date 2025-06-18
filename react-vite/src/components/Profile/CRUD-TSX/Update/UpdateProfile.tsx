@@ -200,7 +200,7 @@ const UpdateProfile: React.FC = () => {
 			);
 
 			if (response.ok) {
-				window.location.href = "/profile";
+				navigate("/profile");
 			} else {
 				const errorData = await response.json();
 				setErrors(errorData);
@@ -269,14 +269,6 @@ const UpdateProfile: React.FC = () => {
 							</div>
 						</div>
 
-						<div className="section-actions">
-							<button type="button" className="cancel-btn">
-								Cancel
-							</button>
-							<button type="button" className="save-btn">
-								Save
-							</button>
-						</div>
 						{errors.profileImage && (
 							<div className="error-message">{errors.profileImage}</div>
 						)}
@@ -359,15 +351,6 @@ const UpdateProfile: React.FC = () => {
 									<div className="error-message">{errors.username}</div>
 								)}
 							</div>
-						</div>
-
-						<div className="section-actions">
-							<button type="button" className="cancel-btn">
-								Cancel
-							</button>
-							<button type="button" className="save-btn">
-								Save
-							</button>
 						</div>
 					</div>
 
@@ -458,15 +441,6 @@ const UpdateProfile: React.FC = () => {
 								)}
 							</div>
 						</div>
-
-						<div className="section-actions">
-							<button type="button" className="cancel-btn">
-								Cancel
-							</button>
-							<button type="button" className="save-btn">
-								Save
-							</button>
-						</div>
 					</div>
 
 					{/* Bio Section */}
@@ -492,15 +466,6 @@ const UpdateProfile: React.FC = () => {
 							/>
 							<div className="character-count">{formData.bio.length}/500</div>
 							{errors.bio && <div className="error-message">{errors.bio}</div>}
-						</div>
-
-						<div className="section-actions">
-							<button type="button" className="cancel-btn">
-								Cancel
-							</button>
-							<button type="button" className="save-btn">
-								Save
-							</button>
 						</div>
 					</div>
 
@@ -555,14 +520,6 @@ const UpdateProfile: React.FC = () => {
 							</div>
 						)}
 
-						<div className="section-actions">
-							<button type="button" className="cancel-btn">
-								Cancel
-							</button>
-							<button type="button" className="save-btn">
-								Save
-							</button>
-						</div>
 						{errors.userTags && (
 							<div className="error-message">{errors.userTags}</div>
 						)}
