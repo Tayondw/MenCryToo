@@ -64,11 +64,16 @@
 	flex: 1;
 }
 
+h2.section-title {
+      text-align: start;
+}
+
 .section-title {
 	font-size: 1.125rem;
 	font-weight: 600;
 	color: #1e293b;
 	margin: 0 0 0.5rem 0;
+      align-items: start;
 }
 
 .section-description {
@@ -91,8 +96,8 @@
 }
 
 .profile-photo {
-	width: 80px;
-	height: 80px;
+	width: 150px;
+	height: 150px;
 	border-radius: 50%;
 	object-fit: cover;
 	border: 3px solid #e2e8f0;
@@ -117,7 +122,7 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 0.5rem;
-	background: #3b82f6;
+	background: var(--orangy);
 	color: white;
 	padding: 0.5rem 1rem;
 	border-radius: 6px;
@@ -130,7 +135,7 @@
 }
 
 .upload-btn:hover {
-	background: #2563eb;
+	background: var(--peach);
 }
 
 .upload-text {
@@ -255,8 +260,7 @@
 }
 
 .tag-checkbox:hover {
-	border-color: #3b82f6;
-	background: #f8fafc;
+	background: var(--orangy);
 }
 
 .tag-checkbox input[type="checkbox"] {
@@ -367,11 +371,11 @@
 }
 
 .save-btn.primary {
-	background: #3b82f6;
+	background: var(--orangy);
 }
 
 .save-btn.primary:hover:not(:disabled) {
-	background: #2563eb;
+	background: var(--peach);
 }
 
 .save-btn:disabled {
