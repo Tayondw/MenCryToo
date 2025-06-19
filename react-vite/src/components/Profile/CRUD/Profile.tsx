@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { Link, useLoaderData } from "react-router-dom";
 import {
 	Heart,
@@ -12,6 +12,7 @@ import {
 import { User, Post, Group, Event, Tag } from "../../../types";
 import PostMenu from "../../Posts/PostMenu-TSX/PostMenu";
 import DeleteProfile from "../CRUD-TSX/Delete/DeleteProfile";
+import AddTags from "../../Tags/AddTags-TSX/AddTags";
 import "./Profile2.css";
 
 // Mock data for demonstration when no backend data is available
@@ -113,10 +114,6 @@ const Profile: React.FC = () => {
 	// Use loader data or fallback to mock data
 	const currentUser = loaderData?.user || mockUser;
 
-	useEffect(() => {
-		if (!currentUser) window.location.href = "/";
-	}, [currentUser]);
-
 	const [activeMainSection, setActiveMainSection] = useState<
 		"posts" | "groups" | "events"
 	>("posts");
@@ -124,6 +121,7 @@ const Profile: React.FC = () => {
 		"tags" | "similar"
 	>("tags");
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [showAddTagsModal, setShowAddTagsModal] = useState(false);
 
 	// Memoized user-related values with proper null checks and default arrays
 	const userTags = useMemo(() => currentUser?.usersTags ?? [], [currentUser]);
@@ -162,6 +160,14 @@ const Profile: React.FC = () => {
 	const confirmDeleteProfile = useCallback(() => {
 		setShowDeleteModal(false);
 		// The DeleteProfile component handles the actual deletion
+	}, []);
+
+	const handleAddTags = useCallback(() => {
+		setShowAddTagsModal(true);
+	}, []);
+
+	const closeAddTagsModal = useCallback(() => {
+		setShowAddTagsModal(false);
 	}, []);
 
 	const renderContent = useCallback(() => {
@@ -367,11 +373,18 @@ const Profile: React.FC = () => {
 								</div>
 							))}
 						</div>
-						<button className="add-tags-btn">Add Tags</button>
+						<button className="add-tags-btn" onClick={handleAddTags}>
+							Add Tags
+						</button>
 					</div>
 				) : (
-					<div className="empty-state">
-						<p>Currently no tags available.</p>
+					<div className="tags-content">
+						<div className="empty-state">
+							<p>Currently no tags available.</p>
+						</div>
+						<button className="add-tags-btn" onClick={handleAddTags}>
+							Add Tags
+						</button>
 					</div>
 				);
 
@@ -390,7 +403,7 @@ const Profile: React.FC = () => {
 			default:
 				return null;
 		}
-	}, [activeAsideSection, userTags]);
+	}, [activeAsideSection, userTags, handleAddTags]);
 
 	return (
 		<div className="profile-container">
@@ -541,6 +554,15 @@ const Profile: React.FC = () => {
 							onClose={closeDeleteModal}
 							onConfirm={confirmDeleteProfile}
 						/>
+					</div>
+				</div>
+			)}
+
+			{/* Add Tags Modal */}
+			{showAddTagsModal && (
+				<div className="modal-overlay">
+					<div className="modal-container">
+						<AddTags user={currentUser} onClose={closeAddTagsModal} />
 					</div>
 				</div>
 			)}
