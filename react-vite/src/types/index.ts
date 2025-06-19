@@ -32,7 +32,9 @@ export interface Group {
 	id: number;
 	name: string;
 	about: string;
-	image: string;
+      image: string;
+      city: string;
+      state: string;
 	numMembers: number;
 	events: Event[];
 	type: string;
@@ -47,7 +49,19 @@ export interface Event {
 	capacity: number;
 	type: string;
 	startDate: string;
-	endDate: string;
+      endDate: string;
+      venueInfo: Venue;
+      groupInfo: Group;
+}
+
+export interface Venue {
+      id: number;
+      groupId: number;
+      address: string;
+      city: string;
+      state: string;
+      latitude: number;
+      longitude: number;
 }
 
 export interface Comment {
