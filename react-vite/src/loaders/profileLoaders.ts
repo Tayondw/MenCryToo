@@ -28,6 +28,92 @@ export const profileLoader = async ({
 	}
 };
 
+// New combined action for profile page (handles add-tags and delete-profile)
+export const profileAction = async ({ request }: { request: Request }) => {
+	const formData = await request.formData();
+	const intent = formData.get("intent");
+
+	if (intent === "add-tags") {
+		const userId = formData.get("userId") as string;
+
+		if (!userId) {
+			return json({ error: "User ID is required" }, { status: 400 });
+		}
+
+		const userTags = formData.getAll("userTags");
+
+		if (userTags.length === 0) {
+			return json({ error: "Please select at least one tag" }, { status: 400 });
+		}
+
+		try {
+			const requestBody = {
+				userTags: userTags,
+				userId: parseInt(userId),
+			};
+
+			const response = await fetch(`/api/users/${userId}/add-tags`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(requestBody),
+			});
+
+			if (response.ok) {
+				// Redirect to profile page to show updated tags
+				return redirect("/profile");
+			} else {
+				return json({ error: "Failed to add tags" }, { status: 500 });
+			}
+		} catch (error) {
+			console.error("Error adding tags:", error);
+			return json(
+				{ error: "Network error. Please try again" },
+				{ status: 500 },
+			);
+		}
+	}
+
+	if (intent === "delete-profile") {
+		const userId = formData.get("userId") as string;
+
+		if (!userId) {
+			return json({ error: "User ID is required" }, { status: 400 });
+		}
+
+		try {
+			const response = await fetch(`/api/users/${userId}/profile/delete`, {
+				method: "DELETE",
+				body: formData,
+			});
+
+			if (response.ok) {
+				// Clear the user session by calling logout endpoint
+				await fetch("/api/auth/logout", {
+					method: "POST",
+				});
+
+				// Use window.location.href for full page navigation and state reset
+				if (typeof window !== "undefined") {
+					window.location.href = "/";
+				}
+				return null; // Return null since we're handling navigation manually
+			} else {
+				return json({ error: "Failed to delete profile" }, { status: 500 });
+			}
+		} catch (error) {
+			console.error("Error deleting profile:", error);
+			return json(
+				{ error: "Network error. Please try again" },
+				{ status: 500 },
+			);
+		}
+	}
+
+	return json({ error: "Invalid form submission" }, { status: 400 });
+};
+
 // Action to handle profile update form submission
 export const profileUpdateAction = async ({
 	request,
