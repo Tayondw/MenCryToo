@@ -57,7 +57,7 @@ import {
 	partnershipActions,
 	contactActions,
 } from "./actions";
-import {profileLoader, profileUpdateAction, profileDeleteAction} from "../loaders/profileLoaders";
+import {profileLoader, profileUpdateAction, profileAction} from "../loaders/profileLoaders";
 import Layout from "./Layout";
 
 export const router = createBrowserRouter([
@@ -155,7 +155,7 @@ export const router = createBrowserRouter([
 						<Profile />
 					</PrivateRoute>
 				),
-				action: profileDeleteAction,
+				action: profileAction,
 			},
 			{
 				path: "users/:userId/profile/update",
