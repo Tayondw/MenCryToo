@@ -27,8 +27,8 @@ const DeleteProfile: React.FC<DeleteProfileProps> = ({
 		onClose();
 	};
 
-	const handleSubmit = () => {
-		// The Form component will handle the submission via the router action
+	const handleSubmit = async () => {
+		// Let the form submit naturally - the router action will handle the deletion and logout
 		onConfirm();
 	};
 
