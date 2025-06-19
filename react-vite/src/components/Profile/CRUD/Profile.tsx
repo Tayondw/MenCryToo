@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Link, useLoaderData } from "react-router-dom";
 import {
 	Heart,
@@ -112,6 +112,10 @@ const Profile: React.FC = () => {
 
 	// Use loader data or fallback to mock data
 	const currentUser = loaderData?.user || mockUser;
+
+	useEffect(() => {
+		if (!currentUser) window.location.href = "/";
+	}, [currentUser]);
 
 	const [activeMainSection, setActiveMainSection] = useState<
 		"posts" | "groups" | "events"
