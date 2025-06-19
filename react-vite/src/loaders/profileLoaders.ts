@@ -53,8 +53,16 @@ export const profileUpdateAction = async ({
 			});
 
 			if (response.ok) {
-				// Redirect to home page after successful deletion
-				return redirect("/");
+				// Clear the user session by calling logout endpoint
+				await fetch("/api/auth/logout", {
+					method: "POST",
+				});
+
+				// Use window.location.href for full page navigation and state reset
+				if (typeof window !== "undefined") {
+					window.location.href = "/";
+				}
+				return null; // Return null since we're handling navigation manually
 			} else {
 				return json({ error: "Failed to delete profile" }, { status: 500 });
 			}
@@ -190,8 +198,16 @@ export const profileDeleteAction = async ({
 		});
 
 		if (response.ok) {
-			// Redirect to home page after successful deletion
-			return redirect("/");
+			// Clear the user session by calling logout endpoint
+			await fetch("/api/auth/logout", {
+				method: "POST",
+			});
+
+			// Use window.location.href for full page navigation and state reset
+			if (typeof window !== "undefined") {
+				window.location.href = "/";
+			}
+			return null; // Return null since we're handling navigation manually
 		} else {
 			return json({ error: "Failed to delete profile" }, { status: 500 });
 		}
