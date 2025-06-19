@@ -247,6 +247,7 @@
 	margin-bottom: var(--spacing-lg);
 	border-bottom: 2px solid var(--light-gray);
 	flex-wrap: wrap;
+      justify-content: space-between;
 }
 
 .content-nav-btn {
