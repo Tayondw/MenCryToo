@@ -7,21 +7,29 @@ export const profileLoader = async ({
 	try {
 		const response = await fetch("/api/auth/");
 
-		if (response.ok) {
-			const user = await response.json();
-			if (user.errors) {
-				return redirect("/login");
-			}
-
-			// If we have a user ID in params, verify it matches the current user
-			if (params?.id && user.id.toString() !== params.id) {
-				return redirect("/profile"); // Redirect to their own profile
-			}
-
-			return { user };
-		} else {
+		// Check if response is not OK first, before trying to parse JSON
+		if (!response.ok) {
 			return redirect("/login");
 		}
+
+		// Check if the response is actually JSON
+		const contentType = response.headers.get("content-type");
+		if (!contentType || !contentType.includes("application/json")) {
+			console.error("Expected JSON response but received:", contentType);
+			return redirect("/login");
+		}
+
+		const user = await response.json();
+		if (user.errors) {
+			return redirect("/login");
+		}
+
+		// If we have a user ID in params, verify it matches the current user
+		if (params?.id && user.id.toString() !== params.id) {
+			return redirect("/profile"); // Redirect to their own profile
+		}
+
+		return { user };
 	} catch (error) {
 		console.error("Error loading profile:", error);
 		return redirect("/login");
