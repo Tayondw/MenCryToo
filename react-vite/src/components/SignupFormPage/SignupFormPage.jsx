@@ -10,7 +10,7 @@ import {
 import { thunkAuthenticate } from "../../redux/session";
 import OpenModalMenuItem from "../Navigation/OpenModalMenuItem";
 import LoginFormModal from "../LoginFormModal";
-import "./SignupForm.css";
+// import "./SignupForm.css";
 
 function SignupFormPage() {
 	const dispatch = useDispatch();
