@@ -200,7 +200,7 @@ const SignupFormPage: React.FC = () => {
 			<div className="grid lg:grid-cols-2 min-h-screen">
 				{/* Left Side - Hero Content and Image */}
 				<div
-					className="relative flex flex-col bg-slate-800 text-white overflow-hidden lg:sticky lg:top-0 lg:h-screen"
+					className="relative flex flex-col bg-slate-800 text-white lg:sticky lg:top-0 lg:h-screen lg:self-start overflow-hidden min-h-full"
 					style={{
 						backgroundImage:
 							'url("https://mencrytoo.s3.amazonaws.com/MENCRYTOO3.jpg")',
@@ -213,8 +213,8 @@ const SignupFormPage: React.FC = () => {
 					<div className="absolute inset-0 bg-slate-900/60"></div>
 
 					{/* Content - Now with sticky positioning and smooth scroll behavior */}
-					<div className="relative z-10 flex flex-col justify-center items-center text-center p-8 lg:p-12 min-h-full">
-						<div className="max-w-lg space-y-6 transform transition-all duration-300 ease-in-out">
+					<div className="fixed top-0 left-0 z-10 w-1/2 h-screen flex flex-col justify-center items-center text-center px-8 overflow-y-auto">
+						<div className="max-w-lg space-y-6 transform transition-all duration-300 ease-in-out py-16">
 							<h1 className="text-4xl lg:text-5xl font-bold text-orange-400 drop-shadow-lg animate-pulse">
 								MEN CRY TOO
 							</h1>
