@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import OpenModalMenuItem from "../Navigation/OpenModalMenuItem";
 import LoginFormModal from "../LoginFormModal";
-import "./SignupFormPage.css";
+// import "./SignupFormPage.css";
 
 function SignupFormPage() {
 	const dispatch = useDispatch();
