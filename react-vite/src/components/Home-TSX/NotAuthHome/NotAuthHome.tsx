@@ -136,7 +136,7 @@ const NotAuthHome: React.FC = () => {
 						<div className="about-card">
 							<div className="about-image">
 								<img
-									src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=600"
+									src="https://mencrytoo.s3.amazonaws.com/MENCRYTOO4.jpg"
 									alt="Men supporting each other"
 								/>
 							</div>
