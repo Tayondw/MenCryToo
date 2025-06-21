@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Form } from "react-router-dom";
-import { useModal } from "../../../../context/Modal";
+import { useModal } from "../../../../context-TSX/Modal";
 import "./DeleteGroup.css";
 
 const DeleteGroup = ({ groupDetails }) => {
