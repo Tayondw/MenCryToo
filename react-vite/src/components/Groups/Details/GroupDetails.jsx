@@ -2,7 +2,7 @@ import { useLoaderData, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import OpenModalButton from "../../OpenModalButton";
-import { useModal } from "../../../context/Modal";
+import { useModal } from "../../../context-TSX/Modal";
 import GroupImage from "../Images";
 import DeleteGroup from "../CRUD/Delete";
 import "./GroupDetails.css";
