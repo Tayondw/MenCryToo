@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
-import LoginFormPage from "../components/LoginFormPage";
+// import LoginFormPage from "../components/LoginFormPage";
+import LoginFormPage from "../components/LoginFormPage-TSX";
 // import SignupFormPage from "../components/SignupFormPage";
 // import SignupFormPage from "../components/SignupFormPage-TSX/SignupFormPage";
 import SignupFormPage from "../components/SignupFormPage-TSX/Signup"
