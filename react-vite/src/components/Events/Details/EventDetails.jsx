@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { FaRegClock } from "react-icons/fa";
 import { GrLocationPin } from "react-icons/gr";
 import OpenModalButton from "../../OpenModalButton";
-import { useModal } from "../../../context/Modal";
+import { useModal } from "../../../context-TSX/Modal";
 import EventImage from "../Images";
 import DeleteEvent from "../CRUD/Delete/DeleteEvent";
 import "./EventDetails.css";
@@ -424,9 +424,7 @@ const EventDetails = () => {
 								eventDetails.organizer &&
 								sessionUser.id === eventDetails.organizer.id ? (
 									<>
-										{new Date(eventDetails.startDate) < currentDate ? (
-											null
-										) : (
+										{new Date(eventDetails.startDate) < currentDate ? null : (
 											<>
 												<div id="crud-buttons-update">
 													<button
