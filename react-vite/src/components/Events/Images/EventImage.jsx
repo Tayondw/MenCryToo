@@ -1,6 +1,6 @@
 import { Form, useActionData } from "react-router-dom";
 import { useEffect } from "react";
-import { useModal } from "../../../context/Modal";
+import { useModal } from "../../../context-TSX/Modal";
 import "./EventImage.css";
 
 const EventImage = ({ eventDetails, onClose }) => {
