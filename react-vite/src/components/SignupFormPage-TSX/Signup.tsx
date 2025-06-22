@@ -19,8 +19,8 @@ import {
 	ArrowLeft,
 	Check,
 } from "lucide-react";
-// import OpenModalMenuItem from "../Navigation/OpenModalMenuItem";
-// import LoginFormModal from "../LoginFormModal";
+import OpenModalMenuItem from "../Navigation/OpenModalMenuItem/OpenModalMenuItem";
+import LoginFormModal from "../LoginFormModal-TSX/LoginFormModal";
 import { RootState, AppDispatch } from "../../types";
 
 interface LocationState {
@@ -725,11 +725,11 @@ const SignupFormPage: React.FC = () => {
 							{/* Login Link */}
 							<div className="flex items-center justify-center gap-2 pt-6 border-t border-slate-200">
 								<p className="text-slate-600">Already have an account?</p>
-								{/* <OpenModalMenuItem
+								<OpenModalMenuItem
 									itemText="Sign in here"
 									className="text-orange-500 hover:text-orange-600 font-medium cursor-pointer transition-colors"
 									modalComponent={<LoginFormModal navigate={navigate} />}
-								/> */}
+								/>
 							</div>
 						</Form>
 					</div>
