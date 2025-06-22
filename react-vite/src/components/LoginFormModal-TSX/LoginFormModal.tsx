@@ -106,7 +106,7 @@ const LoginFormModal: React.FC<LoginFormModalProps> = ({
 
 		window.addEventListener("popstate", handlePopState);
 		return () => window.removeEventListener("popstate", handlePopState);
-	}, []);
+	});
 
 	return (
 		<div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 animate-in fade-in-0 zoom-in-95 mx-4">
@@ -215,7 +215,7 @@ const LoginFormModal: React.FC<LoginFormModalProps> = ({
 								Signing In...
 							</div>
 						) : (
-							"Sign In"
+							"Log In"
 						)}
 					</button>
 
