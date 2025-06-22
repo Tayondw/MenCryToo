@@ -3,7 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 import LoginFormPage from "../components/LoginFormPage-TSX";
 // import SignupFormPage from "../components/SignupFormPage";
 // import SignupFormPage from "../components/SignupFormPage-TSX/SignupFormPage";
-import SignupFormPage from "../components/SignupFormPage-TSX/Signup"
+import SignupFormPage from "../components/SignupFormPage-TSX/Signup";
 // import Home from "../components/Home";
 import Home from "../components/Home-TSX";
 import Groups from "../components/Groups";
@@ -61,7 +61,12 @@ import {
 	partnershipActions,
 	contactActions,
 } from "./actions";
-import {profileLoader, profileUpdateAction, profileAction} from "../loaders/profileLoaders";
+import {
+	profileLoader,
+	profileUpdateAction,
+	profileAction,
+} from "../loaders/profileLoaders";
+import { signupAction, loginAction } from "../loaders/authLoaders";
 import Layout from "./Layout";
 
 export const router = createBrowserRouter([
@@ -76,11 +81,13 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "login",
-				element: <LoginFormPage />,
+                        element: <LoginFormPage />,
+                        action: loginAction
 			},
 			{
 				path: "signup",
-				element: <SignupFormPage />,
+                        element: <SignupFormPage />,
+                        action: signupAction
 			},
 			// ! GROUPS
 			{
@@ -152,8 +159,8 @@ export const router = createBrowserRouter([
 			// ! PROFILE
 			// ? your profile only you can access
 			{
-                        path: "profile",
-                        loader: profileLoader,
+				path: "profile",
+				loader: profileLoader,
 				element: (
 					<PrivateRoute>
 						<Profile />
