@@ -116,7 +116,7 @@ const LoginFormPage: React.FC = () => {
 								Continue Your Journey
 							</p>
 							<p className="text-lg text-slate-300 leading-relaxed">
-								Sign in to access your account and continue connecting with our
+								Log in to access your account and continue connecting with our
 								supportive community focused on mental health and wellness.
 							</p>
 
@@ -153,7 +153,7 @@ const LoginFormPage: React.FC = () => {
 								<LogIn size={24} className="text-white" />
 							</div>
 							<h2 className="text-3xl font-bold text-slate-900 mb-2">
-								Sign In
+								Log In
 							</h2>
 							<p className="text-slate-600">
 								Enter your credentials to access your account
@@ -250,7 +250,7 @@ const LoginFormPage: React.FC = () => {
 											Signing In...
 										</div>
 									) : (
-										"Sign In"
+										"Log In"
 									)}
 								</button>
 
