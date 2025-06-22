@@ -507,7 +507,7 @@ function SignupFormPage() {
 							<div className="login-link">
 								<p>Already have an account?</p>
 								<OpenModalMenuItem
-									itemText="Sign in here"
+									itemText="Log in here"
 									className="login-modal-trigger"
 									modalComponent={<LoginFormModal navigate={navigate} />}
 								/>
