@@ -24,7 +24,8 @@ import Posts from "../components/Posts";
 import CreatePost from "../components/Posts/CRUD/Create";
 import UpdatePost from "../components/Posts/CRUD/Update";
 import PrivateRoute from "../components/PrivateRoute";
-import ProfileFeed from "../components/Profile/CRUD/ProfileFeed";
+// import ProfileFeed from "../components/Profile/CRUD/ProfileFeed";
+import ProfileFeed from "../components/Profile/CRUD-TSX/ProfileFeed/ProfileFeed";
 import Partnership from "../components/Partnership";
 import Contact from "../components/Contact";
 import Success from "../components/Success";
@@ -67,6 +68,7 @@ import {
 	profileAction,
 } from "../loaders/profileLoaders";
 import { signupAction, loginAction } from "../loaders/authLoaders";
+import { profileFeedLoader } from '../loaders/profileFeedLoaders';
 import Layout from "./Layout";
 
 export const router = createBrowserRouter([
@@ -177,7 +179,8 @@ export const router = createBrowserRouter([
 			// ? profile feed for users with similar tags
 			{
 				path: "profile-feed",
-				loader: profilesLoader,
+                        // loader: profilesLoader,
+                        loader: profileFeedLoader,
 				element: <ProfileFeed />,
 				action: postActions,
 			},
