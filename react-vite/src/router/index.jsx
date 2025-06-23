@@ -1,11 +1,9 @@
 import { createBrowserRouter } from "react-router-dom";
-// import LoginFormPage from "../components/LoginFormPage";
-import LoginFormPage from "../components/LoginFormPage-TSX";
+import LoginFormPage from "../components/LoginFormPage";
 // import SignupFormPage from "../components/SignupFormPage";
 // import SignupFormPage from "../components/SignupFormPage-TSX/SignupFormPage";
 import SignupFormPage from "../components/SignupFormPage-TSX/Signup";
-// import Home from "../components/Home";
-import Home from "../components/Home-TSX";
+import Home from "../components/Home";
 import Groups from "../components/Groups";
 import GroupDetails from "../components/Groups/Details";
 import CreateGroup from "../components/Groups/CRUD/Create";
@@ -14,18 +12,15 @@ import Events from "../components/Events";
 import EventDetails from "../components/Events/Details";
 import CreateEvent from "../components/Events/CRUD/Create";
 import UpdateEvent from "../components/Events/CRUD/Update";
-// import Profile from "../components/Profile";
-import Profile from "../components/Profile/CRUD";
+import Profile from "../components/Profile";
 import ProfileDetails from "../components/Profile/Details";
-// import UpdateProfile from "../components/Profile/CRUD/Update";
-import UpdateProfile from "../components/Profile/CRUD-TSX/Update";
+import UpdateProfile from "../components/Profile/CRUD/Update";
 import Posts from "../components/Posts";
 // import PostDetails from "../components/Posts/Details";
 import CreatePost from "../components/Posts/CRUD/Create";
 import UpdatePost from "../components/Posts/CRUD/Update";
 import PrivateRoute from "../components/PrivateRoute";
-// import ProfileFeed from "../components/Profile/CRUD/ProfileFeed";
-import ProfileFeed from "../components/Profile/CRUD-TSX/ProfileFeed/ProfileFeed";
+import ProfileFeed from "../components/Profile/CRUD/ProfileFeed";
 import Partnership from "../components/Partnership";
 import Contact from "../components/Contact";
 import Success from "../components/Success";
@@ -68,7 +63,7 @@ import {
 	profileAction,
 } from "../loaders/profileLoaders";
 import { signupAction, loginAction } from "../loaders/authLoaders";
-import { profileFeedLoader } from '../loaders/profileFeedLoaders';
+import { profileFeedLoader } from "../loaders/profileFeedLoaders";
 import Layout from "./Layout";
 
 export const router = createBrowserRouter([
@@ -83,13 +78,13 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "login",
-                        element: <LoginFormPage />,
-                        action: loginAction
+				element: <LoginFormPage />,
+				action: loginAction,
 			},
 			{
 				path: "signup",
-                        element: <SignupFormPage />,
-                        action: signupAction
+				element: <SignupFormPage />,
+				action: signupAction,
 			},
 			// ! GROUPS
 			{
@@ -179,8 +174,8 @@ export const router = createBrowserRouter([
 			// ? profile feed for users with similar tags
 			{
 				path: "profile-feed",
-                        // loader: profilesLoader,
-                        loader: profileFeedLoader,
+				// loader: profilesLoader,
+				loader: profileFeedLoader,
 				element: <ProfileFeed />,
 				action: postActions,
 			},
