@@ -20,7 +20,7 @@ import {
 	Check,
 } from "lucide-react";
 import OpenModalMenuItem from "../Navigation/OpenModalMenuItem/OpenModalMenuItem";
-import LoginFormModal from "../LoginFormModal-TSX";
+import LoginFormModal from "../LoginFormModal";
 import { RootState } from "../../types";
 
 interface LocationState {
