@@ -6,7 +6,6 @@ import { FaFolder, FaGithub, FaLinkedin } from "react-icons/fa";
 import { GrDocumentPdf } from "react-icons/gr";
 import { Tooltip } from "react-tooltip";
 import resume from "../../assets/Williams, Tayon SWE.pdf";
-import "../Home/NotAuthHome/NotAuthHome.css";
 import "./Footer.css";
 // import "react-tooltip/dist/react-tooltip.css";
 
