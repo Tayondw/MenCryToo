@@ -22,21 +22,22 @@ const mockUser: User = {
 	firstName: "John",
 	lastName: "Doe",
 	email: "john.doe@example.com",
-	bio: "Passionate developer and community builder",
+	bio: "Passionate developer and community builder focused on mental health advocacy and creating supportive environments for men to express their emotions.",
 	profileImage:
 		"https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop",
+	updatedAt: "2024-01-20T15:30:00Z",
 	usersTags: [
-		{ id: 1, name: "React" },
-		{ id: 2, name: "JavaScript" },
-		{ id: 3, name: "Web Development" },
-		{ id: 4, name: "UI/UX" },
+		{ id: 1, name: "ANXIETY" },
+		{ id: 2, name: "DEPRESSION" },
+		{ id: 3, name: "STRESS" },
+		{ id: 4, name: "RELATIONSHIPS" },
 	],
 	posts: [
 		{
 			id: 1,
-			title: "Building Modern Web Apps",
+			title: "My Journey with Mental Health",
 			caption:
-				"Just finished working on an amazing React project with some incredible features!",
+				"Just finished working on an amazing React project with some incredible features! It has been a transformative experience that helped me cope with my anxiety.",
 			image:
 				"https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=800",
 			likes: 42,
@@ -44,54 +45,160 @@ const mockUser: User = {
 		},
 		{
 			id: 2,
-			title: "Design Systems",
-			caption: "Exploring the world of design systems and component libraries.",
+			title: "Finding Support in Community",
+			caption:
+				"Exploring the world of design systems and component libraries while dealing with depression. The creative process has been therapeutic.",
 			image:
 				"https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=800",
 			likes: 28,
 			updatedAt: "2024-01-10T14:20:00Z",
 		},
+		{
+			id: 3,
+			title: "Breaking the Silence",
+			caption:
+				"Learning to express my emotions and break free from toxic masculinity. It is okay for men to cry and seek help.",
+			image:
+				"https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800",
+			likes: 67,
+			updatedAt: "2024-01-05T16:45:00Z",
+		},
 	],
 	group: [
 		{
 			id: 1,
-			name: "React Developers",
-			about: "A community for React enthusiasts",
+			name: "Men's Mental Health Support",
+			about:
+				"A safe space for men to discuss mental health challenges and support each other",
 			image:
 				"https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400",
+			city: "San Francisco",
+			state: "CA",
 			numMembers: 1250,
+			type: "Support Group",
 			events: [
 				{
 					id: 1,
-					name: "Event 1",
-					description: "",
-					image: "",
-					numAttendees: 0,
-					capacity: 0,
-					type: "",
-					startDate: "",
-					endDate: "",
+					name: "Weekly Check-in",
+					description: "Weekly group therapy session",
+					image:
+						"https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=400",
+					numAttendees: 15,
+					capacity: 20,
+					type: "Therapy",
+					startDate: "2024-02-15T18:00:00Z",
+					endDate: "2024-02-15T20:00:00Z",
+					venueInfo: {
+						id: 1,
+						groupId: 1,
+						address: "123 Main St",
+						city: "San Francisco",
+						state: "CA",
+						latitude: 37.7749,
+						longitude: -122.4194,
+					},
+					groupInfo: {
+						id: 1,
+						name: "Men's Mental Health Support",
+						about: "A safe space for men to discuss mental health challenges",
+						image:
+							"https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400",
+						city: "San Francisco",
+						state: "CA",
+						numMembers: 1250,
+						type: "Support Group",
+						events: [],
+					},
 				},
 				{
 					id: 2,
-					name: "Event 2",
-					description: "",
-					image: "",
-					numAttendees: 0,
-					capacity: 0,
-					type: "",
-					startDate: "",
-					endDate: "",
+					name: "Mindfulness Workshop",
+					description: "Learn mindfulness techniques for stress management",
+					image:
+						"https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=400",
+					numAttendees: 25,
+					capacity: 30,
+					type: "Workshop",
+					startDate: "2024-02-22T19:00:00Z",
+					endDate: "2024-02-22T21:00:00Z",
+					venueInfo: {
+						id: 2,
+						groupId: 1,
+						address: "456 Oak Ave",
+						city: "San Francisco",
+						state: "CA",
+						latitude: 37.7849,
+						longitude: -122.4094,
+					},
+					groupInfo: {
+						id: 1,
+						name: "Men's Mental Health Support",
+						about: "A safe space for men to discuss mental health challenges",
+						image:
+							"https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400",
+						city: "San Francisco",
+						state: "CA",
+						numMembers: 1250,
+						type: "Support Group",
+						events: [],
+					},
 				},
 			],
-			type: "Public",
+		},
+		{
+			id: 2,
+			name: "Anxiety Support Circle",
+			about: "Supporting each other through anxiety and panic disorders",
+			image:
+				"https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=400",
+			city: "Oakland",
+			state: "CA",
+			numMembers: 850,
+			type: "Support Group",
+			events: [
+				{
+					id: 3,
+					name: "Breathing Techniques Session",
+					description:
+						"Learn effective breathing techniques for anxiety management",
+					image:
+						"https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=400",
+					numAttendees: 12,
+					capacity: 15,
+					type: "Workshop",
+					startDate: "2024-02-20T17:00:00Z",
+					endDate: "2024-02-20T18:30:00Z",
+					venueInfo: {
+						id: 3,
+						groupId: 2,
+						address: "789 Pine St",
+						city: "Oakland",
+						state: "CA",
+						latitude: 37.8044,
+						longitude: -122.2711,
+					},
+					groupInfo: {
+						id: 2,
+						name: "Anxiety Support Circle",
+						about: "Supporting each other through anxiety and panic disorders",
+						image:
+							"https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=400",
+						city: "Oakland",
+						state: "CA",
+						numMembers: 850,
+						type: "Support Group",
+						events: [],
+					},
+				},
+			],
 		},
 	],
 	events: [
 		{
 			id: 1,
-			name: "React Conference 2024",
-			description: "Annual React developers conference",
+			name: "Mental Health Awareness Conference 2024",
+			description:
+				"Annual conference focused on men's mental health awareness and breaking stigma",
 			image:
 				"https://images.pexels.com/photos/1181676/pexels-photo-1181676.jpeg?auto=compress&cs=tinysrgb&w=400",
 			numAttendees: 150,
@@ -99,13 +206,81 @@ const mockUser: User = {
 			type: "Conference",
 			startDate: "2024-03-15T09:00:00Z",
 			endDate: "2024-03-15T18:00:00Z",
+			venueInfo: {
+				id: 4,
+				groupId: 1,
+				address: "1000 Conference Center Dr",
+				city: "San Francisco",
+				state: "CA",
+				latitude: 37.7849,
+				longitude: -122.4194,
+			},
+			groupInfo: {
+				id: 1,
+				name: "Men's Mental Health Support",
+				about: "A safe space for men to discuss mental health challenges",
+				image:
+					"https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400",
+				city: "San Francisco",
+				state: "CA",
+				numMembers: 1250,
+				type: "Support Group",
+				events: [],
+			},
+		},
+		{
+			id: 2,
+			name: "Stress Management Workshop",
+			description:
+				"Interactive workshop on managing stress in daily life and work environments",
+			image:
+				"https://images.pexels.com/photos/3184340/pexels-photo-3184340.jpeg?auto=compress&cs=tinysrgb&w=400",
+			numAttendees: 45,
+			capacity: 50,
+			type: "Workshop",
+			startDate: "2024-02-28T14:00:00Z",
+			endDate: "2024-02-28T17:00:00Z",
+			venueInfo: {
+				id: 5,
+				groupId: 2,
+				address: "555 Workshop Way",
+				city: "Oakland",
+				state: "CA",
+				latitude: 37.8144,
+				longitude: -122.2811,
+			},
+			groupInfo: {
+				id: 2,
+				name: "Anxiety Support Circle",
+				about: "Supporting each other through anxiety and panic disorders",
+				image:
+					"https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=400",
+				city: "Oakland",
+				state: "CA",
+				numMembers: 850,
+				type: "Support Group",
+				events: [],
+			},
 		},
 	],
 	userComments: [
-		{ id: 1, content: "Great post!" },
-		{ id: 2, content: "Thanks for sharing!" },
+		{
+			id: 1,
+			content: "Thank you for sharing your story, it really helped me!",
+		},
+		{
+			id: 2,
+			content: "Your post about anxiety management was incredibly helpful.",
+		},
+		{
+			id: 3,
+			content:
+				"I appreciate your vulnerability and openness about mental health.",
+		},
+		{ id: 4, content: "Looking forward to the next group session!" },
 	],
 };
+    
 
 const Profile: React.FC = () => {
 	// Get data from React Router loader
@@ -124,6 +299,7 @@ const Profile: React.FC = () => {
 	const [showAddTagsModal, setShowAddTagsModal] = useState(false);
 
 	// Memoized user-related values with proper null checks and default arrays
+	// These MUST be called unconditionally, even if currentUser is null
 	const userTags = useMemo(() => currentUser?.usersTags ?? [], [currentUser]);
 	const userPosts = useMemo(() => currentUser?.posts ?? [], [currentUser]);
 	const userGroups = useMemo(() => currentUser?.group ?? [], [currentUser]);
