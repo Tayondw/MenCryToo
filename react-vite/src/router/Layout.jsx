@@ -5,7 +5,8 @@ import { useDispatch } from "react-redux";
 // import { Modal } from "../context/Modal";
 import { ModalProvider } from "../context-TSX/Modal";
 import { thunkAuthenticate } from "../redux/session";
-import Navigation from "../components/Navigation/Navigation";
+// import Navigation from "../components/Navigation/Navigation";
+import Navigation from "../components/Navigation-TSX/Navigation"
 import Footer from "../components/Footer";
 import ScrollToTop from "../components/ScrollToTop";
 
