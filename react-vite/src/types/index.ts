@@ -12,6 +12,7 @@ export interface User {
 	group: Group[];
 	events: Event[];
 	userComments: Comment[];
+	updatedAt?: string;
 }
 
 export interface Tag {
