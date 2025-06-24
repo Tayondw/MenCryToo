@@ -10,8 +10,10 @@ import Groups from "../components/Groups-TSX";
 import GroupDetails from "../components/Groups-TSX/Details";
 import CreateGroup from "../components/Groups/CRUD/Create";
 import UpdateGroup from "../components/Groups/CRUD/Update";
-import Events from "../components/Events";
-import EventDetails from "../components/Events/Details";
+// import Events from "../components/Events";
+import Events from "../components/Events-TSX";
+// import EventDetails from "../components/Events/Details";
+import EventDetails from "../components/Events-TSX/Details";
 import CreateEvent from "../components/Events/CRUD/Create";
 import UpdateEvent from "../components/Events/CRUD/Update";
 import Profile from "../components/Profile";
@@ -37,7 +39,7 @@ import FourZeroFourPage from "../components/404Page";
 import {
 	getLoader,
 	// groupDetailsLoader,
-	eventDetailsLoader,
+	// eventDetailsLoader,
 	// venueDetailsLoader,
 	userDetailsLoader,
 	// postsLoader,
@@ -72,6 +74,12 @@ import {
 	groupAction,
 	groupFormAction,
 } from "../loaders/groupLoaders";
+import {
+	eventsLoader,
+	eventDetailsLoader,
+	eventAction,
+	eventFormAction,
+} from "../loaders/eventLoaders";
 import Layout from "./Layout";
 
 export const router = createBrowserRouter([
@@ -137,15 +145,14 @@ export const router = createBrowserRouter([
 			// ! EVENTS
 			{
 				path: "events",
-				loader: getLoader,
+				loader: eventsLoader,
 				element: <Events />,
-				action: eventActions,
 			},
 			{
 				path: "events/:eventId",
 				loader: eventDetailsLoader,
 				element: <EventDetails />,
-				action: eventActions,
+				action: eventAction,
 			},
 			{
 				path: "groups/:groupId/events/new",
