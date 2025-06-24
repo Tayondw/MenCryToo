@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useLoaderData, Link, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
@@ -62,13 +62,17 @@ const ProfileFeed: React.FC = () => {
 	}, [loaderData]);
 
 	// Calculate similarity score for each user - moved to regular function
-	const calculateSimilarity = (user: User): number => {
-		const userTagIds = user.usersTags?.map((tag: TagInterface) => tag.id) || [];
-		const commonTags = userTagIds.filter((tagId: number) =>
-			sessionUserTags.includes(tagId),
-		);
-		return commonTags.length;
-	};
+	const calculateSimilarity = useCallback(
+		(user: User): number => {
+			const userTagIds =
+				user.usersTags?.map((tag: TagInterface) => tag.id) || [];
+			const commonTags = userTagIds.filter((tagId: number) =>
+				sessionUserTags.includes(tagId),
+			);
+			return commonTags.length;
+		},
+		[sessionUserTags],
+	);
 
 	// Filter and sort users
 	const filteredAndSortedUsers = useMemo(() => {
@@ -122,7 +126,7 @@ const ProfileFeed: React.FC = () => {
 			default:
 				return users;
 		}
-	}, [loaderData, sessionUser, filters, sessionUserTags]);
+	}, [loaderData, sessionUser, filters, calculateSimilarity]);
 
 	// Redirect if not authenticated - check after all hooks
 	if (!sessionUser) {
