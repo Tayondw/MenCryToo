@@ -20,7 +20,12 @@ export default function Layout() {
 			<ModalProvider>
 				<Navigation isLoaded={isLoaded} />
 				<ScrollToTop />
-				{isLoaded && <Outlet />}
+				<div className="relative overflow-hidden">
+					{isLoaded && <Outlet />}
+					{/* Force boundary */}
+					<div className="clear-both h-0"></div>
+					<div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-orange-400 via-blue-500 to-purple-500"></div>
+				</div>
 				<Footer />
 			</ModalProvider>
 		</>
