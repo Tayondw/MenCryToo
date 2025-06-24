@@ -4,8 +4,10 @@ import LoginFormPage from "../components/LoginFormPage";
 // import SignupFormPage from "../components/SignupFormPage-TSX/SignupFormPage";
 import SignupFormPage from "../components/SignupFormPage-TSX/Signup";
 import Home from "../components/Home";
-import Groups from "../components/Groups";
-import GroupDetails from "../components/Groups/Details";
+// import Groups from "../components/Groups";
+import Groups from "../components/Groups-TSX";
+// import GroupDetails from "../components/Groups/Details";
+import GroupDetails from "../components/Groups-TSX/Details";
 import CreateGroup from "../components/Groups/CRUD/Create";
 import UpdateGroup from "../components/Groups/CRUD/Update";
 import Events from "../components/Events";
@@ -34,7 +36,7 @@ import FourZeroFourPage from "../components/404Page";
 // import CreateVenue from "../components/Venues/CRUD/Create";
 import {
 	getLoader,
-	groupDetailsLoader,
+	// groupDetailsLoader,
 	eventDetailsLoader,
 	// venueDetailsLoader,
 	userDetailsLoader,
@@ -64,6 +66,12 @@ import {
 } from "../loaders/profileLoaders";
 import { signupAction, loginAction } from "../loaders/authLoaders";
 import { profileFeedLoader } from "../loaders/profileFeedLoaders";
+import {
+	groupsLoader,
+	groupDetailsLoader,
+	groupAction,
+	groupFormAction,
+} from "../loaders/groupLoaders";
 import Layout from "./Layout";
 
 export const router = createBrowserRouter([
@@ -73,7 +81,6 @@ export const router = createBrowserRouter([
 		children: [
 			{
 				path: "/",
-				loader: getLoader,
 				element: <Home />,
 			},
 			{
@@ -89,15 +96,14 @@ export const router = createBrowserRouter([
 			// ! GROUPS
 			{
 				path: "groups",
-				loader: getLoader,
+				loader: groupsLoader,
 				element: <Groups />,
-				action: groupActions,
 			},
 			{
 				path: "groups/:groupId",
 				loader: groupDetailsLoader,
 				element: <GroupDetails />,
-				action: groupActions,
+				action: groupAction,
 			},
 			{
 				path: "groups/new",
