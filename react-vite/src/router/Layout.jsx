@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { useDispatch } from "react-redux";
-// import { ModalProvider, Modal } from "../context/Modal";
-// import { Modal } from "../context/Modal";
-import { ModalProvider } from "../context-TSX/Modal";
-import { thunkAuthenticate } from "../redux/session";
+import { ModalProvider } from "../context/Modal";
+import { thunkAuthenticate } from "../store/session";
 import Navigation from "../components/Navigation/Navigation";
-// import Footer from "../components/Footer";
-import Footer from "../components/Footer-TSX";
+import Footer from "../components/Footer";
 import ScrollToTop from "../components/ScrollToTop";
 
 export default function Layout() {
@@ -25,7 +22,6 @@ export default function Layout() {
 				<ScrollToTop />
 				{isLoaded && <Outlet />}
 				<Footer />
-				{/* <Modal /> */}
 			</ModalProvider>
 		</>
 	);
