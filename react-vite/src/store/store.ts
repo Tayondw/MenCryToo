@@ -4,7 +4,7 @@ import {
 	compose,
 	combineReducers,
 	Store,
-	Middleware,
+	// Middleware,
 } from "redux";
 import thunk, { ThunkMiddleware } from "redux-thunk";
 import sessionReducer from "./session";
@@ -28,29 +28,33 @@ if (import.meta.env.MODE === "production") {
 	);
 } else {
 	// Handle redux-logger import with proper typing
-	let logger: Middleware | null = null;
-	try {
-		const reduxLogger = await import("redux-logger");
-		logger = reduxLogger.default as Middleware;
-	} catch (error) {
-		console.warn("Redux logger not available:", error);
-	}
+	// let logger: Middleware | null = null;
+	// try {
+	// 	const reduxLogger = await import("redux-logger");
+	// 	logger = reduxLogger.default as Middleware;
+	// } catch (error) {
+	// 	console.warn("Redux logger not available:", error);
+	// }
 
 	const composeEnhancers =
 		window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-	if (logger) {
-		enhancer = composeEnhancers(
-			applyMiddleware(
-				thunk as ThunkMiddleware<RootState, SessionAction>,
-				logger,
-			),
-		);
-	} else {
-		enhancer = composeEnhancers(
-			applyMiddleware(thunk as ThunkMiddleware<RootState, SessionAction>),
-		);
-	}
+	// if (logger) {
+	// 	enhancer = composeEnhancers(
+	// 		applyMiddleware(
+	// 			thunk as ThunkMiddleware<RootState, SessionAction>,
+	// 			logger,
+	// 		),
+	// 	);
+	// } else {
+	// 	enhancer = composeEnhancers(
+	// 		applyMiddleware(thunk as ThunkMiddleware<RootState, SessionAction>),
+	// 	);
+      // }
+      
+      enhancer = composeEnhancers(
+            applyMiddleware(thunk as ThunkMiddleware<RootState, SessionAction>),
+      );
 }
 
 const configureStore = (
