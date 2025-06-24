@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { FaRegClock } from "react-icons/fa";
 import { GrLocationPin } from "react-icons/gr";
 import OpenModalButton from "../../OpenModalButton";
-import { useModal } from "../../../context-TSX/Modal";
+import { useModal } from "../../../hooks/useModal";
 import EventImage from "../Images";
 import DeleteEvent from "../CRUD/Delete/DeleteEvent";
 import "./EventDetails.css";

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Form } from "react-router-dom";
-import { useModal } from "../../../../context/Modal";
+import { useModal } from "../../../../hooks/useModal";
 import "./DeletePost.css";
 
 const DeletePost = ({ post }) => {

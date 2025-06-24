@@ -1,7 +1,7 @@
 import { useActionData, Form } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useModal } from "../../../context/Modal";
+import { useModal } from "../../../hooks/useModal";
 import "./AddTag.css";
 
 const AddTag = () => {

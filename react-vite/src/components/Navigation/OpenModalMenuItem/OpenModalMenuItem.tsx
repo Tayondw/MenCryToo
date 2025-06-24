@@ -1,5 +1,5 @@
 import React from "react";
-import { useModal } from "../../../context-TSX/Modal";
+import { useModal } from "../../../hooks/useModal";
 
 interface OpenModalMenuItemProps {
 	itemText: string;

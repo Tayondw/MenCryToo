@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, X, LogIn, User } from "lucide-react";
 import { thunkLogin } from "../../store/session";
 import { AppDispatch } from "../../types";
-import { useModal } from "../../context-TSX/Modal";
+import { useModal } from "../../hooks/useModal";
 
 interface LoginFormModalProps {
 	navigate?: (path: string) => void;
