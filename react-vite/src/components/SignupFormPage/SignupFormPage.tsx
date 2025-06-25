@@ -112,7 +112,7 @@ const SignupFormPage: React.FC = () => {
 			{/* Back Button */}
 			<Link
 				to="/"
-				className="fixed top-8 left-8 z-20 inline-flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm text-slate-600 hover:text-slate-900 font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
+				className="fixed top-28 left-8 z-20 inline-flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm text-slate-600 hover:text-slate-900 font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 max-xl:relative max-xl:top-16 lg:fixed lg:top-28"
 			>
 				<ArrowLeft size={20} />
 				Back to Home
@@ -134,7 +134,7 @@ const SignupFormPage: React.FC = () => {
 					<div className="absolute inset-0 bg-slate-900/60"></div>
 
 					{/* Content - Now with sticky positioning and smooth scroll behavior */}
-					<div className="fixed top-0 left-0 z-10 w-1/2 h-screen flex flex-col justify-center items-center text-center px-8 overflow-y-auto">
+					<div className="fixed top-0 left-0 z-10 w-1/2 h-screen flex flex-col justify-center items-center text-center px-8 overflow-y-auto max-xl:relative max-xl:items-center max-xl:justify-center max-xl:text-center max-xl:left-36 lg:fixed lg:left-0">
 						<div className="max-w-lg space-y-6 transform transition-all duration-300 ease-in-out py-16">
 							<h1 className="text-4xl lg:text-5xl font-bold text-orange-400 drop-shadow-lg animate-pulse">
 								MEN CRY TOO
@@ -181,7 +181,7 @@ const SignupFormPage: React.FC = () => {
 								<p className="text-sm text-slate-400 mb-2">
 									Join thousands of men on their healing journey
 								</p>
-								<div className="flex items-center gap-2">
+								<div className="flex items-center gap-2 mb-56">
 									<div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
 										<div
 											className="h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-full transition-all duration-500 ease-out"
