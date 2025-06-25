@@ -50,7 +50,7 @@ const Footer: React.FC = () => {
 	return (
 		<footer className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
 			{/* Main Footer Content */}
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+			<div className="flex mx-auto px-4 sm:px-6 lg:px-8 py-6 justify-around">
 				<div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-center">
 					{/* Developer Info */}
 					<div className="lg:col-span-1 text-center lg:text-left">
@@ -60,10 +60,10 @@ const Footer: React.FC = () => {
 								MEET THE DEVELOPER
 							</h3>
 						</div>
-						<h4 className="text-2xl font-semibold text-white mb-2">
+						<h4 className="text-2xl font-semibold text-white mb-2 text-center">
 							Tayon Williams
 						</h4>
-						<div className="flex items-center gap-2 justify-center lg:justify-start text-slate-300">
+						<div className="flex items-center gap-2 justify-center lg:justify-center text-slate-300 ">
 							<Mail size={16} />
 							<a
 								href="mailto:tayondw@gmail.com"
@@ -72,7 +72,7 @@ const Footer: React.FC = () => {
 								tayondw@gmail.com
 							</a>
 						</div>
-						<p className="text-slate-400 text-sm mt-2">
+						<p className="text-slate-400 text-sm mt-2 text-center">
 							Full Stack Software Engineer
 						</p>
 					</div>
@@ -92,10 +92,10 @@ const Footer: React.FC = () => {
 
 					{/* Social Links */}
 					<div className="lg:col-span-1">
-						<h4 className="text-lg font-semibold text-center lg:text-left mb-6 text-slate-200">
+						<h4 className="text-lg font-semibold items-center lg:text-center text-slate-200">
 							Connect With Me
 						</h4>
-						<div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
+						<div className="grid grid-cols-2 gap-4">
 							{socialLinks.map((link) => {
 								const IconComponent = link.icon;
 								return (
@@ -137,7 +137,7 @@ const Footer: React.FC = () => {
 					</div>
 
 					{/* Project Info */}
-					<div className="lg:col-span-1 text-center lg:text-left">
+					<div className="lg:col-span-1 text-center lg:text-center">
 						<h4 className="text-lg font-semibold mb-4 text-slate-200">
 							About This Project
 						</h4>
