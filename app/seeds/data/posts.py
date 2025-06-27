@@ -181,7 +181,7 @@ posts = [
     },
     {
         "creator": 9,
-        "title": "Life",
+        "title": "Life!",
         "caption": "I'm the papi!",
         "image": "https://mencrytoo.s3.amazonaws.com/tags/grief2.jpeg",
         "post_likes": [user["username"] for user in sample(users, randint(0, len(users)))],
