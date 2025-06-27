@@ -85,6 +85,23 @@ class User(db.Model, UserMixin):
             "updatedAt": self.updated_at,
         }
 
+    def to_dict_for_profile_feed(self):
+        """Special method for profile feed that includes tags and posts"""
+        return {
+            "id": self.id,
+            "firstName": self.first_name,
+            "lastName": self.last_name,
+            "username": self.username,
+            "email": self.email,
+            "bio": self.bio,
+            "profileImage": self.profile_image_url,
+            "usersTags": [tag.to_dict() for tag in self.users_tags],
+            "posts": [post.to_dict() for post in self.posts],
+            "userComments": [comment.to_dict() for comment in self.user_comments],
+            "createdAt": self.created_at,
+            "updatedAt": self.updated_at,
+        }
+
     def to_dict(
         self,
         posts=False,
