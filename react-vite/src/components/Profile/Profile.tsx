@@ -10,7 +10,7 @@ import {
 	Edit3,
 } from "lucide-react";
 import { User, Post, Group, Event, Tag } from "../../types";
-import PostMenu from "../Posts/PostMenu-TSX/PostMenu";
+import PostMenu from "../Posts-TSX/PostMenu-TSX/PostMenu";
 import DeleteProfile from "./CRUD/Delete/DeleteProfile";
 import AddTags from "../Tags/AddTags-TSX/AddTags";
 import "./Profile.css";
