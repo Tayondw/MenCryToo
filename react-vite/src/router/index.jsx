@@ -17,7 +17,8 @@ import UpdateEvent from "../components/Events/CRUD/Update";
 import Profile from "../components/Profile";
 import ProfileDetails from "../components/Profile/Details";
 import UpdateProfile from "../components/Profile/CRUD/Update";
-import Posts from "../components/Posts";
+// import Posts from "../components/Posts";
+import Posts from "../components/Posts-TSX";
 // import PostDetails from "../components/Posts/Details";
 import CreatePost from "../components/Posts/CRUD/Create";
 import UpdatePost from "../components/Posts/CRUD/Update";
@@ -199,7 +200,8 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "posts-feed",
-				loader: profilesLoader,
+                        // loader: profilesLoader,
+                        loader: profileFeedLoader,
 				element: <Posts />,
 				action: postActions,
 			},
