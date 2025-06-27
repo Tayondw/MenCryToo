@@ -3,6 +3,8 @@ from flask_login import login_required, current_user
 from app.models import db, User, Post, Comment, Likes
 from app.forms import PostForm, CommentForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
+from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy import desc
 
 post_routes = Blueprint("posts", __name__)
 
@@ -12,14 +14,42 @@ post_routes = Blueprint("posts", __name__)
 @login_required
 def all_posts():
     """
-    Query for all posts and returns them in a list of post dictionaries
+    Query for all posts and returns them in a list of post dictionaries - with pagination
     """
-    posts = Post.query.order_by(Post.created_at.desc()).all()
+    page = request.args.get("page", 1, type=int)
+    per_page = min(request.args.get("per_page", 20, type=int), 50)
 
-    if not posts:
+    posts_query = (
+        db.session.query(Post)
+        .options(
+            joinedload(Post.user),
+            selectinload(Post.post_comments).joinedload(Comment.commenter),
+            selectinload(Post.post_likes),
+        )
+        .order_by(desc(Post.created_at))
+    )
+
+    posts = posts_query.paginate(page=page, per_page=per_page, error_out=False)
+
+    if not posts.items:
         return jsonify({"errors": {"message": "Not Found"}}), 404
 
-    return jsonify({"posts": [post.to_dict(post_comments=True, post_likes=True) for post in posts]})
+    return jsonify(
+        {
+            "posts": [
+                post.to_dict(post_comments=True, post_likes=True)
+                for post in posts.items
+            ],
+            "pagination": {
+                "page": page,
+                "pages": posts.pages,
+                "per_page": per_page,
+                "total": posts.total,
+                "has_next": posts.has_next,
+                "has_prev": posts.has_prev,
+            },
+        }
+    )
 
 
 @post_routes.route("/<int:postId>")
@@ -29,7 +59,16 @@ def post(postId):
     Query for post by id and returns that post in a dictionary
     """
 
-    post = Post.query.get(postId)
+    post = (
+        db.session.query(Post)
+        .options(
+            joinedload(Post.user),
+            selectinload(Post.post_comments).joinedload(Comment.commenter),
+            selectinload(Post.post_likes),
+        )
+        .filter(Post.id == postId)
+        .first()
+    )
 
     if not post:
         return jsonify({"errors": {"message": "Not Found"}}), 404
@@ -52,32 +91,38 @@ def delete_post(postId):
 
     post_to_delete = Post.query.get(postId)
 
-    # check if there is a post to delete
     if not post_to_delete:
         return {"errors": {"message": "Not Found"}}, 404
 
     user = User.query.get(post_to_delete.creator)
-
-    # check if there is a user who created the post
     if not user:
-        return {"errors": {"message": "Not Found"}}, 404
+        return {"errors": {"message": "User not found"}}, 404
 
-    # check if current user is post creator - post creator is only allowed to update
     if current_user.id != post_to_delete.creator:
         return {"errors": {"message": "Unauthorized"}}, 401
 
-    # Delete associated post comments
-    Comment.query.filter_by(post_id=postId).delete()
+    try:
+        # Delete associated data in batch operations
+        Comment.query.filter_by(post_id=postId).delete(synchronize_session=False)
 
-    # Delete associated post likes (use db.session for many-to-many table)
-    db.session.execute(Likes.delete().where(Likes.c.post_id == postId))
+        # Delete likes using raw SQL for better performance
+        db.session.execute(Likes.delete().where(Likes.c.post_id == postId))
 
-    # Delete associated post likes
-    #     Likes.query.filter_by(post_id=postId).delete()
+        # Delete associated post likes
+        #   Likes.query.filter_by(post_id=postId).delete()
 
-    db.session.delete(post_to_delete)
-    db.session.commit()
-    return {"message": "post deleted"}
+        # Remove image from S3 if it exists
+        if post_to_delete.image:
+            remove_file_from_s3(post_to_delete.image)
+
+        db.session.delete(post_to_delete)
+        db.session.commit()
+
+        return {"message": "Post deleted successfully"}, 200
+
+    except Exception as e:
+        db.session.rollback()
+        return {"errors": {"message": "Error deleting post"}}, 500
 
 
 #     return redirect("/api/posts/")
@@ -95,13 +140,30 @@ def add_comment(postId):
 
     form = CommentForm()
     form["csrf_token"].data = request.cookies["csrf_token"]
+
     if form.validate_on_submit():
-        comment = Comment(
-            post_id=postId, user_id=current_user.id, comment=form.comment.data
-        )
-        db.session.add(comment)
-        db.session.commit()
-        return jsonify(comment.to_dict()), 201
+        try:
+            comment = Comment(
+                post_id=postId, user_id=current_user.id, comment=form.comment.data
+            )
+
+            db.session.add(comment)
+            db.session.commit()
+
+            # Load comment with user relationship for response
+            created_comment = (
+                db.session.query(Comment)
+                .options(joinedload(Comment.commenter))
+                .filter(Comment.id == comment.id)
+                .first()
+            )
+
+            return jsonify(created_comment.to_dict()), 201
+
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"errors": {"message": "Error creating comment"}}), 500
+
     #   return redirect(f"/api/posts/{postId}")
     #     elif form.errors:
     #         print(form.errors)
@@ -122,16 +184,26 @@ def add_comment(postId):
 @post_routes.route("/<int:postId>/comments/<int:commentId>", methods=["DELETE"])
 @login_required
 def delete_comment(postId, commentId):
-    comment = Comment.query.get(commentId)
-    if not comment or comment.post_id != postId:
+    comment = Comment.query.filter_by(id=commentId, post_id=postId).first()
+
+    if not comment:
         return jsonify({"errors": {"message": "Comment not found"}}), 404
 
     if comment.user_id != current_user.id:
         return jsonify({"errors": {"message": "Unauthorized"}}), 403
 
-    db.session.delete(comment)
-    db.session.commit()
-    return jsonify({"message": "Comment deleted successfully"}), 200
+    try:
+        # Delete nested replies first
+        Comment.query.filter_by(parent_id=commentId).delete(synchronize_session=False)
+
+        db.session.delete(comment)
+        db.session.commit()
+
+        return jsonify({"message": "Comment deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"errors": {"message": "Error deleting comment"}}), 500
 
 
 # ! POST - LIKES
@@ -142,9 +214,14 @@ def like_post(postId):
     if not post:
         return {"errors": {"message": "Post not found"}}, 404
 
-    if post.add_like(current_user.id):
-        return {"message": "Like added"}, 200
-    return {"errors": {"message": "Failed to add like"}}, 400
+    try:
+        if post.add_like(current_user.id):
+            return {"message": "Like added"}, 200
+        return {"errors": {"message": "Post already liked"}}, 400
+
+    except Exception as e:
+        db.session.rollback()
+        return {"errors": {"message": "Error adding like"}}, 500
 
 
 @post_routes.route("/<int:postId>/unlike", methods=["POST"])
@@ -154,6 +231,11 @@ def unlike_post(postId):
     if not post:
         return {"errors": {"message": "Post not found"}}, 404
 
-    if post.remove_like(current_user.id):
-        return {"message": "Like removed"}, 200
-    return {"errors": {"message": "Failed to remove like"}}, 400
+    try:
+        if post.remove_like(current_user.id):
+            return {"message": "Like removed"}, 200
+        return {"errors": {"message": "Post not liked"}}, 400
+
+    except Exception as e:
+        db.session.rollback()
+        return {"errors": {"message": "Error removing like"}}, 500
