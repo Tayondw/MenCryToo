@@ -13,6 +13,7 @@ from app.models import (
 
 from app.forms import EventForm, EventImageForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
+from sqlalchemy.orm import joinedload, selectinload
 
 event_routes = Blueprint("events", __name__)
 
@@ -21,10 +22,37 @@ event_routes = Blueprint("events", __name__)
 @event_routes.route("/")
 def all_events():
     """
-    Query for all events and returns them in a list of event dictionaries
+    Query for all events and returns them in a list of event dictionaries - with pagination
     """
-    events = Event.query.all()
-    return jsonify({"events": [event.to_dict() for event in events]})
+    page = request.args.get("page", 1, type=int)
+    per_page = min(request.args.get("per_page", 20, type=int), 50)
+
+    events_query = (
+        db.session.query(Event)
+        .options(
+            joinedload(Event.groups).joinedload(Group.organizer),
+            joinedload(Event.venues),
+            selectinload(Event.attendances),
+            selectinload(Event.event_images),
+        )
+        .order_by(Event.start_date)
+    )
+
+    events = events_query.paginate(page=page, per_page=per_page, error_out=False)
+
+    return jsonify(
+        {
+            "events": [event.to_dict() for event in events.items],
+            "pagination": {
+                "page": page,
+                "pages": events.pages,
+                "per_page": per_page,
+                "total": events.total,
+                "has_next": events.has_next,
+                "has_prev": events.has_prev,
+            },
+        }
+    )
 
 
 @event_routes.route("/<int:eventId>")
@@ -33,7 +61,21 @@ def event(eventId):
     Query for event by id and returns that event in a dictionary
     """
 
-    event = Event.query.get(eventId)
+    event = (
+        db.session.query(Event)
+        .options(
+            joinedload(Event.groups).joinedload(Group.organizer),
+            joinedload(Event.venues),
+            selectinload(Event.attendances).joinedload(Attendance.user),
+            selectinload(Event.event_images),
+        )
+        .filter(Event.id == eventId)
+        .first()
+    )
+
+    if not event:
+        return jsonify({"errors": {"message": "Event not found"}}), 404
+
     return jsonify(event.to_dict())
 
 
@@ -50,22 +92,31 @@ def delete_event(eventId):
     The commented out code was to test if the delete request works
     """
     event_to_delete = Event.query.get(eventId)
-    group = Group.query.get(event_to_delete.group_id)
 
-    # check if there is an event to delete
     if not event_to_delete:
         return {"errors": {"message": "Not Found"}}, 404
 
-    # check if current user is group organizer - group organizer is only allowed to update
+    group = Group.query.get(event_to_delete.group_id)
     if current_user.id != group.organizer_id:
         return {"errors": {"message": "Unauthorized"}}, 401
 
-    # Delete associated event images
-    EventImage.query.filter_by(event_id=eventId).delete()
+    try:
+        # Delete associated data in batch
+        EventImage.query.filter_by(event_id=eventId).delete(synchronize_session=False)
+        Attendance.query.filter_by(event_id=eventId).delete(synchronize_session=False)
 
-    db.session.delete(event_to_delete)
-    db.session.commit()
-    return {"message": "Event deleted"}
+        # Remove image from S3 if it exists
+        if event_to_delete.image:
+            remove_file_from_s3(event_to_delete.image)
+
+        db.session.delete(event_to_delete)
+        db.session.commit()
+
+        return {"message": "Event deleted successfully"}, 200
+
+    except Exception as e:
+        db.session.rollback()
+        return {"errors": {"message": "Error deleting event"}}, 500
 
 
 # ! EVENT IMAGES
@@ -82,14 +133,11 @@ def add_event_image(eventId):
     The commented out code was to test if the post request works
     """
 
-    # check if there is an event to add the image to
     event = Event.query.get(eventId)
-    group = Group.query.get(event.group_id)
-
     if not event:
         return {"errors": {"message": "Not Found"}}, 404
 
-    # check if current user is group organizer - group organizer is only allowed to update
+    group = Group.query.get(event.group_id)
     if current_user.id != group.organizer_id:
         return {"errors": {"message": "Unauthorized"}}, 401
 
@@ -100,22 +148,24 @@ def add_event_image(eventId):
         event_image = form.event_image.data
 
         if event_image:
-            event_image.filename = get_unique_filename(event_image.filename)
-            upload = upload_file_to_s3(event_image)
+            try:
+                event_image.filename = get_unique_filename(event_image.filename)
+                upload = upload_file_to_s3(event_image)
 
-            if "url" not in upload:
-                # if the dictionary doesn't have a url key
-                # it means that there was an error when you tried to upload
-                # so you send back that error message (and you printed it above)
-                return {"message": "unable to locate url"}
+                if "url" not in upload:
+                    return {"message": "unable to locate url"}, 400
 
-            url = upload["url"]
-            new_event_image = EventImage(event_id=eventId, event_image=url)
-            db.session.add(new_event_image)
-            db.session.commit()
-            return {"event_image": new_event_image.to_dict()}, 201
+                url = upload["url"]
+                new_event_image = EventImage(event_id=eventId, event_image=url)
+                db.session.add(new_event_image)
+                db.session.commit()
+
+                return {"event_image": new_event_image.to_dict()}, 201
+
+            except Exception as e:
+                return {"message": f"Image upload failed: {str(e)}"}, 500
         else:
-            return {"message": "Event image is None"}
+            return {"message": "Event image is None"}, 400
 
     #     if form.errors:
     #         print(form.errors)
@@ -193,10 +243,10 @@ def edit_event_images(eventId, imageId):
 @login_required
 def attend_event(eventId):
     event = Event.query.get(eventId)
-    group = Group.query.get(event.group_id)
-
     if not event:
         return {"errors": {"message": "Event Not Found"}}, 404
+
+    group = Group.query.get(event.group_id)
 
     # Prevent the organizer from attending as a member
     if group.organizer_id == current_user.id:
@@ -204,61 +254,73 @@ def attend_event(eventId):
             "message": "User is the organizer and is currently attending the event"
         }, 403
 
-    # Check if the user is currently attending the event
-    attendance = Attendance.query.filter_by(
+    # Check if the user is already attending
+    existing_attendance = Attendance.query.filter_by(
         event_id=eventId, user_id=current_user.id
     ).first()
 
-    if attendance:
+    if existing_attendance:
         return {"message": "Currently attending the event"}, 400
 
     # Parse JSON request body
     data = request.get_json()
-    user_id = data.get("user_id")
-    event_id = data.get("event_id")
+    user_id = data.get("user_id") if data else current_user.id
+    event_id = data.get("event_id") if data else eventId
 
     # Ensure data is valid
     if user_id != current_user.id:
         return jsonify({"message": "Invalid user ID"}), 400
 
-    new_attendance = Attendance(event_id=event_id, user_id=user_id)
-    db.session.add(new_attendance)
-    db.session.commit()
+    try:
+        new_attendance = Attendance(event_id=event_id, user_id=user_id)
+        db.session.add(new_attendance)
+        db.session.commit()
 
-    return {"message": "Successfully attended the event"}, 200
+        return {"message": "Successfully attended the event"}, 200
+
+    except Exception as e:
+        db.session.rollback()
+        return {"errors": {"message": "Error attending event"}}, 500
 
 
 @event_routes.route("/<int:eventId>/leave-event/<int:attendeeId>", methods=["DELETE"])
 @login_required
 def leave_event(eventId, attendeeId):
     event = Event.query.get(eventId)
-    group = Group.query.get(event.group_id)
-
     if not event:
         return {"errors": {"message": "Event not found"}}, 404
 
-    # Check if the attendee to be removed is attending the event
-    attendee = Attendance.query.filter_by(event_id=eventId, user_id=attendeeId).first()
+    group = Group.query.get(event.group_id)
 
+    # Check if the attendee exists
+    attendee = Attendance.query.filter_by(event_id=eventId, user_id=attendeeId).first()
     if not attendee:
-        return {"message": "User is not a attendee of this event"}, 400
+        return {"message": "User is not an attendee of this event"}, 400
 
     # If the current user is trying to leave the event
     if attendeeId == current_user.id:
         if group.organizer_id == current_user.id:
             return {"message": "The organizer must attend the event"}, 403
 
-        db.session.delete(attendee)
-        db.session.commit()
-        return {"message": "You have successfully unattended the event"}, 200
+        try:
+            db.session.delete(attendee)
+            db.session.commit()
+            return {"message": "You have successfully left the event"}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {"errors": {"message": "Error leaving event"}}, 500
 
-    # If the current user is trying to remove another member
+    # If the current user is trying to remove another attendee
     if group.organizer_id != current_user.id:
         return {"message": "Only the organizer can remove attendees"}, 403
 
     if attendeeId == group.organizer_id:
         return {"message": "The organizer must attend the event"}, 400
 
-    db.session.delete(attendee)
-    db.session.commit()
-    return {"message": "Attendee successfully unattended the event"}, 200
+    try:
+        db.session.delete(attendee)
+        db.session.commit()
+        return {"message": "Attendee successfully removed from the event"}, 200
+    except Exception as e:
+        db.session.rollback()
+        return {"errors": {"message": "Error removing attendee"}}, 500
