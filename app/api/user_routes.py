@@ -89,11 +89,17 @@ def view_all_profiles():
     users = (
         db.session.query(User)
         .filter(User.profile_image_url.isnot(None))
-        .options(selectinload(User.users_tags))
+        .options(
+            selectinload(User.users_tags),
+            selectinload(User.posts).selectinload(Post.user),
+            selectinload(User.user_comments),
+        )
         .all()
     )
 
-    return jsonify({"users_profile": [user.to_dict_minimal() for user in users]})
+    return jsonify(
+        {"users_profile": [user.to_dict_for_profile_feed() for user in users]}
+    )
 
 
 @user_routes.route("/<int:userId>/profile/update", methods=["POST"])
