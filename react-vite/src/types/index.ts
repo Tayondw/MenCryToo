@@ -26,7 +26,10 @@ export interface Post {
 	caption: string;
 	image: string;
 	likes: number;
+	creator: number;
+	createdAt: string;
 	updatedAt: string;
+	user: User;
 }
 
 export interface Group {
@@ -68,6 +71,14 @@ export interface Venue {
 export interface Comment {
 	id: number;
 	content: string;
+	userId: number;
+	postId: number;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface ProfilesData {
+	users_profile: User[];
 }
 
 // Redux types
