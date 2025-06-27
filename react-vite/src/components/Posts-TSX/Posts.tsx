@@ -12,11 +12,7 @@ import {
 	ArrowLeft,
 	Plus,
 } from "lucide-react";
-import type {
-	ProfilesData,
-	RootState,
-	User as UserType,
-} from "../../types";
+import type { ProfilesData, RootState, User as UserType } from "../../types";
 
 interface FilterOptions {
 	searchTerm: string;
