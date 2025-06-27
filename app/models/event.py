@@ -92,14 +92,34 @@ class Event(db.Model):
 
     def to_dict(self):
         """full dictionary representation"""
-        organizer = (
-            self.groups.organizer.to_dict_minimal()
-            if self.groups and self.groups.organizer
-            else None
-        )
+        organizer = None
+        if self.groups and self.groups.organizer:
+            if hasattr(self.groups.organizer, "to_dict_minimal"):
+                organizer = self.groups.organizer.to_dict_minimal()
+        else:
+            # Fallback to basic user info
+            organizer = {
+                "id": self.groups.organizer.id,
+                "firstName": self.groups.organizer.first_name,
+                "lastName": self.groups.organizer.last_name,
+                "username": self.groups.organizer.username,
+                "profileImage": self.groups.organizer.profile_image_url,
+            }
 
-        group_info = (
-            {
+        organizer_info = None
+        if organizer:
+            organizer_info = {
+                "firstName": organizer.get("firstName", ""),
+                "lastName": organizer.get("lastName", ""),
+                "profileImage": organizer.get("profileImage", ""),
+            }
+            # Only add email if it exists
+            if "email" in organizer:
+                organizer_info["email"] = organizer["email"]
+
+        group_info = None
+        if self.groups:
+            group_info = {
                 "id": self.groups.id,
                 "name": self.groups.name,
                 "organizerId": self.groups.organizer_id,
@@ -109,9 +129,6 @@ class Event(db.Model):
                 "about": self.groups.about,
                 "image": self.groups.image,
             }
-            if self.groups
-            else None
-        )
 
         venue_info = {
             "id": self.venues.id if self.venues else None,
@@ -132,16 +149,7 @@ class Event(db.Model):
             "groupId": self.group_id,
             "groupInfo": group_info,
             "organizer": organizer,
-            "organizerInfo": (
-                {
-                    "firstName": organizer["firstName"],
-                    "lastName": organizer["lastName"],
-                    "email": organizer["email"],
-                    "profileImage": organizer["profileImage"],
-                }
-                if organizer
-                else None
-            ),
+            "organizerInfo": organizer_info,
             "name": self.name,
             "description": self.description,
             "type": self.type,
