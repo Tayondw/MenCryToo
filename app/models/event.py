@@ -2,6 +2,8 @@ from .db import db, environment, SCHEMA, add_prefix_for_prod
 from datetime import datetime
 from .attendance import Attendance
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm import validates
+
 
 class Event(db.Model):
     __tablename__ = "events"
@@ -11,82 +13,108 @@ class Event(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     venue_id = db.Column(
-        db.Integer, db.ForeignKey(add_prefix_for_prod("venues.id")), nullable=True
+        db.Integer,
+        db.ForeignKey(add_prefix_for_prod("venues.id")),
+        nullable=True,
+        index=True,
     )
     group_id = db.Column(
-        db.Integer, db.ForeignKey(add_prefix_for_prod("groups.id")), nullable=False
+        db.Integer,
+        db.ForeignKey(add_prefix_for_prod("groups.id")),
+        nullable=False,
+        index=True,
     )
-    name = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(50), nullable=False, index=True)
     description = db.Column(db.String(150), nullable=False)
     type = db.Column(
         db.Enum("online", "in-person", name="event_location"),
         default="online",
         nullable=False,
+        index=True,
     )
     capacity = db.Column(db.Integer, nullable=False)
     image = db.Column(db.String(500), nullable=True)
-    start_date = db.Column(db.DateTime, nullable=False)
-    end_date = db.Column(db.DateTime, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now)
+    start_date = db.Column(db.DateTime, nullable=False, index=True)
+    end_date = db.Column(db.DateTime, nullable=False, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.now, index=True)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    # Relationship attributes
-    venues = db.relationship("Venue", back_populates="events")
-    groups = db.relationship("Group", back_populates="events")
+    venues = db.relationship("Venue", back_populates="events", lazy="joined")
+    groups = db.relationship("Group", back_populates="events", lazy="joined")
     event_images = db.relationship(
-        "EventImage", back_populates="event", cascade="all, delete-orphan"
+        "EventImage",
+        back_populates="event",
+        cascade="all, delete-orphan",
+        lazy="select",
     )
     attendances = db.relationship(
-        "Attendance", back_populates="event", cascade="all, delete-orphan"
+        "Attendance",
+        back_populates="event",
+        cascade="all, delete-orphan",
+        lazy="select",
     )
     users = association_proxy("attendances", "user")
-    #     event_attendances = db.relationship(
-    #         "User",
-    #         secondary=attendances,
-    #         back_populates="user_attendances",
-    #     )
+
+    @validates("start_date", "end_date")
+    def validate_dates(self, key, date_value):
+        if key == "end_date" and hasattr(self, "start_date") and self.start_date:
+            if date_value <= self.start_date:
+                raise ValueError("End date must be after start date")
+        return date_value
+
+    @validates("capacity")
+    def validate_capacity(self, key, capacity):
+        if capacity < 2:
+            raise ValueError("Capacity must be at least 2")
+        if capacity > 1000:
+            raise ValueError("Capacity cannot exceed 1000")
+        return capacity
+
+    def to_dict_minimal(self):
+        """Lightweight version for lists"""
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": (
+                self.description[:100] + "..."
+                if len(self.description) > 100
+                else self.description
+            ),
+            "type": self.type,
+            "capacity": self.capacity,
+            "image": self.image,
+            "startDate": self.start_date.isoformat(),
+            "endDate": self.end_date.isoformat(),
+            "numAttendees": (
+                len(self.attendances) if hasattr(self, "_attendees_count") else 0
+            ),
+        }
 
     def to_dict(self):
-
+        """full dictionary representation"""
         organizer = (
-            self.groups.organizer.to_dict()
+            self.groups.organizer.to_dict_minimal()
             if self.groups and self.groups.organizer
             else None
         )
-        #   group = [group.to_dict() for group in self.groups]
-        #   venue = [venue.to_dict() for venue in self.venues]
-        image = [event_image.to_dict() for event_image in self.event_images]
-        group_image = [
-            group_image.to_dict() for group_image in self.groups.group_images
-        ]
 
-        attendees = [attendee.to_dict() for attendee in self.attendances]
-
-        organizerInfo = (
+        group_info = (
             {
-                "firstName": organizer["firstName"],
-                "lastName": organizer["lastName"],
-                "email": organizer["email"],
-                "profileImage": organizer["profileImage"],
+                "id": self.groups.id,
+                "name": self.groups.name,
+                "organizerId": self.groups.organizer_id,
+                "type": self.groups.type,
+                "city": self.groups.city,
+                "state": self.groups.state,
+                "about": self.groups.about,
+                "image": self.groups.image,
             }
-            if organizer
+            if self.groups
             else None
         )
 
-        groupInfo = {
-            "id": self.groups.id,
-            "name": self.groups.name,
-            "organizerId": self.groups.organizer_id,
-            "type": self.groups.type,
-            "city": self.groups.city,
-            "state": self.groups.state,
-            "about": self.groups.about,
-            "groupImage": group_image,
-            "image": self.groups.image,
-        }
-
-        venueInfo = {
-            "id": self.venues.id if self.venues and self.venues.id else None,
+        venue_info = {
+            "id": self.venues.id if self.venues else None,
             "groupId": self.venues.group_id if self.venues else None,
             "address": self.venues.address if self.venues else None,
             "city": self.venues.city if self.venues else None,
@@ -98,21 +126,33 @@ class Event(db.Model):
         return {
             "id": self.id,
             "image": self.image,
-            "eventImage": image,
+            "eventImage": [img.to_dict() for img in self.event_images],
             "venueId": self.venue_id,
-            "venueInfo": venueInfo,
+            "venueInfo": venue_info,
             "groupId": self.group_id,
-            "groupInfo": groupInfo,
+            "groupInfo": group_info,
             "organizer": organizer,
-            "organizerInfo": organizerInfo,
+            "organizerInfo": (
+                {
+                    "firstName": organizer["firstName"],
+                    "lastName": organizer["lastName"],
+                    "email": organizer["email"],
+                    "profileImage": organizer["profileImage"],
+                }
+                if organizer
+                else None
+            ),
             "name": self.name,
             "description": self.description,
             "type": self.type,
             "capacity": self.capacity,
-            "startDate": self.start_date,
-            "endDate": self.end_date,
-            "attendees": attendees,
+            "startDate": self.start_date.isoformat(),
+            "endDate": self.end_date.isoformat(),
+            "attendees": [attendee.to_dict() for attendee in self.attendances],
             "numAttendees": len(self.attendances),
-            "created_at": self.created_at,
-            "updated_at": self.updated_at,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
         }
+
+    def __repr__(self):
+        return f"<Event {self.name} - {self.start_date}>"
