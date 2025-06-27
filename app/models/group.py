@@ -64,6 +64,8 @@ class Group(db.Model):
             "numMembers": (
                 len(self.memberships) if hasattr(self, "_member_count") else 0
             ),
+            "numEvents": len(self.events),
+            "organizerId": self.organizer_id,
         }
 
     def to_dict(self, include_events=True, include_members=True):
