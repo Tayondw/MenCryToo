@@ -22,8 +22,10 @@ interface Group {
 	city: string;
 	state: string;
 	numMembers: number;
-	events: Event[];
+	numEvents: number;
+	// events: Event[];
 	type: string;
+	organizerId?: number;
 }
 
 interface GroupsData {
@@ -90,7 +92,7 @@ const Groups: React.FC = () => {
 			case "members":
 				return groups.sort((a, b) => b.numMembers - a.numMembers);
 			case "events":
-				return groups.sort((a, b) => b.events.length - a.events.length);
+				return groups.sort((a, b) => b.numEvents - a.numEvents);
 			case "recent":
 				return groups.sort((a, b) => b.id - a.id); // Assuming higher ID = more recent
 			default:
@@ -160,7 +162,7 @@ const Groups: React.FC = () => {
 							</span>
 							<span className="flex items-center gap-1 text-slate-600">
 								<Calendar size={14} />
-								{group.events.length} events
+								{group.numEvents} events
 							</span>
 						</div>
 						<span className="bg-slate-100 text-slate-700 px-2 py-1 rounded-full text-xs font-medium">
@@ -207,7 +209,7 @@ const Groups: React.FC = () => {
 								</span>
 								<span className="flex items-center gap-1">
 									<Calendar size={14} />
-									{group.events.length} events
+									{group.numEvents} events
 								</span>
 								<span className="bg-slate-100 text-slate-700 px-2 py-1 rounded-full text-xs font-medium">
 									{group.type}
