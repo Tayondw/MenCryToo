@@ -1,15 +1,17 @@
 from flask import Blueprint, request, render_template, redirect, jsonify
 from flask_login import login_required, current_user
-from app.models import (
-    db,
-    Group,
-    GroupImage,
-    Membership,
-    Venue,
-    Event,
+from app.models import db, Group, GroupImage, Membership, Venue, Event, EventImage
+from app.forms import (
+    GroupForm,
+    GroupImageForm,
+    EventForm,
+    VenueForm,
+    EditGroupForm,
+    EditEventForm,
 )
-from app.forms import GroupForm, GroupImageForm, EventForm, VenueForm, EditGroupForm, EditEventForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
+from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy import func
 
 group_routes = Blueprint("groups", __name__)
 
@@ -18,12 +20,22 @@ group_routes = Blueprint("groups", __name__)
 @group_routes.route("/")
 def all_groups():
     """
-    Query for all groups and returns them in a list of group dictionaries
+    Query for all groups and returns them in a list of group dictionaries - with member count
     """
-    groups = Group.query.all()
+    groups = (
+        db.session.query(Group)
+        .options(
+            joinedload(Group.organizer),
+            selectinload(Group.memberships),
+            selectinload(Group.group_images),
+        )
+        .all()
+    )
+
     if not groups:
         return jsonify({"errors": {"message": "Not Found"}}), 404
-    return jsonify({"groups": [group.to_dict() for group in groups]})
+
+    return jsonify({"groups": [group.to_dict_minimal() for group in groups]})
 
 
 @group_routes.route("/<int:groupId>")
@@ -31,9 +43,22 @@ def group(groupId):
     """
     Query for group by id and returns that group in a dictionary
     """
-    group = Group.query.get(groupId)
+    group = (
+        db.session.query(Group)
+        .options(
+            joinedload(Group.organizer),
+            selectinload(Group.events),
+            selectinload(Group.venues),
+            selectinload(Group.memberships).joinedload(Membership.user),
+            selectinload(Group.group_images),
+        )
+        .filter(Group.id == groupId)
+        .first()
+    )
+
     if not group:
         return jsonify({"errors": {"message": "Not Found"}}), 404
+
     return jsonify(group.to_dict())
 
 
@@ -80,15 +105,27 @@ def create_group():
             state=form.data["state"],
             image=url,
         )
+
         db.session.add(new_group)
         db.session.commit()
-        #   return redirect("/api/groups/")
-        return new_group.to_dict(), 201
-    #     if form.errors:
-    #         print(form.errors)
-    #         return render_template("group_form.html", form=form, errors=form.errors)
-    #     return render_template("group_form.html", form=form, errors=None)
 
+        # Load the created group with relationships
+        created_group = (
+            db.session.query(Group)
+            .options(
+                joinedload(Group.organizer),
+                selectinload(Group.memberships),
+                selectinload(Group.group_images),
+            )
+            .filter(Group.id == new_group.id)
+            .first()
+        )
+        #   return redirect("/api/groups/")
+        return created_group.to_dict(), 201
+    #   if form.errors:
+    #       print(form.errors)
+    #       return render_template("group_form.html", form=form, errors=form.errors)
+    #   return render_template("group_form.html", form=form, errors=None)
     return form.errors, 400
 
 
@@ -106,11 +143,9 @@ def edit_group(groupId):
     """
     group_to_edit = Group.query.get(groupId)
 
-    # check if there is a group to edit
     if not group_to_edit:
         return {"errors": {"message": "Not Found"}}, 404
 
-    # check if current user is group organizer - group organizer is only allowed to update
     if current_user.id != group_to_edit.organizer_id:
         return {"errors": {"message": "Unauthorized"}}, 401
 
@@ -135,17 +170,34 @@ def edit_group(groupId):
                 }, 400
 
             # Remove the old image from S3
-            remove_file_from_s3(group_to_edit.image)
+            if group_to_edit.image:
+                remove_file_from_s3(group_to_edit.image)
             group_to_edit.image = upload["url"]
 
-        group_to_edit.organizer_id = current_user.id
+        # Update group fields
         group_to_edit.name = form.data["name"] or group_to_edit.name
         group_to_edit.about = form.data["about"] or group_to_edit.about
         group_to_edit.type = form.data["type"] or group_to_edit.type
         group_to_edit.city = form.data["city"] or group_to_edit.city
         group_to_edit.state = form.data["state"] or group_to_edit.state
+
         db.session.commit()
-        return group_to_edit.to_dict(), 201
+
+        # Return updated group with relationships
+        updated_group = (
+            db.session.query(Group)
+            .options(
+                joinedload(Group.organizer),
+                selectinload(Group.events),
+                selectinload(Group.venues),
+                selectinload(Group.memberships),
+                selectinload(Group.group_images),
+            )
+            .filter(Group.id == groupId)
+            .first()
+        )
+
+        return updated_group.to_dict(), 201
     #   return redirect(f"/api/groups/{groupId}")
 
     #     elif form.errors:
@@ -178,21 +230,32 @@ def delete_group(groupId):
     """
     group_to_delete = Group.query.get(groupId)
 
-    # check if there is a group to delete
     if not group_to_delete:
         return {"errors": {"message": "Not Found"}}, 404
 
-    # check if current user is group organizer - group organizer is only allowed to update
     if current_user.id != group_to_delete.organizer_id:
         return {"errors": {"message": "Unauthorized"}}, 401
 
-    # Delete associated group images
-    GroupImage.query.filter_by(group_id=groupId).delete()
-    Event.query.filter_by(group_id=groupId).delete()
+    try:
+        # Delete associated data in batch operations
+        GroupImage.query.filter_by(group_id=groupId).delete(synchronize_session=False)
+        EventImage.query.filter(
+            EventImage.event_id.in_(
+                db.session.query(Event.id).filter_by(group_id=groupId)
+            )
+        ).delete(synchronize_session=False)
+        Event.query.filter_by(group_id=groupId).delete(synchronize_session=False)
+        Venue.query.filter_by(group_id=groupId).delete(synchronize_session=False)
+        Membership.query.filter_by(group_id=groupId).delete(synchronize_session=False)
 
-    db.session.delete(group_to_delete)
-    db.session.commit()
-    return {"message": "Group deleted"}
+        db.session.delete(group_to_delete)
+        db.session.commit()
+
+        return {"message": "Group deleted"}, 200
+
+    except Exception as e:
+        db.session.rollback()
+        return {"errors": {"message": "Error deleting group"}}, 500
 
 
 #     return redirect("/api/groups/")
@@ -217,7 +280,6 @@ def add_group_image(groupId):
     if not group:
         return {"errors": {"message": "Not Found"}}, 404
 
-    # check if current user is group organizer - group organizer is only allowed to update
     if current_user.id != group.organizer_id:
         return {"errors": {"message": "Unauthorized"}}, 401
 
@@ -232,17 +294,16 @@ def add_group_image(groupId):
             upload = upload_file_to_s3(group_image)
 
             if "url" not in upload:
-                # if the dictionary doesn't have a url key
-                # it means that there was an error when you tried to upload
-                # so you send back that error message (and you printed it above)
-                return {"message": "unable to locate url"}
+                return {"message": "unable to locate url"}, 400
+
             url = upload["url"]
             new_group_image = GroupImage(group_id=groupId, group_image=url)
             db.session.add(new_group_image)
             db.session.commit()
+
             return {"group_image": new_group_image.to_dict()}, 201
         else:
-            return {"message": "Group image is None"}
+            return {"message": "Group image is None"}, 400
     #     if form.errors:
     #         print(form.errors)
     #         return render_template("group_image_form.html", form=form, id=groupId, errors=form.errors)
@@ -262,27 +323,26 @@ def edit_group_images(groupId, imageId):
 
     The commented out code was to test if the post request works
     """
-
     group_image = GroupImage.query.get(imageId)
-
     group = Group.query.get(groupId)
 
-    # check if there is a group to edit
     if not group:
         return {"errors": {"message": "Not Found"}}, 404
 
-    # check if there is a group image to edit
     if not group_image:
         return {"errors": {"message": "Not Found"}}, 404
 
-    # check if current user is group organizer - group organizer is only allowed to update
     if current_user.id != group.organizer_id:
         return {"errors": {"message": "Unauthorized"}}, 401
 
     form = GroupImageForm()
     form["csrf_token"].data = request.cookies["csrf_token"]
+
     if form.validate_on_submit():
-        edit_group_image = form.data["group_image"] or edit_group_image.group_image
+        edit_group_image = form.data["group_image"]
+        if not edit_group_image:
+            return {"message": "No image provided"}, 400
+
         edit_group_image.filename = get_unique_filename(edit_group_image.filename)
         upload = upload_file_to_s3(edit_group_image)
 
@@ -290,10 +350,12 @@ def edit_group_images(groupId, imageId):
             return {"message": "Upload failed"}, 400
 
         # Remove the old image from S3
-        remove_file_from_s3(group_image.group_image)
+        if group_image.group_image:
+            remove_file_from_s3(group_image.group_image)
 
         group_image.group_image = upload["url"]
         db.session.commit()
+
         return {"group_image": group_image.to_dict()}, 200
     #   return {"message": "Image updated successfully"}
 
@@ -320,14 +382,11 @@ def create_event(groupId):
 
     The commented out code was to test if the post request works
     """
-    # query for the group you want to add the event to
     group = Group.query.get(groupId)
 
-    # check if there is a group
     if not group:
         return {"errors": {"message": "Not Found"}}, 404
 
-    # check if current user is group organizer - group organizer is only allowed to update
     if current_user.id != group.organizer_id:
         return {"errors": {"message": "Unauthorized"}}, 401
 
@@ -338,7 +397,7 @@ def create_event(groupId):
         image = form.image.data
 
         if not image:
-            return {"message": "An image is required to create a profile."}, 400
+            return {"message": "An image is required to create an event."}, 400
 
         try:
             image.filename = get_unique_filename(image.filename)
@@ -365,17 +424,31 @@ def create_event(groupId):
             start_date=form.data["startDate"],
             end_date=form.data["endDate"],
         )
+
         db.session.add(new_event)
         db.session.commit()
+
+        # Load created event with relationships
+        created_event = (
+            db.session.query(Event)
+            .options(
+                joinedload(Event.groups).joinedload(Group.organizer),
+                selectinload(Event.attendances),
+                selectinload(Event.event_images),
+            )
+            .filter(Event.id == new_event.id)
+            .first()
+        )
+
+        return created_event.to_dict(), 201
         #   return redirect("/api/events/")
-        return new_event.to_dict(), 201
+
     #     if form.errors:
     #             print(form.errors)
     #             return render_template(
     #                 "event_form.html", id=groupId, form=form, errors=form.errors
     #             )
     #     return render_template("event_form.html", id=groupId, form=form, errors=None)
-
     return form.errors, 400
 
 
@@ -391,21 +464,15 @@ def edit_event(groupId, eventId):
 
     The commented out code was to test if the post request works
     """
-    # query for the group you want to edit the event
     group = Group.query.get(groupId)
-
-    # query for the event you want to edit
     event_to_edit = Event.query.get(eventId)
 
-    # check if there is a group to edit
     if not group:
-        return {"errors": {"message": "Not Found"}}, 404
+        return {"errors": {"message": "Group not found"}}, 404
 
-    # check if there is an event to edit
     if not event_to_edit:
-        return {"errors": {"message": "Not Found"}}, 404
+        return {"errors": {"message": "Event not found"}}, 404
 
-    # check if current user is group organizer - group organizer is only allowed to update
     if current_user.id != group.organizer_id:
         return {"errors": {"message": "Unauthorized"}}, 401
 
@@ -430,10 +497,11 @@ def edit_event(groupId, eventId):
                 }, 400
 
             # Remove the old image from S3
-            remove_file_from_s3(event_to_edit.image)
+            if event_to_edit.image:
+                remove_file_from_s3(event_to_edit.image)
             event_to_edit.image = upload["url"]
 
-        event_to_edit.group_id = groupId
+        # Update event fields
         event_to_edit.name = form.data["name"] or event_to_edit.name
         event_to_edit.description = (
             form.data["description"] or event_to_edit.description
@@ -442,8 +510,22 @@ def edit_event(groupId, eventId):
         event_to_edit.capacity = form.data["capacity"] or event_to_edit.capacity
         event_to_edit.start_date = form.data["startDate"] or event_to_edit.start_date
         event_to_edit.end_date = form.data["endDate"] or event_to_edit.end_date
+
         db.session.commit()
-        return event_to_edit.to_dict(), 201
+
+        # Return updated event with relationships
+        updated_event = (
+            db.session.query(Event)
+            .options(
+                joinedload(Event.groups).joinedload(Group.organizer),
+                selectinload(Event.attendances),
+                selectinload(Event.event_images),
+            )
+            .filter(Event.id == eventId)
+            .first()
+        )
+
+        return updated_event.to_dict(), 201
     #   return redirect(f"/api/groups/{groupId}")
 
     #     elif form.errors:
@@ -469,13 +551,10 @@ def edit_event(groupId, eventId):
     #             eventId=eventId,
     #             errors=None,
     #         )
-
     return form.errors, 400
 
 
 # ! GROUP - VENUES
-
-
 @group_routes.route("/<int:groupId>/venues", methods=["GET", "POST"])
 @login_required
 def create_venue(groupId):
@@ -486,14 +565,11 @@ def create_venue(groupId):
 
     The commented out code was to test if the post request works
     """
-    # query for the group you want to add the venue to
     group = Group.query.get(groupId)
 
-    # check if there is a group
     if not group:
         return {"errors": {"message": "Not Found"}}, 404
 
-    # check if current user is group organizer - group organizer is only allowed to update
     if current_user.id != group.organizer_id:
         return {"errors": {"message": "Unauthorized"}}, 401
 
@@ -510,19 +586,20 @@ def create_venue(groupId):
             latitude=form.data["latitude"],
             longitude=form.data["longitude"],
         )
+
         db.session.add(new_venue)
         db.session.commit()
-        return redirect("/api/venues/")
-    #   return new_venue.to_dict()
-    if form.errors:
-        print(form.errors)
-        return render_template(
-            "venue_form.html", id=groupId, form=form, errors=form.errors
-        )
-    return render_template("venue_form.html", id=groupId, form=form, errors=None)
 
+        return new_venue.to_dict(), 201
+    #   return redirect("/api/venues/")
 
-#     return form.errors, 400
+    #    if form.errors:
+    #       print(form.errors)
+    #       return render_template(
+    #           "venue_form.html", id=groupId, form=form, errors=form.errors
+    #       )
+    #    return render_template("venue_form.html", id=groupId, form=form, errors=None)
+    return form.errors, 400
 
 
 # ! GROUP - MEMBERS
@@ -538,28 +615,33 @@ def join_group(groupId):
     if group.organizer_id == current_user.id:
         return {"message": "User is the organizer of the group"}, 403
 
-    # Check if the user is already a member of the group
-    membership = Membership.query.filter_by(
+    # Check if the user is already a member in one query
+    existing_membership = Membership.query.filter_by(
         group_id=groupId, user_id=current_user.id
     ).first()
 
-    if membership:
+    if existing_membership:
         return {"message": "Already a member of this group"}, 400
 
     # Parse JSON request body
     data = request.get_json()
-    user_id = data.get("user_id")
-    group_id = data.get("group_id")
+    user_id = data.get("user_id") if data else None
+    group_id = data.get("group_id") if data else groupId
 
     # Ensure data is valid
-    if user_id != current_user.id:
+    if user_id and user_id != current_user.id:
         return jsonify({"message": "Invalid user ID"}), 400
 
-    new_membership = Membership(group_id=group_id, user_id=current_user.id)
-    db.session.add(new_membership)
-    db.session.commit()
+    try:
+        new_membership = Membership(group_id=group_id, user_id=current_user.id)
+        db.session.add(new_membership)
+        db.session.commit()
 
-    return {"message": "Successfully joined the group"}, 200
+        return {"message": "Successfully joined the group"}, 200
+
+    except Exception as e:
+        db.session.rollback()
+        return {"errors": {"message": "Error joining group"}}, 500
 
 
 @group_routes.route("/<int:groupId>/leave-group/<int:memberId>", methods=["DELETE"])
@@ -581,9 +663,13 @@ def leave_group(groupId, memberId):
         if group.organizer_id == current_user.id:
             return {"message": "The organizer cannot leave their own group"}, 403
 
-        db.session.delete(member)
-        db.session.commit()
-        return {"message": "You have successfully left the group"}, 200
+        try:
+            db.session.delete(member)
+            db.session.commit()
+            return {"message": "You have successfully left the group"}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {"errors": {"message": "Error leaving group"}}, 500
 
     # If the current user is trying to remove another member
     if group.organizer_id != current_user.id:
@@ -592,6 +678,9 @@ def leave_group(groupId, memberId):
     if memberId == group.organizer_id:
         return {"message": "The organizer cannot be removed from the group"}, 400
 
-    db.session.delete(member)
-    db.session.commit()
-    return {"message": "Member successfully removed from the group"}, 200
+    try:
+        db.session.delete(member)
+        db.session.commit()
+        return {"message": "Member successfully removed from the group"}, 200
+    except Exception as e:
+        db.session.rollback()
