@@ -1,8 +1,22 @@
 from flask import Blueprint, jsonify, render_template, request, redirect, abort
 from flask_login import login_required, current_user
-from app.models import db, User, Group, Event, Post, UserTags, Tag, Attendance, Membership, Comment, Venue
+from app.models import (
+    db,
+    User,
+    Group,
+    Event,
+    Post,
+    UserTags,
+    Tag,
+    Attendance,
+    Membership,
+    Comment,
+    Venue,
+)
 from app.forms import UserForm, EditUserForm, PostForm, EditPostForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
+from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy import func
 import requests
 import json
 
@@ -13,34 +27,45 @@ user_routes = Blueprint("users", __name__)
 @login_required
 def users():
     """
-    Query for all users and returns them in a list of user dictionaries
+    Query for all users and returns them in a list of user dictionaries  - minimal data only
     """
-    users = User.query.all()
-    return jsonify(
-        {
-            "users": [
-                user.to_dict(
-                    posts=True,
-                    user_comments=True,
-                    memberships=True,
-                    attendances=True,
-                    users_tags=True,
-                    group=True,
-                    events=True
-                )
-                for user in users
-            ]
-        }
+    users = (
+        db.session.query(User)
+        .options(
+            selectinload(User.users_tags),
+            selectinload(User.memberships),
+            selectinload(User.attendances),
+        )
+        .all()
     )
+
+    return jsonify({"users": [user.to_dict_minimal() for user in users]})
 
 
 @user_routes.route("/<int:userId>")
 @login_required
 def user(userId):
     """
-    Query for a user by id and returns that user in a dictionary
+    Query for a user by id and returns that user in a dictionary - single user fetch
     """
-    user = User.query.get(userId)
+    user = (
+        db.session.query(User)
+        .options(
+            joinedload(User.posts).joinedload(Post.post_comments),
+            joinedload(User.posts).joinedload(Post.post_likes),
+            selectinload(User.user_comments),
+            selectinload(User.memberships).joinedload(Membership.group),
+            selectinload(User.attendances),
+            selectinload(User.users_tags),
+            selectinload(User.groups),
+        )
+        .filter(User.id == userId)
+        .first()
+    )
+
+    if not user:
+        return jsonify({"errors": {"message": "User not found"}}), 404
+
     return jsonify(
         user.to_dict(
             posts=True,
@@ -49,7 +74,7 @@ def user(userId):
             attendances=True,
             users_tags=True,
             group=True,
-            events=True
+            events=True,
         )
     )
 
@@ -58,26 +83,17 @@ def user(userId):
 @login_required
 def view_all_profiles():
     """
-    Query for all users with a profile and returns them in a list of user dictionaries
+    Query for all users with a profile and returns them in a list of user dictionaries -  return minimal data
     """
 
-    users = User.query.filter(User.profile_image_url.isnot(None)).all()
-    return jsonify(
-        {
-            "users_profile": [
-                user.to_dict(
-                    posts=True,
-                    user_comments=True,
-                    memberships=True,
-                    attendances=True,
-                    users_tags=True,
-                    group=True,
-                    events=True
-                )
-                for user in users
-            ]
-        }
+    users = (
+        db.session.query(User)
+        .filter(User.profile_image_url.isnot(None))
+        .options(selectinload(User.users_tags))
+        .all()
     )
+
+    return jsonify({"users_profile": [user.to_dict_minimal() for user in users]})
 
 
 @user_routes.route("/<int:userId>/profile/update", methods=["POST"])
@@ -116,7 +132,8 @@ def update_profile(userId):
                 }, 400
 
             # Remove the old image from S3
-            remove_file_from_s3(user_to_edit.profile_image_url)
+            if user_to_edit.profile_image_url:
+                remove_file_from_s3(user_to_edit.profile_image_url)
             user_to_edit.profile_image_url = upload["url"]
 
         # Update the existing user with profile details
@@ -126,13 +143,16 @@ def update_profile(userId):
         user_to_edit.username = form.data["username"]
         user_to_edit.email = form.data["email"]
 
-        # Update the user's tags
-        selected_tags = form.userTags.data
-        tags_to_add = Tag.query.filter(Tag.name.in_(selected_tags)).all()
-        if tags_to_add:
-            user_to_edit.users_tags = tags_to_add
+        # Optimized tag update - clear existing and add new
+        if form.userTags.data:
+            user_to_edit.users_tags.clear()
+            selected_tags = form.userTags.data
+            tags_to_add = Tag.query.filter(Tag.name.in_(selected_tags)).all()
+            user_to_edit.users_tags.extend(tags_to_add)
 
         db.session.commit()
+
+        # Return optimized response
         return {
             "profile": user_to_edit.to_dict(
                 posts=True,
@@ -234,6 +254,7 @@ def update_profile(userId):
 @user_routes.route("/<int:userId>/profile/delete", methods=["DELETE"])
 @login_required
 def delete_profile(userId):
+    """Optimized profile deletion with batch operations"""
     user = User.query.get(userId)
 
     if not user:
@@ -242,24 +263,31 @@ def delete_profile(userId):
     if user.id != current_user.id:
         return jsonify({"errors": {"message": "Unauthorized"}}), 403
 
-    # Delete related data for the user
-    Attendance.query.filter_by(user_id=userId).delete()
-    Membership.query.filter_by(user_id=userId).delete()
-    Post.query.filter_by(creator=userId).delete()
-    Comment.query.filter_by(user_id=userId).delete()
-    groups_to_delete = Group.query.filter_by(organizer_id=userId).all()
+    # Batch delete related data for better performance
+    try:
+        # Delete in correct order to avoid foreign key constraints
+        Attendance.query.filter_by(user_id=userId).delete(synchronize_session=False)
+        Membership.query.filter_by(user_id=userId).delete(synchronize_session=False)
+        Comment.query.filter_by(user_id=userId).delete(synchronize_session=False)
+        Post.query.filter_by(creator=userId).delete(synchronize_session=False)
 
-    # Handle groups organized by the user
-    for group in groups_to_delete:
-        # Delete events associated with this group
-        Event.query.filter_by(group_id=group.id).delete()
-        Venue.query.filter_by(group_id=group.id).delete()
-        # Delete the group itself
-        db.session.delete(group)
-        
-    db.session.delete(user)
-    db.session.commit()
-    return jsonify({"message": "Profile deleted successfully"}), 200
+        # Handle groups organized by the user - batch operation
+        groups_to_delete = Group.query.filter_by(organizer_id=userId).all()
+        for group in groups_to_delete:
+            # Delete events and venues associated with this group
+            Event.query.filter_by(group_id=group.id).delete(synchronize_session=False)
+            Venue.query.filter_by(group_id=group.id).delete(synchronize_session=False)
+            db.session.delete(group)
+
+        # Delete the user
+        db.session.delete(user)
+        db.session.commit()
+
+        return jsonify({"message": "Profile deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"errors": {"message": "Error deleting profile"}}), 500
 
 
 @user_routes.route("/<int:userId>/add-tags", methods=["POST"])
@@ -276,21 +304,35 @@ def add_tags(userId):
     form = request.json
     new_tag_names = form.get("userTags", [])
 
-    # Fetch existing tags
-    existing_tags = user.users_tags
-    existing_tag_names = {tag.name for tag in existing_tags}
+    if not new_tag_names:
+        return jsonify({"message": "No tags provided"}), 400
 
-    # Fetch or create new tags
-    for tag_name in new_tag_names:
-        if tag_name not in existing_tag_names:
-            tag = Tag.query.filter_by(name=tag_name).first()
-            if not tag:
-                tag = Tag(name=tag_name)
-                db.session.add(tag)
-            user.users_tags.append(tag)
+    try:
+        # Get existing user tags in one query
+        existing_tag_names = {tag.name for tag in user.users_tags}
 
-    db.session.commit()
-    return jsonify({"message": "Tags added successfully"}), 200
+        # Get or create new tags in batch
+        tags_to_add = []
+        for tag_name in new_tag_names:
+            if tag_name not in existing_tag_names:
+                tag = Tag.query.filter_by(name=tag_name).first()
+                if not tag:
+                    tag = Tag(name=tag_name)
+                    db.session.add(tag)
+                tags_to_add.append(tag)
+
+        # Flush to get IDs for new tags
+        db.session.flush()
+
+        # Add tags to user
+        user.users_tags.extend(tags_to_add)
+        db.session.commit()
+
+        return jsonify({"message": "Tags added successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"errors": {"message": "Error adding tags"}}), 500
 
 
 @user_routes.route("<int:userId>/posts/create", methods=["POST"])
@@ -303,14 +345,12 @@ def create_post(userId):
 
     The commented out code was to test if the post request works
     """
-    # query for the user you want to add the post to
+    # Verify user exists
     user = User.query.get(userId)
-
-    # check if there is a group
     if not user:
         return {"errors": {"message": "Not Found"}}, 404
 
-    # check if current user
+    # Check authorization
     if current_user.id != userId:
         return {"errors": {"message": "Unauthorized"}}, 401
 
@@ -329,11 +369,7 @@ def create_post(userId):
         except Exception as e:
             return {"message": f"Image upload failed: {str(e)}"}, 500
 
-        # Check if the upload was successful
         if "url" not in upload:
-            # if the dictionary doesn't have a url key
-            # it means that there was an error when you tried to upload
-            # so you send back that error message (and you printed it above)
             return {
                 "message": upload.get(
                     "errors", "Image upload failed. Please try again."
@@ -347,9 +383,26 @@ def create_post(userId):
             caption=form.data["caption"],
             image=url,
         )
+
         db.session.add(create_post)
         db.session.commit()
-        return {"post": create_post.to_dict(post_likes=True, post_comments=True)}, 201
+
+        # Load the post with relationships for response
+        post_with_relations = (
+            db.session.query(Post)
+            .options(
+                joinedload(Post.user),
+                selectinload(Post.post_likes),
+                selectinload(Post.post_comments),
+            )
+            .filter(Post.id == create_post.id)
+            .first()
+        )
+
+        return {
+            "post": post_with_relations.to_dict(post_likes=True, post_comments=True)
+        }, 201
+
     #     if form.errors:
     #         print(form.errors)
     #         return render_template("post_form.html", form=form, errors=form.errors)
@@ -372,17 +425,13 @@ def edit_post(userId, postId):
 
     post_to_edit = Post.query.get(postId)
 
-    # check if there is a post to edit
     if not post_to_edit:
         return {"errors": {"message": "Not Found"}}, 404
 
     user = User.query.get(userId)
-
-    # check if there is a user who created the post
     if not user:
         return {"errors": {"message": "Not Found"}}, 404
 
-    # check if current user is post creator - post creator is only allowed to update
     if current_user.id != userId:
         return {"errors": {"message": "Unauthorized"}}, 401
 
@@ -396,7 +445,6 @@ def edit_post(userId, postId):
 
         if form.image.data:
             post_image = form.image.data
-
             post_image.filename = get_unique_filename(post_image.filename)
 
             upload = upload_file_to_s3(post_image)
@@ -404,10 +452,25 @@ def edit_post(userId, postId):
                 return {"message": "Upload failed"}, 400
 
             # Remove the old image from S3
-            remove_file_from_s3(post_to_edit.image)
+            if post_to_edit.image:
+                remove_file_from_s3(post_to_edit.image)
             post_to_edit.image = upload["url"]
+
         db.session.commit()
-        return {"post": post_to_edit.to_dict(post_comments=True, post_likes=True)}, 200
+
+        # Load updated post with relationships
+        updated_post = (
+            db.session.query(Post)
+            .options(
+                joinedload(Post.user),
+                selectinload(Post.post_comments).joinedload(Comment.commenter),
+                selectinload(Post.post_likes),
+            )
+            .filter(Post.id == postId)
+            .first()
+        )
+
+        return {"post": updated_post.to_dict(post_comments=True, post_likes=True)}, 200
     #   return redirect(f"/api/posts/{postId}")
     #     elif form.errors:
     #         print(form.errors)
@@ -424,6 +487,17 @@ def edit_post(userId, postId):
     #         )
     elif form.errors:
         return {"errors": form.errors}, 400
-
     else:
-        return {"post": post_to_edit.to_dict(post_comments=True, post_likes=True)}, 200
+        # Return current post data if no form submission
+        current_post = (
+            db.session.query(Post)
+            .options(
+                joinedload(Post.user),
+                selectinload(Post.post_comments).joinedload(Comment.commenter),
+                selectinload(Post.post_likes),
+            )
+            .filter(Post.id == postId)
+            .first()
+        )
+
+        return {"post": current_post.to_dict(post_comments=True, post_likes=True)}, 200
