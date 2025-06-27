@@ -20,7 +20,7 @@ from .models import (
     Likes,
     UserTags,
     Partnership,
-    Contact
+    Contact,
 )
 from .api.user_routes import user_routes
 from .api.auth_routes import auth_routes
@@ -48,7 +48,6 @@ login.login_view = "auth.unauthorized"
 def load_user(id):
     return User.query.get(int(id))
 
-
 # Tell flask about our seed commands
 app.cli.add_command(seed_commands)
 
@@ -71,12 +70,10 @@ Migrate(app, db)
 # Application Security
 CORS(app)
 
-
 # Since we are deploying with Docker and Flask,
 # we won't be using a buildpack when we deploy to Heroku.
 # Therefore, we need to make sure that in production any
 # request made over http is redirected to https.
-# Well.........
 @app.before_request
 def https_redirect():
     if os.environ.get("FLASK_ENV") == "production":
@@ -131,3 +128,9 @@ def react_root(path):
 @app.errorhandler(404)
 def not_found(e):
     return app.send_static_file("index.html")
+
+
+@app.errorhandler(500)
+def internal_error(e):
+    db.session.rollback()
+    return {"errors": {"message": "Internal server error"}}, 500
