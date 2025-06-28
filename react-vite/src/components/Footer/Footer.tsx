@@ -95,7 +95,7 @@ const Footer: React.FC = () => {
 						<h4 className="text-lg font-semibold items-center lg:text-center text-slate-200">
 							Connect With Me
 						</h4>
-						<div className="grid grid-cols-2 gap-4">
+						<div className="grid grid-cols-2 gap-4 justify-self-center">
 							{socialLinks.map((link) => {
 								const IconComponent = link.icon;
 								return (
@@ -141,7 +141,7 @@ const Footer: React.FC = () => {
 						<h4 className="text-lg font-semibold mb-4 text-slate-200">
 							About This Project
 						</h4>
-						<div className="space-y-3">
+						<div className="space-y-3 justify-self-center">
 							<div className="flex items-center gap-2 justify-center lg:justify-start text-slate-300">
 								<Heart size={16} className="text-red-400" />
 								<span className="text-sm">
@@ -150,7 +150,9 @@ const Footer: React.FC = () => {
 							</div>
 							<div className="flex items-center gap-2 justify-center lg:justify-start text-slate-300">
 								<Code size={16} className="text-blue-400" />
-								<span className="text-sm">React • TypeScript • Tailwind</span>
+								<span className="text-sm">
+									React • JavaScript • TypeScript • Tailwind • Python
+								</span>
 							</div>
 							<div className="flex items-center gap-2 justify-center lg:justify-start text-slate-300">
 								<User size={16} className="text-green-400" />
