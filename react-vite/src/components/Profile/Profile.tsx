@@ -6,14 +6,24 @@ import {
 	Users,
 	Calendar,
 	MapPin,
-	Expand,
 	Edit3,
+	Settings,
+	Plus,
+	Grid,
+	List,
+	Search,
+	Trash2,
+	Share2,
+	Bookmark,
+	TrendingUp,
+	Award,
+	Clock,
+	Eye,
 } from "lucide-react";
-import { User, Post, Group, Event, Tag } from "../../types";
+import type { User, Post, Group, Event, Tag } from "../../types";
 import PostMenu from "../Posts-TSX/PostMenu-TSX/PostMenu";
-import DeleteProfile from "./CRUD/Delete/DeleteProfile";
-import AddTags from "../Tags/AddTags-TSX/AddTags";
-import "./Profile.css";
+// import DeleteProfile from "./CRUD/Delete/DeleteProfile";
+// import AddTags from "../Tags/AddTags-TSX/AddTags";
 
 // Mock data for demonstration when no backend data is available
 const mockUser: User = {
@@ -41,7 +51,10 @@ const mockUser: User = {
 			image:
 				"https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=800",
 			likes: 42,
+			creator: 1,
+			createdAt: "2024-01-15T10:30:00Z",
 			updatedAt: "2024-01-15T10:30:00Z",
+			user: {} as User,
 		},
 		{
 			id: 2,
@@ -51,7 +64,10 @@ const mockUser: User = {
 			image:
 				"https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=800",
 			likes: 28,
+			creator: 1,
+			createdAt: "2024-01-10T14:20:00Z",
 			updatedAt: "2024-01-10T14:20:00Z",
+			user: {} as User,
 		},
 		{
 			id: 3,
@@ -61,7 +77,10 @@ const mockUser: User = {
 			image:
 				"https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800",
 			likes: 67,
+			creator: 1,
+			createdAt: "2024-01-05T16:45:00Z",
 			updatedAt: "2024-01-05T16:45:00Z",
+			user: {} as User,
 		},
 	],
 	group: [
@@ -76,74 +95,7 @@ const mockUser: User = {
 			state: "CA",
 			numMembers: 1250,
 			type: "Support Group",
-			events: [
-				{
-					id: 1,
-					name: "Weekly Check-in",
-					description: "Weekly group therapy session",
-					image:
-						"https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=400",
-					numAttendees: 15,
-					capacity: 20,
-					type: "Therapy",
-					startDate: "2024-02-15T18:00:00Z",
-					endDate: "2024-02-15T20:00:00Z",
-					venueInfo: {
-						id: 1,
-						groupId: 1,
-						address: "123 Main St",
-						city: "San Francisco",
-						state: "CA",
-						latitude: 37.7749,
-						longitude: -122.4194,
-					},
-					groupInfo: {
-						id: 1,
-						name: "Men's Mental Health Support",
-						about: "A safe space for men to discuss mental health challenges",
-						image:
-							"https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400",
-						city: "San Francisco",
-						state: "CA",
-						numMembers: 1250,
-						type: "Support Group",
-						events: [],
-					},
-				},
-				{
-					id: 2,
-					name: "Mindfulness Workshop",
-					description: "Learn mindfulness techniques for stress management",
-					image:
-						"https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=400",
-					numAttendees: 25,
-					capacity: 30,
-					type: "Workshop",
-					startDate: "2024-02-22T19:00:00Z",
-					endDate: "2024-02-22T21:00:00Z",
-					venueInfo: {
-						id: 2,
-						groupId: 1,
-						address: "456 Oak Ave",
-						city: "San Francisco",
-						state: "CA",
-						latitude: 37.7849,
-						longitude: -122.4094,
-					},
-					groupInfo: {
-						id: 1,
-						name: "Men's Mental Health Support",
-						about: "A safe space for men to discuss mental health challenges",
-						image:
-							"https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400",
-						city: "San Francisco",
-						state: "CA",
-						numMembers: 1250,
-						type: "Support Group",
-						events: [],
-					},
-				},
-			],
+			events: [],
 		},
 		{
 			id: 2,
@@ -155,42 +107,7 @@ const mockUser: User = {
 			state: "CA",
 			numMembers: 850,
 			type: "Support Group",
-			events: [
-				{
-					id: 3,
-					name: "Breathing Techniques Session",
-					description:
-						"Learn effective breathing techniques for anxiety management",
-					image:
-						"https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=400",
-					numAttendees: 12,
-					capacity: 15,
-					type: "Workshop",
-					startDate: "2024-02-20T17:00:00Z",
-					endDate: "2024-02-20T18:30:00Z",
-					venueInfo: {
-						id: 3,
-						groupId: 2,
-						address: "789 Pine St",
-						city: "Oakland",
-						state: "CA",
-						latitude: 37.8044,
-						longitude: -122.2711,
-					},
-					groupInfo: {
-						id: 2,
-						name: "Anxiety Support Circle",
-						about: "Supporting each other through anxiety and panic disorders",
-						image:
-							"https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=400",
-						city: "Oakland",
-						state: "CA",
-						numMembers: 850,
-						type: "Support Group",
-						events: [],
-					},
-				},
-			],
+			events: [],
 		},
 	],
 	events: [
@@ -215,18 +132,7 @@ const mockUser: User = {
 				latitude: 37.7849,
 				longitude: -122.4194,
 			},
-			groupInfo: {
-				id: 1,
-				name: "Men's Mental Health Support",
-				about: "A safe space for men to discuss mental health challenges",
-				image:
-					"https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400",
-				city: "San Francisco",
-				state: "CA",
-				numMembers: 1250,
-				type: "Support Group",
-				events: [],
-			},
+			groupInfo: {} as Group,
 		},
 		{
 			id: 2,
@@ -249,18 +155,7 @@ const mockUser: User = {
 				latitude: 37.8144,
 				longitude: -122.2811,
 			},
-			groupInfo: {
-				id: 2,
-				name: "Anxiety Support Circle",
-				about: "Supporting each other through anxiety and panic disorders",
-				image:
-					"https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=400",
-				city: "Oakland",
-				state: "CA",
-				numMembers: 850,
-				type: "Support Group",
-				events: [],
-			},
+			groupInfo: {} as Group,
 		},
 	],
 	userComments: [
@@ -296,9 +191,10 @@ const Profile: React.FC = () => {
 	>("tags");
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [showAddTagsModal, setShowAddTagsModal] = useState(false);
+	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+	const [searchTerm, setSearchTerm] = useState("");
 
 	// Memoized user-related values with proper null checks and default arrays
-	// These MUST be called unconditionally, even if currentUser is null
 	const userTags = useMemo(() => currentUser?.usersTags ?? [], [currentUser]);
 	const userPosts = useMemo(() => currentUser?.posts ?? [], [currentUser]);
 	const userGroups = useMemo(() => currentUser?.group ?? [], [currentUser]);
@@ -315,14 +211,53 @@ const Profile: React.FC = () => {
 		);
 	}, [userPosts]);
 
-	const formatTimeAgo = (dateString: string) => {
+	const filteredContent = useMemo(() => {
+		if (!searchTerm) {
+			switch (activeMainSection) {
+				case "posts":
+					return sortedUserPosts;
+				case "groups":
+					return userGroups;
+				case "events":
+					return userEvents;
+				default:
+					return [];
+			}
+		}
+
+		const term = searchTerm.toLowerCase();
+		switch (activeMainSection) {
+			case "posts":
+				return sortedUserPosts.filter(
+					(post) =>
+						post.title.toLowerCase().includes(term) ||
+						post.caption.toLowerCase().includes(term),
+				);
+			case "groups":
+				return userGroups.filter(
+					(group) =>
+						group.name.toLowerCase().includes(term) ||
+						group.about.toLowerCase().includes(term),
+				);
+			case "events":
+				return userEvents.filter(
+					(event) =>
+						event.name.toLowerCase().includes(term) ||
+						event.description.toLowerCase().includes(term),
+				);
+			default:
+				return [];
+		}
+	}, [activeMainSection, searchTerm, sortedUserPosts, userGroups, userEvents]);
+
+	const formatTimeAgo = useCallback((dateString: string) => {
 		const now = new Date();
 		const postDate = new Date(dateString);
 		const diffInDays = Math.floor(
 			(now.getTime() - postDate.getTime()) / (1000 * 60 * 60 * 24),
 		);
 		return `${diffInDays}d ago`;
-	};
+	}, []);
 
 	const handleDeleteProfile = useCallback(() => {
 		setShowDeleteModal(true);
@@ -346,180 +281,259 @@ const Profile: React.FC = () => {
 	}, []);
 
 	const renderContent = useCallback(() => {
+		const content = filteredContent;
+
 		switch (activeMainSection) {
 			case "posts":
-				return userPosts.length > 0 ? (
-					<div className="content-grid">
-						{sortedUserPosts.map((post: Post) => (
-							<article key={post.id} className="post-card">
-								<div className="post-header">
-									<div className="post-user-info">
+				return content.length > 0 ? (
+					<div
+						className={`${
+							viewMode === "grid"
+								? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6 w-full"
+								: "space-y-6"
+						}`}
+					>
+						{(content as Post[]).map((post: Post) => (
+							<article
+								key={post.id}
+								className={`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group ${
+									viewMode === "list" ? "max-w-2xl mx-auto" : ""
+								}`}
+							>
+								<div className="p-4 border-b border-gray-50">
+									<div className="flex items-start justify-between gap-3">
+										<div className="flex items-center gap-3 min-w-0 flex-1">
+											<img
+												src={currentUser?.profileImage}
+												alt={currentUser?.username}
+												className="w-10 h-10 rounded-full object-cover border-2 border-gray-100 flex-shrink-0"
+											/>
+											<div className="min-w-0 flex-1">
+												<span className="font-semibold text-gray-800 block truncate">
+													{currentUser?.username}
+												</span>
+											</div>
+										</div>
+										<div className="flex items-center gap-2 flex-shrink-0">
+											<h3 className="font-semibold text-gray-800 text-sm text-right">
+												{post.title}
+											</h3>
+											<PostMenu post={post} navigate={() => {}} />
+										</div>
+									</div>
+								</div>
+
+								{post.image && (
+									<div className="relative">
 										<img
-											src={currentUser?.profileImage}
-											alt={currentUser?.username}
-											className="post-avatar"
+											src={post.image}
+											alt={post.title}
+											className="w-full h-64 object-cover"
 										/>
-										<span className="post-username">
-											{currentUser?.username}
-										</span>
+										<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
 									</div>
-									<h3 className="post-title">{post?.title}</h3>
-									<div className="post-menu-btn">
-										<PostMenu navigate={() => {}} post={post} />
-									</div>
-								</div>
-								<div className="post-image-container">
-									<img
-										src={post?.image}
-										alt={post?.title}
-										className="post-image"
-									/>
-								</div>
-								<div className="post-content">
-									<div className="post-stats">
-										<div className="stat-item">
+								)}
+
+								<div className="p-4">
+									<div className="flex items-center gap-6 mb-3">
+										<button className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors duration-200">
 											<Heart size={18} />
-											<span>{post?.likes}</span>
-										</div>
-										<div className="stat-item">
+											<span className="text-sm font-medium">{post.likes}</span>
+										</button>
+										<button className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors duration-200">
 											<MessageCircle size={18} />
-											<span>{userComments.length}</span>
-										</div>
+											<span className="text-sm font-medium">
+												{userComments.length}
+											</span>
+										</button>
+										<button className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200 ml-auto">
+											<Share2 size={16} />
+										</button>
+										<button className="flex items-center gap-2 text-gray-600 hover:text-yellow-500 transition-colors duration-200">
+											<Bookmark size={16} />
+										</button>
 									</div>
-									<div className="post-caption">
-										<span className="caption-username">
+
+									<div className="text-sm text-gray-700 leading-relaxed flex align-center gap-5">
+										<span className="font-semibold text-gray-800">
 											{currentUser?.username}
-										</span>
-										<span className="caption-separator">•</span>
-										<span className="caption-time">
-											{formatTimeAgo(post?.updatedAt)}
-										</span>
-										<span className="caption-separator">•</span>
-										<p className="caption-text">{post?.caption}</p>
+										</span>{" "}
+										<p className="text-xs text-gray-500 flex items-center gap-1 py-0 my-0">
+											<Clock size={12} />
+											{formatTimeAgo(post.updatedAt)}
+										</p>
+										{post.caption}
 									</div>
 								</div>
 							</article>
 						))}
 					</div>
 				) : (
-					<div className="empty-state">
-						<p>
-							Currently no posts available. You will see something after you
-							make a post
-						</p>
+					<div className="text-center py-16">
+						<div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 max-w-md mx-auto">
+							<div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
+								<Grid className="text-white" size={24} />
+							</div>
+							<h3 className="text-xl font-semibold text-gray-800 mb-2">
+								No Posts Yet
+							</h3>
+							<p className="text-gray-600 mb-4">
+								Share your first post to get started!
+							</p>
+							<Link
+								to="/posts/create"
+								className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200"
+							>
+								<Plus size={16} />
+								Create Post
+							</Link>
+						</div>
 					</div>
 				);
 
 			case "groups":
-				return userGroups.length > 0 ? (
-					<div className="content-grid">
-						{userGroups.map((group: Group) => (
+				return content.length > 0 ? (
+					<div
+						className={`${
+							viewMode === "grid"
+								? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+								: "space-y-6"
+						}`}
+					>
+						{(content as Group[]).map((group: Group) => (
 							<Link
-								to={`/groups/${group?.id}`}
-								key={group?.id}
-								className="card-link"
+								to={`/groups/${group.id}`}
+								key={group.id}
+								className="group block"
 							>
-								<article className="content-card">
-									<img
-										src={group?.image}
-										alt={group?.name}
-										className="card-image"
-									/>
-									<div className="card-content">
-										<div className="card-header">
-											<h2 className="card-title">{group?.name}</h2>
-											<p className="card-description">{group?.about}</p>
+								<article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+									<div className="relative">
+										<img
+											src={group.image}
+											alt={group.name}
+											className="w-full h-48 object-cover"
+										/>
+										<div className="absolute top-4 right-4">
+											<span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-xs font-medium text-gray-700 rounded-full">
+												{group.type}
+											</span>
 										</div>
-										<ul className="card-stats">
-											<li className="stat-item">
-												<Users size={16} />
-												<span className="stat-value">{group?.numMembers}</span>
-												<span className="stat-label">Members</span>
-											</li>
-											<li className="stat-item">
-												<Calendar size={16} />
-												<span className="stat-value">
-													{group?.events?.length || 0}
+									</div>
+									<div className="p-6 flex-1 flex flex-col">
+										<h2 className="text-lg font-bold text-gray-800 mb-2 group-hover:text-orange-600 transition-colors duration-200">
+											{group.name}
+										</h2>
+										<p className="text-gray-600 text-sm mb-4 flex-1 line-clamp-3">
+											{group.about}
+										</p>
+										<div className="flex items-center justify-between text-sm text-gray-500 mt-auto">
+											<div className="flex items-center gap-1">
+												<Users size={14} />
+												<span>{group.numMembers.toLocaleString()} members</span>
+											</div>
+											<div className="flex items-center gap-1">
+												<MapPin size={14} />
+												<span>
+													{group.city}, {group.state}
 												</span>
-												<span className="stat-label">Events</span>
-											</li>
-											<li className="stat-item">
-												<MapPin size={16} />
-												<span className="stat-value">{group?.type}</span>
-												<span className="stat-label">Type</span>
-											</li>
-										</ul>
+											</div>
+										</div>
 									</div>
 								</article>
 							</Link>
 						))}
 					</div>
 				) : (
-					<div className="empty-state">
-						<p>
-							Currently no groups available. You will see something after you
-							join a group
-						</p>
+					<div className="text-center py-16">
+						<div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 max-w-md mx-auto">
+							<div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
+								<Users className="text-white" size={24} />
+							</div>
+							<h3 className="text-xl font-semibold text-gray-800 mb-2">
+								No Groups Yet
+							</h3>
+							<p className="text-gray-600 mb-4">
+								Join groups to connect with like-minded people!
+							</p>
+						</div>
 					</div>
 				);
 
 			case "events":
-				return userEvents.length > 0 ? (
-					<div className="content-grid">
-						{userEvents.map((event: Event) => (
+				return content.length > 0 ? (
+					<div
+						className={`${
+							viewMode === "grid"
+								? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+								: "space-y-6"
+						}`}
+					>
+						{(content as Event[]).map((event: Event) => (
 							<Link
-								key={event?.id}
-								to={`/events/${event?.id}`}
-								className="card-link"
+								key={event.id}
+								to={`/events/${event.id}`}
+								className="group block"
 							>
-								<article className="content-card">
-									<img
-										src={event?.image}
-										alt={event?.name}
-										className="card-image"
-									/>
-									<div className="card-content">
-										<div className="card-header">
-											<h2 className="card-title">{event?.name}</h2>
-											<p className="card-description">{event?.description}</p>
+								<article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+									<div className="relative">
+										<img
+											src={event.image}
+											alt={event.name}
+											className="w-full h-48 object-cover"
+										/>
+										<div className="absolute top-4 right-4">
+											<span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-xs font-medium text-gray-700 rounded-full">
+												{event.type}
+											</span>
 										</div>
-										<ul className="card-stats">
-											<li className="stat-item">
-												<Users size={16} />
-												<span className="stat-value">
-													{event?.numAttendees}
+									</div>
+									<div className="p-6 flex-1 flex flex-col">
+										<h2 className="text-lg font-bold text-gray-800 mb-2 group-hover:text-orange-600 transition-colors duration-200">
+											{event.name}
+										</h2>
+										<p className="text-gray-600 text-sm mb-4 flex-1 line-clamp-3">
+											{event.description}
+										</p>
+										<div className="space-y-2 text-sm text-gray-500 mt-auto">
+											<div className="flex items-center gap-2">
+												<Calendar size={14} />
+												<span>
+													{new Date(event.startDate).toLocaleDateString()}
 												</span>
-												<span className="stat-label">Attendees</span>
-											</li>
-											<li className="stat-item">
-												<Expand size={16} />
-												<span className="stat-value">{event?.capacity}</span>
-												<span className="stat-label">Capacity</span>
-											</li>
-											<li className="stat-item">
-												<MapPin size={16} />
-												<span className="stat-value">{event?.type}</span>
-												<span className="stat-label">Type</span>
-											</li>
-											<li className="stat-item">
-												<Calendar size={16} />
-												<span className="stat-value">
-													{new Date(event?.startDate).toLocaleDateString()}
-												</span>
-												<span className="stat-label">Start Date</span>
-											</li>
-										</ul>
+											</div>
+											<div className="flex items-center justify-between">
+												<div className="flex items-center gap-1">
+													<Users size={14} />
+													<span>
+														{event.numAttendees}/{event.capacity} attending
+													</span>
+												</div>
+												<div className="flex items-center gap-1">
+													<MapPin size={14} />
+													<span>
+														{event.venueInfo.city}, {event.venueInfo.state}
+													</span>
+												</div>
+											</div>
+										</div>
 									</div>
 								</article>
 							</Link>
 						))}
 					</div>
 				) : (
-					<div className="empty-state">
-						<p>
-							Currently no events available. You will see something after you
-							add an event
-						</p>
+					<div className="text-center py-16">
+						<div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 max-w-md mx-auto">
+							<div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
+								<Calendar className="text-white" size={24} />
+							</div>
+							<h3 className="text-xl font-semibold text-gray-800 mb-2">
+								No Events Yet
+							</h3>
+							<p className="text-gray-600 mb-4">
+								Create or join events to get started!
+							</p>
+						</div>
 					</div>
 				);
 
@@ -528,36 +542,37 @@ const Profile: React.FC = () => {
 		}
 	}, [
 		activeMainSection,
-		userPosts,
-		userGroups,
-		userEvents,
+		filteredContent,
+		viewMode,
 		currentUser,
 		userComments,
-		sortedUserPosts,
+		formatTimeAgo,
 	]);
 
 	const renderTagContent = useCallback(() => {
 		switch (activeAsideSection) {
 			case "tags":
-				return userTags.length > 0 ? (
-					<div className="tags-content">
-						<div className="tags-grid">
-							{userTags.map((tag: Tag) => (
-								<div key={tag?.id} className="tag-item">
-									<span className="tag-badge">{tag?.name}</span>
-								</div>
-							))}
-						</div>
-						<button className="add-tags-btn" onClick={handleAddTags}>
-							Add Tags
-						</button>
-					</div>
-				) : (
-					<div className="tags-content">
-						<div className="empty-state">
-							<p>Currently no tags available.</p>
-						</div>
-						<button className="add-tags-btn" onClick={handleAddTags}>
+				return (
+					<div className="space-y-6">
+						{userTags.length > 0 ? (
+							<div className="flex flex-wrap gap-2">
+								{userTags.map((tag: Tag) => (
+									<span
+										key={tag.id}
+										className="px-3 py-1 bg-gradient-to-r from-orange-100 to-slate-100 text-gray-700 text-sm font-medium rounded-full border border-gray-200 hover:shadow-sm transition-all duration-200"
+									>
+										{tag.name}
+									</span>
+								))}
+							</div>
+						) : (
+							<p className="text-gray-500 text-sm">No tags added yet.</p>
+						)}
+						<button
+							onClick={handleAddTags}
+							className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200 shadow-md hover:shadow-lg"
+						>
+							<Plus size={16} />
 							Add Tags
 						</button>
 					</div>
@@ -565,12 +580,23 @@ const Profile: React.FC = () => {
 
 			case "similar":
 				return (
-					<div className="similar-users-content">
-						<h3 className="similar-users-title">
-							Find users similar to you based on your tags
-						</h3>
+					<div className="space-y-6">
+						<div className="text-center">
+							<div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-3">
+								<TrendingUp className="text-white" size={20} />
+							</div>
+							<h3 className="font-semibold text-gray-800 mb-2">
+								Discover Similar Users
+							</h3>
+							<p className="text-gray-600 text-sm mb-4">
+								Find users with similar interests based on your tags
+							</p>
+						</div>
 						<Link to="/profile-feed">
-							<button className="similar-users-btn">SIMILAR TO YOU</button>
+							<button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200 shadow-md hover:shadow-lg">
+								<Eye size={16} />
+								Find Similar Users
+							</button>
 						</Link>
 					</div>
 				);
@@ -580,164 +606,354 @@ const Profile: React.FC = () => {
 		}
 	}, [activeAsideSection, userTags, handleAddTags]);
 
+	const getContentCount = () => {
+		switch (activeMainSection) {
+			case "posts":
+				return userPosts.length;
+			case "groups":
+				return userGroups.length;
+			case "events":
+				return userEvents.length;
+			default:
+				return 0;
+		}
+	};
+
+	const getTotalLikes = () => {
+		return userPosts.reduce((total, post) => total + post.likes, 0);
+	};
+
 	return (
-		<div className="profile-container">
-			<nav className="profile-nav">
-				<Link to="/posts-feed" className="nav-link">
-					← Posts
-				</Link>
-				<Link to="/posts/create" className="nav-link">
-					Create a Post →
-				</Link>
+		<div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-slate-50">
+			{/* Navigation */}
+			<nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
+				<div className="max-w-7xl mx-auto px-4 py-4">
+					<div className="flex items-center justify-between">
+						<Link
+							to="/posts-feed"
+							className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all duration-200"
+						>
+							← Posts Feed
+						</Link>
+						<Link
+							to="/posts/create"
+							className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200 shadow-md hover:shadow-lg"
+						>
+							<Plus size={16} />
+							Create Post
+						</Link>
+					</div>
+				</div>
 			</nav>
 
-			<div className="profile-layout">
-				<main className="profile-main">
-					<section className="profile-header">
-						<div className="profile-info">
-							<div className="profile-avatar-section">
-								<div className="avatar-container">
-									<img
-										src={currentUser?.profileImage}
-										alt={currentUser?.username}
-										className="profile-avatar"
-									/>
-									<Link
-										to={`/users/${currentUser?.id}/profile/update`}
-										className="edit-avatar-btn"
-									>
-										<Edit3 size={24} />
-									</Link>
+			<div className="max-w-7xl mx-auto px-4 py-8">
+				<div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+					{/* Main Content */}
+					<main className="lg:col-span-3 space-y-8">
+						{/* Profile Header */}
+						<section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+							<div className="relative h-32 bg-gradient-to-r from-orange-500 to-slate-600">
+								<div className="absolute inset-0 bg-black/20"></div>
+							</div>
+							<div className="relative px-6 pb-6">
+								<div className="flex flex-col sm:flex-row sm:items-end sm:gap-6 -mt-16">
+									<div className="relative">
+										<img
+											src={currentUser?.profileImage}
+											alt={currentUser?.username}
+											className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+										/>
+										<Link
+											to={`/users/${currentUser?.id}/profile/update`}
+											className="absolute bottom-2 right-2 p-2 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200"
+										>
+											<Edit3 size={16} className="text-gray-600" />
+										</Link>
+									</div>
+
+									<div className="flex-1 mt-4 sm:mt-0">
+										<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
+											<div className="mt-4">
+												<h1 className="text-2xl font-bold text-gray-800">
+													{currentUser?.username}
+												</h1>
+												<p className="text-gray-600 mt-1">
+													{currentUser?.firstName} {currentUser?.lastName}
+												</p>
+												<p className="text-gray-500 text-sm">
+													{currentUser?.email}
+												</p>
+											</div>
+											<div className="flex items-center gap-3 mt-4 sm:-mt-8">
+												<Link
+													to={`/users/${currentUser?.id}/profile/update`}
+													className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-all duration-200"
+												>
+													<Settings size={16} />
+													Edit Profile
+												</Link>
+												<button
+													onClick={handleDeleteProfile}
+													className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 font-medium rounded-lg hover:bg-red-100 transition-all duration-200"
+												>
+													<Trash2 size={16} />
+													Delete
+												</button>
+											</div>
+										</div>
+
+										{currentUser?.bio && (
+											<p className="text-gray-700 mt-4 leading-relaxed">
+												{currentUser.bio}
+											</p>
+										)}
+
+										{/* Stats */}
+										<div className="flex items-center gap-8 mt-6">
+											<div className="text-center">
+												<div className="text-xl font-bold text-gray-800">
+													{userPosts.length}
+												</div>
+												<div className="text-sm text-gray-500">Posts</div>
+											</div>
+											<div className="text-center">
+												<div className="text-xl font-bold text-gray-800">
+													{getTotalLikes()}
+												</div>
+												<div className="text-sm text-gray-500">Likes</div>
+											</div>
+											<div className="text-center">
+												<div className="text-xl font-bold text-gray-800">
+													{userGroups.length}
+												</div>
+												<div className="text-sm text-gray-500">Groups</div>
+											</div>
+											<div className="text-center">
+												<div className="text-xl font-bold text-gray-800">
+													{userEvents.length}
+												</div>
+												<div className="text-sm text-gray-500">Events</div>
+											</div>
+										</div>
+									</div>
 								</div>
 							</div>
+						</section>
 
-							<div className="profile-details">
-								<h1 className="profile-username">{currentUser?.username}</h1>
-								<p className="profile-bio">{currentUser?.bio}</p>
+						{/* Content Section */}
+						<section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+							{/* Content Header */}
+							<div className="p-6 border-b border-gray-100">
+								<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+									<nav className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+										{(["posts", "groups", "events"] as const).map((section) => (
+											<button
+												key={section}
+												onClick={() => setActiveMainSection(section)}
+												className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+													activeMainSection === section
+														? "bg-white text-orange-600 shadow-sm"
+														: "text-gray-600 hover:text-gray-800"
+												}`}
+											>
+												{section.charAt(0).toUpperCase() + section.slice(1)} (
+												{getContentCount()})
+											</button>
+										))}
+									</nav>
 
-								<ul className="profile-stats">
-									<li className="profile-stat">
-										<span className="stat-value">{currentUser?.firstName}</span>
-										<span className="stat-label">First Name</span>
-									</li>
-									<li className="profile-stat">
-										<span className="stat-value">{currentUser?.lastName}</span>
-										<span className="stat-label">Last Name</span>
-									</li>
-									<li className="profile-stat">
-										<span className="stat-value">{currentUser?.email}</span>
-										<span className="stat-label">Email</span>
-									</li>
-								</ul>
+									<div className="flex items-center gap-3">
+										{/* Search */}
+										<div className="relative">
+											<Search
+												className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+												size={16}
+											/>
+											<input
+												type="text"
+												placeholder={`Search ${activeMainSection}...`}
+												value={searchTerm}
+												onChange={(e) => setSearchTerm(e.target.value)}
+												className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+											/>
+										</div>
 
-								<div className="profile-actions">
-									<Link to={`/users/${currentUser?.id}/profile/update`}>
-										<button className="edit-profile-btn">Edit Profile</button>
-									</Link>
-									<button
-										className="delete-profile-btn"
-										onClick={handleDeleteProfile}
-									>
-										Delete Profile
-									</button>
+										{/* View Mode Toggle */}
+										<div className="flex bg-gray-100 rounded-lg p-1">
+											<button
+												onClick={() => setViewMode("grid")}
+												className={`p-2 rounded-md transition-all duration-200 ${
+													viewMode === "grid"
+														? "bg-white shadow-sm text-orange-600"
+														: "text-gray-500 hover:text-gray-700"
+												}`}
+											>
+												<Grid size={16} />
+											</button>
+											<button
+												onClick={() => setViewMode("list")}
+												className={`p-2 rounded-md transition-all duration-200 ${
+													viewMode === "list"
+														? "bg-white shadow-sm text-orange-600"
+														: "text-gray-500 hover:text-gray-700"
+												}`}
+											>
+												<List size={16} />
+											</button>
+										</div>
+									</div>
 								</div>
-							</div>
-						</div>
-					</section>
 
-					<section className="profile-content">
-						<nav className="content-nav">
-							{(["posts", "groups", "events"] as const).map((section) => (
+								{/* Search Results Info */}
+								{searchTerm && (
+									<div className="mt-4 text-sm text-gray-600">
+										Showing {filteredContent.length} results for "{searchTerm}"
+									</div>
+								)}
+							</div>
+
+							{/* Content Area */}
+							<div className="p-6 w-[50vw]">{renderContent()}</div>
+						</section>
+					</main>
+
+					{/* Sidebar */}
+					<aside className="space-y-6">
+						{/* Tags Section */}
+						<section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+							<nav className="flex items-center gap-1 bg-gray-100 rounded-lg p-1 mb-6">
 								<button
-									key={section}
-									onClick={() => setActiveMainSection(section)}
-									className={`content-nav-btn ${
-										activeMainSection === section ? "active" : ""
+									onClick={() => setActiveAsideSection("tags")}
+									className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-all duration-200 ${
+										activeAsideSection === "tags"
+											? "bg-white text-orange-600 shadow-sm"
+											: "text-gray-600 hover:text-gray-800"
 									}`}
 								>
-									{section.toUpperCase()}
+									Your Tags
 								</button>
-							))}
-						</nav>
+								<button
+									onClick={() => setActiveAsideSection("similar")}
+									className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-all duration-200 ${
+										activeAsideSection === "similar"
+											? "bg-white text-orange-600 shadow-sm"
+											: "text-gray-600 hover:text-gray-800"
+									}`}
+								>
+									Similar
+								</button>
+							</nav>
 
-						<div className="content-area">{renderContent()}</div>
-					</section>
-				</main>
+							{renderTagContent()}
+						</section>
 
-				{/* Desktop Sidebar - Hidden on mobile */}
-				<aside className="profile-sidebar">
-					<nav className="sidebar-nav">
-						<button
-							onClick={() => setActiveAsideSection("tags")}
-							className={`sidebar-nav-btn ${
-								activeAsideSection === "tags" ? "active" : ""
-							}`}
-						>
-							YOUR TAGS
-						</button>
-						<button
-							onClick={() => setActiveAsideSection("similar")}
-							className={`sidebar-nav-btn ${
-								activeAsideSection === "similar" ? "active" : ""
-							}`}
-						>
-							SIMILAR TO YOU
-						</button>
-					</nav>
-
-					<div className="sidebar-content">{renderTagContent()}</div>
-				</aside>
-
-				{/* Mobile Tags Section - Only visible on mobile */}
-				<section className="mobile-tags-section">
-					<div className="mobile-tags-header">
-						<h2 className="mobile-tags-title">Your Profile Tags</h2>
-						<p className="mobile-tags-subtitle">
-							Manage your interests and find similar users
-						</p>
-					</div>
-
-					<nav className="mobile-tags-nav">
-						<button
-							onClick={() => setActiveAsideSection("tags")}
-							className={`mobile-tags-nav-btn ${
-								activeAsideSection === "tags" ? "active" : ""
-							}`}
-						>
-							YOUR TAGS
-						</button>
-						<button
-							onClick={() => setActiveAsideSection("similar")}
-							className={`mobile-tags-nav-btn ${
-								activeAsideSection === "similar" ? "active" : ""
-							}`}
-						>
-							SIMILAR TO YOU
-						</button>
-					</nav>
-
-					<div className="mobile-tags-content">{renderTagContent()}</div>
-				</section>
+						{/* Quick Stats */}
+						<section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+							<h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+								<Award size={16} className="text-orange-500" />
+								Quick Stats
+							</h3>
+							<div className="space-y-3">
+								<div className="flex items-center justify-between">
+									<span className="text-sm text-gray-600">Total Posts</span>
+									<span className="font-semibold text-gray-800">
+										{userPosts.length}
+									</span>
+								</div>
+								<div className="flex items-center justify-between">
+									<span className="text-sm text-gray-600">Total Likes</span>
+									<span className="font-semibold text-gray-800">
+										{getTotalLikes()}
+									</span>
+								</div>
+								<div className="flex items-center justify-between">
+									<span className="text-sm text-gray-600">Groups Joined</span>
+									<span className="font-semibold text-gray-800">
+										{userGroups.length}
+									</span>
+								</div>
+								<div className="flex items-center justify-between">
+									<span className="text-sm text-gray-600">
+										Events Attending
+									</span>
+									<span className="font-semibold text-gray-800">
+										{userEvents.length}
+									</span>
+								</div>
+								<div className="flex items-center justify-between">
+									<span className="text-sm text-gray-600">Profile Tags</span>
+									<span className="font-semibold text-gray-800">
+										{userTags.length}
+									</span>
+								</div>
+							</div>
+						</section>
+					</aside>
+				</div>
 			</div>
 
-			{/* Delete Profile Modal */}
+			{/* Modals */}
 			{showDeleteModal && (
-				<div className="modal-overlay">
-					<div className="delete-modal-container">
-						<DeleteProfile
-							user={currentUser}
-							onClose={closeDeleteModal}
-							onConfirm={confirmDeleteProfile}
-						/>
+				<div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+					<div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+						<div className="text-center">
+							<div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+								<Trash2 className="text-red-600" size={24} />
+							</div>
+							<h3 className="text-xl font-semibold text-gray-800 mb-2">
+								Delete Profile
+							</h3>
+							<p className="text-gray-600 mb-6">
+								Are you sure you want to delete your profile? This action cannot
+								be undone.
+							</p>
+							<div className="flex items-center gap-3">
+								<button
+									onClick={closeDeleteModal}
+									className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-all duration-200"
+								>
+									Cancel
+								</button>
+								<button
+									onClick={confirmDeleteProfile}
+									className="flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-all duration-200"
+								>
+									Delete
+								</button>
+							</div>
+						</div>
 					</div>
 				</div>
 			)}
 
-			{/* Add Tags Modal */}
 			{showAddTagsModal && (
-				<div className="modal-overlay">
-					<div className="modal-container">
-						<AddTags user={currentUser} onClose={closeAddTagsModal} />
+				<div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+					<div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+						<div className="text-center">
+							<div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+								<Plus className="text-orange-600" size={24} />
+							</div>
+							<h3 className="text-xl font-semibold text-gray-800 mb-2">
+								Add Tags
+							</h3>
+							<p className="text-gray-600 mb-6">
+								Add tags to help others find you and discover similar users.
+							</p>
+							<div className="flex items-center gap-3">
+								<button
+									onClick={closeAddTagsModal}
+									className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-all duration-200"
+								>
+									Cancel
+								</button>
+								<button
+									onClick={closeAddTagsModal}
+									className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200"
+								>
+									Add Tags
+								</button>
+							</div>
+						</div>
 					</div>
 				</div>
 			)}
