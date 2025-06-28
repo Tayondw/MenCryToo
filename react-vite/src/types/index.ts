@@ -71,10 +71,10 @@ export interface Venue {
 export interface Comment {
 	id: number;
 	content: string;
-	userId: number;
-	postId: number;
-	createdAt: string;
-	updatedAt: string;
+	userId?: number;
+	postId?: number;
+	createdAt?: string;
+	updatedAt?: string;
 }
 
 export interface ProfilesData {
