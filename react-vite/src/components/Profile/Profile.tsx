@@ -695,7 +695,7 @@ const Profile: React.FC = () => {
 							</div>
 							<div className="relative px-6 pb-6">
 								<div className="flex flex-col sm:flex-row sm:items-end sm:gap-6 -mt-16">
-									<div className="relative">
+									<div className="relative justify-center self-center">
 										<img
 											src={currentUser?.profileImage}
 											alt={currentUser?.username}
@@ -714,7 +714,7 @@ const Profile: React.FC = () => {
 
 									<div className="flex-1 mt-4 sm:mt-0">
 										<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
-											<div className="mt-4">
+											<div className="mt-16">
 												<h1 className="text-2xl font-bold text-gray-800">
 													{currentUser?.username}
 												</h1>
