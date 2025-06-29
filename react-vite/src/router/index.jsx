@@ -15,7 +15,8 @@ import EventDetails from "../components/Events-TSX/Details";
 import CreateEvent from "../components/Events/CRUD/Create";
 import UpdateEvent from "../components/Events/CRUD/Update";
 import Profile from "../components/Profile";
-import ProfileDetails from "../components/Profile/Details";
+// import ProfileDetails from "../components/Profile/Details";
+import ProfileDetails from "../components/Profile/Details-TSX";
 import UpdateProfile from "../components/Profile/CRUD/Update";
 // import Posts from "../components/Posts";
 import Posts from "../components/Posts-TSX";
@@ -40,7 +41,7 @@ import {
 	// groupDetailsLoader,
 	// eventDetailsLoader,
 	// venueDetailsLoader,
-	userDetailsLoader,
+	// userDetailsLoader,
 	// postsLoader,
 	postDetailsLoader,
 	profilesLoader,
@@ -66,6 +67,7 @@ import {
 	profileAction,
 } from "../loaders/profileLoaders";
 import { signupAction, loginAction } from "../loaders/authLoaders";
+import { userDetailsLoader } from "../loaders/userLoaders";
 import { profileFeedLoader } from "../loaders/profileFeedLoaders";
 import {
 	groupsLoader,
