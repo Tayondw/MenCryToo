@@ -26,13 +26,165 @@ import PostMenu from "../Posts-TSX/PostMenu-TSX";
 import DeleteProfile from "./CRUD/Delete";
 import AddTags from "../Tags/AddTags-TSX";
 
+// Mock data for demonstration when no backend data is available
+const mockUser: User = {
+      id: 1,
+      username: "johndoe",
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+      bio: "Passionate developer and community builder focused on mental health advocacy and creating supportive environments for men to express their emotions.",
+      profileImage:
+        "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop",
+      updatedAt: "2024-01-20T15:30:00Z",
+      usersTags: [
+        { id: 1, name: "ANXIETY" },
+        { id: 2, name: "DEPRESSION" },
+        { id: 3, name: "STRESS" },
+        { id: 4, name: "RELATIONSHIPS" },
+      ],
+      posts: [
+        {
+          id: 1,
+          title: "My Journey with Mental Health",
+          caption:
+            "Just finished working on an amazing React project with some incredible features! It has been a transformative experience that helped me cope with my anxiety.",
+          image:
+            "https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=800",
+          likes: 42,
+          creator: 1,
+          createdAt: "2024-01-15T10:30:00Z",
+          updatedAt: "2024-01-15T10:30:00Z",
+          user: {} as User,
+        },
+        {
+          id: 2,
+          title: "Finding Support in Community",
+          caption:
+            "Exploring the world of design systems and component libraries while dealing with depression. The creative process has been therapeutic.",
+          image:
+            "https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=800",
+          likes: 28,
+          creator: 1,
+          createdAt: "2024-01-10T14:20:00Z",
+          updatedAt: "2024-01-10T14:20:00Z",
+          user: {} as User,
+        },
+        {
+          id: 3,
+          title: "Breaking the Silence",
+          caption:
+            "Learning to express my emotions and break free from toxic masculinity. It is okay for men to cry and seek help.",
+          image:
+            "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800",
+          likes: 67,
+          creator: 1,
+          createdAt: "2024-01-05T16:45:00Z",
+          updatedAt: "2024-01-05T16:45:00Z",
+          user: {} as User,
+        },
+      ],
+      group: [
+        {
+          id: 1,
+          name: "Men's Mental Health Support",
+          about:
+            "A safe space for men to discuss mental health challenges and support each other",
+          image:
+            "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400",
+          city: "San Francisco",
+          state: "CA",
+          numMembers: 1250,
+          type: "Support Group",
+          events: [],
+        },
+        {
+          id: 2,
+          name: "Anxiety Support Circle",
+          about: "Supporting each other through anxiety and panic disorders",
+          image:
+            "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=400",
+          city: "Oakland",
+          state: "CA",
+          numMembers: 850,
+          type: "Support Group",
+          events: [],
+        },
+      ],
+      events: [
+        {
+          id: 1,
+          name: "Mental Health Awareness Conference 2024",
+          description:
+            "Annual conference focused on men's mental health awareness and breaking stigma",
+          image:
+            "https://images.pexels.com/photos/1181676/pexels-photo-1181676.jpeg?auto=compress&cs=tinysrgb&w=400",
+          numAttendees: 150,
+          capacity: 200,
+          type: "Conference",
+          startDate: "2024-03-15T09:00:00Z",
+          endDate: "2024-03-15T18:00:00Z",
+          venueInfo: {
+            id: 4,
+            groupId: 1,
+            address: "1000 Conference Center Dr",
+            city: "San Francisco",
+            state: "CA",
+            latitude: 37.7849,
+            longitude: -122.4194,
+          },
+          groupInfo: {} as Group,
+        },
+        {
+          id: 2,
+          name: "Stress Management Workshop",
+          description:
+            "Interactive workshop on managing stress in daily life and work environments",
+          image:
+            "https://images.pexels.com/photos/3184340/pexels-photo-3184340.jpeg?auto=compress&cs=tinysrgb&w=400",
+          numAttendees: 45,
+          capacity: 50,
+          type: "Workshop",
+          startDate: "2024-02-28T14:00:00Z",
+          endDate: "2024-02-28T17:00:00Z",
+          venueInfo: {
+            id: 5,
+            groupId: 2,
+            address: "555 Workshop Way",
+            city: "Oakland",
+            state: "CA",
+            latitude: 37.8144,
+            longitude: -122.2811,
+          },
+          groupInfo: {} as Group,
+        },
+      ],
+      userComments: [
+        {
+          id: 1,
+          content: "Thank you for sharing your story, it really helped me!",
+        },
+        {
+          id: 2,
+          content: "Your post about anxiety management was incredibly helpful.",
+        },
+        {
+          id: 3,
+          content:
+            "I appreciate your vulnerability and openness about mental health.",
+        },
+        { id: 4, content: "Looking forward to the next group session!" },
+      ],
+    };
+    
+
 const Profile: React.FC = () => {
 	// Get data from React Router loader
 	const loaderData = useLoaderData() as { user: User } | null;
-	const navigate = useNavigate(); // Add navigate hook
+	const navigate = useNavigate();
 
 	// Use loader data or fallback to mock data
-	const currentUser = loaderData?.user;
+	const currentUser = loaderData?.user || mockUser;
 
 	// ALL HOOKS MUST BE CALLED UNCONDITIONALLY AT THE TOP LEVEL
 	// State hooks
@@ -105,7 +257,6 @@ const Profile: React.FC = () => {
 		}
 	}, [activeMainSection, searchTerm, sortedUserPosts, userGroups, userEvents]);
 
-	// Format time ago function moved inside useCallback to fix dependency issue
 	const formatTimeAgo = useCallback((dateString: string) => {
 		const now = new Date();
 		const postDate = new Date(dateString);
@@ -142,7 +293,7 @@ const Profile: React.FC = () => {
 		return userPosts.reduce((total, post) => total + (post.likes || 0), 0);
 	};
 
-	// Render functions (not hooks)
+	// Render functions
 	const renderContent = useCallback(() => {
 		const content = filteredContent;
 
@@ -160,7 +311,7 @@ const Profile: React.FC = () => {
 							<article
 								key={post.id}
 								className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col"
-								style={{ minHeight: "500px" }} // Fixed minimum height for all cards
+								style={{ minHeight: "500px" }}
 							>
 								{/* Post Header with User Info */}
 								<div className="p-4 border-b border-gray-50 flex-shrink-0">
@@ -183,7 +334,7 @@ const Profile: React.FC = () => {
 									</div>
 								</div>
 
-								{/* Post Title - Full height with proper wrapping */}
+								{/* Post Title */}
 								<div className="px-4 py-3 border-b border-gray-50 flex-shrink-0">
 									<h3 className="font-semibold text-gray-800 text-sm tracking-wide leading-tight break-words text-">
 										{post.title}
@@ -202,7 +353,7 @@ const Profile: React.FC = () => {
 									</div>
 								)}
 
-								{/* Post Content - Takes remaining space */}
+								{/* Post Content */}
 								<div className="p-4 flex-1 flex flex-col">
 									<div className="flex items-center gap-6 mb-3">
 										<button className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors duration-200">
@@ -223,7 +374,7 @@ const Profile: React.FC = () => {
 										</button>
 									</div>
 
-									{/* Caption with username and time on same line */}
+									{/* Caption */}
 									<div className="text-sm text-gray-700 leading-relaxed flex-1">
 										<div className="flex items-start gap-2 flex-wrap">
 											<span className="font-semibold text-gray-800 flex-shrink-0">
@@ -438,7 +589,7 @@ const Profile: React.FC = () => {
 		userGroups,
 		userEvents,
 		formatTimeAgo,
-		navigate, // Add navigate to dependencies
+		navigate,
 	]);
 
 	const renderTagContent = useCallback(() => {
