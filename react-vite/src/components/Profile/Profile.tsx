@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
-import { Link, useLoaderData } from "react-router-dom";
+import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import {
 	Heart,
 	MessageCircle,
@@ -19,170 +19,23 @@ import {
 	Award,
 	Clock,
 	Eye,
+	UserIcon,
 } from "lucide-react";
-import type { User, Post, Group, Event, Tag } from "../../types";
-import PostMenu from "../Posts-TSX/PostMenu-TSX/PostMenu";
-// import DeleteProfile from "./CRUD/Delete/DeleteProfile";
-// import AddTags from "../Tags/AddTags-TSX/AddTags";
-
-// Mock data for demonstration when no backend data is available
-const mockUser: User = {
-	id: 1,
-	username: "johndoe",
-	firstName: "John",
-	lastName: "Doe",
-	email: "john.doe@example.com",
-	bio: "Passionate developer and community builder focused on mental health advocacy and creating supportive environments for men to express their emotions.",
-	profileImage:
-		"https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop",
-	updatedAt: "2024-01-20T15:30:00Z",
-	usersTags: [
-		{ id: 1, name: "ANXIETY" },
-		{ id: 2, name: "DEPRESSION" },
-		{ id: 3, name: "STRESS" },
-		{ id: 4, name: "RELATIONSHIPS" },
-	],
-	posts: [
-		{
-			id: 1,
-			title: "My Journey with Mental Health",
-			caption:
-				"Just finished working on an amazing React project with some incredible features! It has been a transformative experience that helped me cope with my anxiety.",
-			image:
-				"https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=800",
-			likes: 42,
-			creator: 1,
-			createdAt: "2024-01-15T10:30:00Z",
-			updatedAt: "2024-01-15T10:30:00Z",
-			user: {} as User,
-		},
-		{
-			id: 2,
-			title: "Finding Support in Community",
-			caption:
-				"Exploring the world of design systems and component libraries while dealing with depression. The creative process has been therapeutic.",
-			image:
-				"https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=800",
-			likes: 28,
-			creator: 1,
-			createdAt: "2024-01-10T14:20:00Z",
-			updatedAt: "2024-01-10T14:20:00Z",
-			user: {} as User,
-		},
-		{
-			id: 3,
-			title: "Breaking the Silence",
-			caption:
-				"Learning to express my emotions and break free from toxic masculinity. It is okay for men to cry and seek help.",
-			image:
-				"https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800",
-			likes: 67,
-			creator: 1,
-			createdAt: "2024-01-05T16:45:00Z",
-			updatedAt: "2024-01-05T16:45:00Z",
-			user: {} as User,
-		},
-	],
-	group: [
-		{
-			id: 1,
-			name: "Men's Mental Health Support",
-			about:
-				"A safe space for men to discuss mental health challenges and support each other",
-			image:
-				"https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400",
-			city: "San Francisco",
-			state: "CA",
-			numMembers: 1250,
-			type: "Support Group",
-			events: [],
-		},
-		{
-			id: 2,
-			name: "Anxiety Support Circle",
-			about: "Supporting each other through anxiety and panic disorders",
-			image:
-				"https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=400",
-			city: "Oakland",
-			state: "CA",
-			numMembers: 850,
-			type: "Support Group",
-			events: [],
-		},
-	],
-	events: [
-		{
-			id: 1,
-			name: "Mental Health Awareness Conference 2024",
-			description:
-				"Annual conference focused on men's mental health awareness and breaking stigma",
-			image:
-				"https://images.pexels.com/photos/1181676/pexels-photo-1181676.jpeg?auto=compress&cs=tinysrgb&w=400",
-			numAttendees: 150,
-			capacity: 200,
-			type: "Conference",
-			startDate: "2024-03-15T09:00:00Z",
-			endDate: "2024-03-15T18:00:00Z",
-			venueInfo: {
-				id: 4,
-				groupId: 1,
-				address: "1000 Conference Center Dr",
-				city: "San Francisco",
-				state: "CA",
-				latitude: 37.7849,
-				longitude: -122.4194,
-			},
-			groupInfo: {} as Group,
-		},
-		{
-			id: 2,
-			name: "Stress Management Workshop",
-			description:
-				"Interactive workshop on managing stress in daily life and work environments",
-			image:
-				"https://images.pexels.com/photos/3184340/pexels-photo-3184340.jpeg?auto=compress&cs=tinysrgb&w=400",
-			numAttendees: 45,
-			capacity: 50,
-			type: "Workshop",
-			startDate: "2024-02-28T14:00:00Z",
-			endDate: "2024-02-28T17:00:00Z",
-			venueInfo: {
-				id: 5,
-				groupId: 2,
-				address: "555 Workshop Way",
-				city: "Oakland",
-				state: "CA",
-				latitude: 37.8144,
-				longitude: -122.2811,
-			},
-			groupInfo: {} as Group,
-		},
-	],
-	userComments: [
-		{
-			id: 1,
-			content: "Thank you for sharing your story, it really helped me!",
-		},
-		{
-			id: 2,
-			content: "Your post about anxiety management was incredibly helpful.",
-		},
-		{
-			id: 3,
-			content:
-				"I appreciate your vulnerability and openness about mental health.",
-		},
-		{ id: 4, content: "Looking forward to the next group session!" },
-	],
-};
+import { User, Post, Group, Event, Tag } from "../../types";
+import PostMenu from "../Posts-TSX/PostMenu-TSX";
+import DeleteProfile from "./CRUD/Delete";
+import AddTags from "../Tags/AddTags-TSX";
 
 const Profile: React.FC = () => {
 	// Get data from React Router loader
 	const loaderData = useLoaderData() as { user: User } | null;
+	const navigate = useNavigate(); // Add navigate hook
 
 	// Use loader data or fallback to mock data
-	const currentUser = loaderData?.user || mockUser;
+	const currentUser = loaderData?.user;
 
+	// ALL HOOKS MUST BE CALLED UNCONDITIONALLY AT THE TOP LEVEL
+	// State hooks
 	const [activeMainSection, setActiveMainSection] = useState<
 		"posts" | "groups" | "events"
 	>("posts");
@@ -195,6 +48,7 @@ const Profile: React.FC = () => {
 	const [searchTerm, setSearchTerm] = useState("");
 
 	// Memoized user-related values with proper null checks and default arrays
+	// These MUST be called unconditionally, even if currentUser is null
 	const userTags = useMemo(() => currentUser?.usersTags ?? [], [currentUser]);
 	const userPosts = useMemo(() => currentUser?.posts ?? [], [currentUser]);
 	const userGroups = useMemo(() => currentUser?.group ?? [], [currentUser]);
@@ -211,6 +65,7 @@ const Profile: React.FC = () => {
 		);
 	}, [userPosts]);
 
+	// Filter content based on search term
 	const filteredContent = useMemo(() => {
 		if (!searchTerm) {
 			switch (activeMainSection) {
@@ -250,6 +105,7 @@ const Profile: React.FC = () => {
 		}
 	}, [activeMainSection, searchTerm, sortedUserPosts, userGroups, userEvents]);
 
+	// Format time ago function moved inside useCallback to fix dependency issue
 	const formatTimeAgo = useCallback((dateString: string) => {
 		const now = new Date();
 		const postDate = new Date(dateString);
@@ -259,6 +115,7 @@ const Profile: React.FC = () => {
 		return `${diffInDays}d ago`;
 	}, []);
 
+	// Callback hooks
 	const handleDeleteProfile = useCallback(() => {
 		setShowDeleteModal(true);
 	}, []);
@@ -280,28 +137,34 @@ const Profile: React.FC = () => {
 		setShowAddTagsModal(false);
 	}, []);
 
+	// Get total likes across all posts
+	const getTotalLikes = () => {
+		return userPosts.reduce((total, post) => total + (post.likes || 0), 0);
+	};
+
+	// Render functions (not hooks)
 	const renderContent = useCallback(() => {
 		const content = filteredContent;
 
 		switch (activeMainSection) {
 			case "posts":
-				return content.length > 0 ? (
+				return userPosts.length > 0 ? (
 					<div
 						className={`${
 							viewMode === "grid"
-								? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6 w-full"
+								? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-6 w-full"
 								: "space-y-6"
 						}`}
 					>
 						{(content as Post[]).map((post: Post) => (
 							<article
 								key={post.id}
-								className={`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group ${
-									viewMode === "list" ? "max-w-2xl mx-auto" : ""
-								}`}
+								className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col"
+								style={{ minHeight: "500px" }} // Fixed minimum height for all cards
 							>
-								<div className="p-4 border-b border-gray-50">
-									<div className="flex items-start justify-between gap-3">
+								{/* Post Header with User Info */}
+								<div className="p-4 border-b border-gray-50 flex-shrink-0">
+									<div className="flex items-center justify-between gap-3">
 										<div className="flex items-center gap-3 min-w-0 flex-1">
 											<img
 												src={currentUser?.profileImage}
@@ -314,27 +177,33 @@ const Profile: React.FC = () => {
 												</span>
 											</div>
 										</div>
-										<div className="flex items-center gap-2 flex-shrink-0">
-											<h3 className="font-semibold text-gray-800 text-sm text-right">
-												{post.title}
-											</h3>
-											<PostMenu post={post} navigate={() => {}} />
+										<div className="flex-shrink-0">
+											<PostMenu post={post} navigate={navigate} />
 										</div>
 									</div>
 								</div>
 
+								{/* Post Title - Full height with proper wrapping */}
+								<div className="px-4 py-3 border-b border-gray-50 flex-shrink-0">
+									<h3 className="font-semibold text-gray-800 text-sm tracking-wide leading-tight break-words text-">
+										{post.title}
+									</h3>
+								</div>
+
+								{/* Post Image */}
 								{post.image && (
-									<div className="relative">
+									<div className="relative flex-shrink-0">
 										<img
 											src={post.image}
 											alt={post.title}
 											className="w-full h-64 object-cover"
 										/>
-										<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
+										<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 									</div>
 								)}
 
-								<div className="p-4">
+								{/* Post Content - Takes remaining space */}
+								<div className="p-4 flex-1 flex flex-col">
 									<div className="flex items-center gap-6 mb-3">
 										<button className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors duration-200">
 											<Heart size={18} />
@@ -354,15 +223,18 @@ const Profile: React.FC = () => {
 										</button>
 									</div>
 
-									<div className="text-sm text-gray-700 leading-relaxed flex align-center gap-5">
-										<span className="font-semibold text-gray-800">
-											{currentUser?.username}
-										</span>{" "}
-										<p className="text-xs text-gray-500 flex items-center gap-1 py-0 my-0">
-											<Clock size={12} />
-											{formatTimeAgo(post.updatedAt)}
-										</p>
-										{post.caption}
+									{/* Caption with username and time on same line */}
+									<div className="text-sm text-gray-700 leading-relaxed flex-1">
+										<div className="flex items-start gap-2 flex-wrap">
+											<span className="font-semibold text-gray-800 flex-shrink-0">
+												{currentUser?.username}
+											</span>
+											<span className="text-xs text-gray-500 flex items-center gap-1 flex-shrink-0 self-center">
+												<Clock size={12} />
+												{formatTimeAgo(post.updatedAt)}
+											</span>
+											<span className="break-words">{post.caption}</span>
+										</div>
 									</div>
 								</div>
 							</article>
@@ -392,7 +264,7 @@ const Profile: React.FC = () => {
 				);
 
 			case "groups":
-				return content.length > 0 ? (
+				return userGroups.length > 0 ? (
 					<div
 						className={`${
 							viewMode === "grid"
@@ -455,12 +327,19 @@ const Profile: React.FC = () => {
 							<p className="text-gray-600 mb-4">
 								Join groups to connect with like-minded people!
 							</p>
+							<Link
+								to="/groups"
+								className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200"
+							>
+								<Users size={16} />
+								Explore Groups
+							</Link>
 						</div>
 					</div>
 				);
 
 			case "events":
-				return content.length > 0 ? (
+				return userEvents.length > 0 ? (
 					<div
 						className={`${
 							viewMode === "grid"
@@ -508,12 +387,14 @@ const Profile: React.FC = () => {
 														{event.numAttendees}/{event.capacity} attending
 													</span>
 												</div>
-												<div className="flex items-center gap-1">
-													<MapPin size={14} />
-													<span>
-														{event.venueInfo.city}, {event.venueInfo.state}
-													</span>
-												</div>
+												{event.venueInfo && (
+													<div className="flex items-center gap-1">
+														<MapPin size={14} />
+														<span>
+															{event.venueInfo.city}, {event.venueInfo.state}
+														</span>
+													</div>
+												)}
 											</div>
 										</div>
 									</div>
@@ -533,6 +414,13 @@ const Profile: React.FC = () => {
 							<p className="text-gray-600 mb-4">
 								Create or join events to get started!
 							</p>
+							<Link
+								to="/events"
+								className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200"
+							>
+								<Calendar size={16} />
+								Explore Events
+							</Link>
 						</div>
 					</div>
 				);
@@ -546,28 +434,44 @@ const Profile: React.FC = () => {
 		viewMode,
 		currentUser,
 		userComments,
+		userPosts,
+		userGroups,
+		userEvents,
 		formatTimeAgo,
+		navigate, // Add navigate to dependencies
 	]);
 
 	const renderTagContent = useCallback(() => {
 		switch (activeAsideSection) {
 			case "tags":
-				return (
+				return userTags.length > 0 ? (
 					<div className="space-y-6">
-						{userTags.length > 0 ? (
-							<div className="flex flex-wrap gap-2">
-								{userTags.map((tag: Tag) => (
-									<span
-										key={tag.id}
-										className="px-3 py-1 bg-gradient-to-r from-orange-100 to-slate-100 text-gray-700 text-sm font-medium rounded-full border border-gray-200 hover:shadow-sm transition-all duration-200"
-									>
-										{tag.name}
-									</span>
-								))}
+						<div className="flex flex-wrap gap-2">
+							{userTags.map((tag: Tag) => (
+								<span
+									key={tag.id}
+									className="px-3 py-1 bg-gradient-to-r from-orange-100 to-slate-100 text-gray-700 text-sm font-medium rounded-full border border-gray-200 hover:shadow-sm transition-all duration-200"
+								>
+									{tag.name}
+								</span>
+							))}
+						</div>
+						<button
+							onClick={handleAddTags}
+							className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200 shadow-md hover:shadow-lg"
+						>
+							<Plus size={16} />
+							Add Tags
+						</button>
+					</div>
+				) : (
+					<div className="space-y-6">
+						<div className="text-center py-4">
+							<div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+								<UserIcon className="text-gray-400" size={20} />
 							</div>
-						) : (
-							<p className="text-gray-500 text-sm">No tags added yet.</p>
-						)}
+							<p className="text-gray-500 text-sm mb-4">No tags added yet.</p>
+						</div>
 						<button
 							onClick={handleAddTags}
 							className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200 shadow-md hover:shadow-lg"
@@ -605,23 +509,6 @@ const Profile: React.FC = () => {
 				return null;
 		}
 	}, [activeAsideSection, userTags, handleAddTags]);
-
-	const getContentCount = () => {
-		switch (activeMainSection) {
-			case "posts":
-				return userPosts.length;
-			case "groups":
-				return userGroups.length;
-			case "events":
-				return userEvents.length;
-			default:
-				return 0;
-		}
-	};
-
-	const getTotalLikes = () => {
-		return userPosts.reduce((total, post) => total + post.likes, 0);
-	};
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-slate-50">
@@ -665,9 +552,12 @@ const Profile: React.FC = () => {
 										/>
 										<Link
 											to={`/users/${currentUser?.id}/profile/update`}
-											className="absolute bottom-2 right-2 p-2 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200"
+											className="absolute bottom-2 right-2 p-2 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 group"
 										>
-											<Edit3 size={16} className="text-gray-600" />
+											<Edit3
+												size={16}
+												className="text-gray-600 group-hover:text-orange-600 transition-colors"
+											/>
 										</Link>
 									</div>
 
@@ -757,7 +647,12 @@ const Profile: React.FC = () => {
 												}`}
 											>
 												{section.charAt(0).toUpperCase() + section.slice(1)} (
-												{getContentCount()})
+												{section === "posts"
+													? userPosts.length
+													: section === "groups"
+													? userGroups.length
+													: userEvents.length}
+												)
 											</button>
 										))}
 									</nav>
@@ -813,7 +708,7 @@ const Profile: React.FC = () => {
 							</div>
 
 							{/* Content Area */}
-							<div className="p-6 w-[50vw]">{renderContent()}</div>
+							<div className="p-6">{renderContent()}</div>
 						</section>
 					</main>
 
@@ -892,68 +787,60 @@ const Profile: React.FC = () => {
 				</div>
 			</div>
 
-			{/* Modals */}
+			{/* Mobile Tags Section - Only visible on mobile */}
+			<section className="lg:hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-6 max-w-7xl mx-auto mt-8">
+				<div className="mb-4">
+					<h2 className="text-xl font-semibold text-gray-800 mb-1">
+						Your Profile Tags
+					</h2>
+					<p className="text-gray-600 text-sm">
+						Manage your interests and find similar users
+					</p>
+				</div>
+
+				<nav className="flex items-center gap-1 bg-gray-100 rounded-lg p-1 mb-6">
+					<button
+						onClick={() => setActiveAsideSection("tags")}
+						className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-all duration-200 ${
+							activeAsideSection === "tags"
+								? "bg-white text-orange-600 shadow-sm"
+								: "text-gray-600 hover:text-gray-800"
+						}`}
+					>
+						Your Tags
+					</button>
+					<button
+						onClick={() => setActiveAsideSection("similar")}
+						className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-all duration-200 ${
+							activeAsideSection === "similar"
+								? "bg-white text-orange-600 shadow-sm"
+								: "text-gray-600 hover:text-gray-800"
+						}`}
+					>
+						Similar
+					</button>
+				</nav>
+
+				{renderTagContent()}
+			</section>
+
+			{/* Modals - Positioned to be visible in viewport */}
 			{showDeleteModal && (
-				<div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-					<div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-						<div className="text-center">
-							<div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-								<Trash2 className="text-red-600" size={24} />
-							</div>
-							<h3 className="text-xl font-semibold text-gray-800 mb-2">
-								Delete Profile
-							</h3>
-							<p className="text-gray-600 mb-6">
-								Are you sure you want to delete your profile? This action cannot
-								be undone.
-							</p>
-							<div className="flex items-center gap-3">
-								<button
-									onClick={closeDeleteModal}
-									className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-all duration-200"
-								>
-									Cancel
-								</button>
-								<button
-									onClick={confirmDeleteProfile}
-									className="flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-all duration-200"
-								>
-									Delete
-								</button>
-							</div>
-						</div>
+				<div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+					<div className="w-full max-w-md">
+						<DeleteProfile
+							user={currentUser!}
+							onClose={closeDeleteModal}
+							onConfirm={confirmDeleteProfile}
+						/>
 					</div>
 				</div>
 			)}
 
 			{showAddTagsModal && (
-				<div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-					<div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-						<div className="text-center">
-							<div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-								<Plus className="text-orange-600" size={24} />
-							</div>
-							<h3 className="text-xl font-semibold text-gray-800 mb-2">
-								Add Tags
-							</h3>
-							<p className="text-gray-600 mb-6">
-								Add tags to help others find you and discover similar users.
-							</p>
-							<div className="flex items-center gap-3">
-								<button
-									onClick={closeAddTagsModal}
-									className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-all duration-200"
-								>
-									Cancel
-								</button>
-								<button
-									onClick={closeAddTagsModal}
-									className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200"
-								>
-									Add Tags
-								</button>
-							</div>
-						</div>
+				<div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+					<div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+						<AddTags user={currentUser!} onClose={closeAddTagsModal} />
 					</div>
 				</div>
 			)}
