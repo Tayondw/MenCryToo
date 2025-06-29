@@ -270,7 +270,7 @@
 	border: none;
 	border-radius: 8px;
 	background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-	color: var(--white);
+	color: white;
 	font-weight: 600;
 	cursor: pointer;
 	transition: all 0.2s ease;
