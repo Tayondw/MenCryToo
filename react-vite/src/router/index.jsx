@@ -15,26 +15,18 @@ import EventDetails from "../components/Events-TSX/Details";
 import CreateEvent from "../components/Events/CRUD/Create";
 import UpdateEvent from "../components/Events/CRUD/Update";
 import Profile from "../components/Profile";
-// import ProfileDetails from "../components/Profile/Details";
-import ProfileDetails from "../components/Profile/Details-TSX";
+import ProfileDetails from "../components/Profile/Details";
 import UpdateProfile from "../components/Profile/CRUD/Update";
-// import Posts from "../components/Posts";
-import Posts from "../components/Posts-TSX";
-// import PostDetails from "../components/Posts/Details";
-// import CreatePost from "../components/Posts/CRUD/Create";
-import CreatePost from "../components/Posts-TSX/CRUD-TSX/Create";
-// import UpdatePost from "../components/Posts/CRUD/Update";
-import UpdatePost from "../components/Posts-TSX/CRUD-TSX/Update";
-import PrivateRoute from "../components/PrivateRoute";
 import ProfileFeed from "../components/Profile/CRUD/ProfileFeed";
-// import Partnership from "../components/Partnership";
-import Partnership from "../components/Partnership-TSX";
-// import Contact from "../components/Contact";
-import Contact from "../components/Contact-TSX";
-// import Success from "../components/Success";
-import Success from "../components/Success-TSX";
-// import FourZeroFourPage from "../components/404Page";
-import FourZeroFourPage from "../components/404Page-TSX";
+import Posts from "../components/Posts";
+// import PostDetails from "../components/Posts/Details";
+import CreatePost from "../components/Posts/CRUD/Create";
+import UpdatePost from "../components/Posts/CRUD/Update";
+import PrivateRoute from "../components/PrivateRoute";
+import Partnership from "../components/Partnership";
+import Contact from "../components/Contact";
+import Success from "../components/Success";
+import FourZeroFourPage from "../components/404Page";
 // import Comments from "../components/Comments";
 // import CommentDetails from "../components/Comments/Details";
 // import Tags from "../components/Tags";
@@ -208,8 +200,8 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "posts-feed",
-                        // loader: profilesLoader,
-                        loader: profileFeedLoader,
+				// loader: profilesLoader,
+				loader: profileFeedLoader,
 				element: <Posts />,
 				action: postActions,
 			},
