@@ -41,7 +41,8 @@ export interface Group {
       state: string;
 	numMembers: number;
 	events: Event[];
-	type: string;
+      type: string;
+      organizerId: number;
 }
 
 export interface Event {
