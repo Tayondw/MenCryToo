@@ -94,6 +94,8 @@ const EventDetails: React.FC = () => {
 	const [activeSection, setActiveSection] = useState<SectionType>("overview");
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+      console.log(eventDetails);
+
 	useEffect(() => {
 		if (!eventDetails?.id) {
 			navigate("/events");
@@ -335,7 +337,7 @@ const EventDetails: React.FC = () => {
 													<button
 														onClick={() =>
 															navigate(
-																`/groups/${eventDetails.groupId}/events/${eventDetails.id}/edit`,
+																`/groups/${eventDetails.groupId}/events/${eventDetails.id}`,
 															)
 														}
 														className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
