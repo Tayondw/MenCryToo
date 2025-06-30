@@ -14,6 +14,7 @@ import {
 	Sparkles,
 	User,
 	Plus,
+	X,
 } from "lucide-react";
 import { RootState } from "../../types";
 
@@ -77,6 +78,16 @@ const Events: React.FC = () => {
 	});
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 	const [showFilters, setShowFilters] = useState(false);
+	const [showGroupSelector, setShowGroupSelector] = useState(false);
+      const [groupSearchTerm, setGroupSearchTerm] = useState("");
+      
+      console.log("first,", groupSearchTerm);
+
+	// Mock user groups for the selector - in a real app, this would come from the user's data
+	const userGroups = useMemo(() => {
+		if (!sessionUser) return [];
+		return sessionUser.group || [];
+	}, [sessionUser]);
 
 	// Process and filter events
 	const processedEvents = useMemo(() => {
@@ -165,6 +176,18 @@ const Events: React.FC = () => {
 				return events; // Already sorted by date in processedEvents
 		}
 	}, [processedEvents, filters]);
+
+	// Filter groups based on search term
+	const filteredGroups = useMemo(() => {
+		if (!groupSearchTerm) return userGroups;
+
+		const searchLower = groupSearchTerm.toLowerCase();
+		return userGroups.filter((group) =>
+			group.name.toLowerCase().includes(searchLower),
+		);
+      }, [userGroups, groupSearchTerm]);
+      
+      console.log("----------------", filteredGroups)
 
 	const clearFilters = () => {
 		setFilters({
@@ -391,6 +414,94 @@ const Events: React.FC = () => {
 		);
 	};
 
+	// Group selection modal
+	const GroupSelectionModal: React.FC = () => (
+		<div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+			<div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+				<div className="flex items-center justify-between mb-6">
+					<h3 className="text-xl font-bold text-slate-900">Select a Group</h3>
+					<button
+						onClick={() => setShowGroupSelector(false)}
+						className="p-2 text-slate-500 hover:text-slate-700 rounded-full hover:bg-slate-100 transition-colors"
+					>
+						<X size={20} />
+					</button>
+				</div>
+
+				{userGroups.length === 0 ? (
+					<div className="text-center py-8">
+						<div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+							<Users size={24} className="text-slate-400" />
+						</div>
+						<p className="text-slate-700 mb-4">
+							You need to be an organizer of a group to create an event.
+						</p>
+						<Link
+							to="/groups/new"
+							className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
+						>
+							<Plus size={18} />
+							Create a Group First
+						</Link>
+					</div>
+				) : (
+					<>
+						<div>
+							<p className="text-center py-4 text-red-500">
+								Must be an organizer of a group to create an event.
+							</p>
+							<div className="relative">
+								<Search
+									size={18}
+									className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+								/>
+								<input
+									type="text"
+									placeholder="Search your groups..."
+									value={groupSearchTerm}
+									onChange={(e) => setGroupSearchTerm(e.target.value)}
+									className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+								/>
+							</div>
+						</div>
+
+						<div className="max-h-80 overflow-y-auto pr-2 space-y-2">
+							{filteredGroups.length === 0 ? (
+								<p className="text-center py-4 text-slate-500">
+									No matching groups found
+								</p>
+							) : (
+								filteredGroups.map((group) => (
+									<Link
+										key={group.id}
+										to={`/groups/${group.id}/events/new`}
+										className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-slate-200"
+									>
+										<img
+											src={group.image}
+											alt={group.name}
+											className="w-12 h-12 rounded-lg object-cover"
+										/>
+										<div>
+											<h4 className="font-medium text-slate-900">
+												{group.name}
+											</h4>
+											<p className="text-sm text-slate-500">
+												{group.organizerId === sessionUser?.id
+													? "You are the organizer"
+													: "You are a member"}
+											</p>
+										</div>
+									</Link>
+								))
+							)}
+						</div>
+					</>
+				)}
+			</div>
+		</div>
+	);
+
 	if (!allEvents || !allEvents.events) {
 		return (
 			<div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-slate-100 flex items-center justify-center">
@@ -422,13 +533,13 @@ const Events: React.FC = () => {
 
 						<div className="flex items-center gap-3">
 							{sessionUser && (
-								<Link
-									to="/events/new"
+								<button
+									onClick={() => setShowGroupSelector(true)}
 									className="inline-flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-orange-600 transition-colors"
 								>
 									<Plus size={18} />
 									Create Event
-								</Link>
+								</button>
 							)}
 						</div>
 					</div>
@@ -549,7 +660,7 @@ const Events: React.FC = () => {
 							</select>
 						</div>
 
-						{/* View Toggle */}
+						{/* View Mode Toggle */}
 						<div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
 							<button
 								onClick={() => setViewMode("grid")}
@@ -673,13 +784,13 @@ const Events: React.FC = () => {
 								: "No events are currently available. Check back later!"}
 						</p>
 						{sessionUser && (
-							<Link
-								to="/events/new"
+							<button
+								onClick={() => setShowGroupSelector(true)}
 								className="inline-flex items-center gap-2 bg-orange-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors"
 							>
 								<Plus size={20} />
 								Create First Event
-							</Link>
+							</button>
 						)}
 					</div>
 				) : (
@@ -700,6 +811,9 @@ const Events: React.FC = () => {
 					</div>
 				)}
 			</div>
+
+			{/* Group Selection Modal */}
+			{showGroupSelector && <GroupSelectionModal />}
 		</div>
 	);
 };
