@@ -17,7 +17,7 @@ import {
 	Save,
 	Upload,
 } from "lucide-react";
-import { RootState } from "../.././../../types";
+import { RootState } from "../../../../types";
 
 interface FormErrors {
 	name?: string;
