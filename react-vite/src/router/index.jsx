@@ -2,16 +2,12 @@ import { createBrowserRouter } from "react-router-dom";
 import LoginFormPage from "../components/LoginFormPage";
 import SignupFormPage from "../components/SignupFormPage";
 import Home from "../components/Home";
-// import Groups from "../components/Groups";
-import Groups from "../components/Groups-TSX";
-// import GroupDetails from "../components/Groups/Details";
-import GroupDetails from "../components/Groups-TSX/Details";
+import Groups from "../components/Groups";
+import GroupDetails from "../components/Groups/Details";
 import CreateGroup from "../components/Groups/CRUD/Create";
 import UpdateGroup from "../components/Groups/CRUD/Update";
-// import Events from "../components/Events";
-import Events from "../components/Events-TSX";
-// import EventDetails from "../components/Events/Details";
-import EventDetails from "../components/Events-TSX/Details";
+import Events from "../components/Events";
+import EventDetails from "../components/Events/Details";
 import CreateEvent from "../components/Events/CRUD/Create";
 import UpdateEvent from "../components/Events/CRUD/Update";
 import Profile from "../components/Profile";
@@ -34,31 +30,8 @@ import FourZeroFourPage from "../components/404Page";
 // import Venues from "../components/Venues";
 // import VenueDetails from "../components/Venues/Details";
 // import CreateVenue from "../components/Venues/CRUD/Create";
-import {
-	getLoader,
-	// groupDetailsLoader,
-	// eventDetailsLoader,
-	// venueDetailsLoader,
-	// userDetailsLoader,
-	// postsLoader,
-	postDetailsLoader,
-	profilesLoader,
-	tagsLoader,
-	// tagDetailsLoader,
-} from "./loaders";
-import {
-	groupActions,
-	// groupImageActions,
-	eventActions,
-	// eventImageActions,
-	// groupMemberActions,
-	// eventAttendeeActions,
-	// venueActions,
-	profileActions,
-	postActions,
-	partnershipActions,
-	contactActions,
-} from "./actions";
+import { getLoader, postDetailsLoader, tagsLoader } from "./loaders";
+import { postActions, partnershipActions, contactActions } from "./actions";
 import {
 	profileLoader,
 	profileUpdateAction,
@@ -116,13 +89,13 @@ export const router = createBrowserRouter([
 				path: "groups/new",
 				loader: getLoader,
 				element: <CreateGroup />,
-				action: groupActions,
+				action: groupFormAction,
 			},
 			{
 				path: "groups/:groupId/edit",
 				loader: groupDetailsLoader,
 				element: <UpdateGroup />,
-				action: groupActions,
+				action: groupFormAction,
 			},
 			// ! VENUES
 			// {
@@ -157,13 +130,13 @@ export const router = createBrowserRouter([
 				path: "groups/:groupId/events/new",
 				loader: groupDetailsLoader,
 				element: <CreateEvent />,
-				action: eventActions,
+				action: eventFormAction,
 			},
 			{
 				path: "groups/:groupId/events/:eventId",
 				loader: eventDetailsLoader,
 				element: <UpdateEvent />,
-				action: eventActions,
+				action: eventFormAction,
 			},
 			// ! PROFILE
 			// ? your profile only you can access
