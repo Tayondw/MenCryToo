@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import Footer from "../../../Footer";
 import "./UpdateEvent.css";
 
 const UpdateEvent = () => {
@@ -21,7 +20,6 @@ const UpdateEvent = () => {
 	const [capacity, setCapacity] = useState("");
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
-	// console.log("events", eventDetails);
 
 	// Ensure user is logged in
 	useEffect(() => {
@@ -244,7 +242,6 @@ const UpdateEvent = () => {
 			) : (
 				<h1>Please log in to update an event!</h1>
 			)}
-			<Footer />
 		</div>
 	);
 };
