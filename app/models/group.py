@@ -2,7 +2,6 @@ from .db import db, environment, SCHEMA, add_prefix_for_prod
 from datetime import datetime
 from .member import Membership
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import joinedload
 
 
 class Group(db.Model):
@@ -52,24 +51,27 @@ class Group(db.Model):
     users = association_proxy("memberships", "user")
 
     def to_dict_minimal(self):
-        """Lightweight version for lists"""
+        """Lightweight version for lists - optimized for performance"""
         return {
             "id": self.id,
             "name": self.name,
-            "about": self.about,
+            "about": self.about[:100] + "..." if len(self.about) > 100 else self.about,
             "type": self.type,
             "city": self.city,
             "state": self.state,
             "image": self.image,
-            "numMembers": (
-                len(self.memberships) if hasattr(self, "_member_count") else 0
-            ),
-            "numEvents": len(self.events),
+            "numMembers": len(self.memberships) if self.memberships else 0,
+            "numEvents": len(self.events) if self.events else 0,
             "organizerId": self.organizer_id,
+            "organizerName": (
+                self.organizer.username
+                if hasattr(self, "organizer") and self.organizer
+                else None
+            ),
         }
 
     def to_dict(self, include_events=True, include_members=True):
-        """Optimized full version"""
+        """Optimized full version - selective loading"""
         base_dict = {
             "id": self.id,
             "organizerId": self.organizer_id,
@@ -79,25 +81,195 @@ class Group(db.Model):
             "city": self.city,
             "state": self.state,
             "image": self.image,
-            "numMembers": len(self.memberships),
+            "numMembers": len(self.memberships) if self.memberships else 0,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
         }
 
-        # Only include organizer minimal info
-        if self.organizer:
-            base_dict["organizer"] = self.organizer.to_dict_minimal()
+        # Only include organizer minimal info if loaded
+        if hasattr(self, "organizer") and self.organizer:
+            base_dict["organizer"] = {
+                "id": self.organizer.id,
+                "username": self.organizer.username,
+                "firstName": self.organizer.first_name,
+                "lastName": self.organizer.last_name,
+                "profileImage": self.organizer.profile_image_url,
+                "email": self.organizer.email,
+            }
 
-        if include_events:
-            base_dict["events"] = [event.to_dict() for event in self.events]
+        # Conditionally include events - use minimal data to avoid deep loading
+        if include_events and hasattr(self, "events") and self.events:
+            base_dict["events"] = [
+                {
+                    "id": event.id,
+                    "name": event.name,
+                    "description": (
+                        event.description[:100] + "..."
+                        if len(event.description) > 100
+                        else event.description
+                    ),
+                    "type": event.type,
+                    "capacity": event.capacity,
+                    "image": event.image,
+                    "startDate": event.start_date.isoformat(),
+                    "endDate": event.end_date.isoformat(),
+                    "numAttendees": (
+                        len(event.attendances)
+                        if hasattr(event, "attendances") and event.attendances
+                        else 0
+                    ),
+                }
+                for event in self.events
+            ]
 
-        if include_members:
-            base_dict["members"] = [member.to_dict() for member in self.memberships]
+        # Conditionally include members - use minimal data
+        if include_members and hasattr(self, "memberships") and self.memberships:
+            base_dict["members"] = [
+                {
+                    "id": membership.id,
+                    "groupId": membership.group_id,
+                    "userId": membership.user_id,
+                    "user": (
+                        {
+                            "id": membership.user.id,
+                            "username": membership.user.username,
+                            "firstName": membership.user.first_name,
+                            "lastName": membership.user.last_name,
+                            "profileImage": membership.user.profile_image_url,
+                        }
+                        if hasattr(membership, "user") and membership.user
+                        else None
+                    ),
+                }
+                for membership in self.memberships
+            ]
 
-        # Only include venues if they exist
-        if self.venues:
-            base_dict["venues"] = [venue.to_dict() for venue in self.venues]
+        # Only include venues if they exist and are loaded
+        if hasattr(self, "venues") and self.venues:
+            base_dict["venues"] = [
+                {
+                    "id": venue.id,
+                    "groupId": venue.group_id,
+                    "address": venue.address,
+                    "city": venue.city,
+                    "state": venue.state,
+                    "zipCode": venue.zip_code,
+                    "latitude": venue.latitude,
+                    "longitude": venue.longitude,
+                }
+                for venue in self.venues
+            ]
 
-        # Only include group images if they exist
-        if self.group_images:
-            base_dict["groupImage"] = [img.to_dict() for img in self.group_images]
+        # Only include group images if they exist and are loaded
+        if hasattr(self, "group_images") and self.group_images:
+            base_dict["groupImage"] = [
+                {"id": img.id, "groupId": img.group_id, "groupImage": img.group_image}
+                for img in self.group_images
+            ]
 
         return base_dict
+
+
+# from .db import db, environment, SCHEMA, add_prefix_for_prod
+# from datetime import datetime
+# from .member import Membership
+# from sqlalchemy.ext.associationproxy import association_proxy
+# from sqlalchemy.orm import joinedload
+
+
+# class Group(db.Model):
+#     __tablename__ = "groups"
+
+#     if environment == "production":
+#         __table_args__ = {"schema": SCHEMA}
+
+#     id = db.Column(db.Integer, primary_key=True)
+#     organizer_id = db.Column(
+#         db.Integer,
+#         db.ForeignKey(add_prefix_for_prod("users.id")),
+#         nullable=False,
+#         index=True,
+#     )
+#     name = db.Column(db.String(50), nullable=False, index=True)
+#     about = db.Column(db.String(150), nullable=False)
+#     type = db.Column(
+#         db.Enum("online", "in-person", name="group_location"),
+#         default="online",
+#         nullable=False,
+#         index=True,
+#     )
+#     city = db.Column(db.String(30), nullable=False, index=True)
+#     state = db.Column(db.String(2), nullable=False, index=True)
+#     image = db.Column(db.String(500), nullable=True)
+#     created_at = db.Column(db.DateTime, default=datetime.now, index=True)
+#     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+#     organizer = db.relationship(
+#         "User", back_populates="groups", lazy="joined"
+#     )  # Eager load organizer
+#     events = db.relationship("Event", back_populates="groups", lazy="select")
+#     venues = db.relationship("Venue", back_populates="groups", lazy="select")
+#     memberships = db.relationship(
+#         "Membership",
+#         back_populates="group",
+#         cascade="all, delete-orphan",
+#         lazy="select",
+#     )
+#     group_images = db.relationship(
+#         "GroupImage",
+#         back_populates="group",
+#         cascade="all, delete-orphan",
+#         lazy="select",
+#     )
+#     users = association_proxy("memberships", "user")
+
+#     def to_dict_minimal(self):
+#         """Lightweight version for lists"""
+#         return {
+#             "id": self.id,
+#             "name": self.name,
+#             "about": self.about,
+#             "type": self.type,
+#             "city": self.city,
+#             "state": self.state,
+#             "image": self.image,
+#             "numMembers": (
+#                 len(self.memberships) if hasattr(self, "_member_count") else 0
+#             ),
+#             "numEvents": len(self.events),
+#             "organizerId": self.organizer_id,
+#         }
+
+#     def to_dict(self, include_events=True, include_members=True):
+#         """Optimized full version"""
+#         base_dict = {
+#             "id": self.id,
+#             "organizerId": self.organizer_id,
+#             "name": self.name,
+#             "about": self.about,
+#             "type": self.type,
+#             "city": self.city,
+#             "state": self.state,
+#             "image": self.image,
+#             "numMembers": len(self.memberships),
+#         }
+
+#         # Only include organizer minimal info
+#         if self.organizer:
+#             base_dict["organizer"] = self.organizer.to_dict_minimal()
+
+#         if include_events:
+#             base_dict["events"] = [event.to_dict() for event in self.events]
+
+#         if include_members:
+#             base_dict["members"] = [member.to_dict() for member in self.memberships]
+
+#         # Only include venues if they exist
+#         if self.venues:
+#             base_dict["venues"] = [venue.to_dict() for venue in self.venues]
+
+#         # Only include group images if they exist
+#         if self.group_images:
+#             base_dict["groupImage"] = [img.to_dict() for img in self.group_images]
+
+#         return base_dict
