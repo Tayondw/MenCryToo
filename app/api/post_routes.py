@@ -4,7 +4,7 @@ from app.models import db, User, Post, Comment, Likes
 from app.forms import PostForm, CommentForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
 from sqlalchemy.orm import joinedload, selectinload
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 
 post_routes = Blueprint("posts", __name__)
 
@@ -14,24 +14,42 @@ post_routes = Blueprint("posts", __name__)
 @login_required
 def all_posts():
     """
-    Query for all posts and returns them in a list of post dictionaries - with pagination
+    Optimized posts feed with pagination and minimal data loading
     """
     page = request.args.get("page", 1, type=int)
     per_page = min(request.args.get("per_page", 20, type=int), 50)
 
-    posts_query = (
-        db.session.query(Post)
-        .options(
-            joinedload(Post.user).load_only(
-                "id", "username", "first_name", "last_name", "profile_image_url"
-            ),
-            selectinload(Post.post_comments)
-            .joinedload(Comment.commenter)
-            .load_only("id", "username"),
-            selectinload(Post.post_likes).load_only("id"),
+    # Get current user's tags for personalized feed
+    current_user_tag_ids = [tag.id for tag in current_user.users_tags]
+
+    if current_user_tag_ids:
+        # Show posts from users with similar tags first
+        posts_query = (
+            db.session.query(Post)
+            .join(User, Post.creator == User.id)
+            .join(User.users_tags)
+            .filter(User.users_tags.any(lambda tag: tag.id.in_(current_user_tag_ids)))
+            .options(
+                joinedload(Post.user).load_only(
+                    "id", "username", "first_name", "last_name", "profile_image_url"
+                ),
+                selectinload(Post.post_likes).load_only("id"),
+            )
+            .distinct()
+            .order_by(desc(Post.created_at))
         )
-        .order_by(desc(Post.created_at))
-    )
+    else:
+        # Fallback to all posts if user has no tags
+        posts_query = (
+            db.session.query(Post)
+            .options(
+                joinedload(Post.user).load_only(
+                    "id", "username", "first_name", "last_name", "profile_image_url"
+                ),
+                selectinload(Post.post_likes).load_only("id"),
+            )
+            .order_by(desc(Post.created_at))
+        )
 
     posts = posts_query.paginate(page=page, per_page=per_page, error_out=False)
 
@@ -40,7 +58,7 @@ def all_posts():
 
     return jsonify(
         {
-            "posts": [post.to_dict_minimal() for post in posts.items],
+            "posts": [post.to_dict_feed_optimized() for post in posts.items],
             "pagination": {
                 "page": page,
                 "pages": posts.pages,
@@ -57,7 +75,7 @@ def all_posts():
 @login_required
 def post(postId):
     """
-    Query for post by id and returns that post in a dictionary
+    Optimized single post view
     """
     post = (
         db.session.query(Post)
@@ -77,33 +95,34 @@ def post(postId):
     if not post:
         return jsonify({"errors": {"message": "Not Found"}}), 404
 
-    return jsonify(post.to_dict(post_comments=True, post_likes=True))
+    return jsonify(post.to_dict_detail_optimized())
 
 
 @post_routes.route("/<int:postId>/delete", methods=["DELETE"])
 @login_required
 def delete_post(postId):
     """
-    will delete a given post by its id with optimized batch operations
+    Optimized post deletion with batch operations
     """
     post_to_delete = Post.query.get(postId)
 
     if not post_to_delete:
         return {"errors": {"message": "Not Found"}}, 404
 
-    user = User.query.get(post_to_delete.creator)
-    if not user:
-        return {"errors": {"message": "User not found"}}, 404
-
     if current_user.id != post_to_delete.creator:
         return {"errors": {"message": "Unauthorized"}}, 401
 
     try:
-        # Delete associated data in batch operations
-        Comment.query.filter_by(post_id=postId).delete(synchronize_session=False)
+        # Use efficient bulk delete operations
+        # Delete comments
+        db.session.execute(
+            "DELETE FROM comments WHERE post_id = :post_id", {"post_id": postId}
+        )
 
-        # Delete likes using raw SQL for better performance
-        db.session.execute(Likes.delete().where(Likes.c.post_id == postId))
+        # Delete likes
+        db.session.execute(
+            "DELETE FROM likes WHERE post_id = :post_id", {"post_id": postId}
+        )
 
         # Remove image from S3 if it exists
         if post_to_delete.image:
@@ -123,6 +142,9 @@ def delete_post(postId):
 @post_routes.route("/<int:postId>/comments", methods=["GET", "POST"])
 @login_required
 def add_comment(postId):
+    """
+    Optimized comment addition
+    """
     post = Post.query.get(postId)
 
     if not post:
@@ -140,15 +162,30 @@ def add_comment(postId):
             db.session.add(comment)
             db.session.commit()
 
-            # Load comment with user relationship for response
-            created_comment = (
-                db.session.query(Comment)
-                .options(joinedload(Comment.commenter).load_only("id", "username"))
-                .filter(Comment.id == comment.id)
-                .first()
+            # Return minimal comment data
+            return (
+                jsonify(
+                    {
+                        "id": comment.id,
+                        "postId": comment.post_id,
+                        "userId": comment.user_id,
+                        "comment": comment.comment,
+                        "username": current_user.username,
+                        "parentId": comment.parent_id,
+                        "created_at": (
+                            comment.created_at.isoformat()
+                            if comment.created_at
+                            else None
+                        ),
+                        "updated_at": (
+                            comment.updated_at.isoformat()
+                            if comment.updated_at
+                            else None
+                        ),
+                    }
+                ),
+                201,
             )
-
-            return jsonify(created_comment.to_dict()), 201
 
         except Exception as e:
             db.session.rollback()
@@ -160,6 +197,9 @@ def add_comment(postId):
 @post_routes.route("/<int:postId>/comments/<int:commentId>", methods=["DELETE"])
 @login_required
 def delete_comment(postId, commentId):
+    """
+    Optimized comment deletion
+    """
     comment = Comment.query.filter_by(id=commentId, post_id=postId).first()
 
     if not comment:
@@ -169,8 +209,11 @@ def delete_comment(postId, commentId):
         return jsonify({"errors": {"message": "Unauthorized"}}), 403
 
     try:
-        # Delete nested replies first
-        Comment.query.filter_by(parent_id=commentId).delete(synchronize_session=False)
+        # Delete nested replies efficiently
+        db.session.execute(
+            "DELETE FROM comments WHERE parent_id = :comment_id",
+            {"comment_id": commentId},
+        )
 
         db.session.delete(comment)
         db.session.commit()
@@ -186,12 +229,15 @@ def delete_comment(postId, commentId):
 @post_routes.route("/<int:postId>/like", methods=["POST"])
 @login_required
 def like_post(postId):
+    """
+    Optimized post liking
+    """
     post = Post.query.get(postId)
     if not post:
         return {"errors": {"message": "Post not found"}}, 404
 
     try:
-        if post.add_like(current_user.id):
+        if post.add_like_optimized(current_user.id):
             return {"message": "Like added"}, 200
         return {"errors": {"message": "Post already liked"}}, 400
 
@@ -203,12 +249,15 @@ def like_post(postId):
 @post_routes.route("/<int:postId>/unlike", methods=["POST"])
 @login_required
 def unlike_post(postId):
+    """
+    Optimized post unliking
+    """
     post = Post.query.get(postId)
     if not post:
         return {"errors": {"message": "Post not found"}}, 404
 
     try:
-        if post.remove_like(current_user.id):
+        if post.remove_like_optimized(current_user.id):
             return {"message": "Like removed"}, 200
         return {"errors": {"message": "Post not liked"}}, 400
 
