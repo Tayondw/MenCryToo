@@ -21,28 +21,22 @@ auth_routes = Blueprint("auth", __name__)
 @auth_routes.route("/")
 def authenticate():
     """
-    Authenticates a user with optimized loading.
+    Authenticates a user with minimal data loading for faster response.
     """
     if current_user.is_authenticated:
-        # Use optimized query with selective loading
+        # Load only essential data for authentication
         user = (
             db.session.query(User)
             .options(
-                selectinload(User.users_tags),
-                selectinload(User.memberships)
-                .joinedload(User.memberships.property.mapper.class_.group)
-                .load_only("id", "name", "image"),
-                selectinload(User.posts).load_only(
-                    "id", "title", "likes", "created_at", "updated_at"
-                ),
-                selectinload(User.attendances).load_only("id", "event_id"),
+                selectinload(User.users_tags).load_only("id", "name"),
+                # Don't load full relationships, just counts for essential data
             )
             .filter(User.id == current_user.id)
             .first()
         )
 
         if user:
-            return user.to_dict_optimized()
+            return user.to_dict_auth_optimized()
 
     return {"errors": {"message": "Unauthorized"}}, 401
 
@@ -50,7 +44,7 @@ def authenticate():
 @auth_routes.route("/login", methods=["POST"])
 def login():
     """
-    Logs a user in with optimized response
+    Logs a user in with minimal response data for faster login
     """
     form = LoginForm()
     # Get the csrf_token from the request cookie and put it into the
@@ -61,8 +55,8 @@ def login():
         user = User.query.filter(User.email == form.data["email"]).first()
         login_user(user)
 
-        # Return minimal user data for faster response
-        return user.to_dict_minimal()
+        # Return only essential data for login
+        return user.to_dict_auth_optimized()
     return form.errors, 401
 
 
@@ -113,17 +107,18 @@ def sign_up():
             profile_image_url=url,
         )
 
-        # Update the user's tags
-        selected_tags = form.userTags.data  # This returns a list of selected tags
-        tags_to_add = Tag.query.filter(Tag.name.in_(selected_tags)).all()
-        user.users_tags = tags_to_add
+        # Update the user's tags efficiently
+        selected_tags = form.userTags.data
+        if selected_tags:
+            tags_to_add = Tag.query.filter(Tag.name.in_(selected_tags)).all()
+            user.users_tags = tags_to_add
 
         db.session.add(user)
         db.session.commit()
         login_user(user)
 
         # Return minimal data for faster response
-        return user.to_dict_minimal()
+        return user.to_dict_auth_optimized()
     return form.errors, 401
 
 
