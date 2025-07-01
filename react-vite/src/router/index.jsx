@@ -30,15 +30,15 @@ import FourZeroFourPage from "../components/404Page";
 // import Venues from "../components/Venues";
 // import VenueDetails from "../components/Venues/Details";
 // import CreateVenue from "../components/Venues/CRUD/Create";
-import { getLoader, postDetailsLoader, tagsLoader } from "./loaders";
+import { getLoader, tagsLoader } from "./loaders";
 import { postActions, partnershipActions, contactActions } from "./actions";
+import { signupAction, loginAction } from "../loaders/authLoaders";
+import { userDetailsLoader } from "../loaders/userLoaders";
 import {
 	profileLoader,
 	profileUpdateAction,
 	profileAction,
 } from "../loaders/profileLoaders";
-import { signupAction, loginAction } from "../loaders/authLoaders";
-import { userDetailsLoader } from "../loaders/userLoaders";
 import { profileFeedLoader } from "../loaders/profileFeedLoaders";
 import {
 	groupsLoader,
@@ -52,6 +52,7 @@ import {
 	eventAction,
 	eventFormAction,
 } from "../loaders/eventLoaders";
+import { postsLoader, postDetailsLoader, postAction } from "../loaders/postLoaders";
 import Layout from "./Layout";
 
 export const router = createBrowserRouter([
@@ -188,13 +189,13 @@ export const router = createBrowserRouter([
 				path: "posts/create",
 				// loader: postDetailsLoader,
 				element: <CreatePost />,
-				action: postActions,
+				action: postAction,
 			},
 			{
 				path: "posts/:postId/edit",
 				loader: postDetailsLoader,
 				element: <UpdatePost />,
-				action: postActions,
+				action: postAction,
 			},
 			// {
 			// 	path: "comments",
