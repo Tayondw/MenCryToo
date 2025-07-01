@@ -16,7 +16,7 @@ class User(db.Model, UserMixin):
     if environment == "production":
         __table_args__ = {"schema": SCHEMA}
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, index=True)
     first_name = db.Column(db.String(20), nullable=False, index=True)
     last_name = db.Column(db.String(20), nullable=False, index=True)
     username = db.Column(db.String(40), nullable=False, unique=True, index=True)
@@ -59,6 +59,166 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
+    def to_dict_auth_optimized(self):
+        """Ultra-lightweight version for authentication - fastest possible loading"""
+        return {
+            "id": self.id,
+            "firstName": self.first_name,
+            "lastName": self.last_name,
+            "username": self.username,
+            "email": self.email,
+            "bio": self.bio,
+            "profileImage": self.profile_image_url,
+            "usersTags": (
+                [{"id": tag.id, "name": tag.name} for tag in self.users_tags]
+                if hasattr(self, "users_tags")
+                else []
+            ),
+            "createdAt": self.created_at.isoformat() if self.created_at else None,
+            "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+    def to_dict_list_optimized(self):
+        """Optimized for user lists - minimal data"""
+        return {
+            "id": self.id,
+            "firstName": self.first_name,
+            "lastName": self.last_name,
+            "username": self.username,
+            "email": self.email,
+            "profileImage": self.profile_image_url,
+            "usersTags": (
+                [{"id": tag.id, "name": tag.name} for tag in self.users_tags]
+                if hasattr(self, "users_tags")
+                else []
+            ),
+        }
+
+    def to_dict_feed_optimized(self):
+        """Optimized for profile feed - minimal data to reduce load time"""
+        return {
+            "id": self.id,
+            "firstName": self.first_name,
+            "lastName": self.last_name,
+            "username": self.username,
+            "email": self.email,
+            "bio": self.bio,
+            "profileImage": self.profile_image_url,
+            "usersTags": (
+                [{"id": tag.id, "name": tag.name} for tag in self.users_tags]
+                if hasattr(self, "users_tags")
+                else []
+            ),
+            "createdAt": self.created_at.isoformat() if self.created_at else None,
+            "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+    def to_dict_profile_optimized(self, posts=None, comments=None):
+        """Optimized version for profile page that accepts pre-loaded data"""
+        result = {
+            "id": self.id,
+            "firstName": self.first_name,
+            "lastName": self.last_name,
+            "username": self.username,
+            "email": self.email,
+            "bio": self.bio,
+            "profileImage": self.profile_image_url,
+            "usersTags": (
+                [{"id": tag.id, "name": tag.name} for tag in self.users_tags]
+                if hasattr(self, "users_tags")
+                else []
+            ),
+            "createdAt": self.created_at.isoformat() if self.created_at else None,
+            "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+        # Add membership info if available
+        if hasattr(self, "memberships"):
+            result["userMembership"] = [
+                {
+                    "id": membership.id,
+                    "groupId": membership.group_id,
+                    "userId": membership.user_id,
+                    "group": (
+                        {
+                            "id": membership.group.id,
+                            "name": membership.group.name,
+                            "image": membership.group.image,
+                            "city": membership.group.city,
+                            "state": membership.group.state,
+                        }
+                        if membership.group
+                        else None
+                    ),
+                }
+                for membership in self.memberships
+            ]
+
+        # Add attendance info if available
+        if hasattr(self, "attendances"):
+            result["userAttendances"] = [
+                {
+                    "id": attendance.id,
+                    "eventId": attendance.event_id,
+                    "userId": attendance.user_id,
+                }
+                for attendance in self.attendances
+            ]
+
+        # Add group info if available
+        if hasattr(self, "groups"):
+            result["groups"] = [
+                {
+                    "id": group.id,
+                    "name": group.name,
+                    "image": group.image,
+                }
+                for group in self.groups
+            ]
+
+        # Use provided posts to avoid triggering additional queries
+        if posts is not None:
+            result["posts"] = [
+                {
+                    "id": post.id,
+                    "title": post.title,
+                    "caption": post.caption,
+                    "image": post.image,
+                    "likes": len(post.post_likes) if hasattr(post, "post_likes") else 0,
+                    "creator": post.creator,
+                    "createdAt": (
+                        post.created_at.isoformat() if post.created_at else None
+                    ),
+                    "updatedAt": (
+                        post.updated_at.isoformat() if post.updated_at else None
+                    ),
+                    "user": self.to_dict_list_optimized(),
+                }
+                for post in posts
+            ]
+
+        # Use provided comments to avoid triggering additional queries
+        if comments is not None:
+            result["userComments"] = [
+                {
+                    "id": comment.id,
+                    "userId": comment.user_id,
+                    "postId": comment.post_id,
+                    "comment": comment.comment,
+                    "username": self.username,
+                    "parentId": comment.parent_id,
+                    "created_at": (
+                        comment.created_at.isoformat() if comment.created_at else None
+                    ),
+                    "updated_at": (
+                        comment.updated_at.isoformat() if comment.updated_at else None
+                    ),
+                }
+                for comment in comments
+            ]
+
+        return result
+
     def to_dict_minimal(self):
         """Lightweight version for lists and references - fastest loading"""
         return {
@@ -81,12 +241,12 @@ class User(db.Model, UserMixin):
             "bio": self.bio,
             "profileImage": self.profile_image_url,
             "usersTags": (
-                [tag.to_dict() for tag in self.users_tags]
+                [{"id": tag.id, "name": tag.name} for tag in self.users_tags]
                 if hasattr(self, "users_tags")
                 else []
             ),
-            "createdAt": self.created_at,
-            "updatedAt": self.updated_at,
+            "createdAt": self.created_at.isoformat() if self.created_at else None,
+            "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
         }
 
     def to_dict_no_posts(self):
@@ -100,95 +260,11 @@ class User(db.Model, UserMixin):
             "bio": self.bio,
             "profileImage": self.profile_image_url,
             "likes": len(self.user_likes) if hasattr(self, "_user_likes_count") else 0,
-            "createdAt": self.created_at,
-            "updatedAt": self.updated_at,
+            "createdAt": self.created_at.isoformat() if self.created_at else None,
+            "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
         }
 
-    def to_dict_for_profile_feed_optimized(self):
-        """Optimized method for profile feed - minimal data to reduce load time"""
-        return {
-            "id": self.id,
-            "firstName": self.first_name,
-            "lastName": self.last_name,
-            "username": self.username,
-            "email": self.email,
-            "bio": self.bio,
-            "profileImage": self.profile_image_url,
-            "usersTags": (
-                [tag.to_dict() for tag in self.users_tags]
-                if hasattr(self, "users_tags")
-                else []
-            ),
-            # Don't include posts and comments for feed - too heavy
-            "createdAt": self.created_at,
-            "updatedAt": self.updated_at,
-        }
-
-    def to_dict_for_profile_feed(self):
-        """Special method for profile feed that includes tags and posts"""
-        return {
-            "id": self.id,
-            "firstName": self.first_name,
-            "lastName": self.last_name,
-            "username": self.username,
-            "email": self.email,
-            "bio": self.bio,
-            "profileImage": self.profile_image_url,
-            "usersTags": [tag.to_dict() for tag in self.users_tags],
-            "posts": [post.to_dict() for post in self.posts],
-            "userComments": [comment.to_dict() for comment in self.user_comments],
-            "createdAt": self.created_at,
-            "updatedAt": self.updated_at,
-        }
-
-    def to_dict_with_posts(self, posts=None, comments=None):
-        """Optimized version that accepts pre-loaded posts and comments"""
-        result = {
-            "id": self.id,
-            "firstName": self.first_name,
-            "lastName": self.last_name,
-            "username": self.username,
-            "email": self.email,
-            "bio": self.bio,
-            "profileImage": self.profile_image_url,
-            "usersTags": (
-                [tag.to_dict() for tag in self.users_tags]
-                if hasattr(self, "users_tags")
-                else []
-            ),
-            "userMembership": (
-                [membership.to_dict() for membership in self.memberships]
-                if hasattr(self, "memberships")
-                else []
-            ),
-            "userAttendances": (
-                [attendance.to_dict() for attendance in self.attendances]
-                if hasattr(self, "attendances")
-                else []
-            ),
-            "group": (
-                [group.to_dict_minimal() for group in self.group]
-                if hasattr(self, "group")
-                else []
-            ),
-            "events": (
-                [event.to_dict_minimal() for event in self.events]
-                if hasattr(self, "events")
-                else []
-            ),
-            "createdAt": self.created_at,
-            "updatedAt": self.updated_at,
-        }
-
-        # Use provided posts and comments to avoid triggering additional queries
-        if posts is not None:
-            result["posts"] = [post.to_dict_minimal() for post in posts]
-
-        if comments is not None:
-            result["userComments"] = [comment.to_dict() for comment in comments]
-
-        return result
-
+    # Legacy methods kept for backward compatibility but optimized
     def to_dict(
         self,
         posts=False,
@@ -200,30 +276,7 @@ class User(db.Model, UserMixin):
         group=False,
     ):
         """Full version - use sparingly as it can trigger many queries"""
-        dict_user = self.to_dict_no_posts()
-
-        if posts:
-            dict_user["posts"] = [post.to_dict() for post in self.posts]
-        if user_comments:
-            dict_user["userComments"] = [
-                comment.to_dict() for comment in self.user_comments
-            ]
-        if memberships:
-            dict_user["userMembership"] = [
-                membership.to_dict() for membership in self.memberships
-            ]
-        if attendances:
-            dict_user["userAttendances"] = [
-                attendance.to_dict() for attendance in self.attendances
-            ]
-        if users_tags:
-            dict_user["usersTags"] = [tag.to_dict() for tag in self.users_tags]
-        if events:
-            dict_user["events"] = [event.to_dict() for event in self.events]
-        if group:
-            dict_user["group"] = [group.to_dict() for group in self.group]
-
-        return dict_user
+        dict_user = self.to_dict
 
 
 # from .db import db, environment, SCHEMA, add_prefix_for_prod
