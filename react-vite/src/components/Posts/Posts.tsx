@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, memo, useCallback } from "react";
 import { useLoaderData, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
@@ -12,7 +12,7 @@ import {
 	ArrowLeft,
 	Plus,
 } from "lucide-react";
-import type { ProfilesData, RootState, User as UserType } from "../../types";
+import type { ProfilesData, RootState, User as UserType, Post } from "../../types";
 
 interface FilterOptions {
 	searchTerm: string;
@@ -20,6 +20,228 @@ interface FilterOptions {
 	userFilter: string;
 }
 
+// Memoized PostCard component
+const PostCard = memo(
+	({
+		post,
+		formatTimeAgo,
+	}: {
+		post: Post;
+		sessionUser: UserType;
+		formatTimeAgo: (date: string) => string;
+            }) => {
+            console.log("-----------", post)
+		return (
+			<div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 max-w-4xl w-full mb-8">
+				<div className="p-4 border-b border-gray-50">
+					<div className="flex items-center justify-between">
+						<Link
+							to={`/users/${post.creator}`}
+							className="flex items-center gap-3 hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors duration-200 no-underline"
+						>
+							<img
+								src={post?.user?.profileImage}
+								alt={post?.user?.username}
+								className="w-10 h-10 rounded-full object-cover border-2 border-gray-100"
+								loading="lazy"
+							/>
+							<p className="font-semibold text-gray-800">
+								{post?.user?.username}
+							</p>
+						</Link>
+						<div className="text-right">
+							<p className="font-semibold text-gray-800 text-sm">
+								{post?.title}
+							</p>
+						</div>
+					</div>
+				</div>
+
+				{post?.image && (
+					<div className="relative">
+						<img
+							src={post?.image}
+							alt={post?.title}
+							className="w-full h-96 object-cover"
+							loading="lazy"
+						/>
+						<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
+					</div>
+				)}
+
+				<div className="p-4">
+					<div className="flex items-center gap-6 mb-3">
+						<div className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors duration-200 cursor-pointer">
+							<Heart size={18} />
+							<span className="text-sm font-medium">{post?.likes}</span>
+						</div>
+						<div className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors duration-200 cursor-pointer">
+							<MessageCircle size={18} />
+							<span className="text-sm font-medium">0</span>
+						</div>
+					</div>
+
+					<div className="flex items-center gap-2 text-sm text-gray-700 leading-relaxed">
+						<p className="font-semibold text-gray-800">
+							{post?.user?.username}
+						</p>
+						<p className="text-gray-400">•</p>
+						<p className="text-gray-500">{formatTimeAgo(post?.updatedAt)}</p>
+						<p className="text-gray-400">•</p>
+						<p className="text-gray-700">{post?.caption}</p>
+					</div>
+				</div>
+			</div>
+		);
+	},
+);
+
+// Memoized FilterControls component
+const FilterControls = memo(
+	({
+		filters,
+		setFilters,
+		viewMode,
+		setViewMode,
+		showFilters,
+		setShowFilters,
+		clearFilters,
+	}: {
+		filters: FilterOptions;
+		setFilters: React.Dispatch<React.SetStateAction<FilterOptions>>;
+		viewMode: "grid" | "list";
+		setViewMode: React.Dispatch<React.SetStateAction<"grid" | "list">>;
+		showFilters: boolean;
+		setShowFilters: React.Dispatch<React.SetStateAction<boolean>>;
+		clearFilters: () => void;
+	}) => {
+		return (
+			<div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
+				<div className="flex flex-col lg:flex-row lg:items-center gap-4">
+					{/* Search */}
+					<div className="flex-1">
+						<div className="relative">
+							<Search
+								size={20}
+								className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+							/>
+							<input
+								type="text"
+								placeholder="Search posts, users, or content..."
+								value={filters.searchTerm}
+								onChange={(e) =>
+									setFilters((prev) => ({
+										...prev,
+										searchTerm: e.target.value,
+									}))
+								}
+								className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+							/>
+						</div>
+					</div>
+
+					{/* Sort */}
+					<div className="flex items-center gap-2">
+						<label className="text-sm font-medium text-slate-700">
+							Sort by:
+						</label>
+						<select
+							value={filters.sortBy}
+							onChange={(e) =>
+								setFilters((prev) => ({
+									...prev,
+									sortBy: e.target.value as FilterOptions["sortBy"],
+								}))
+							}
+							className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+						>
+							<option value="recent">Most Recent</option>
+							<option value="popular">Most Popular</option>
+							<option value="oldest">Oldest First</option>
+						</select>
+					</div>
+
+					{/* View Toggle */}
+					<div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+						<button
+							onClick={() => setViewMode("grid")}
+							className={`p-2 rounded-md transition-colors ${
+								viewMode === "grid"
+									? "bg-white shadow-sm text-orange-600"
+									: "text-slate-600 hover:text-slate-900"
+							}`}
+						>
+							<Grid size={18} />
+						</button>
+						<button
+							onClick={() => setViewMode("list")}
+							className={`p-2 rounded-md transition-colors ${
+								viewMode === "list"
+									? "bg-white shadow-sm text-orange-600"
+									: "text-slate-600 hover:text-slate-900"
+							}`}
+						>
+							<List size={18} />
+						</button>
+					</div>
+
+					{/* Filter Toggle */}
+					<button
+						onClick={() => setShowFilters(!showFilters)}
+						className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+							showFilters || filters.userFilter
+								? "bg-orange-100 text-orange-700 border border-orange-200"
+								: "bg-slate-100 text-slate-700 hover:bg-slate-200"
+						}`}
+					>
+						<Filter size={18} />
+						Filters
+						{filters.userFilter && (
+							<span className="bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+								1
+							</span>
+						)}
+					</button>
+				</div>
+
+				{/* Advanced Filters */}
+				{showFilters && (
+					<div className="mt-6 pt-6 border-t border-slate-200">
+						<div className="grid md:grid-cols-3 gap-4">
+							<div>
+								<label className="block text-sm font-medium text-slate-700 mb-2">
+									Filter by User
+								</label>
+								<input
+									type="text"
+									placeholder="Username"
+									value={filters.userFilter}
+									onChange={(e) =>
+										setFilters((prev) => ({
+											...prev,
+											userFilter: e.target.value,
+										}))
+									}
+									className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+								/>
+							</div>
+							<div className="md:col-span-2 flex items-end">
+								<button
+									onClick={clearFilters}
+									className="w-full px-4 py-2 text-orange-600 hover:text-orange-700 font-medium transition-colors"
+								>
+									Clear Filters
+								</button>
+							</div>
+						</div>
+					</div>
+				)}
+			</div>
+		);
+	},
+);
+
+// Main Posts component
 const Posts: React.FC = () => {
 	const allProfiles = useLoaderData() as ProfilesData;
 	const sessionUser = useSelector((state: RootState) => state.session.user);
@@ -32,12 +254,11 @@ const Posts: React.FC = () => {
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 	const [showFilters, setShowFilters] = useState(false);
 
+	// Memoized calculations
 	const { similarUsers, filteredAndSortedPosts } = useMemo(() => {
-		// Handle case where sessionUser is null
 		if (!sessionUser) {
 			return {
 				similarUsers: [],
-				posts: [],
 				filteredAndSortedPosts: [],
 			};
 		}
@@ -106,23 +327,32 @@ const Posts: React.FC = () => {
 
 		return {
 			similarUsers,
-			posts,
 			filteredAndSortedPosts: sortedPosts,
 		};
 	}, [allProfiles, sessionUser, filters]);
 
-	if (!sessionUser) {
-		window.location.href = "/";
-		return null;
-	}
+	// Memoized callback functions
+	const formatTimeAgo = useCallback((dateString: string) => {
+		const now = new Date();
+		const postDate = new Date(dateString);
+		const diffInDays = Math.floor(
+			(now.getTime() - postDate.getTime()) / (1000 * 60 * 60 * 24),
+		);
+		return `${Math.max(1, diffInDays)}d ago`;
+	}, []);
 
-	const clearFilters = () => {
+	const clearFilters = useCallback(() => {
 		setFilters({
 			searchTerm: "",
 			sortBy: "recent",
 			userFilter: "",
 		});
-	};
+	}, []);
+
+	if (!sessionUser) {
+		window.location.href = "/";
+		return null;
+	}
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-slate-100">
@@ -186,128 +416,16 @@ const Posts: React.FC = () => {
 					</div>
 				) : (
 					<>
-						{/* Filters and Controls */}
-						<div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
-							<div className="flex flex-col lg:flex-row lg:items-center gap-4">
-								{/* Search */}
-								<div className="flex-1">
-									<div className="relative">
-										<Search
-											size={20}
-											className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
-										/>
-										<input
-											type="text"
-											placeholder="Search posts, users, or content..."
-											value={filters.searchTerm}
-											onChange={(e) =>
-												setFilters((prev) => ({
-													...prev,
-													searchTerm: e.target.value,
-												}))
-											}
-											className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-										/>
-									</div>
-								</div>
-
-								{/* Sort */}
-								<div className="flex items-center gap-2">
-									<label className="text-sm font-medium text-slate-700">
-										Sort by:
-									</label>
-									<select
-										value={filters.sortBy}
-										onChange={(e) =>
-											setFilters((prev) => ({
-												...prev,
-												sortBy: e.target.value as FilterOptions["sortBy"],
-											}))
-										}
-										className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-									>
-										<option value="recent">Most Recent</option>
-										<option value="popular">Most Popular</option>
-										<option value="oldest">Oldest First</option>
-									</select>
-								</div>
-
-								{/* View Toggle */}
-								<div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
-									<button
-										onClick={() => setViewMode("grid")}
-										className={`p-2 rounded-md transition-colors ${
-											viewMode === "grid"
-												? "bg-white shadow-sm text-orange-600"
-												: "text-slate-600 hover:text-slate-900"
-										}`}
-									>
-										<Grid size={18} />
-									</button>
-									<button
-										onClick={() => setViewMode("list")}
-										className={`p-2 rounded-md transition-colors ${
-											viewMode === "list"
-												? "bg-white shadow-sm text-orange-600"
-												: "text-slate-600 hover:text-slate-900"
-										}`}
-									>
-										<List size={18} />
-									</button>
-								</div>
-
-								{/* Filter Toggle */}
-								<button
-									onClick={() => setShowFilters(!showFilters)}
-									className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-										showFilters || filters.userFilter
-											? "bg-orange-100 text-orange-700 border border-orange-200"
-											: "bg-slate-100 text-slate-700 hover:bg-slate-200"
-									}`}
-								>
-									<Filter size={18} />
-									Filters
-									{filters.userFilter && (
-										<span className="bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-											1
-										</span>
-									)}
-								</button>
-							</div>
-
-							{/* Advanced Filters */}
-							{showFilters && (
-								<div className="mt-6 pt-6 border-t border-slate-200">
-									<div className="grid md:grid-cols-3 gap-4">
-										<div>
-											<label className="block text-sm font-medium text-slate-700 mb-2">
-												Filter by User
-											</label>
-											<input
-												type="text"
-												placeholder="Username"
-												value={filters.userFilter}
-												onChange={(e) =>
-													setFilters((prev) => ({
-														...prev,
-														userFilter: e.target.value,
-													}))
-												}
-												className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-											/>
-										</div>
-										<div className="md:col-span-2 flex items-end">
-											<button
-												onClick={clearFilters}
-												className="w-full px-4 py-2 text-orange-600 hover:text-orange-700 font-medium transition-colors"
-											>
-												Clear Filters
-											</button>
-										</div>
-									</div>
-								</div>
-							)}
-						</div>
+						{/* Filter Controls */}
+						<FilterControls
+							filters={filters}
+							setFilters={setFilters}
+							viewMode={viewMode}
+							setViewMode={setViewMode}
+							showFilters={showFilters}
+							setShowFilters={setShowFilters}
+							clearFilters={clearFilters}
+						/>
 
 						{/* Results */}
 						<div className="mb-6">
@@ -347,82 +465,12 @@ const Posts: React.FC = () => {
 						) : (
 							<div className="flex flex-col justify-center items-center">
 								{filteredAndSortedPosts.map((post) => (
-									<div
-										key={post.id}
-										className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 max-w-4xl w-full mb-8"
-									>
-										<div className="p-4 border-b border-gray-50">
-											<div className="flex items-center justify-between">
-												<Link
-													to={`/users/${post.creator}`}
-													className="flex items-center gap-3 hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors duration-200 no-underline"
-												>
-													<img
-														src={post?.user?.profileImage}
-														alt={post?.user?.username}
-														className="w-10 h-10 rounded-full object-cover border-2 border-gray-100"
-													/>
-													<p className="font-semibold text-gray-800">
-														{post?.user?.username}
-													</p>
-												</Link>
-												<div className="text-right">
-													<p className="font-semibold text-gray-800 text-sm">
-														{post?.title}
-													</p>
-												</div>
-											</div>
-										</div>
-
-										{post?.image && (
-											<div className="relative">
-												<img
-													src={post?.image}
-													alt={post?.title}
-													className="w-full h-96 object-cover"
-												/>
-												<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
-											</div>
-										)}
-
-										<div className="p-4">
-											<div className="flex items-center gap-6 mb-3">
-												<div className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors duration-200 cursor-pointer">
-													<Heart size={18} />
-													<span className="text-sm font-medium">
-														{post?.likes}
-													</span>
-												</div>
-												<div className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors duration-200 cursor-pointer">
-													<MessageCircle size={18} />
-													<span className="text-sm font-medium">
-														{similarUsers.find((u) => u.id === post.creator)
-															?.userComments.length || 0}
-													</span>
-												</div>
-											</div>
-
-											<div className="flex items-center gap-2 text-sm text-gray-700 leading-relaxed">
-												<p className="font-semibold text-gray-800">
-													{post?.user?.username}
-												</p>
-												<p className="text-gray-400">•</p>
-												<p className="text-gray-500">
-													{Math.max(
-														1,
-														Math.floor(
-															(new Date().getTime() -
-																new Date(post?.updatedAt).getTime()) /
-																(1000 * 60 * 60 * 24),
-														),
-													)}
-													d ago
-												</p>
-												<p className="text-gray-400">•</p>
-												<p className="text-gray-700">{post?.caption}</p>
-											</div>
-										</div>
-									</div>
+									<PostCard
+										// key={post.id}
+										post={post}
+										sessionUser={sessionUser}
+										formatTimeAgo={formatTimeAgo}
+									/>
 								))}
 							</div>
 						)}
