@@ -16,7 +16,7 @@ from app.models import (
 from app.forms import UserForm, EditUserForm, PostForm, EditPostForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
 from sqlalchemy.orm import joinedload, selectinload
-from sqlalchemy import func
+from sqlalchemy import func, and_
 import requests
 import json
 
@@ -27,21 +27,21 @@ user_routes = Blueprint("users", __name__)
 @login_required
 def users():
     """
-    Query for all users and returns them in a list of user dictionaries - minimal data only
+    Query for all users with pagination and minimal data loading
     """
     page = request.args.get("page", 1, type=int)
     per_page = min(request.args.get("per_page", 50, type=int), 100)
 
+    # Load only essential data for user list
     users_query = db.session.query(User).options(
-        selectinload(User.users_tags),
-        # Only load count data, not full relationships
+        selectinload(User.users_tags).load_only("id", "name"),
     )
 
     users = users_query.paginate(page=page, per_page=per_page, error_out=False)
 
     return jsonify(
         {
-            "users": [user.to_dict_minimal() for user in users.items],
+            "users": [user.to_dict_list_optimized() for user in users.items],
             "pagination": {
                 "page": page,
                 "pages": users.pages,
@@ -58,13 +58,13 @@ def users():
 @login_required
 def user(userId):
     """
-    Query for a user by id and returns that user in a dictionary - optimized loading
+    Query for a user by id with optimized loading strategy
     """
-    # Load basic user info with essential relationships
+    # Load user with minimal essential data first
     user = (
         db.session.query(User)
         .options(
-            selectinload(User.users_tags),
+            selectinload(User.users_tags).load_only("id", "name"),
             selectinload(User.memberships)
             .joinedload(Membership.group)
             .load_only("id", "name", "image", "city", "state"),
@@ -78,54 +78,69 @@ def user(userId):
     if not user:
         return jsonify({"errors": {"message": "User not found"}}), 404
 
-    # Load posts separately with pagination
+    # Load posts with pagination and minimal data
     posts = (
         db.session.query(Post)
         .options(
             selectinload(Post.post_likes).load_only("id"),
-            selectinload(Post.post_comments).load_only(
-                "id", "comment", "user_id", "created_at"
-            ),
         )
         .filter(Post.creator == userId)
         .order_by(Post.created_at.desc())
-        .limit(20)
+        .limit(20)  # Limit recent posts
         .all()
     )
 
-    # Load comments separately
+    # Load recent comments only
     comments = (
-        db.session.query(Comment).filter(Comment.user_id == userId).limit(10).all()
+        db.session.query(Comment)
+        .filter(Comment.user_id == userId)
+        .order_by(Comment.created_at.desc())
+        .limit(10)  # Limit recent comments
+        .all()
     )
 
-    return jsonify(user.to_dict_with_posts(posts=posts, comments=comments))
+    return jsonify(user.to_dict_profile_optimized(posts=posts, comments=comments))
 
 
 @user_routes.route("/profile-feed")
 @login_required
 def view_all_profiles():
     """
-    Query for all users with a profile and returns them in a list of user dictionaries - optimized
+    Optimized profile feed with reduced data loading
     """
     page = request.args.get("page", 1, type=int)
     per_page = min(request.args.get("per_page", 20, type=int), 50)
 
+    # Get current user's tags for similarity matching
+    current_user_tags = (
+        db.session.query(Tag.id)
+        .join(UserTags)
+        .filter(UserTags.c.user_id == current_user.id)
+        .subquery()
+    )
+
+    # Find users with similar tags (at least one common tag)
     users_query = (
         db.session.query(User)
-        .filter(User.profile_image_url.isnot(None))
-        .options(
-            selectinload(User.users_tags),
-            # Don't load posts and comments here - too heavy for feed
+        .join(UserTags)
+        .join(current_user_tags, UserTags.c.tag_id == current_user_tags.c.id)
+        .filter(
+            and_(
+                User.profile_image_url.isnot(None),
+                User.id != current_user.id,  # Exclude current user
+            )
         )
+        .options(
+            selectinload(User.users_tags).load_only("id", "name"),
+        )
+        .distinct()
     )
 
     users = users_query.paginate(page=page, per_page=per_page, error_out=False)
 
     return jsonify(
         {
-            "users_profile": [
-                user.to_dict_for_profile_feed_optimized() for user in users.items
-            ],
+            "users_profile": [user.to_dict_feed_optimized() for user in users.items],
             "pagination": {
                 "page": page,
                 "pages": users.pages,
@@ -141,6 +156,9 @@ def view_all_profiles():
 @user_routes.route("/<int:userId>/profile/update", methods=["POST"])
 @login_required
 def update_profile(userId):
+    """
+    Optimized profile update with minimal data return
+    """
     user_to_edit = User.query.get(userId)
 
     if not user_to_edit:
@@ -178,15 +196,16 @@ def update_profile(userId):
                 remove_file_from_s3(user_to_edit.profile_image_url)
             user_to_edit.profile_image_url = upload["url"]
 
-        # Update the existing user with profile details
+        # Update user fields
         user_to_edit.first_name = form.data["firstName"]
         user_to_edit.last_name = form.data["lastName"]
         user_to_edit.bio = form.data["bio"]
         user_to_edit.username = form.data["username"]
         user_to_edit.email = form.data["email"]
 
-        # Optimized tag update - clear existing and add new
+        # Efficient tag update
         if form.userTags.data:
+            # Clear existing tags and add new ones in one operation
             user_to_edit.users_tags.clear()
             selected_tags = form.userTags.data
             tags_to_add = Tag.query.filter(Tag.name.in_(selected_tags)).all()
@@ -194,8 +213,8 @@ def update_profile(userId):
 
         db.session.commit()
 
-        # Return optimized response
-        return {"profile": user_to_edit.to_dict_minimal()}, 201
+        # Return minimal response for faster update
+        return {"profile": user_to_edit.to_dict_auth_optimized()}, 201
 
     return form.errors, 400
 
@@ -203,7 +222,9 @@ def update_profile(userId):
 @user_routes.route("/<int:userId>/profile/delete", methods=["DELETE"])
 @login_required
 def delete_profile(userId):
-    """Optimized profile deletion with batch operations"""
+    """
+    Optimized profile deletion with efficient batch operations
+    """
     user = User.query.get(userId)
 
     if not user:
@@ -212,15 +233,41 @@ def delete_profile(userId):
     if user.id != current_user.id:
         return jsonify({"errors": {"message": "Unauthorized"}}), 403
 
-    # Batch delete related data for better performance
     try:
+        # Use efficient bulk delete operations
         # Delete in correct order to avoid foreign key constraints
-        Attendance.query.filter_by(user_id=userId).delete(synchronize_session=False)
-        Membership.query.filter_by(user_id=userId).delete(synchronize_session=False)
-        Comment.query.filter_by(user_id=userId).delete(synchronize_session=False)
-        Post.query.filter_by(creator=userId).delete(synchronize_session=False)
 
-        # Handle groups organized by the user - batch operation
+        # Delete attendances
+        db.session.execute(
+            "DELETE FROM attendances WHERE user_id = :user_id", {"user_id": userId}
+        )
+
+        # Delete memberships
+        db.session.execute(
+            "DELETE FROM memberships WHERE user_id = :user_id", {"user_id": userId}
+        )
+
+        # Delete comments
+        db.session.execute(
+            "DELETE FROM comments WHERE user_id = :user_id", {"user_id": userId}
+        )
+
+        # Delete post likes
+        db.session.execute(
+            "DELETE FROM likes WHERE user_id = :user_id", {"user_id": userId}
+        )
+
+        # Delete posts
+        db.session.execute(
+            "DELETE FROM posts WHERE creator = :user_id", {"user_id": userId}
+        )
+
+        # Delete user tags
+        db.session.execute(
+            "DELETE FROM user_tags WHERE user_id = :user_id", {"user_id": userId}
+        )
+
+        # Handle groups organized by the user
         groups_to_delete = Group.query.filter_by(organizer_id=userId).all()
         for group in groups_to_delete:
             # Delete events and venues associated with this group
@@ -242,6 +289,9 @@ def delete_profile(userId):
 @user_routes.route("/<int:userId>/add-tags", methods=["POST"])
 @login_required
 def add_tags(userId):
+    """
+    Optimized tag addition
+    """
     user = User.query.get(userId)
 
     if not user:
@@ -260,7 +310,7 @@ def add_tags(userId):
         # Get existing user tags in one query
         existing_tag_names = {tag.name for tag in user.users_tags}
 
-        # Get or create new tags in batch
+        # Get or create new tags efficiently
         tags_to_add = []
         for tag_name in new_tag_names:
             if tag_name not in existing_tag_names:
@@ -288,7 +338,7 @@ def add_tags(userId):
 @login_required
 def create_post(userId):
     """
-    Create a new post linked to the current user and submit to the database
+    Optimized post creation
     """
     # Verify user exists
     user = User.query.get(userId)
@@ -333,7 +383,7 @@ def create_post(userId):
         db.session.commit()
 
         # Return minimal post data for faster response
-        return {"post": create_post.to_dict_minimal()}, 201
+        return {"post": create_post.to_dict_create_optimized()}, 201
 
     return form.errors, 400
 
@@ -341,7 +391,7 @@ def create_post(userId):
 @user_routes.route("/<int:userId>/posts/<int:postId>", methods=["POST"])
 def edit_post(userId, postId):
     """
-    Update post with optimized response
+    Optimized post editing
     """
     post_to_edit = Post.query.get(postId)
 
@@ -379,13 +429,13 @@ def edit_post(userId, postId):
         db.session.commit()
 
         # Return minimal data for faster response
-        return {"post": post_to_edit.to_dict_minimal()}, 200
+        return {"post": post_to_edit.to_dict_create_optimized()}, 200
 
     elif form.errors:
         return {"errors": form.errors}, 400
     else:
         # Return current post data if no form submission
-        return {"post": post_to_edit.to_dict_minimal()}, 200
+        return {"post": post_to_edit.to_dict_create_optimized()}, 200
 
 
 # from flask import Blueprint, jsonify, render_template, request, redirect, abort
