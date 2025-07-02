@@ -86,9 +86,66 @@ class Event(db.Model):
             "startDate": self.start_date.isoformat(),
             "endDate": self.end_date.isoformat(),
             "numAttendees": len(self.attendances) if self.attendances else 0,
-            "groupId": self.group_id,
-            "groupName": (
-                self.groups.name if hasattr(self, "groups") and self.groups else None
+            # ADD: Minimum groupInfo object using the loaded relationship data
+            "groupInfo": (
+                {
+                    "id": (
+                        self.groups.id
+                        if hasattr(self, "groups") and self.groups
+                        else None
+                    ),
+                    "name": (
+                        self.groups.name
+                        if hasattr(self, "groups") and self.groups
+                        else "Unknown Group"
+                    ),
+                    "image": (
+                        self.groups.image
+                        if hasattr(self, "groups") and self.groups
+                        else None
+                    ),
+                    "city": (
+                        self.groups.city
+                        if hasattr(self, "groups") and self.groups
+                        else None
+                    ),
+                    "state": (
+                        self.groups.state
+                        if hasattr(self, "groups") and self.groups
+                        else None
+                    ),
+                }
+                if hasattr(self, "groups") and self.groups
+                else {
+                    "id": None,
+                    "name": "Unknown Group",
+                    "image": None,
+                    "city": None,
+                    "state": None,
+                    "type": None,
+                }
+            ),
+            # ADD: Minimum venueInfo object using the loaded relationship data
+            "venueInfo": (
+                {
+                    "address": (
+                        self.venues.address
+                        if hasattr(self, "venues") and self.venues
+                        else None
+                    ),
+                    "city": (
+                        self.venues.city
+                        if hasattr(self, "venues") and self.venues
+                        else None
+                    ),
+                    "state": (
+                        self.venues.state
+                        if hasattr(self, "venues") and self.venues
+                        else None
+                    ),
+                }
+                if hasattr(self, "venues") and self.venues
+                else None
             ),
         }
 
