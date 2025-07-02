@@ -9,24 +9,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 # Import models with optimized loading
-from .models import (
-    db,
-    User,
-    Group,
-    GroupImage,
-    Post,
-    Comment,
-    Event,
-    EventImage,
-    Venue,
-    Membership,
-    Attendance,
-    Tag,
-    Likes,
-    UserTags,
-    Partnership,
-    Contact,
-)
+from .models import db, User
 
 # Import routes
 from .api.user_routes import user_routes
@@ -193,13 +176,6 @@ def create_app(config_class=Config):
         # Don't cache the main index.html to ensure updates are reflected
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         return response
-
-    @app.route("/api/debug/env")
-    def debug_env():
-        return {
-            "FLASK_ENV": app.config.get("FLASK_ENV"),
-            "environment_var": os.environ.get("FLASK_ENV"),
-        }
 
     # Error handlers with better error pages
     @app.errorhandler(404)
