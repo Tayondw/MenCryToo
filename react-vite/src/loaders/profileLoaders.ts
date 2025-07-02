@@ -45,12 +45,19 @@ export async function profileLoader({
 	if (cached) return cached as { user: User };
 
 	try {
-		const response = await fetch("/api/auth/", {
+		// Use the new dedicated profile endpoint
+		const response = await fetch("/api/auth/profile", {
 			method: "GET",
-			headers: { "Content-Type": "application/json" },
+			headers: {
+				"Content-Type": "application/json",
+				"Cache-Control": "max-age=120", // Cache for 2 minutes
+			},
 		});
 
 		if (!response.ok) {
+			if (response.status === 401) {
+				return redirect("/login");
+			}
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
 
@@ -64,6 +71,15 @@ export async function profileLoader({
 		if (params?.id && userData.id.toString() !== params.id) {
 			return redirect("/profile");
 		}
+
+		// Data is already optimized from the backend, no need for transformation
+		console.log("Profile data loaded:", {
+			posts: userData.posts?.length || 0,
+			groups: userData.group?.length || 0,
+			events: userData.events?.length || 0,
+			tags: userData.usersTags?.length || 0,
+			comments: userData.userComments?.length || 0,
+		});
 
 		const result = { user: userData };
 		setCachedData(cacheKey, result);
