@@ -6,7 +6,7 @@ from sqlalchemy.orm import load_only
 tag_routes = Blueprint("tags", __name__)
 
 
-@tag_routes.route("/")
+@tag_routes.route("")
 def tags():
     """
     Query for all tags and returns them in a list of tag dictionaries - optimized with caching consideration
