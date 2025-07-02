@@ -20,7 +20,7 @@ event_routes = Blueprint("events", __name__)
 
 
 # ! EVENTS
-@event_routes.route("/")
+@event_routes.route("")
 def all_events():
     """
     Query for all events and returns them in a list of event dictionaries - with pagination and optimized loading
