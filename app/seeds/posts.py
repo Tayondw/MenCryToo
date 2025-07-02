@@ -29,6 +29,34 @@ def seed_posts():
     db.session.commit()
 
 
+def seed_posts_minimal():
+    """Seed only 10 posts for faster loading"""
+    from app.models import db, User, Post
+    from app.seeds.data.posts import posts
+    from random import sample
+
+    all_users = User.query.all()
+    user_map = {user.username: user for user in all_users}
+
+    # Only use first 10 posts
+    minimal_posts = posts[:10]
+
+    for post_data in minimal_posts:
+        post = Post(
+            creator=post_data["creator"],
+            title=post_data["title"],
+            caption=post_data["caption"],
+            image=post_data["image"],
+        )
+
+        # Add fewer likes for faster processing
+        for username in post_data["post_likes"][:3]:  # Only 3 likes per post
+            user = user_map.get(username)
+            if user:
+                post.post_likes.append(user)
+
+        db.session.add(post)
+    db.session.commit()
 
 
 # Uses a raw SQL query to TRUNCATE or DELETE the users table. SQLAlchemy doesn't

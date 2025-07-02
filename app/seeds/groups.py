@@ -44,6 +44,40 @@ def seed_groups():
     db.session.commit()
 
 
+def seed_groups_minimal():
+    """Seed only 5 groups for faster loading"""
+    from app.models import db, Group, User, Membership
+    from app.seeds.data.groups import groups
+
+    all_users = User.query.all()
+    user_map = {user.username: user for user in all_users}
+
+    # Only use first 5 groups
+    minimal_groups = groups[:5]
+
+    for group_data in minimal_groups:
+        group = Group(
+            organizer_id=group_data["organizer_id"],
+            name=group_data["name"],
+            about=group_data["about"],
+            type=group_data["type"],
+            city=group_data["city"],
+            state=group_data["state"],
+            image=group_data["image"],
+        )
+        db.session.add(group)
+        db.session.flush()
+
+        # Add fewer memberships for faster processing
+        for username in group_data["memberships"][:5]:  # Only 5 members per group
+            user = user_map.get(username)
+            if user:
+                membership = Membership(group_id=group.id, user_id=user.id)
+                db.session.add(membership)
+
+    db.session.commit()
+
+
 # def seed_group_images():
 #     for group_image_data in group_images:
 #         group_image = GroupImage(**group_image_data)

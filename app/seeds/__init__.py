@@ -7,9 +7,9 @@ from .users import (
     undo_tags,
     undo_user_tags,
 )
-from .posts import seed_posts, undo_posts
+from .posts import seed_posts, undo_posts, seed_posts_minimal
 from .comments import seed_comments, undo_comments
-from .groups import seed_groups, undo_groups
+from .groups import seed_groups, undo_groups, seed_groups_minimal
 from .venues import seed_venues, undo_venues
 from .events import seed_events, undo_events
 
@@ -17,6 +17,42 @@ from app.models.db import db, environment, SCHEMA
 
 # Creates a seed group to hold our commands
 seed_commands = AppGroup("seed")
+
+
+@seed_commands.command("production-minimal")
+def seed_production_minimal():
+    """Minimal seeding for production to reduce initial load time"""
+    print("Starting minimal production seeding...")
+
+    try:
+        # Only seed essential data for production
+        print("Seeding users...")
+        seed_users()
+
+        print("Seeding tags...")
+        seed_tags()
+
+        print("Seeding user tags...")
+        seed_user_tags()
+
+        print("Seeding minimal posts...")
+        seed_posts_minimal()  # Only 10 posts instead of 30
+
+        print("Seeding minimal groups...")
+        seed_groups_minimal()  # Only 5 groups instead of 10
+
+        print("Minimal production seeding completed!")
+
+        # Optimize database after seeding
+        if environment == "production" and db.engine.url.drivername == "postgresql":
+            print("Analyzing database for optimal query plans...")
+            db.session.execute("ANALYZE;")
+            db.session.commit()
+
+    except Exception as e:
+        print(f"Error during minimal seeding: {e}")
+        db.session.rollback()
+        raise
 
 
 # Optimized seeding with better transaction management
