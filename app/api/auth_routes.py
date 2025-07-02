@@ -1,10 +1,10 @@
 from flask import Blueprint, request, abort, redirect, session
-from app.models import User, db, Tag
+from app.models import User, db, Tag, Event, Attendance, Group, Membership
 from app.forms import LoginForm
 from app.forms import SignUpForm
 from flask_login import current_user, login_user, logout_user, login_required
 from app.aws import get_unique_filename, upload_file_to_s3
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.orm import selectinload, joinedload, load_only
 import os
 import pathlib
 import requests
@@ -21,22 +21,75 @@ auth_routes = Blueprint("auth", __name__)
 @auth_routes.route("/")
 def authenticate():
     """
-    Authenticates a user with minimal data loading for faster response.
+    Authenticates a user with complete groups and events data for home page display.
     """
     if current_user.is_authenticated:
-        # Load only essential data for authentication
+        # Load user with ALL groups and events relationships
         user = (
             db.session.query(User)
             .options(
+                # Load user tags
                 selectinload(User.users_tags).load_only("id", "name"),
-                # Don't load full relationships, just counts for essential data
+                # Load groups where user is a MEMBER
+                selectinload(User.memberships)
+                .joinedload(Membership.group)
+                .options(
+                    load_only(
+                        "id",
+                        "name",
+                        "about",
+                        "image",
+                        "city",
+                        "state",
+                        "type",
+                        "organizer_id",
+                    ),
+                    selectinload(Group.memberships).load_only("id"),  # For member count
+                ),
+                # Load groups where user is ORGANIZER
+                selectinload(User.groups).options(
+                    load_only(
+                        "id",
+                        "name",
+                        "about",
+                        "image",
+                        "city",
+                        "state",
+                        "type",
+                        "organizer_id",
+                    ),
+                    selectinload(Group.memberships).load_only("id"),  # For member count
+                ),
+                # Load events user is ATTENDING
+                selectinload(User.attendances)
+                .joinedload(Attendance.event)
+                .options(
+                    load_only(
+                        "id",
+                        "name",
+                        "description",
+                        "type",
+                        "capacity",
+                        "image",
+                        "start_date",
+                        "end_date",
+                        "group_id",
+                        "venue_id",
+                    ),
+                    # Load group info for each event
+                    joinedload(Event.groups).load_only("name"),
+                    # Load venue info for each event
+                    joinedload(Event.venues).load_only("address", "city", "state"),
+                    # Load attendee count
+                    selectinload(Event.attendances).load_only("id"),
+                ),
             )
             .filter(User.id == current_user.id)
             .first()
         )
 
         if user:
-            return user.to_dict_auth_optimized()
+            return user.to_dict_auth_with_complete_data()
 
     return {"errors": {"message": "Unauthorized"}}, 401
 
