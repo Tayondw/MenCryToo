@@ -1,23 +1,74 @@
 import { redirect, json, LoaderFunctionArgs, ActionFunctionArgs } from "react-router-dom";
 
+// Configuration for API base URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
+// Helper function to make API calls with proper error handling
+const apiCall = async (url: string, options?: RequestInit) => {
+	try {
+		// Ensure the URL is absolute
+		const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+		
+		const response = await fetch(fullUrl, {
+			...options,
+			credentials: 'include', // Important for sessions/cookies
+			headers: {
+				'Content-Type': 'application/json',
+				...options?.headers,
+			},
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+		}
+
+		return await response.json();
+	} catch (error) {
+		console.error('API call failed:', error);
+		throw error;
+	}
+};
+
 // Loader for groups list page
 export const groupsLoader = async ({ request }: LoaderFunctionArgs) => {
 	try {
 		const url = new URL(request.url);
 		const searchParams = url.searchParams;
 		const page = searchParams.get("page") || "1";
+		const per_page = searchParams.get("per_page") || "20";
 
-		const response = await fetch(`/api/groups?page=${page}`);
+		// Use relative URL since we're configuring the base URL
+		const response = await apiCall(
+			`/api/groups?page=${page}&per_page=${per_page}`,
+		);
 
-		if (!response.ok) {
-			throw new Error(`Failed to fetch groups: ${response.status}`);
+		// Handle both paginated and non-paginated responses
+		let groupsData;
+		if (response.groups) {
+			// Paginated response: { groups: [...], pagination: {...} }
+			groupsData = response;
+		} else if (Array.isArray(response)) {
+			// Direct array response: [...]
+			groupsData = { groups: response };
+		} else {
+			// Unknown format, try to extract groups
+			groupsData = { groups: response.groups || [] };
 		}
 
-		const groups = await response.json();
-		return { groups };
+		return {
+			allGroups: groupsData, // This matches what Groups component expects
+			currentPage: parseInt(page),
+			perPage: parseInt(per_page),
+		};
 	} catch (error) {
 		console.error("Error loading groups:", error);
-		throw error;
+		// Return empty data instead of throwing to prevent complete failure
+		return {
+			allGroups: { groups: [] },
+			currentPage: 1,
+			perPage: 20,
+			error: error instanceof Error ? error.message : "Failed to load groups",
+		};
 	}
 };
 
