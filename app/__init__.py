@@ -61,7 +61,11 @@ def create_app(config_class=Config):
     Migrate(app, db)
     CORS(
         app,
-        origins=["http://localhost:3000", "https://mencrytoo.onrender.com"],
+        origins=[
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "https://mencrytoo.onrender.com",
+        ],
         supports_credentials=True,
         allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -97,14 +101,29 @@ def create_app(config_class=Config):
     @app.before_request
     def before_request():
         """Optimizations for each request"""
-        # HTTPS redirect for production
-        if app.config.get("FLASK_ENV") == "production":
+        # FIX: Check os.environ instead of app.config
+        flask_env = os.environ.get("FLASK_ENV", "development")
+
+        # Only do HTTPS redirect in actual production AND not for API endpoints
+        if (
+            flask_env == "production"
+            and not request.path.startswith("/api/")
+            and request.method != "OPTIONS"
+        ):
             if request.headers.get("X-Forwarded-Proto") == "http":
                 url = request.url.replace("http://", "https://", 1)
                 return redirect(url, code=301)
 
-        # Add request timing for monitoring
-        g.start_time = time.time() if "time" in globals() else None
+        # Debug logging (remove after fixing)
+        print(f"DEBUG: {request.method} {request.path} - ENV: {flask_env}")
+
+        # Add request timing for monitoring (safely)
+        try:
+            import time
+
+            g.start_time = time.time()
+        except ImportError:
+            pass
 
     @app.after_request
     def after_request(response):
@@ -178,6 +197,13 @@ def create_app(config_class=Config):
         # Don't cache the main index.html to ensure updates are reflected
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         return response
+
+    @app.route("/api/debug/env")
+    def debug_env():
+        return {
+            "FLASK_ENV": app.config.get("FLASK_ENV"),
+            "environment_var": os.environ.get("FLASK_ENV"),
+        }
 
     # Error handlers with better error pages
     @app.errorhandler(404)
