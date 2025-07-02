@@ -1,5 +1,5 @@
 from flask import Blueprint, request, abort, redirect, session
-from app.models import User, db, Tag, Event, Attendance, Group, Membership
+from app.models import User, db, Tag, Event, Attendance, Group, Membership, Post
 from app.forms import LoginForm
 from app.forms import SignUpForm
 from flask_login import current_user, login_user, logout_user, login_required
@@ -173,6 +173,105 @@ def sign_up():
         # Return minimal data for faster response
         return user.to_dict_auth_optimized()
     return form.errors, 401
+
+
+@auth_routes.route("/profile")
+@login_required
+def get_profile():
+    """
+    Optimized endpoint specifically for the profile page.
+    Returns all data needed for profile display in a single efficient query.
+    """
+    if current_user.is_authenticated:
+        # Single optimized query with selective loading
+        user = (
+            db.session.query(User)
+            .options(
+                # Load user tags
+                selectinload(User.users_tags).load_only("id", "name"),
+                # Load groups where user is a MEMBER (optimized)
+                selectinload(User.memberships)
+                .joinedload(Membership.group)
+                .options(
+                    load_only(
+                        "id",
+                        "name",
+                        "about",
+                        "image",
+                        "city",
+                        "state",
+                        "type",
+                        "organizer_id",
+                    ),
+                    selectinload(Group.memberships).load_only("id"),  # For count
+                ),
+                # Load groups where user is ORGANIZER (optimized)
+                selectinload(User.groups).options(
+                    load_only(
+                        "id",
+                        "name",
+                        "about",
+                        "image",
+                        "city",
+                        "state",
+                        "type",
+                        "organizer_id",
+                    ),
+                    selectinload(Group.memberships).load_only("id"),  # For count
+                ),
+                # Load events user is ATTENDING (optimized)
+                selectinload(User.attendances)
+                .joinedload(Attendance.event)
+                .options(
+                    load_only(
+                        "id",
+                        "name",
+                        "description",
+                        "type",
+                        "capacity",
+                        "image",
+                        "start_date",
+                        "end_date",
+                        "group_id",
+                        "venue_id",
+                    ),
+                    joinedload(Event.groups).load_only("id", "name"),
+                    joinedload(Event.venues).load_only("address", "city", "state"),
+                    selectinload(Event.attendances).load_only("id"),  # For count
+                ),
+                # Load recent posts (limited to 20 for performance)
+                selectinload(User.posts).options(
+                    load_only(
+                        "id",
+                        "title",
+                        "caption",
+                        "image",
+                        "creator",
+                        "created_at",
+                        "updated_at",
+                    ),
+                    selectinload(Post.post_likes).load_only("id"),  # For count
+                    selectinload(Post.post_comments).load_only("id"),  # For count
+                ),
+                # Load recent comments (limited for performance)
+                selectinload(User.user_comments).load_only(
+                    "id",
+                    "user_id",
+                    "post_id",
+                    "comment",
+                    "parent_id",
+                    "created_at",
+                    "updated_at",
+                ),
+            )
+            .filter(User.id == current_user.id)
+            .first()
+        )
+
+        if user:
+            return user.to_dict_profile_optimized()
+
+    return {"errors": {"message": "Unauthorized"}}, 401
 
 
 @auth_routes.route("/unauthorized")
