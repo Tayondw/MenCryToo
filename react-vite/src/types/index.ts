@@ -25,7 +25,7 @@ export interface Post {
 	title: string;
 	caption: string;
 	image: string;
-	likes: number;
+      likes: number;
 	creator: number;
 	createdAt: string;
 	updatedAt: string;
