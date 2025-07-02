@@ -1,16 +1,23 @@
+// react-vite/src/components/Home/Home.tsx
 import React from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../../types";
+import { useLoaderData } from "react-router-dom";
 import AuthHome from "./AuthHome/AuthHome";
 import NotAuthHome from "./NotAuthHome/NotAuthHome";
+import { User, Group, Event, Tag } from "../../types";
+
+interface HomeLoaderData {
+	allGroups: Group[];
+	allEvents: Event[];
+	allTags: Tag[];
+	user: User | null;
+	error?: string;
+}
 
 const Home: React.FC = () => {
-	const sessionUser = useSelector((state: RootState) => state.session.user);
+	const { user } = useLoaderData() as HomeLoaderData;
 
 	return (
-		<div className="min-h-screen">
-			{sessionUser ? <AuthHome /> : <NotAuthHome />}
-		</div>
+		<div className="min-h-screen">{user ? <AuthHome /> : <NotAuthHome />}</div>
 	);
 };
 
