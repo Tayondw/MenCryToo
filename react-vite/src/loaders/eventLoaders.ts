@@ -1,23 +1,74 @@
 import { redirect, json, LoaderFunctionArgs } from "react-router-dom";
 
+// Configuration for API base URL
+const API_BASE_URL =
+	import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+// Helper function to make API calls with proper error handling
+const apiCall = async (url: string, options?: RequestInit) => {
+	try {
+		// Ensure the URL is absolute
+		const fullUrl = url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
+
+		const response = await fetch(fullUrl, {
+			...options,
+			credentials: "include", // Important for sessions/cookies
+			headers: {
+				"Content-Type": "application/json",
+				...options?.headers,
+			},
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+		}
+
+		return await response.json();
+	} catch (error) {
+		console.error("API call failed:", error);
+		throw error;
+	}
+};
+
 // Loader for events list page
 export const eventsLoader = async ({ request }: LoaderFunctionArgs) => {
 	try {
 		const url = new URL(request.url);
 		const searchParams = url.searchParams;
 		const page = searchParams.get("page") || "1";
+		const per_page = searchParams.get("per_page") || "20";
 
-		const response = await fetch(`/api/events?page=${page}`);
+		const response = await apiCall(
+			`/api/events?page=${page}&per_page=${per_page}`,
+		);
 
-		if (!response.ok) {
-			throw new Error(`Failed to fetch events: ${response.status}`);
+		// Handle both paginated and non-paginated responses
+		let eventsData;
+		if (response.events) {
+			// Paginated response: { groups: [...], pagination: {...} }
+			eventsData = response;
+		} else if (Array.isArray(response)) {
+			// Direct array response: [...]
+			eventsData = { events: response };
+		} else {
+			// Unknown format, try to extract groups
+			eventsData = { events: response.events || [] };
 		}
 
-		const events = await response.json();
-		return { events };
+		return {
+			allEvents: eventsData, // This matches what Events component expects
+			currentPage: parseInt(page),
+			perPage: parseInt(per_page),
+		};
 	} catch (error) {
 		console.error("Error loading events:", error);
-		throw error;
+		// Return empty data instead of throwing to prevent complete failure
+		return {
+			allEvents: { events: [] },
+			currentPage: 1,
+			perPage: 20,
+			error: error instanceof Error ? error.message : "Failed to load events",
+		};
 	}
 };
 
