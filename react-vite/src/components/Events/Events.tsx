@@ -16,42 +16,7 @@ import {
 	Plus,
 	X,
 } from "lucide-react";
-import { RootState } from "../../types";
-
-interface EventVenue {
-	id: number;
-	groupId: number;
-	address: string;
-	city: string;
-	state: string;
-	latitude: number;
-	longitude: number;
-}
-
-interface EventGroup {
-	id: number;
-	name: string;
-	about: string;
-	image: string;
-	city: string;
-	state: string;
-	numMembers: number;
-	type: string;
-}
-
-interface Event {
-	id: number;
-	name: string;
-	description: string;
-	image: string;
-	numAttendees: number;
-	capacity: number;
-	type: string;
-	startDate: string;
-	endDate: string;
-	venueInfo?: EventVenue;
-	groupInfo: EventGroup;
-}
+import { RootState, Event } from "../../types";
 
 interface EventsData {
 	events: Event[];
@@ -67,7 +32,7 @@ interface FilterOptions {
 
 const Events: React.FC = () => {
 	const { allEvents } = useLoaderData() as { allEvents: EventsData };
-	const sessionUser = useSelector((state: RootState) => state.session.user);
+      const sessionUser = useSelector((state: RootState) => state.session.user);
 
 	const [filters, setFilters] = useState<FilterOptions>({
 		searchTerm: "",
@@ -80,8 +45,6 @@ const Events: React.FC = () => {
 	const [showFilters, setShowFilters] = useState(false);
 	const [showGroupSelector, setShowGroupSelector] = useState(false);
       const [groupSearchTerm, setGroupSearchTerm] = useState("");
-      
-      console.log("first,", groupSearchTerm);
 
 	// Mock user groups for the selector - in a real app, this would come from the user's data
 	const userGroups = useMemo(() => {
@@ -186,8 +149,6 @@ const Events: React.FC = () => {
 			group.name.toLowerCase().includes(searchLower),
 		);
       }, [userGroups, groupSearchTerm]);
-      
-      console.log("----------------", filteredGroups)
 
 	const clearFilters = () => {
 		setFilters({
