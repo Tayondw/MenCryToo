@@ -1,54 +1,54 @@
-import { redirect, json } from "react-router-dom";
+import { redirect, json, LoaderFunctionArgs, ActionFunctionArgs } from "react-router-dom";
 
 // Loader for groups list page
-export const groupsLoader = async () => {
+export const groupsLoader = async ({ request }: LoaderFunctionArgs) => {
 	try {
-		const response = await fetch("/api/groups/");
+		const url = new URL(request.url);
+		const searchParams = url.searchParams;
+		const page = searchParams.get("page") || "1";
+
+		const response = await fetch(`/api/groups?page=${page}`);
 
 		if (!response.ok) {
-			throw new Error("Failed to fetch groups");
+			throw new Error(`Failed to fetch groups: ${response.status}`);
 		}
 
-		const data = await response.json();
-		return { allGroups: data };
+		const groups = await response.json();
+		return { groups };
 	} catch (error) {
 		console.error("Error loading groups:", error);
-		return { allGroups: { groups: [] } };
+		throw error;
 	}
 };
 
 // Loader for group details page
-export const groupDetailsLoader = async ({
-	params,
-}: {
-	params: { groupId: string };
-}) => {
+export const groupDetailsLoader = async ({ params }: LoaderFunctionArgs) => {
+	const { groupId } = params;
+
+	// Add type safety check
+	if (!groupId) {
+		throw new Error("Group ID is required");
+	}
+
 	try {
-		const response = await fetch(`/api/groups/${params.groupId}`);
+		const response = await fetch(`/api/groups/${groupId}`);
 
 		if (!response.ok) {
-			throw new Error("Failed to fetch group details");
+			throw new Error(`Failed to fetch group: ${response.status}`);
 		}
 
-		const groupDetails = await response.json();
-		return groupDetails;
+		const group = await response.json();
+		return { group };
 	} catch (error) {
 		console.error("Error loading group details:", error);
-		return redirect("/groups");
+            throw error;
 	}
 };
-
 // Action for group operations (join, leave, delete)
-export const groupAction = async ({
-	request,
-	params,
-}: {
-	request: Request;
-	params: { groupId?: string };
-}) => {
+export const groupAction = async ({ request, params }: ActionFunctionArgs) => {
 	const formData = await request.formData();
 	const intent = formData.get("intent") as string;
-	const groupId = params.groupId || (formData.get("id") as string);
+	const { groupId } = params || (formData.get("id") as string);
 
 	if (!groupId) {
 		return json({ error: "Group ID is required" }, { status: 400 });

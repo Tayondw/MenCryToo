@@ -1,40 +1,75 @@
-import { redirect, json } from "react-router-dom";
+import { redirect, json, LoaderFunctionArgs } from "react-router-dom";
 
 // Loader for events list page
-export const eventsLoader = async () => {
+export const eventsLoader = async ({ request }: LoaderFunctionArgs) => {
 	try {
-		const response = await fetch("/api/events/");
+		const url = new URL(request.url);
+		const searchParams = url.searchParams;
+		const page = searchParams.get("page") || "1";
+
+		const response = await fetch(`/api/events?page=${page}`);
 
 		if (!response.ok) {
-			throw new Error("Failed to fetch events");
+			throw new Error(`Failed to fetch events: ${response.status}`);
 		}
 
-		const data = await response.json();
-		return { allEvents: data };
+		const events = await response.json();
+		return { events };
 	} catch (error) {
 		console.error("Error loading events:", error);
-		return { allEvents: { events: [] } };
+		throw error;
 	}
 };
 
 // Loader for event details page
-export const eventDetailsLoader = async ({
-	params,
-}: {
-	params: { eventId: string };
-}) => {
+export const eventDetailsLoader = async ({ params }: LoaderFunctionArgs) => {
+	const { eventId } = params;
+
+	if (!eventId) {
+		throw new Error("Event ID is required");
+	}
+
 	try {
-		const response = await fetch(`/api/events/${params.eventId}`);
+		const response = await fetch(`/api/events/${eventId}`);
 
 		if (!response.ok) {
-			throw new Error("Failed to fetch event details");
+			throw new Error(`Failed to fetch event: ${response.status}`);
 		}
 
-		const eventDetails = await response.json();
-		return eventDetails;
+		const event = await response.json();
+		return { event };
 	} catch (error) {
-		console.error("Error loading event details:", error);
-		return redirect("/events");
+		console.error("Error loading event:", error);
+		throw error;
+	}
+};
+
+export const eventUpdateLoader = async ({ params }: LoaderFunctionArgs) => {
+	const { groupId, eventId } = params;
+
+	if (!groupId || !eventId) {
+		throw new Error("Group ID and Event ID are required");
+	}
+
+	try {
+		const [eventResponse, groupResponse] = await Promise.all([
+			fetch(`/api/events/${eventId}`),
+			fetch(`/api/groups/${groupId}`),
+		]);
+
+		if (!eventResponse.ok || !groupResponse.ok) {
+			throw new Error("Failed to fetch event or group data");
+		}
+
+		const [event, group] = await Promise.all([
+			eventResponse.json(),
+			groupResponse.json(),
+		]);
+
+		return { event, group };
+	} catch (error) {
+		console.error("Error loading event update data:", error);
+		throw error;
 	}
 };
 
