@@ -17,7 +17,7 @@ group_routes = Blueprint("groups", __name__)
 
 
 # ! GROUPS
-@group_routes.route("/")
+@group_routes.route("")
 def all_groups():
     """
     Query for all groups with optimized pagination and minimal data loading
