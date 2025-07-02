@@ -31,7 +31,8 @@ const Success = lazy(() => import("../components/Success"));
 const FourZeroFourPage = lazy(() => import("../components/404Page"));
 
 // Import loaders and actions
-import { getLoader } from "../loaders/getLoaders";
+// import { getLoader } from "../loaders/getLoaders";
+import { homeLoader } from "../loaders/homeLoaders";
 import { signupAction, loginAction } from "../loaders/authLoaders";
 import { userDetailsLoader } from "../loaders/userLoaders";
 import {
@@ -67,7 +68,7 @@ export const router = createBrowserRouter([
 		children: [
 			{
                         path: "/",
-                        loader: getLoader,
+                        loader: homeLoader,
 				element: (
 					<SuspenseWrapper>
 						<Home />
