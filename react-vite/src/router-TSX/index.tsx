@@ -31,42 +31,43 @@ const Success = lazy(() => import("../components/Success"));
 const FourZeroFourPage = lazy(() => import("../components/404Page"));
 
 // Import loaders and actions
-import { getLoader, tagsLoader } from "./loaders";
-import { postActions, partnershipActions, contactActions } from "./actions";
+import { getLoader } from "../loaders/getLoaders";
 import { signupAction, loginAction } from "../loaders/authLoaders";
 import { userDetailsLoader } from "../loaders/userLoaders";
 import {
-	profileLoader,
+      profileLoader,
 	profileUpdateAction,
 	profileAction,
 } from "../loaders/profileLoaders";
 import { profileFeedLoader } from "../loaders/profileFeedLoaders";
 import {
-	groupsLoader,
+      groupsLoader,
 	groupDetailsLoader,
 	groupAction,
 	groupFormAction,
 } from "../loaders/groupLoaders";
 import {
-	eventsLoader,
+      eventsLoader,
 	eventDetailsLoader,
 	eventAction,
 	eventFormAction,
 } from "../loaders/eventLoaders";
 import {
-	postsLoader,
+      postsLoader,
 	postDetailsLoader,
-	postAction,
+      postAction,
 } from "../loaders/postLoaders";
+import { partnershipActions } from "../loaders/partnershipActions";
+import { contactActions } from "../loaders/contactActions";
 
 // OPTIMIZED: Router configuration with performance considerations
 export const router = createBrowserRouter([
 	{
 		element: <Layout />,
-		loader: tagsLoader,
 		children: [
 			{
-				path: "/",
+                        path: "/",
+                        loader: getLoader,
 				element: (
 					<SuspenseWrapper>
 						<Home />
@@ -113,7 +114,6 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "groups/new",
-				loader: getLoader,
 				element: (
 					<SuspenseWrapper>
 						<CreateGroup />
@@ -202,7 +202,7 @@ export const router = createBrowserRouter([
 						<ProfileFeed />
 					</SuspenseWrapper>
 				),
-				action: postActions,
+				action: postAction,
 			},
 			{
 				path: "users/:userId",
@@ -221,7 +221,7 @@ export const router = createBrowserRouter([
 						<Posts />
 					</SuspenseWrapper>
 				),
-				action: postActions,
+				action: postAction,
 			},
 			{
 				path: "posts/create",
