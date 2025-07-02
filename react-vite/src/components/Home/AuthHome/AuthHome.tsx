@@ -9,7 +9,7 @@ import {
 	ChevronRight,
 	MapPin,
 	Clock,
-	User,
+	User as UserIcon,
 	Handshake,
 	PenTool,
 	UserCheck,
@@ -106,7 +106,7 @@ const mockEvents = [
 ];
 
 const AuthHome: React.FC = () => {
-	const sessionUser = useSelector((state: RootState) => state.session.user);
+      const sessionUser = useSelector((state: RootState) => state.session.user);
 	const [currentGroupIndex, setCurrentGroupIndex] = useState(0);
 	const [currentEventIndex, setCurrentEventIndex] = useState(0);
 
@@ -256,7 +256,7 @@ const AuthHome: React.FC = () => {
 								Partnership
 							</Link>
 							<Link to="/profile" className="btn-outline-hero">
-								<User size={20} />
+								<UserIcon size={20} />
 								View Profile
 							</Link>
 						</div>
@@ -470,7 +470,7 @@ const AuthHome: React.FC = () => {
 																	</span>
 																</div>
 																<div className="meta-item">
-																	<User size={16} />
+																	<UserIcon size={16} />
 																	<span>{event.type} event</span>
 																</div>
 															</div>
@@ -520,7 +520,7 @@ const AuthHome: React.FC = () => {
 					<div className="section-header">
 						<h2 className="section-title">Choose Your Path</h2>
 					</div>
-					<div className="connect-description" style={{marginBottom: `55px`}}>
+					<div className="connect-description" style={{ marginBottom: `55px` }}>
 						<p className="section-subtitle">
 							Step through the doors to explore different aspects of your mental
 							health journey
