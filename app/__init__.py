@@ -101,7 +101,6 @@ def create_app(config_class=Config):
     @app.before_request
     def before_request():
         """Optimizations for each request"""
-        # FIX: Check os.environ instead of app.config
         flask_env = os.environ.get("FLASK_ENV", "development")
 
         # Only do HTTPS redirect in actual production AND not for API endpoints
@@ -113,9 +112,6 @@ def create_app(config_class=Config):
             if request.headers.get("X-Forwarded-Proto") == "http":
                 url = request.url.replace("http://", "https://", 1)
                 return redirect(url, code=301)
-
-        # Debug logging (remove after fixing)
-        print(f"DEBUG: {request.method} {request.path} - ENV: {flask_env}")
 
         # Add request timing for monitoring (safely)
         try:
