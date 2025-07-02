@@ -328,94 +328,158 @@ class User(db.Model, UserMixin):
             "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
         }
 
-    def to_dict_profile_optimized(self, posts=None, comments=None):
-        """Optimized version for profile page that accepts pre-loaded data"""
-        result = {
-            "id": self.id,
-            "firstName": self.first_name,
-            "lastName": self.last_name,
-            "username": self.username,
-            "email": self.email,
-            "bio": self.bio,
-            "profileImage": self.profile_image_url,
-            "usersTags": (
-                [{"id": tag.id, "name": tag.name} for tag in self.users_tags]
-                if hasattr(self, "users_tags")
-                else []
-            ),
-            "createdAt": self.created_at.isoformat() if self.created_at else None,
-            "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
-        }
+    def to_dict_profile_optimized(self):
+        """
+        Optimized method specifically for profile page.
+        Returns all necessary data with efficient structure.
+        """
 
-        # Add membership info if available
-        if hasattr(self, "memberships"):
-            result["userMembership"] = [
-                {
-                    "id": membership.id,
-                    "groupId": membership.group_id,
-                    "userId": membership.user_id,
-                    "group": (
-                        {
-                            "id": membership.group.id,
-                            "name": membership.group.name,
-                            "image": membership.group.image,
-                            "city": membership.group.city,
-                            "state": membership.group.state,
-                        }
-                        if membership.group
-                        else None
-                    ),
-                }
-                for membership in self.memberships
-            ]
+        # Collect ALL groups (both as member and organizer) efficiently
+        all_user_groups = []
 
-        # Add attendance info if available
-        if hasattr(self, "attendances"):
-            result["userAttendances"] = [
-                {
-                    "id": attendance.id,
-                    "eventId": attendance.event_id,
-                    "userId": attendance.user_id,
-                }
-                for attendance in self.attendances
-            ]
+        # Add groups where user is a member
+        if hasattr(self, "memberships") and self.memberships:
+            for membership in self.memberships:
+                if membership.group:
+                    group_data = {
+                        "id": membership.group.id,
+                        "name": membership.group.name,
+                        "about": membership.group.about,
+                        "image": membership.group.image,
+                        "city": membership.group.city,
+                        "state": membership.group.state,
+                        "type": membership.group.type,
+                        "organizerId": membership.group.organizer_id,
+                        "numMembers": (
+                            len(membership.group.memberships)
+                            if hasattr(membership.group, "memberships")
+                            else 0
+                        ),
+                    }
+                    # Avoid duplicates
+                    if not any(g["id"] == group_data["id"] for g in all_user_groups):
+                        all_user_groups.append(group_data)
 
-        # Add group info if available
-        if hasattr(self, "groups"):
-            result["groups"] = [
-                {
+        # Add groups where user is organizer
+        if hasattr(self, "groups") and self.groups:
+            for group in self.groups:
+                group_data = {
                     "id": group.id,
                     "name": group.name,
+                    "about": group.about,
                     "image": group.image,
+                    "city": group.city,
+                    "state": group.state,
+                    "type": group.type,
+                    "organizerId": group.organizer_id,
+                    "numMembers": (
+                        len(group.memberships) if hasattr(group, "memberships") else 0
+                    ),
                 }
-                for group in self.groups
-            ]
+                # Avoid duplicates
+                if not any(g["id"] == group_data["id"] for g in all_user_groups):
+                    all_user_groups.append(group_data)
 
-        # Use provided posts to avoid triggering additional queries
-        if posts is not None:
-            result["posts"] = [
-                {
+        # Collect ALL events user is attending
+        user_events = []
+        if hasattr(self, "attendances") and self.attendances:
+            for attendance in self.attendances:
+                if attendance.event:
+                    event_data = {
+                        "id": attendance.event.id,
+                        "name": attendance.event.name,
+                        "description": attendance.event.description,
+                        "type": attendance.event.type,
+                        "capacity": attendance.event.capacity,
+                        "image": attendance.event.image,
+                        "startDate": (
+                            attendance.event.start_date.isoformat()
+                            if attendance.event.start_date
+                            else None
+                        ),
+                        "endDate": (
+                            attendance.event.end_date.isoformat()
+                            if attendance.event.end_date
+                            else None
+                        ),
+                        "numAttendees": (
+                            len(attendance.event.attendances)
+                            if hasattr(attendance.event, "attendances")
+                            else 0
+                        ),
+                        "groupInfo": {
+                            "id": (
+                                attendance.event.groups.id
+                                if attendance.event.groups
+                                else None
+                            ),
+                            "name": (
+                                attendance.event.groups.name
+                                if attendance.event.groups
+                                else "Unknown Group"
+                            ),
+                        },
+                        "venueInfo": (
+                            {
+                                "address": attendance.event.venues.address,
+                                "city": attendance.event.venues.city,
+                                "state": attendance.event.venues.state,
+                            }
+                            if attendance.event.venues
+                            else None
+                        ),
+                    }
+                    user_events.append(event_data)
+
+        # Collect user posts with optimized data (recent 20 posts max)
+        user_posts = []
+        if hasattr(self, "posts") and self.posts:
+            # Sort posts by creation date and limit to 20 most recent
+            sorted_posts = sorted(
+                self.posts, key=lambda p: p.created_at or datetime.min, reverse=True
+            )[:20]
+
+            for post in sorted_posts:
+                post_data = {
                     "id": post.id,
                     "title": post.title,
                     "caption": post.caption,
                     "image": post.image,
-                    "likes": len(post.post_likes) if hasattr(post, "post_likes") else 0,
                     "creator": post.creator,
+                    "likes": (
+                        len(post.post_likes) if hasattr(post, "post_likes") else 0
+                    ),
+                    "numComments": (
+                        len(post.post_comments) if hasattr(post, "post_comments") else 0
+                    ),
                     "createdAt": (
                         post.created_at.isoformat() if post.created_at else None
                     ),
                     "updatedAt": (
                         post.updated_at.isoformat() if post.updated_at else None
                     ),
-                    "user": self.to_dict_list_optimized(),
+                    "user": {
+                        "id": self.id,
+                        "username": self.username,
+                        "firstName": self.first_name,
+                        "lastName": self.last_name,
+                        "profileImage": self.profile_image_url,
+                    },
                 }
-                for post in posts
-            ]
+                user_posts.append(post_data)
 
-        # Use provided comments to avoid triggering additional queries
-        if comments is not None:
-            result["userComments"] = [
-                {
+        # Collect user comments (recent 10 comments max for performance)
+        user_comments = []
+        if hasattr(self, "user_comments") and self.user_comments:
+            # Sort comments by creation date and limit to 10 most recent
+            sorted_comments = sorted(
+                self.user_comments,
+                key=lambda c: c.created_at or datetime.min,
+                reverse=True,
+            )[:10]
+
+            for comment in sorted_comments:
+                comment_data = {
                     "id": comment.id,
                     "userId": comment.user_id,
                     "postId": comment.post_id,
@@ -429,10 +493,29 @@ class User(db.Model, UserMixin):
                         comment.updated_at.isoformat() if comment.updated_at else None
                     ),
                 }
-                for comment in comments
-            ]
+                user_comments.append(comment_data)
 
-        return result
+        return {
+            "id": self.id,
+            "firstName": self.first_name,
+            "lastName": self.last_name,
+            "username": self.username,
+            "email": self.email,
+            "bio": self.bio,
+            "profileImage": self.profile_image_url,
+            "usersTags": (
+                [{"id": tag.id, "name": tag.name} for tag in self.users_tags]
+                if hasattr(self, "users_tags")
+                else []
+            ),
+            # Complete data for profile display
+            "group": all_user_groups,
+            "events": user_events,
+            "posts": user_posts,
+            "userComments": user_comments,
+            "createdAt": self.created_at.isoformat() if self.created_at else None,
+            "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
+        }
 
     def to_dict_minimal(self):
         """Lightweight version for lists and references - fastest loading"""
