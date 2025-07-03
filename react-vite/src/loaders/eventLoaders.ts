@@ -1,35 +1,5 @@
 import { redirect, json, LoaderFunctionArgs } from "react-router-dom";
 
-// Configuration for API base URL
-const API_BASE_URL =
-	import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
-
-// Helper function to make API calls with proper error handling
-const apiCall = async (url: string, options?: RequestInit) => {
-	try {
-		// Ensure the URL is absolute
-		const fullUrl = url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
-
-		const response = await fetch(fullUrl, {
-			...options,
-			credentials: "include", // Important for sessions/cookies
-			headers: {
-				"Content-Type": "application/json",
-				...options?.headers,
-			},
-		});
-
-		if (!response.ok) {
-			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-		}
-
-		return await response.json();
-	} catch (error) {
-		console.error("API call failed:", error);
-		throw error;
-	}
-};
-
 // Loader for events list page
 export const eventsLoader = async ({ request }: LoaderFunctionArgs) => {
 	try {
@@ -38,25 +8,42 @@ export const eventsLoader = async ({ request }: LoaderFunctionArgs) => {
 		const page = searchParams.get("page") || "1";
 		const per_page = searchParams.get("per_page") || "20";
 
-		const response = await apiCall(
-			`/api/events?page=${page}&per_page=${per_page}`,
+		// Add cache busting for fresh data
+		const timestamp = Date.now();
+
+		const response = await fetch(
+			`/api/events?page=${page}&per_page=${per_page}&_t=${timestamp}`,
+			{
+				credentials: "include",
+				headers: {
+					"Cache-Control": "no-cache, no-store, must-revalidate",
+					Pragma: "no-cache",
+					Expires: "0",
+				},
+			},
 		);
+
+		if (!response.ok) {
+			throw new Error(`Failed to fetch events: ${response.status}`);
+		}
+
+		const data = await response.json();
 
 		// Handle both paginated and non-paginated responses
 		let eventsData;
-		if (response.events) {
-			// Paginated response: { groups: [...], pagination: {...} }
-			eventsData = response;
-		} else if (Array.isArray(response)) {
+		if (data.events) {
+			// Paginated response: { events: [...], pagination: {...} }
+			eventsData = data;
+		} else if (Array.isArray(data)) {
 			// Direct array response: [...]
-			eventsData = { events: response };
+			eventsData = { events: data };
 		} else {
-			// Unknown format, try to extract groups
-			eventsData = { events: response.events || [] };
+			// Unknown format, try to extract events
+			eventsData = { events: data.events || [] };
 		}
 
 		return {
-			allEvents: eventsData, // This matches what Events component expects
+			allEvents: eventsData,
 			currentPage: parseInt(page),
 			perPage: parseInt(per_page),
 		};
@@ -81,7 +68,17 @@ export const eventDetailsLoader = async ({ params }: LoaderFunctionArgs) => {
 	}
 
 	try {
-		const response = await fetch(`/api/events/${eventId}`);
+		// Add cache busting for fresh data
+		const timestamp = Date.now();
+
+		const response = await fetch(`/api/events/${eventId}?_t=${timestamp}`, {
+			credentials: "include",
+			headers: {
+				"Cache-Control": "no-cache, no-store, must-revalidate",
+				Pragma: "no-cache",
+				Expires: "0",
+			},
+		});
 
 		if (!response.ok) {
 			throw new Error(`Failed to fetch event: ${response.status}`);
@@ -286,11 +283,21 @@ export const eventFormAction = async ({ request }: { request: Request }) => {
 
 				const response = await fetch(`/api/groups/${groupId}/events/new`, {
 					method: "POST",
+					credentials: "include",
 					body: formData,
 				});
 
 				if (response.ok) {
-					return redirect("/events");
+					// Force cache refresh by redirecting with timestamp
+					const timestamp = Date.now();
+
+					// Use window.location for immediate cache-busting redirect
+					if (typeof window !== "undefined") {
+						window.location.href = `/events?refresh=${timestamp}`;
+						return null;
+					}
+
+					return redirect(`/events?refresh=${timestamp}`);
 				} else {
 					const errorData = await response.json();
 					return json({ errors: errorData }, { status: 400 });
@@ -312,12 +319,21 @@ export const eventFormAction = async ({ request }: { request: Request }) => {
 					`/api/groups/${groupId}/events/${eventId}`,
 					{
 						method: "POST",
+						credentials: "include",
 						body: formData,
 					},
 				);
 
 				if (response.ok) {
-					return redirect(`/events/${eventId}`);
+					// Force cache refresh for event details
+					const timestamp = Date.now();
+
+					if (typeof window !== "undefined") {
+						window.location.href = `/events/${eventId}?refresh=${timestamp}`;
+						return null;
+					}
+
+					return redirect(`/events/${eventId}?refresh=${timestamp}`);
 				} else {
 					const errorData = await response.json();
 					return json({ errors: errorData }, { status: 400 });
