@@ -88,7 +88,7 @@ export const eventDetailsLoader = async ({ params }: LoaderFunctionArgs) => {
 		}
 
 		const event = await response.json();
-		return { event };
+		return event;
 	} catch (error) {
 		console.error("Error loading event:", error);
 		throw error;
