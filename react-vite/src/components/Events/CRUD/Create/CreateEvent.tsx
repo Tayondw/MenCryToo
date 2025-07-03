@@ -5,6 +5,7 @@ import {
 	useNavigate,
 	useLoaderData,
 	Link,
+	useNavigation,
 } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
@@ -16,6 +17,7 @@ import {
 	Info,
 	Check,
 	Upload,
+	CheckCircle,
 } from "lucide-react";
 import { RootState } from "../../../../types";
 
@@ -40,6 +42,7 @@ const CreateEvent: React.FC = () => {
 	const errors = useActionData() as FormErrors;
 	const sessionUser = useSelector((state: RootState) => state.session.user);
 	const navigate = useNavigate();
+	const navigation = useNavigation();
 	const groupDetails = useLoaderData() as GroupDetails;
 
 	// Form state
@@ -54,7 +57,10 @@ const CreateEvent: React.FC = () => {
 
 	const [imageFile, setImageFile] = useState<File | null>(null);
 	const [previewImage, setPreviewImage] = useState<string | null>(null);
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
+	// Check if form is being submitted
+	const isSubmitting = navigation.state === "submitting";
 
 	// Character limits
 	const NAME_MAX_LENGTH = 50;
@@ -75,6 +81,20 @@ const CreateEvent: React.FC = () => {
 			navigate("/");
 		}
 	}, [groupDetails, sessionUser, navigate]);
+
+	// Handle successful form submission
+	useEffect(() => {
+		if (navigation.state === "idle" && !errors && isSubmitting) {
+			setShowSuccessMessage(true);
+
+			// Clear form and show success message
+			setTimeout(() => {
+				// Force navigation to events page with cache busting
+				const timestamp = Date.now();
+				window.location.href = `/events?created=${timestamp}`;
+			}, 2000);
+		}
+	}, [navigation.state, errors, isSubmitting]);
 
 	const handleInputChange = (
 		e: React.ChangeEvent<
@@ -116,12 +136,6 @@ const CreateEvent: React.FC = () => {
 		return `${year}-${month}-${day}T${hours}:${minutes}`;
 	};
 
-	// Handle form submission
-	const handleSubmit = () => {
-		setIsSubmitting(true);
-		// Form will be handled by React Router action
-	};
-
 	// Calculate if form is valid
 	const isFormValid =
 		formData.name.length >= NAME_MIN_LENGTH &&
@@ -134,6 +148,30 @@ const CreateEvent: React.FC = () => {
 		formData.startDate !== "" &&
 		formData.endDate !== "" &&
 		imageFile !== null;
+
+	// Success Modal Component
+	const SuccessModal: React.FC = () => (
+		<div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+			<div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
+				<div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+					<CheckCircle size={32} className="text-green-600" />
+				</div>
+				<h3 className="text-xl font-bold text-slate-900 mb-2">
+					Event Created Successfully!
+				</h3>
+				<p className="text-slate-600 mb-4">
+					Your event "{formData.name}" has been created and you've been
+					automatically added as an attendee.
+				</p>
+				<div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+					<p className="text-green-800 text-sm">
+						✅ As the organizer, you are automatically attending this event
+					</p>
+				</div>
+				<p className="text-slate-500 text-sm">Redirecting to events page...</p>
+			</div>
+		</div>
+	);
 
 	if (!sessionUser || !groupDetails) {
 		return (
@@ -298,7 +336,6 @@ const CreateEvent: React.FC = () => {
 							action={`/groups/${groupDetails.id}/events/new`}
 							encType="multipart/form-data"
 							className="space-y-6"
-							onSubmit={handleSubmit}
 						>
 							<input type="hidden" name="group_id" value={groupDetails.id} />
 							<input type="hidden" name="intent" value="create-event" />
@@ -323,6 +360,7 @@ const CreateEvent: React.FC = () => {
 									} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors`}
 									maxLength={NAME_MAX_LENGTH}
 									required
+									disabled={isSubmitting}
 								/>
 								<div className="flex justify-between items-center text-xs">
 									<div>
@@ -368,6 +406,7 @@ const CreateEvent: React.FC = () => {
 											errors?.type ? "border-red-300" : "border-slate-300"
 										} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors`}
 										required
+										disabled={isSubmitting}
 									>
 										<option value="">Select type</option>
 										<option value="in-person">In Person</option>
@@ -398,6 +437,7 @@ const CreateEvent: React.FC = () => {
 											errors?.capacity ? "border-red-300" : "border-slate-300"
 										} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors`}
 										required
+										disabled={isSubmitting}
 									/>
 									{errors?.capacity ? (
 										<p className="text-xs text-red-600">{errors.capacity}</p>
@@ -436,6 +476,7 @@ const CreateEvent: React.FC = () => {
 													: "border-slate-300"
 											} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors`}
 											required
+											disabled={isSubmitting}
 										/>
 										{errors?.startDate && (
 											<p className="text-xs text-red-600">{errors.startDate}</p>
@@ -459,6 +500,7 @@ const CreateEvent: React.FC = () => {
 												errors?.endDate ? "border-red-300" : "border-slate-300"
 											} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors`}
 											required
+											disabled={isSubmitting}
 										/>
 										{errors?.endDate && (
 											<p className="text-xs text-red-600">{errors.endDate}</p>
@@ -487,6 +529,7 @@ const CreateEvent: React.FC = () => {
 									} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors resize-none`}
 									maxLength={DESCRIPTION_MAX_LENGTH}
 									required
+									disabled={isSubmitting}
 								/>
 								<div className="flex justify-between items-center text-xs">
 									<div>
@@ -538,6 +581,7 @@ const CreateEvent: React.FC = () => {
 													setImageFile(null);
 												}}
 												className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm p-1 rounded-full hover:bg-white transition-colors"
+												disabled={isSubmitting}
 											>
 												<svg
 													xmlns="http://www.w3.org/2000/svg"
@@ -560,9 +604,12 @@ const CreateEvent: React.FC = () => {
 								) : (
 									<div
 										onClick={() =>
+											!isSubmitting &&
 											document.getElementById("image-upload")?.click()
 										}
-										className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center cursor-pointer hover:border-orange-300 hover:bg-orange-50 transition-all duration-200"
+										className={`border-2 border-dashed border-slate-300 rounded-lg p-8 text-center cursor-pointer hover:border-orange-300 hover:bg-orange-50 transition-all duration-200 ${
+											isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+										}`}
 									>
 										<Upload size={32} className="mx-auto text-slate-400 mb-2" />
 										<p className="text-sm font-medium text-slate-700 mb-1">
@@ -582,6 +629,7 @@ const CreateEvent: React.FC = () => {
 									onChange={handleImageChange}
 									className="hidden"
 									required
+									disabled={isSubmitting}
 								/>
 
 								{errors?.image && (
@@ -607,6 +655,10 @@ const CreateEvent: React.FC = () => {
 										attendees
 									</li>
 									<li>Consider accessibility needs for all participants</li>
+									<li className="text-green-700 font-medium">
+										As the organizer, you'll be automatically added as an
+										attendee
+									</li>
 								</ul>
 							</div>
 
@@ -614,7 +666,9 @@ const CreateEvent: React.FC = () => {
 							<div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row gap-4 justify-end">
 								<Link
 									to={`/groups/${groupDetails.id}`}
-									className="px-6 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-all duration-200 text-center font-medium"
+									className={`px-6 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-all duration-200 text-center font-medium ${
+										isSubmitting ? "opacity-50 pointer-events-none" : ""
+									}`}
 								>
 									Cancel
 								</Link>
@@ -630,7 +684,7 @@ const CreateEvent: React.FC = () => {
 									{isSubmitting ? (
 										<>
 											<div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-											Creating...
+											Creating Event...
 										</>
 									) : (
 										<>
@@ -644,6 +698,9 @@ const CreateEvent: React.FC = () => {
 					</div>
 				</div>
 			</div>
+
+			{/* Success Modal */}
+			{showSuccessMessage && <SuccessModal />}
 		</div>
 	);
 };
