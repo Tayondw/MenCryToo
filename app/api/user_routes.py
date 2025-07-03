@@ -338,7 +338,7 @@ def add_tags(userId):
 @login_required
 def create_post(userId):
     """
-    Optimized post creation
+    FIXED: Create post with single form processing
     """
     # Verify user exists
     user = User.query.get(userId)
@@ -349,20 +349,30 @@ def create_post(userId):
     if current_user.id != userId:
         return {"errors": {"message": "Unauthorized"}}, 401
 
-    form = PostForm()
-    form["csrf_token"].data = request.cookies["csrf_token"]
+    # Get form data directly from request
+    title = request.form.get("title", "").strip()
+    caption = request.form.get("caption", "").strip()
+    image_file = request.files.get("image")
 
-    if form.validate_on_submit():
-        post_image = form.image.data
+    # Manual validation (no WTF forms to avoid formData conflicts)
+    errors = {}
 
-        if not post_image:
-            return {"message": "An image is required to create a post."}, 400
+    if not title or len(title) < 5 or len(title) > 25:
+        errors["title"] = "Title must be between 5 and 25 characters"
 
-        try:
-            post_image.filename = get_unique_filename(post_image.filename)
-            upload = upload_file_to_s3(post_image)
-        except Exception as e:
-            return {"message": f"Image upload failed: {str(e)}"}, 500
+    if not caption or len(caption) < 50 or len(caption) > 500:
+        errors["caption"] = "Caption must be between 50 and 500 characters"
+
+    if not image_file or image_file.filename == "":
+        errors["image"] = "An image is required to create a post"
+
+    if errors:
+        return {"errors": errors}, 400
+
+    try:
+        # Handle image upload
+        image_file.filename = get_unique_filename(image_file.filename)
+        upload = upload_file_to_s3(image_file)
 
         if "url" not in upload:
             return {
@@ -371,30 +381,33 @@ def create_post(userId):
                 )
             }, 400
 
-        url = upload["url"]
-        create_post = Post(
+        # Create post
+        new_post = Post(
             creator=userId,
-            title=form.data["title"],
-            caption=form.data["caption"],
-            image=url,
+            title=title,
+            caption=caption,
+            image=upload["url"],
         )
 
-        db.session.add(create_post)
+        db.session.add(new_post)
         db.session.commit()
 
-        # Return minimal post data for faster response
-        return {"post": create_post.to_dict_create_optimized()}, 201
+        # Return minimal post data
+        return {"post": new_post.to_dict_create_optimized()}, 201
 
-    return form.errors, 400
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error creating post: {str(e)}")
+        return {"errors": {"server": "Failed to create post. Please try again."}}, 500
 
 
 @user_routes.route("/<int:userId>/posts/<int:postId>", methods=["POST"])
+@login_required
 def edit_post(userId, postId):
     """
-    Optimized post editing
+    FIXED: Edit post with single form processing
     """
     post_to_edit = Post.query.get(postId)
-
     if not post_to_edit:
         return {"errors": {"message": "Not Found"}}, 404
 
@@ -405,37 +418,153 @@ def edit_post(userId, postId):
     if current_user.id != userId:
         return {"errors": {"message": "Unauthorized"}}, 401
 
-    form = EditPostForm()
-    form["csrf_token"].data = request.cookies["csrf_token"]
+    # Get form data directly from request
+    title = request.form.get("title", "").strip()
+    caption = request.form.get("caption", "").strip()
+    image_file = request.files.get("image")
 
-    if form.validate_on_submit():
-        post_to_edit.creator = userId
-        post_to_edit.title = form.data["title"]
-        post_to_edit.caption = form.data["caption"]
+    # Manual validation
+    errors = {}
 
-        if form.image.data:
-            post_image = form.image.data
-            post_image.filename = get_unique_filename(post_image.filename)
+    if not title or len(title) < 5 or len(title) > 25:
+        errors["title"] = "Title must be between 5 and 25 characters"
 
-            upload = upload_file_to_s3(post_image)
+    if not caption or len(caption) < 50 or len(caption) > 500:
+        errors["caption"] = "Caption must be between 50 and 500 characters"
+
+    if errors:
+        return {"errors": errors}, 400
+
+    try:
+        # Update post fields
+        post_to_edit.title = title
+        post_to_edit.caption = caption
+
+        # Handle image update if provided
+        if image_file and image_file.filename != "":
+            image_file.filename = get_unique_filename(image_file.filename)
+            upload = upload_file_to_s3(image_file)
+
             if "url" not in upload:
                 return {"message": "Upload failed"}, 400
 
-            # Remove the old image from S3
+            # Remove old image from S3
             if post_to_edit.image:
                 remove_file_from_s3(post_to_edit.image)
+
             post_to_edit.image = upload["url"]
 
         db.session.commit()
-
-        # Return minimal data for faster response
         return {"post": post_to_edit.to_dict_create_optimized()}, 200
 
-    elif form.errors:
-        return {"errors": form.errors}, 400
-    else:
-        # Return current post data if no form submission
-        return {"post": post_to_edit.to_dict_create_optimized()}, 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating post: {str(e)}")
+        return {"errors": {"server": "Failed to update post. Please try again."}}, 500
+
+
+# @user_routes.route("<int:userId>/posts/create", methods=["POST"])
+# @login_required
+# def create_post(userId):
+#     """
+#     Optimized post creation
+#     """
+#     # Verify user exists
+#     user = User.query.get(userId)
+#     if not user:
+#         return {"errors": {"message": "Not Found"}}, 404
+
+#     # Check authorization
+#     if current_user.id != userId:
+#         return {"errors": {"message": "Unauthorized"}}, 401
+
+#     form = PostForm()
+#     form["csrf_token"].data = request.cookies["csrf_token"]
+
+#     if form.validate_on_submit():
+#         post_image = form.image.data
+
+#         if not post_image:
+#             return {"message": "An image is required to create a post."}, 400
+
+#         try:
+#             post_image.filename = get_unique_filename(post_image.filename)
+#             upload = upload_file_to_s3(post_image)
+#         except Exception as e:
+#             return {"message": f"Image upload failed: {str(e)}"}, 500
+
+#         if "url" not in upload:
+#             return {
+#                 "message": upload.get(
+#                     "errors", "Image upload failed. Please try again."
+#                 )
+#             }, 400
+
+#         url = upload["url"]
+#         create_post = Post(
+#             creator=userId,
+#             title=form.data["title"],
+#             caption=form.data["caption"],
+#             image=url,
+#         )
+
+#         db.session.add(create_post)
+#         db.session.commit()
+
+#         # Return minimal post data for faster response
+#         return {"post": create_post.to_dict_create_optimized()}, 201
+
+#     return form.errors, 400
+
+
+# @user_routes.route("/<int:userId>/posts/<int:postId>", methods=["POST"])
+# def edit_post(userId, postId):
+#     """
+#     Optimized post editing
+#     """
+#     post_to_edit = Post.query.get(postId)
+
+#     if not post_to_edit:
+#         return {"errors": {"message": "Not Found"}}, 404
+
+#     user = User.query.get(userId)
+#     if not user:
+#         return {"errors": {"message": "Not Found"}}, 404
+
+#     if current_user.id != userId:
+#         return {"errors": {"message": "Unauthorized"}}, 401
+
+#     form = EditPostForm()
+#     form["csrf_token"].data = request.cookies["csrf_token"]
+
+#     if form.validate_on_submit():
+#         post_to_edit.creator = userId
+#         post_to_edit.title = form.data["title"]
+#         post_to_edit.caption = form.data["caption"]
+
+#         if form.image.data:
+#             post_image = form.image.data
+#             post_image.filename = get_unique_filename(post_image.filename)
+
+#             upload = upload_file_to_s3(post_image)
+#             if "url" not in upload:
+#                 return {"message": "Upload failed"}, 400
+
+#             # Remove the old image from S3
+#             if post_to_edit.image:
+#                 remove_file_from_s3(post_to_edit.image)
+#             post_to_edit.image = upload["url"]
+
+#         db.session.commit()
+
+#         # Return minimal data for faster response
+#         return {"post": post_to_edit.to_dict_create_optimized()}, 200
+
+#     elif form.errors:
+#         return {"errors": form.errors}, 400
+#     else:
+#         # Return current post data if no form submission
+#         return {"post": post_to_edit.to_dict_create_optimized()}, 200
 
 
 # from flask import Blueprint, jsonify, render_template, request, redirect, abort
