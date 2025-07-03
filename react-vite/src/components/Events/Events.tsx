@@ -1,3 +1,5 @@
+// react-vite/src/components/Events/Events.tsx - Fixed organizer groups logic
+
 import React, { useState, useMemo } from "react";
 import { useLoaderData, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -16,7 +18,7 @@ import {
 	Plus,
 	X,
 } from "lucide-react";
-import { RootState, Event } from "../../types";
+import { RootState, Event, Group } from "../../types";
 
 interface EventsData {
 	events: Event[];
@@ -32,7 +34,7 @@ interface FilterOptions {
 
 const Events: React.FC = () => {
 	const { allEvents } = useLoaderData() as { allEvents: EventsData };
-      const sessionUser = useSelector((state: RootState) => state.session.user);
+	const sessionUser = useSelector((state: RootState) => state.session.user);
 
 	const [filters, setFilters] = useState<FilterOptions>({
 		searchTerm: "",
@@ -44,12 +46,35 @@ const Events: React.FC = () => {
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 	const [showFilters, setShowFilters] = useState(false);
 	const [showGroupSelector, setShowGroupSelector] = useState(false);
-      const [groupSearchTerm, setGroupSearchTerm] = useState("");
+	const [groupSearchTerm, setGroupSearchTerm] = useState("");
 
-	// Mock user groups for the selector - in a real app, this would come from the user's data
+	// FIXED: Get groups where user is ORGANIZER and member groups using organizerId
 	const userGroups = useMemo(() => {
-		if (!sessionUser) return [];
-		return sessionUser.group || [];
+		if (!sessionUser) {
+			return {
+				organizer: [] as Group[],
+				member: [] as Group[],
+				all: [] as Group[],
+			};
+		}
+
+		// Get all groups from user data
+		const allUserGroups = sessionUser.group || [];
+
+		// Separate organizer groups from member groups using organizerId
+		const organizerGroups = allUserGroups.filter((group: Group) => {
+			return group.organizerId === sessionUser.id;
+		});
+
+		const memberGroups = allUserGroups.filter((group: Group) => {
+			return group.organizerId !== sessionUser.id;
+		});
+
+		return {
+			organizer: organizerGroups,
+			member: memberGroups,
+			all: allUserGroups,
+		};
 	}, [sessionUser]);
 
 	// Process and filter events
@@ -140,15 +165,16 @@ const Events: React.FC = () => {
 		}
 	}, [processedEvents, filters]);
 
-	// Filter groups based on search term
-	const filteredGroups = useMemo(() => {
-		if (!groupSearchTerm) return userGroups;
+	// FIXED: Filter groups based on search term - only organizer groups for event creation
+	const filteredOrganizerGroups = useMemo(() => {
+		const organizerGroups = userGroups.organizer;
+		if (!groupSearchTerm) return organizerGroups;
 
 		const searchLower = groupSearchTerm.toLowerCase();
-		return userGroups.filter((group) =>
+		return organizerGroups.filter((group: Group) =>
 			group.name.toLowerCase().includes(searchLower),
 		);
-      }, [userGroups, groupSearchTerm]);
+	}, [userGroups.organizer, groupSearchTerm]);
 
 	const clearFilters = () => {
 		setFilters({
@@ -375,12 +401,12 @@ const Events: React.FC = () => {
 		);
 	};
 
-	// Group selection modal
+	// FIXED: Group selection modal - now properly shows organizer vs member groups
 	const GroupSelectionModal: React.FC = () => (
 		<div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
 			<div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
 				<div className="flex items-center justify-between mb-6">
-					<h3 className="text-xl font-bold text-slate-900">Select a Group</h3>
+					<h3 className="text-xl font-bold text-slate-900">Create Event</h3>
 					<button
 						onClick={() => setShowGroupSelector(false)}
 						className="p-2 text-slate-500 hover:text-slate-700 rounded-full hover:bg-slate-100 transition-colors"
@@ -389,27 +415,39 @@ const Events: React.FC = () => {
 					</button>
 				</div>
 
-				{userGroups.length === 0 ? (
+				{userGroups.organizer.length === 0 ? (
 					<div className="text-center py-8">
 						<div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
 							<Users size={24} className="text-slate-400" />
 						</div>
-						<p className="text-slate-700 mb-4">
+						<h4 className="text-lg font-semibold text-slate-900 mb-2">
+							No Groups to Organize
+						</h4>
+						<p className="text-slate-600 mb-4">
 							You need to be an organizer of a group to create an event.
 						</p>
+						{userGroups.member.length > 0 && (
+							<div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+								<p className="text-blue-800 text-sm">
+									You're a member of {userGroups.member.length} group
+									{userGroups.member.length !== 1 ? "s" : ""}, but only
+									organizers can create events.
+								</p>
+							</div>
+						)}
 						<Link
 							to="/groups/new"
 							className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
 						>
 							<Plus size={18} />
-							Create a Group First
+							Create Your Own Group
 						</Link>
 					</div>
 				) : (
 					<>
-						<div>
-							<p className="text-center py-4 text-red-500">
-								Must be an organizer of a group to create an event.
+						<div className="mb-6">
+							<p className="text-center text-slate-700 mb-4">
+								Select a group you organize to create an event:
 							</p>
 							<div className="relative">
 								<Search
@@ -426,35 +464,82 @@ const Events: React.FC = () => {
 							</div>
 						</div>
 
-						<div className="max-h-80 overflow-y-auto pr-2 space-y-2">
-							{filteredGroups.length === 0 ? (
+						<div className="max-h-80 overflow-y-auto pr-2 space-y-3">
+							{filteredOrganizerGroups.length === 0 ? (
 								<p className="text-center py-4 text-slate-500">
-									No matching groups found
+									No matching organizer groups found
 								</p>
 							) : (
-								filteredGroups.map((group) => (
-									<Link
-										key={group.id}
-										to={`/groups/${group.id}/events/new`}
-										className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-slate-200"
-									>
-										<img
-											src={group.image}
-											alt={group.name}
-											className="w-12 h-12 rounded-lg object-cover"
-										/>
-										<div>
-											<h4 className="font-medium text-slate-900">
-												{group.name}
-											</h4>
-											<p className="text-sm text-slate-500">
-												{group.organizerId === sessionUser?.id
-													? "You are the organizer"
-													: "You are a member"}
-											</p>
-										</div>
-									</Link>
-								))
+								<>
+									{/* Show organizer groups - these are clickable */}
+									{filteredOrganizerGroups.map((group: Group) => (
+										<Link
+											key={group.id}
+											to={`/groups/${group.id}/events/new`}
+											className="flex items-center gap-3 p-4 rounded-lg hover:bg-orange-50 transition-colors border-2 border-orange-200 hover:border-orange-300 group"
+										>
+											<img
+												src={group.image}
+												alt={group.name}
+												className="w-12 h-12 rounded-lg object-cover"
+											/>
+											<div className="flex-1">
+												<div className="flex items-center gap-2">
+													<h4 className="font-medium text-slate-900 group-hover:text-orange-700">
+														{group.name}
+													</h4>
+													<span className="bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-xs font-medium">
+														Organizer
+													</span>
+												</div>
+												<p className="text-sm text-slate-500">
+													Click to create an event for this group
+												</p>
+											</div>
+										</Link>
+									))}
+
+									{/* Show member groups for reference - these are NOT clickable */}
+									{userGroups.member.length > 0 && (
+										<>
+											<div className="border-t border-slate-200 pt-4 mt-4">
+												<p className="text-sm font-medium text-slate-600 mb-3">
+													Groups you're a member of (can't create events):
+												</p>
+												{userGroups.member.slice(0, 3).map((group: Group) => (
+													<div
+														key={group.id}
+														className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200 opacity-60"
+													>
+														<img
+															src={group.image}
+															alt={group.name}
+															className="w-10 h-10 rounded-lg object-cover"
+														/>
+														<div className="flex-1">
+															<div className="flex items-center gap-2">
+																<h4 className="font-medium text-slate-700">
+																	{group.name}
+																</h4>
+																<span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-full text-xs">
+																	Member
+																</span>
+															</div>
+															<p className="text-xs text-slate-500">
+																Only organizers can create events
+															</p>
+														</div>
+													</div>
+												))}
+												{userGroups.member.length > 3 && (
+													<p className="text-xs text-slate-500 text-center mt-2">
+														...and {userGroups.member.length - 3} more groups
+													</p>
+												)}
+											</div>
+										</>
+									)}
+								</>
 							)}
 						</div>
 					</>
@@ -497,6 +582,11 @@ const Events: React.FC = () => {
 								<button
 									onClick={() => setShowGroupSelector(true)}
 									className="inline-flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-orange-600 transition-colors"
+									title={
+										userGroups.organizer.length === 0
+											? "You need to organize a group to create events"
+											: "Create an event for one of your groups"
+									}
 								>
 									<Plus size={18} />
 									Create Event
@@ -744,7 +834,7 @@ const Events: React.FC = () => {
 								? "Try adjusting your search or filters to find more events."
 								: "No events are currently available. Check back later!"}
 						</p>
-						{sessionUser && (
+						{sessionUser && userGroups.organizer.length > 0 && (
 							<button
 								onClick={() => setShowGroupSelector(true)}
 								className="inline-flex items-center gap-2 bg-orange-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors"
