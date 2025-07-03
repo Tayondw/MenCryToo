@@ -1,14 +1,16 @@
-import { redirect, json } from "react-router-dom";
+import { redirect, json, LoaderFunctionArgs } from "react-router-dom";
 import { User, Tag } from "../types";
 
 // Loader to fetch user details by ID (optimized with caching)
-export const userDetailsLoader = async ({
-	params,
-}: {
-	params: { userId: string };
-}): Promise<User | Response> => {
+export const userDetailsLoader = async ({ params }: LoaderFunctionArgs) => {
+	const { userId } = params;
+
+	if (!userId) {
+		throw new Error("User ID is required");
+      }
+      
 	try {
-		const response = await fetch(`/api/users/${params.userId}`, {
+		const response = await fetch(`/api/users/${userId}`, {
 			headers: {
 				"Cache-Control": "max-age=120", // Cache for 2 minutes
 			},
