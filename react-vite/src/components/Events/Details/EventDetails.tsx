@@ -16,6 +16,7 @@ import {
 	AlertTriangle,
 	Building,
 	Globe,
+	Info,
 } from "lucide-react";
 import { RootState } from "../../../types";
 
@@ -87,14 +88,45 @@ interface EventDetails {
 
 type SectionType = "overview" | "attendees" | "group" | "photos";
 
+const getVenueDisplay = (
+	venueInfo: EventVenue | null | undefined,
+	type: string,
+) => {
+	if (type === "online") {
+		return {
+			address: "Online Event",
+			city: "Virtual",
+			state: "",
+			display: "This is an online event - no physical location",
+		};
+	}
+
+	if (!venueInfo || (!venueInfo.address && !venueInfo.city)) {
+		return {
+			address: "Venue TBD",
+			city: "Location Coming Soon",
+			state: "",
+			display: "Venue details will be announced soon",
+		};
+	}
+
+	return {
+		address: venueInfo.address || "Address TBD",
+		city: venueInfo.city || "City TBD",
+		state: venueInfo.state || "",
+		display: `${venueInfo.address || "Address TBD"}, ${
+			venueInfo.city || "City TBD"
+		}${venueInfo.state ? `, ${venueInfo.state}` : ""}`,
+	};
+};
+
 const EventDetails: React.FC = () => {
 	const eventDetails = useLoaderData() as EventDetails;
 	const navigate = useNavigate();
 	const sessionUser = useSelector((state: RootState) => state.session.user);
 	const [activeSection, setActiveSection] = useState<SectionType>("overview");
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-      console.log(eventDetails);
+	const [showOrganizerInfo, setShowOrganizerInfo] = useState(false);
 
 	useEffect(() => {
 		if (!eventDetails?.id) {
@@ -215,6 +247,20 @@ const EventDetails: React.FC = () => {
 		</div>
 	);
 
+	// Organizer Info Modal
+	const OrganizerInfoModal: React.FC = () => (
+		<div className="fixed top-4 right-4 bg-orange-100 border border-orange-300 rounded-lg p-4 shadow-lg z-50 max-w-sm">
+			<div className="flex items-center gap-2 mb-2">
+				<Info size={20} className="text-orange-600" />
+				<h4 className="font-semibold text-orange-800">Event Organizer</h4>
+			</div>
+			<p className="text-orange-700 text-sm">
+				As the event organizer, you are automatically attending this event. You
+				cannot leave your own event.
+			</p>
+		</div>
+	);
+
 	if (!eventDetails) {
 		return (
 			<div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-slate-100 flex items-center justify-center">
@@ -286,6 +332,11 @@ const EventDetails: React.FC = () => {
 									Full
 								</span>
 							)}
+							{isOrganizer && (
+								<span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+									Your Event
+								</span>
+							)}
 						</div>
 
 						{/* Event Info Overlay */}
@@ -315,7 +366,7 @@ const EventDetails: React.FC = () => {
 									</div>
 								</div>
 
-								{/* Action Buttons */}
+								{/* Action Buttons with better organizer handling */}
 								<div className="flex items-center gap-3">
 									{!sessionUser ? (
 										<button
@@ -332,6 +383,12 @@ const EventDetails: React.FC = () => {
 										</button>
 									) : isOrganizer ? (
 										<div className="flex items-center gap-2">
+											<div className="bg-green-100 text-green-800 px-3 py-2 rounded-lg flex items-center gap-2">
+												<Users size={16} />
+												<span className="font-medium">
+													You're the organizer
+												</span>
+											</div>
 											{!isPastEvent && (
 												<>
 													<button
@@ -486,18 +543,28 @@ const EventDetails: React.FC = () => {
 												</div>
 											</div>
 											<div className="flex items-center gap-3">
-												{eventDetails.venueInfo ? (
-													<Building size={20} className="text-orange-500" />
-												) : (
+												{eventDetails.type === "online" ? (
 													<Globe size={20} className="text-orange-500" />
+												) : (
+													<Building size={20} className="text-orange-500" />
 												)}
 												<div>
 													<p className="font-medium text-slate-900">Location</p>
 													<p className="text-slate-600">
-														{eventDetails.venueInfo
-															? `${eventDetails.venueInfo.address}, ${eventDetails.venueInfo.city}, ${eventDetails.venueInfo.state}`
-															: "Online Event"}
+														{
+															getVenueDisplay(
+																eventDetails.venueInfo,
+																eventDetails.type,
+															).display
+														}
 													</p>
+													{eventDetails.type === "in-person" &&
+														!eventDetails.venueInfo?.address && (
+															<p className="text-orange-600 text-sm mt-1">
+																Venue details will be shared closer to the event
+																date
+															</p>
+														)}
 												</div>
 											</div>
 										</div>
@@ -541,9 +608,42 @@ const EventDetails: React.FC = () => {
 
 						{activeSection === "attendees" && (
 							<div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-								<h2 className="text-xl font-semibold text-slate-900 mb-4">
-									Attendees ({eventDetails.attendees?.length || 0})
-								</h2>
+								<div className="flex items-center justify-between mb-4">
+									<h2 className="text-xl font-semibold text-slate-900">
+										Attendees ({eventDetails.attendees?.length || 0})
+									</h2>
+									{/* Add attend button in attendees section too */}
+									{sessionUser &&
+										!isAttending &&
+										!isOrganizer &&
+										!isPastEvent &&
+										!isFull && (
+											<Form method="post">
+												<input
+													type="hidden"
+													name="intent"
+													value="attend-event"
+												/>
+												<input
+													type="hidden"
+													name="id"
+													value={eventDetails.id}
+												/>
+												<input
+													type="hidden"
+													name="userId"
+													value={sessionUser.id}
+												/>
+												<button
+													type="submit"
+													className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+												>
+													<UserPlus size={16} />
+													Attend Event
+												</button>
+											</Form>
+										)}
+								</div>
 								{!sessionUser ? (
 									<div className="text-center py-8">
 										<Users size={48} className="mx-auto text-slate-300 mb-4" />
@@ -591,27 +691,47 @@ const EventDetails: React.FC = () => {
 									</div>
 								) : (
 									<div className="grid sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
-										{eventDetails.attendees.map((attendee) => (
-											<Link
-												key={attendee.user.id}
-												to={`/users/${attendee.user.id}`}
-												className="flex items-center gap-3 p-4 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100"
-											>
-												<img
-													src={attendee.user.profileImage}
-													alt={attendee.user.username}
-													className="w-12 h-12 rounded-full object-cover"
+										{/* Ensure attendees is properly handled */}
+										{eventDetails.attendees &&
+										eventDetails.attendees.length > 0 ? (
+											eventDetails.attendees.map((attendee) => (
+												<Link
+													key={attendee.user.id}
+													to={`/users/${attendee.user.id}`}
+													className="flex items-center gap-3 p-4 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100"
+												>
+													<img
+														src={attendee.user.profileImage}
+														alt={attendee.user.username}
+														className="w-12 h-12 rounded-full object-cover"
+													/>
+													<div>
+														<h3 className="font-semibold text-slate-900">
+															{attendee.user.firstName} {attendee.user.lastName}
+															{attendee.user.id ===
+																eventDetails.organizer?.id && (
+																<span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+																	Organizer
+																</span>
+															)}
+														</h3>
+														<p className="text-slate-600 text-sm">
+															@{attendee.user.username}
+														</p>
+													</div>
+												</Link>
+											))
+										) : (
+											<div className="text-center py-8">
+												<Users
+													size={48}
+													className="mx-auto text-slate-300 mb-4"
 												/>
-												<div>
-													<h3 className="font-semibold text-slate-900">
-														{attendee.user.firstName} {attendee.user.lastName}
-													</h3>
-													<p className="text-slate-600 text-sm">
-														@{attendee.user.username}
-													</p>
-												</div>
-											</Link>
-										))}
+												<p className="text-slate-600">
+													No attendees to display.
+												</p>
+											</div>
+										)}
 									</div>
 								)}
 							</div>
@@ -738,29 +858,82 @@ const EventDetails: React.FC = () => {
 							</div>
 						</div>
 
-						{/* Location */}
+						{/* Location with proper null handling */}
 						<div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
 							<h3 className="font-semibold text-slate-900 mb-4">Location</h3>
 							<div className="flex items-start gap-3">
-								{eventDetails.venueInfo ? (
-									<MapPin size={20} className="text-orange-500 mt-0.5" />
-								) : (
+								{eventDetails.type === "online" ? (
 									<Globe size={20} className="text-orange-500 mt-0.5" />
+								) : (
+									<MapPin size={20} className="text-orange-500 mt-0.5" />
 								)}
-								<div>
-									{eventDetails.venueInfo ? (
-										<>
-											<p className="font-medium text-slate-900">
-												{eventDetails.venueInfo.address}
-											</p>
-											<p className="text-slate-600">
-												{eventDetails.venueInfo.city},{" "}
-												{eventDetails.venueInfo.state}
-											</p>
-										</>
-									) : (
-										<p className="text-slate-600">This is an online event</p>
-									)}
+								<div className="flex-1">
+									{(() => {
+										const venueDisplay = getVenueDisplay(
+											eventDetails.venueInfo,
+											eventDetails.type,
+										);
+
+										if (eventDetails.type === "online") {
+											return (
+												<div>
+													<p className="font-medium text-slate-900">
+														Online Event
+													</p>
+													<p className="text-slate-600 text-sm">
+														Join from anywhere with an internet connection
+													</p>
+													<div className="mt-2 p-2 bg-blue-50 rounded-lg">
+														<p className="text-blue-700 text-sm">
+															Event link will be shared with attendees before
+															the event
+														</p>
+													</div>
+												</div>
+											);
+										}
+
+										if (
+											!eventDetails.venueInfo?.address &&
+											!eventDetails.venueInfo?.city
+										) {
+											return (
+												<div>
+													<p className="font-medium text-slate-900">
+														Venue Coming Soon
+													</p>
+													<p className="text-slate-600 text-sm">
+														Location details will be announced
+													</p>
+													<div className="mt-2 p-2 bg-orange-50 rounded-lg">
+														<p className="text-orange-700 text-sm">
+															Check back soon for venue information
+														</p>
+													</div>
+												</div>
+											);
+										}
+
+										return (
+											<div>
+												<p className="font-medium text-slate-900">
+													{venueDisplay.address}
+												</p>
+												<p className="text-slate-600">
+													{venueDisplay.city}
+													{venueDisplay.state && `, ${venueDisplay.state}`}
+												</p>
+												{(!eventDetails.venueInfo?.address ||
+													eventDetails.venueInfo.address === "Address TBD") && (
+													<div className="mt-2 p-2 bg-amber-50 rounded-lg">
+														<p className="text-amber-700 text-sm">
+															Exact address will be provided closer to the event
+														</p>
+													</div>
+												)}
+											</div>
+										);
+									})()}
 								</div>
 							</div>
 						</div>
@@ -783,6 +956,9 @@ const EventDetails: React.FC = () => {
 			{showDeleteModal && (
 				<DeleteEventModal onClose={() => setShowDeleteModal(false)} />
 			)}
+
+			{/* Organizer Info Modal */}
+			{showOrganizerInfo && <OrganizerInfoModal />}
 		</div>
 	);
 };
