@@ -1,5 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { useActionData, Form, useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect, useMemo } from "react";
+import {
+	useActionData,
+	Form,
+	useNavigate,
+	Link,
+	useNavigation,
+} from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
 	Users,
@@ -11,6 +17,7 @@ import {
 	Upload,
 	Info,
 	Check,
+	AlertCircle,
 } from "lucide-react";
 import { RootState } from "../../../../types";
 
@@ -21,12 +28,14 @@ interface FormErrors {
 	city?: string;
 	state?: string;
 	image?: string;
+	server?: string;
 }
 
 const CreateGroup: React.FC = () => {
-	const errors = useActionData() as FormErrors;
+	const errors = useActionData() as { errors?: FormErrors } | FormErrors | null;
 	const sessionUser = useSelector((state: RootState) => state.session.user);
 	const navigate = useNavigate();
+	const navigation = useNavigation();
 
 	// Form state
 	const [name, setName] = useState("");
@@ -36,7 +45,6 @@ const CreateGroup: React.FC = () => {
 	const [state, setState] = useState("");
 	const [imageFile, setImageFile] = useState<File | null>(null);
 	const [previewImage, setPreviewImage] = useState<string | null>(null);
-	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	// Character limits
 	const ABOUT_MAX_LENGTH = 150;
@@ -44,17 +52,49 @@ const CreateGroup: React.FC = () => {
 	const NAME_MAX_LENGTH = 50;
 	const NAME_MIN_LENGTH = 3;
 
+	// Handle form errors properly with useMemo to prevent re-renders
+	const formErrors = useMemo(() => {
+		if (!errors) return {};
+		// Handle nested errors structure: { errors: FormErrors } or direct FormErrors
+		if ("errors" in errors && errors.errors) {
+			return errors.errors;
+		}
+		// Direct FormErrors object
+		return errors as FormErrors;
+	}, [errors]);
+
+	const isSubmitting = navigation.state === "submitting";
+
 	// Ensure user is logged in
 	useEffect(() => {
 		if (!sessionUser) {
-			navigate("/");
+			navigate("/login");
 		}
 	}, [sessionUser, navigate]);
+
+	// Clear form state if there are server errors
+	useEffect(() => {
+		if (formErrors.server) {
+			console.error("Server error:", formErrors.server);
+		}
+	}, [formErrors.server]); // Only depend on the specific property
 
 	// Handle image selection
 	const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
 		if (file) {
+			// Validate file size (5MB limit)
+			if (file.size > 5 * 1024 * 1024) {
+				alert("File size must be less than 5MB");
+				return;
+			}
+
+			// Validate file type
+			if (!file.type.startsWith("image/")) {
+				alert("Please select a valid image file");
+				return;
+			}
+
 			setImageFile(file);
 
 			// Create preview URL
@@ -64,12 +104,6 @@ const CreateGroup: React.FC = () => {
 			};
 			reader.readAsDataURL(file);
 		}
-	};
-
-	// Handle form submission
-	const handleSubmit = () => {
-		setIsSubmitting(true);
-		// Form will be handled by React Router action
 	};
 
 	// Calculate if form is valid
@@ -131,6 +165,17 @@ const CreateGroup: React.FC = () => {
 			</div>
 
 			<div className="max-w-7xl mx-auto px-4 py-12">
+				{/* Show server errors prominently */}
+				{formErrors.server && (
+					<div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+						<div className="flex items-center gap-2 text-red-800">
+							<AlertCircle size={20} />
+							<span className="font-medium">Error creating group</span>
+						</div>
+						<p className="text-red-700 mt-1">{formErrors.server}</p>
+					</div>
+				)}
+
 				<div className="grid md:grid-cols-2 gap-8 items-start">
 					{/* Left Column - Image and Preview */}
 					<div className="space-y-8">
@@ -143,7 +188,9 @@ const CreateGroup: React.FC = () => {
 							/>
 							<div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 to-transparent flex items-end">
 								<div className="p-8 text-white">
-									<h2 className="text-3xl font-bold mb-2 text-slate-200">Start a New Group</h2>
+									<h2 className="text-3xl font-bold mb-2 text-slate-200">
+										Start a New Group
+									</h2>
 									<p className="text-slate-200">
 										Build a supportive community around shared experiences
 									</p>
@@ -238,7 +285,6 @@ const CreateGroup: React.FC = () => {
 							action="/groups/new"
 							encType="multipart/form-data"
 							className="space-y-6"
-							onSubmit={handleSubmit}
 						>
 							<input type="hidden" name="organizer_id" value={sessionUser.id} />
 
@@ -271,11 +317,11 @@ const CreateGroup: React.FC = () => {
 											onChange={(e) => setCity(e.target.value)}
 											placeholder="Enter city name"
 											className={`w-full px-4 py-3 border ${
-												errors?.city ? "border-red-300" : "border-slate-300"
+												formErrors?.city ? "border-red-300" : "border-slate-300"
 											} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors`}
 										/>
-										{errors?.city && (
-											<p className="text-red-600 text-sm">{errors.city}</p>
+										{formErrors?.city && (
+											<p className="text-red-600 text-sm">{formErrors.city}</p>
 										)}
 									</div>
 
@@ -295,11 +341,13 @@ const CreateGroup: React.FC = () => {
 											placeholder="CA"
 											maxLength={2}
 											className={`w-full px-4 py-3 border ${
-												errors?.state ? "border-red-300" : "border-slate-300"
+												formErrors?.state
+													? "border-red-300"
+													: "border-slate-300"
 											} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors uppercase`}
 										/>
-										{errors?.state && (
-											<p className="text-red-600 text-sm">{errors.state}</p>
+										{formErrors?.state && (
+											<p className="text-red-600 text-sm">{formErrors.state}</p>
 										)}
 										<p className="text-xs text-slate-500">
 											Please use the two-letter state code (e.g., CA, NY)
@@ -336,14 +384,14 @@ const CreateGroup: React.FC = () => {
 										onChange={(e) => setName(e.target.value)}
 										placeholder="e.g., Anxiety Support Circle"
 										className={`w-full px-4 py-3 border ${
-											errors?.name ? "border-red-300" : "border-slate-300"
+											formErrors?.name ? "border-red-300" : "border-slate-300"
 										} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors`}
 										maxLength={NAME_MAX_LENGTH}
 									/>
 									<div className="flex justify-between items-center text-xs">
 										<div>
-											{errors?.name ? (
-												<p className="text-red-600">{errors.name}</p>
+											{formErrors?.name ? (
+												<p className="text-red-600">{formErrors.name}</p>
 											) : (
 												<p className="text-slate-500">
 													{name.length < NAME_MIN_LENGTH
@@ -395,14 +443,14 @@ const CreateGroup: React.FC = () => {
 										placeholder="Please write at least 20 characters describing your group..."
 										rows={5}
 										className={`w-full px-4 py-3 border ${
-											errors?.about ? "border-red-300" : "border-slate-300"
+											formErrors?.about ? "border-red-300" : "border-slate-300"
 										} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors resize-none`}
 										maxLength={ABOUT_MAX_LENGTH}
 									/>
 									<div className="flex justify-between items-center text-xs">
 										<div>
-											{errors?.about ? (
-												<p className="text-red-600">{errors.about}</p>
+											{formErrors?.about ? (
+												<p className="text-red-600">{formErrors.about}</p>
 											) : (
 												<p className="text-slate-500">
 													{about.length < ABOUT_MIN_LENGTH
@@ -522,8 +570,8 @@ const CreateGroup: React.FC = () => {
 									className="hidden"
 								/>
 
-								{errors?.image && (
-									<p className="text-red-600 text-xs">{errors.image}</p>
+								{formErrors?.image && (
+									<p className="text-red-600 text-xs">{formErrors.image}</p>
 								)}
 							</div>
 
@@ -552,15 +600,15 @@ const CreateGroup: React.FC = () => {
 										value={type}
 										onChange={(e) => setType(e.target.value)}
 										className={`w-full px-4 py-3 border ${
-											errors?.type ? "border-red-300" : "border-slate-300"
+											formErrors?.type ? "border-red-300" : "border-slate-300"
 										} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors`}
 									>
 										<option value="">Select one</option>
 										<option value="in-person">In Person</option>
 										<option value="online">Online</option>
 									</select>
-									{errors?.type && (
-										<p className="text-red-600 text-sm">{errors.type}</p>
+									{formErrors?.type && (
+										<p className="text-red-600 text-sm">{formErrors.type}</p>
 									)}
 								</div>
 							</div>
@@ -603,7 +651,7 @@ const CreateGroup: React.FC = () => {
 									{isSubmitting ? (
 										<>
 											<div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-											Creating...
+											Creating Group...
 										</>
 									) : (
 										<>
