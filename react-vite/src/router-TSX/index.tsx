@@ -54,9 +54,9 @@ import {
 	eventFormAction,
 } from "../loaders/eventLoaders";
 import {
-      postsLoader,
 	postDetailsLoader,
       postAction,
+      similarPostsLoader
 } from "../loaders/postLoaders";
 import { partnershipActions } from "../loaders/partnershipActions";
 import { contactActions } from "../loaders/contactActions";
@@ -216,7 +216,7 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "posts-feed",
-				loader: postsLoader,
+				loader: similarPostsLoader,
 				element: (
 					<SuspenseWrapper>
 						<Posts />
