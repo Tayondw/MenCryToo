@@ -8,13 +8,13 @@ import Footer from "../components/Footer";
 import ScrollToTop from "../components/ScrollToTop";
 import { AppDispatch } from "../types";
 
-// OPTIMIZED: Memoized Layout component
-const Layout = memo(() => {
+// Memoized Layout component
+const Layout = memo(({ children }: { children?: React.ReactNode }) => {
 	const dispatch = useDispatch<AppDispatch>();
 	const [isLoaded, setIsLoaded] = useState(false);
 
 	useEffect(() => {
-		// OPTIMIZED: Single authentication check with faster loading
+		// Single authentication check with faster loading
 		const authenticateUser = async () => {
 			try {
 				await dispatch(thunkAuthenticate());
@@ -28,7 +28,7 @@ const Layout = memo(() => {
 		authenticateUser();
 	}, [dispatch]);
 
-	// OPTIMIZED: Show minimal loading state
+	// Show minimal loading state
 	if (!isLoaded) {
 		return (
 			<div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-slate-50 flex items-center justify-center">
@@ -46,7 +46,8 @@ const Layout = memo(() => {
 			<ScrollToTop />
 			<div className="relative overflow-hidden">
 				<main className="relative">
-					<Outlet />
+					{/* Support both children prop (for 404) and Outlet (for normal routes) */}
+					{children ? children : <Outlet />}
 				</main>
 				{/* Force boundary */}
 				<div className="clear-both h-0"></div>
