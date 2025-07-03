@@ -4,7 +4,7 @@ import { User, AppThunk, SessionAction } from "../types";
 const SET_USER = "session/setUser";
 const REMOVE_USER = "session/removeUser";
 
-// Action Creators - Optimized
+// Action Creators
 const setUser = (user: User): SessionAction => ({
 	type: SET_USER,
 	payload: user,
@@ -14,7 +14,6 @@ const removeUser = (): SessionAction => ({
 	type: REMOVE_USER,
 });
 
-// OPTIMIZED: Login thunk with minimal data loading
 export const thunkLogin =
 	(credentials: { email: string; password: string }): AppThunk =>
 	async (dispatch) => {
@@ -26,8 +25,24 @@ export const thunkLogin =
 			});
 
 			if (response.ok) {
-				const data = await response.json();
-				dispatch(setUser(data));
+				const loginData = await response.json();
+
+				// After successful login, fetch complete user data
+				try {
+					const authResponse = await fetch("/api/auth/");
+					if (authResponse.ok) {
+						const completeUserData = await authResponse.json();
+						if (!completeUserData.errors) {
+							dispatch(setUser(completeUserData));
+							return null;
+						}
+					}
+				} catch (authError) {
+					console.error("Error fetching complete user data:", authError);
+				}
+
+				// Fallback to login data if auth fetch fails
+				dispatch(setUser(loginData));
 				return null;
 			} else if (response.status < 500) {
 				const errors = await response.json();
@@ -41,7 +56,6 @@ export const thunkLogin =
 		}
 	};
 
-// OPTIMIZED: Signup thunk - keeping JSON format since you're not using FormData
 export const thunkSignup =
 	(user: Partial<User>): AppThunk =>
 	async (dispatch) => {
@@ -53,8 +67,24 @@ export const thunkSignup =
 			});
 
 			if (response.ok) {
-				const data = await response.json();
-				dispatch(setUser(data));
+				const signupData = await response.json();
+
+				// After successful signup, fetch complete user data
+				try {
+					const authResponse = await fetch("/api/auth/");
+					if (authResponse.ok) {
+						const completeUserData = await authResponse.json();
+						if (!completeUserData.errors) {
+							dispatch(setUser(completeUserData));
+							return null;
+						}
+					}
+				} catch (authError) {
+					console.error("Error fetching complete user data:", authError);
+				}
+
+				// Fallback to signup data if auth fetch fails
+				dispatch(setUser(signupData));
 				return null;
 			} else if (response.status < 500) {
 				const errors = await response.json();
@@ -66,9 +96,9 @@ export const thunkSignup =
 			console.error("Signup error:", error);
 			return { server: "Network error occurred" };
 		}
-	};
-
-// OPTIMIZED: Logout thunk
+            };
+      
+// Logout thunk
 export const thunkLogout = (): AppThunk => async (dispatch) => {
 	try {
 		await fetch("/api/auth/logout");
@@ -86,7 +116,7 @@ export const thunkLogout = (): AppThunk => async (dispatch) => {
 	}
 };
 
-// OPTIMIZED: Authenticate thunk with minimal data
+// Authenticate thunk with minimal data
 export const thunkAuthenticate = (): AppThunk => async (dispatch) => {
 	try {
 		const response = await fetch("/api/auth/");
@@ -110,33 +140,6 @@ export const thunkAuthenticate = (): AppThunk => async (dispatch) => {
 	}
 };
 
-// OPTIMIZED: Update profile thunk (if you need this functionality)
-export const thunkUpdateProfile =
-	(userId: number, userData: Partial<User>): AppThunk =>
-	async (dispatch) => {
-		try {
-			const response = await fetch(`/api/users/${userId}/profile/update`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(userData),
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				dispatch(setUser(data.profile || data));
-				return null;
-			} else if (response.status < 500) {
-				const errors = await response.json();
-				return errors;
-			} else {
-				return { server: "Something went wrong. Please try again" };
-			}
-		} catch (error) {
-			console.error("Profile update error:", error);
-			return { server: "Network error occurred" };
-		}
-	};
-
 // Initial state
 interface SessionState {
 	user: User | null;
@@ -146,7 +149,7 @@ const initialState: SessionState = {
 	user: null,
 };
 
-// OPTIMIZED: Session reducer with immutable updates
+// Session reducer with immutable updates
 function sessionReducer(
 	state = initialState,
 	action: SessionAction,
@@ -168,96 +171,3 @@ function sessionReducer(
 }
 
 export default sessionReducer;
-
-// import { User, AppThunk, SessionAction } from "../types";
-
-// const SET_USER = "session/setUser";
-// const REMOVE_USER = "session/removeUser";
-
-// export const setUser = (user: User): SessionAction => ({
-// 	type: SET_USER,
-// 	payload: user,
-// });
-
-// export const removeUser = (): SessionAction => ({
-// 	type: REMOVE_USER,
-// });
-
-// export const thunkAuthenticate = (): AppThunk => async (dispatch) => {
-// 	const response = await fetch("/api/auth/");
-// 	if (response.ok) {
-// 		const data = await response.json();
-// 		if (data.errors) {
-// 			return;
-// 		}
-
-// 		dispatch(setUser(data));
-// 	}
-// };
-
-// export const thunkLogin =
-// 	(credentials: { email: string; password: string }): AppThunk =>
-// 	async (dispatch) => {
-// 		const response = await fetch("/api/auth/login", {
-// 			method: "POST",
-// 			headers: { "Content-Type": "application/json" },
-// 			body: JSON.stringify(credentials),
-// 		});
-
-// 		if (response.ok) {
-// 			const data = await response.json();
-// 			dispatch(setUser(data));
-// 		} else if (response.status < 500) {
-// 			const errorMessages = await response.json();
-// 			return errorMessages;
-// 		} else {
-// 			return { server: "Something went wrong. Please try again" };
-// 		}
-// 	};
-
-// export const thunkSignup =
-// 	(user: Partial<User>): AppThunk =>
-// 	async (dispatch) => {
-// 		const response = await fetch("/api/auth/signup", {
-// 			method: "POST",
-// 			headers: { "Content-Type": "application/json" },
-// 			body: JSON.stringify(user),
-// 		});
-
-// 		if (response.ok) {
-// 			const data = await response.json();
-// 			dispatch(setUser(data));
-// 		} else if (response.status < 500) {
-// 			const errorMessages = await response.json();
-// 			return errorMessages;
-// 		} else {
-// 			return { server: "Something went wrong. Please try again" };
-// 		}
-// 	};
-
-// export const thunkLogout = (): AppThunk => async (dispatch) => {
-// 	await fetch("/api/auth/logout");
-// 	dispatch(removeUser());
-// };
-
-// interface SessionState {
-// 	user: User | null;
-// }
-
-// const initialState: SessionState = { user: null };
-
-// function sessionReducer(
-// 	state = initialState,
-// 	action: SessionAction,
-// ): SessionState {
-// 	switch (action.type) {
-// 		case SET_USER:
-// 			return { ...state, user: action.payload };
-// 		case REMOVE_USER:
-// 			return { ...state, user: null };
-// 		default:
-// 			return state;
-// 	}
-// }
-
-// export default sessionReducer;
