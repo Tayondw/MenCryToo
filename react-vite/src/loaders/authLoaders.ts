@@ -166,7 +166,7 @@ export const loginAction = async ({ request }: { request: Request }) => {
 		if (response.ok) {
 			const url = new URL(request.url);
 			const from = url.searchParams.get("from") || "/";
-			return redirect(from);
+			return window.location. href = from;
 		} else if (response.status < 500) {
 			const errorData = await response.json();
 			return json({ errors: errorData }, { status: 400 });
