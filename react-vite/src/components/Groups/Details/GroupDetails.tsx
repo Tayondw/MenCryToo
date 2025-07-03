@@ -17,10 +17,15 @@ import {
 	Edit,
 	Trash2,
 	AlertTriangle,
+	Crown,
 } from "lucide-react";
 import { RootState } from "../../../types";
 
 interface GroupMember {
+	id: number | string;
+	userId: number;
+	groupId: number;
+	isOrganizer?: boolean;
 	user: {
 		id: number;
 		firstName: string;
@@ -88,26 +93,63 @@ const GroupDetails: React.FC = () => {
 		}
 	}, [groupDetails, navigate]);
 
+	// CRITICAL FIX: Ensure members array is always defined and includes organizer
+	const safeMembers = useMemo(() => {
+		if (!groupDetails) return [];
+
+		// If members is undefined or null, create empty array
+		let membersList = groupDetails.members || [];
+
+		// Check if organizer is in the members list
+		const organizerInMembers = membersList.some(
+			(member) => member.userId === groupDetails.organizerId,
+		);
+
+		// If organizer is not in members, add them
+		if (!organizerInMembers && groupDetails.organizer) {
+			const organizerMember: GroupMember = {
+				id: `organizer_${groupDetails.organizerId}`,
+				userId: groupDetails.organizerId,
+				groupId: groupDetails.id,
+				isOrganizer: true,
+				user: {
+					id: groupDetails.organizer.id,
+					firstName: groupDetails.organizer.firstName,
+					lastName: groupDetails.organizer.lastName,
+					username: groupDetails.organizer.username,
+					email: groupDetails.organizer.email,
+					profileImage: groupDetails.organizer.profileImage,
+				},
+			};
+			membersList = [organizerMember, ...membersList];
+		} else {
+			// Mark organizer in existing members
+			membersList = membersList.map((member) => ({
+				...member,
+				isOrganizer: member.userId === groupDetails.organizerId,
+			}));
+		}
+
+		// Sort with organizer first
+		return membersList.sort((a, b) => {
+			if (a.isOrganizer && !b.isOrganizer) return -1;
+			if (!a.isOrganizer && b.isOrganizer) return 1;
+			return a.user.firstName.localeCompare(b.user.firstName);
+		});
+	}, [groupDetails]);
+
 	// Check if user is a member
 	const isMember = useMemo(() => {
-		if (!sessionUser || !groupDetails?.members) return false;
-		return groupDetails.members.some(
-			(member) => member.user.id === sessionUser.id,
-		);
-	}, [sessionUser, groupDetails?.members]);
+		if (!sessionUser || !safeMembers.length) return false;
+		return safeMembers.some((member) => member.userId === sessionUser.id);
+	}, [sessionUser, safeMembers]);
 
 	// Check if user is organizer
 	const isOrganizer = useMemo(() => {
 		return sessionUser?.id === groupDetails?.organizerId;
 	}, [sessionUser, groupDetails]);
 
-	// Get current member ID for leaving group
-	const currentMemberData = useMemo(() => {
-		if (!sessionUser || !groupDetails?.members) return null;
-		return groupDetails.members.find(
-			(member) => member.user.id === sessionUser.id,
-		);
-	}, [sessionUser, groupDetails?.members]);
+	// Note: currentMemberData removed as it's not needed with current implementation
 
 	// Separate upcoming and past events
 	const { upcomingEvents, pastEvents } = useMemo(() => {
@@ -265,7 +307,7 @@ const GroupDetails: React.FC = () => {
 										</span>
 										<span className="flex items-center gap-1">
 											<Users size={16} />
-											{groupDetails.members?.length || 0} members
+											{safeMembers.length} members
 										</span>
 										<span className="flex items-center gap-1">
 											<Calendar size={16} />
@@ -327,7 +369,7 @@ const GroupDetails: React.FC = () => {
 											<input
 												type="hidden"
 												name="memberId"
-												value={currentMemberData?.user.id || sessionUser.id}
+												value={sessionUser.id}
 											/>
 											<button
 												type="submit"
@@ -607,7 +649,7 @@ const GroupDetails: React.FC = () => {
 						{activeSection === "members" && (
 							<div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
 								<h2 className="text-xl font-semibold text-slate-900 mb-4">
-									Members ({groupDetails.members?.length || 0})
+									Members ({safeMembers.length})
 								</h2>
 								{!sessionUser ? (
 									<div className="text-center py-8">
@@ -622,7 +664,7 @@ const GroupDetails: React.FC = () => {
 											Sign Up to View Members
 										</button>
 									</div>
-								) : groupDetails.members?.length === 0 ? (
+								) : safeMembers.length === 0 ? (
 									<div className="text-center py-8">
 										<Users size={48} className="mx-auto text-slate-300 mb-4" />
 										<p className="text-slate-600 mb-4">
@@ -652,21 +694,37 @@ const GroupDetails: React.FC = () => {
 									</div>
 								) : (
 									<div className="grid sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
-										{groupDetails.members.map((member) => (
+										{safeMembers.map((member) => (
 											<Link
-												key={member.user.id}
-												to={`/users/${member.user.id}`}
-												className="flex items-center gap-3 p-4 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100"
+												key={`${member.userId}-${member.groupId}`}
+												to={`/users/${member.userId}`}
+												className="flex items-center gap-3 p-4 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100 relative"
 											>
+												{/* CRITICAL FIX: Organizer crown indicator */}
+												{member.isOrganizer && (
+													<div className="absolute top-2 right-2">
+														<Crown
+															size={16}
+															className="text-yellow-500 fill-current"
+														/>
+													</div>
+												)}
 												<img
 													src={member.user.profileImage}
 													alt={member.user.username}
 													className="w-12 h-12 rounded-full object-cover"
 												/>
-												<div>
-													<h3 className="font-semibold text-slate-900">
-														{member.user.firstName} {member.user.lastName}
-													</h3>
+												<div className="flex-1">
+													<div className="flex items-center gap-2">
+														<h3 className="font-semibold text-slate-900">
+															{member.user.firstName} {member.user.lastName}
+														</h3>
+														{member.isOrganizer && (
+															<span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-medium">
+																Organizer
+															</span>
+														)}
+													</div>
 													<p className="text-slate-600 text-sm">
 														@{member.user.username}
 													</p>
@@ -683,7 +741,8 @@ const GroupDetails: React.FC = () => {
 								<h2 className="text-xl font-semibold text-slate-900 mb-4">
 									Group Photos
 								</h2>
-								{groupDetails.groupImage?.length === 0 ? (
+								{!groupDetails.groupImage ||
+								groupDetails.groupImage?.length === 0 ? (
 									<div className="text-center py-8">
 										<ImageIcon
 											size={48}
@@ -727,7 +786,7 @@ const GroupDetails: React.FC = () => {
 								<div className="flex items-center justify-between">
 									<span className="text-slate-600">Members</span>
 									<span className="font-semibold text-slate-900">
-										{groupDetails.members?.length || 0}
+										{safeMembers.length}
 									</span>
 								</div>
 								<div className="flex items-center justify-between">
