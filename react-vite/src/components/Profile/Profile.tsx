@@ -56,6 +56,7 @@ const mockUser: User = {
 			createdAt: "2024-01-15T10:30:00Z",
 			updatedAt: "2024-01-15T10:30:00Z",
 			user: {} as User,
+			comments: "",
 		},
 		{
 			id: 2,
@@ -69,6 +70,7 @@ const mockUser: User = {
 			createdAt: "2024-01-10T14:20:00Z",
 			updatedAt: "2024-01-10T14:20:00Z",
 			user: {} as User,
+			comments: "",
 		},
 		{
 			id: 3,
@@ -82,6 +84,7 @@ const mockUser: User = {
 			createdAt: "2024-01-05T16:45:00Z",
 			updatedAt: "2024-01-05T16:45:00Z",
 			user: {} as User,
+			comments: "",
 		},
 	],
 	group: [
@@ -186,19 +189,6 @@ const Profile: React.FC = () => {
 
 	// Use loader data or fallback to mock data for development
 	const currentUser = loaderData?.user || mockUser;
-
-	// Debug log to see what data we're getting from the optimized endpoint
-	React.useEffect(() => {
-		if (loaderData?.user) {
-			console.log("=== OPTIMIZED PROFILE DATA ===");
-			console.log("User:", loaderData.user);
-			console.log("Posts:", loaderData.user.posts?.length || 0);
-			console.log("Groups:", loaderData.user.group?.length || 0);
-			console.log("Events:", loaderData.user.events?.length || 0);
-			console.log("Tags:", loaderData.user.usersTags?.length || 0);
-			console.log("Comments:", loaderData.user.userComments?.length || 0);
-		}
-	}, [loaderData]);
 
 	// ALL HOOKS MUST BE CALLED UNCONDITIONALLY AT THE TOP LEVEL
 	// State hooks
