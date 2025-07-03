@@ -1,6 +1,15 @@
 from flask import Blueprint, request, render_template, redirect, jsonify
 from flask_login import login_required, current_user
-from app.models import db, Group, GroupImage, Membership, Venue, Event, EventImage, Attendance
+from app.models import (
+    db,
+    Group,
+    GroupImage,
+    Membership,
+    Venue,
+    Event,
+    EventImage,
+    Attendance,
+)
 from app.forms import (
     GroupForm,
     GroupImageForm,
@@ -514,12 +523,12 @@ def add_group_image(groupId):
     return form.errors, 400
 
 
-# ! GROUP - EVENTS (Simplified)
+# ! GROUP - EVENTS
 @group_routes.route("/<int:groupId>/events/new", methods=["POST"])
 @login_required
 def create_event(groupId):
     """
-    Create event with minimal response data
+    Create event with automatic organizer attendance and proper response
     """
     group = Group.query.get(groupId)
 
@@ -549,35 +558,58 @@ def create_event(groupId):
 
         url = upload["url"]
 
-        new_event = Event(
-            group_id=groupId,
-            name=form.data["name"],
-            description=form.data["description"],
-            type=form.data["type"],
-            capacity=form.data["capacity"],
-            image=url,
-            start_date=form.data["startDate"],
-            end_date=form.data["endDate"],
-        )
+        try:
+            # Create the event
+            new_event = Event(
+                group_id=groupId,
+                name=form.data["name"],
+                description=form.data["description"],
+                type=form.data["type"],
+                capacity=form.data["capacity"],
+                image=url,
+                start_date=form.data["startDate"],
+                end_date=form.data["endDate"],
+            )
 
-        db.session.add(new_event)
-        db.session.commit()
+            db.session.add(new_event)
+            db.session.flush()  # Get the event ID
 
-        # Return minimal event data
-        return {
-            "event": {
-                "id": new_event.id,
-                "name": new_event.name,
-                "description": new_event.description,
-                "type": new_event.type,
-                "capacity": new_event.capacity,
-                "image": new_event.image,
-                "startDate": new_event.start_date.isoformat(),
-                "endDate": new_event.end_date.isoformat(),
-                "groupId": new_event.group_id,
-                "numAttendees": 0,
-            }
-        }, 201
+            # AUTOMATICALLY ADD ORGANIZER AS ATTENDEE
+            organizer_attendance = Attendance(
+                event_id=new_event.id, user_id=current_user.id
+            )
+            db.session.add(organizer_attendance)
+
+            # Commit both the event and attendance
+            db.session.commit()
+
+            # Return complete event data with attendance count
+            return {
+                "event": {
+                    "id": new_event.id,
+                    "name": new_event.name,
+                    "description": new_event.description,
+                    "type": new_event.type,
+                    "capacity": new_event.capacity,
+                    "image": new_event.image,
+                    "startDate": new_event.start_date.isoformat(),
+                    "endDate": new_event.end_date.isoformat(),
+                    "groupId": new_event.group_id,
+                    "numAttendees": 1,  # Organizer is automatically attending
+                    "organizerId": current_user.id,
+                    "organizer": {
+                        "id": current_user.id,
+                        "firstName": current_user.first_name,
+                        "lastName": current_user.last_name,
+                        "username": current_user.username,
+                        "profileImage": current_user.profile_image_url,
+                    },
+                }
+            }, 201
+
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"Event creation failed: {str(e)}"}, 500
 
     return form.errors, 400
 
