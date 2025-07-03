@@ -13,7 +13,7 @@ Tayon Williams
 
 Men Cry Too is an effort to break through stigma of men not being allowed to express their feelings, improve help-seeking behavior and reduce male suicide.
 
-This is a capstone project for the App Academy 24-week program.
+Developed a full-stack mental health advocacy platform as a capstone project for App Academy's 24-week program, designed to break stigma around male emotional expression and reduce male suicide rates. Built with Flask backend using SQLAlchemy ORM and PostgreSQL database, implementing secure user authentication and data management. Frontend developed with React and Vite build system for optimized production deployment. Deployed to Render.com with Docker containerization, implementing CI/CD pipeline with auto-deployment from GitHub. Designed comprehensive database schema and created detailed wireframes, user stories, and feature specifications. I plan to continue working on this project to add more features!
 
 ## Technologies
 
