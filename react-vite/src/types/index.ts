@@ -4,14 +4,16 @@ export interface User {
 	username: string;
 	firstName: string;
 	lastName: string;
-	email: string;
+      email: string;
+      hashedPassword: string;
 	bio: string;
 	profileImage: string;
 	usersTags: Tag[];
 	posts: Post[];
 	group: Group[];
 	events: Event[];
-	userComments: Comment[];
+      userComments: Comment[];
+      createdAt?: string;
 	updatedAt?: string;
 }
 
@@ -26,7 +28,8 @@ export interface Post {
 	caption: string;
 	image: string;
       likes: number;
-	creator: number;
+      creator: number;
+      comments: string;
 	createdAt: string;
 	updatedAt: string;
 	user: User;
