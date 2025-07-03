@@ -82,14 +82,14 @@ export const groupDetailsLoader = async ({ params }: LoaderFunctionArgs) => {
 	}
 
 	try {
-		const response = await fetch(`/api/groups/${groupId}`);
+            const response = await fetch(`/api/groups/${groupId}`);
 
 		if (!response.ok) {
 			throw new Error(`Failed to fetch group: ${response.status}`);
 		}
 
-		const group = await response.json();
-		return { group };
+            const group = await response.json();
+		return group;
 	} catch (error) {
 		console.error("Error loading group details:", error);
             throw error;
