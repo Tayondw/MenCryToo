@@ -72,15 +72,6 @@ export async function profileLoader({
 			return redirect("/profile");
 		}
 
-		// Data is already optimized from the backend, no need for transformation
-		console.log("Profile data loaded:", {
-			posts: userData.posts?.length || 0,
-			groups: userData.group?.length || 0,
-			events: userData.events?.length || 0,
-			tags: userData.usersTags?.length || 0,
-			comments: userData.userComments?.length || 0,
-		});
-
 		const result = { user: userData };
 		setCachedData(cacheKey, result);
 		return result;
