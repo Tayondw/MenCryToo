@@ -9,7 +9,24 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 # Import models with optimized loading
-from .models import db, User
+from .models import (
+    db,
+    User,
+    Group,
+    GroupImage,
+    Post,
+    Comment,
+    Event,
+    EventImage,
+    Venue,
+    Membership,
+    Attendance,
+    Tag,
+    Likes,
+    UserTags,
+    Partnership,
+    Contact,
+)
 
 # Import routes
 from .api.user_routes import user_routes
