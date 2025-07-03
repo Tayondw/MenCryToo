@@ -4,7 +4,7 @@ import Layout from "./Layout";
 import PrivateRoute from "../components/PrivateRoute";
 import SuspenseWrapper from "../components/SuspenseWrapper/SuspenseWrapper";
 
-// OPTIMIZED: Lazy loading with better chunking
+// Lazy loading with better chunking
 const LoginFormPage = lazy(() => import("../components/LoginFormPage"));
 const SignupFormPage = lazy(() => import("../components/SignupFormPage"));
 const Home = lazy(() => import("../components/Home"));
@@ -31,44 +31,44 @@ const Success = lazy(() => import("../components/Success"));
 const FourZeroFourPage = lazy(() => import("../components/404Page"));
 
 // Import loaders and actions
-// import { getLoader } from "../loaders/getLoaders";
 import { homeLoader } from "../loaders/homeLoaders";
 import { signupAction, loginAction } from "../loaders/authLoaders";
 import { userDetailsLoader } from "../loaders/userLoaders";
 import {
-      profileLoader,
+	profileLoader,
 	profileUpdateAction,
 	profileAction,
 } from "../loaders/profileLoaders";
 import { profileFeedLoader } from "../loaders/profileFeedLoaders";
 import {
-      groupsLoader,
+	groupsLoader,
 	groupDetailsLoader,
 	groupAction,
 	groupFormAction,
 } from "../loaders/groupLoaders";
 import {
-      eventsLoader,
+	eventsLoader,
 	eventDetailsLoader,
 	eventAction,
 	eventFormAction,
 } from "../loaders/eventLoaders";
 import {
 	postDetailsLoader,
-      postAction,
-      similarPostsLoader
+	postAction,
+	similarPostsLoader,
 } from "../loaders/postLoaders";
 import { partnershipActions } from "../loaders/partnershipActions";
 import { contactActions } from "../loaders/contactActions";
 
-// OPTIMIZED: Router configuration with performance considerations
+// Router configuration
 export const router = createBrowserRouter([
 	{
+		path: "/",
 		element: <Layout />,
 		children: [
 			{
-                        path: "/",
-                        loader: homeLoader,
+				index: true, // Use index route for home
+				loader: homeLoader,
 				element: (
 					<SuspenseWrapper>
 						<Home />
@@ -270,16 +270,18 @@ export const router = createBrowserRouter([
 					</SuspenseWrapper>
 				),
 			},
-			// Catch-all route
-			{
-				path: "*",
-				element: (
-					<SuspenseWrapper>
-						<FourZeroFourPage />
-					</SuspenseWrapper>
-				),
-			},
 		],
+	},
+	// Separate 404 route outside of the Layout children
+	{
+		path: "*",
+		element: (
+			<Layout>
+				<SuspenseWrapper>
+					<FourZeroFourPage />
+				</SuspenseWrapper>
+			</Layout>
+		),
 	},
 ]);
 
