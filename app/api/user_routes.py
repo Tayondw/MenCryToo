@@ -338,7 +338,7 @@ def add_tags(userId):
 @login_required
 def create_post(userId):
     """
-    FIXED: Create post with single form processing
+    Create post with single form processing
     """
     # Verify user exists
     user = User.query.get(userId)
@@ -405,7 +405,7 @@ def create_post(userId):
 @login_required
 def edit_post(userId, postId):
     """
-    FIXED: Edit post with single form processing
+    Edit post with single form processing
     """
     post_to_edit = Post.query.get(postId)
     if not post_to_edit:
