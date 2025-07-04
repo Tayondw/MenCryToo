@@ -1,5 +1,3 @@
-// react-vite/src/components/Events/Events.tsx - Fixed organizer groups logic
-
 import React, { useState, useMemo } from "react";
 import { useLoaderData, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -48,7 +46,7 @@ const Events: React.FC = () => {
 	const [showGroupSelector, setShowGroupSelector] = useState(false);
 	const [groupSearchTerm, setGroupSearchTerm] = useState("");
 
-	// FIXED: Get groups where user is ORGANIZER and member groups using organizerId
+	// Get groups where user is ORGANIZER and member groups using organizerId
 	const userGroups = useMemo(() => {
 		if (!sessionUser) {
 			return {
@@ -165,7 +163,7 @@ const Events: React.FC = () => {
 		}
 	}, [processedEvents, filters]);
 
-	// FIXED: Filter groups based on search term - only organizer groups for event creation
+	// Filter groups based on search term - only organizer groups for event creation
 	const filteredOrganizerGroups = useMemo(() => {
 		const organizerGroups = userGroups.organizer;
 		if (!groupSearchTerm) return organizerGroups;
@@ -401,7 +399,7 @@ const Events: React.FC = () => {
 		);
 	};
 
-	// FIXED: Group selection modal - now properly shows organizer vs member groups
+	// Group selection modal - now properly shows organizer vs member groups
 	const GroupSelectionModal: React.FC = () => (
 		<div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
 			<div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
