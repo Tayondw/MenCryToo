@@ -297,7 +297,6 @@
 	text-align: center;
 }
 
-/* FIXED: Post Cards with Consistent Height */
 .post-card {
 	background: var(--white);
 	border-radius: var(--border-radius-lg);
@@ -306,7 +305,7 @@
 	transition: transform 0.2s ease, box-shadow 0.2s ease;
 	display: flex;
 	flex-direction: column;
-	height: var(--card-height); /* Fixed height */
+	height: var(--card-height);
 	width: 100%;
 	box-sizing: border-box;
 }
@@ -455,11 +454,10 @@
 	line-height: 1.4;
 }
 
-/* FIXED: Content Cards with Consistent Height */
 .card-link {
 	text-decoration: none;
 	color: inherit;
-	height: var(--card-height); /* Fixed height for links */
+	height: var(--card-height);
 	display: block;
 }
 
@@ -806,7 +804,7 @@
 	}
 }
 
-/* Fix for screens above 1438px specifically */
+/* For screens above 1438px specifically */
 @media (min-width: 1438px) {
 	:root {
 		--card-height: 580px;
