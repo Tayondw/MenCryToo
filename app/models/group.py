@@ -71,7 +71,7 @@ class Group(db.Model):
         }
 
     def to_dict(self, include_events=True, include_members=True):
-        """Optimized full version - selective loading with CRITICAL FIX for members"""
+        """full version - selective loading for members"""
         base_dict = {
             "id": self.id,
             "organizerId": self.organizer_id,
