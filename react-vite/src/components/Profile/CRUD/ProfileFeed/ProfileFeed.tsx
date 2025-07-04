@@ -323,7 +323,7 @@ const ProfileFeed: React.FC = () => {
 					<div className="flex items-center justify-between h-16">
 						<div className="flex items-center gap-4">
 							<Link
-								to="/posts-feed"
+								to="/similar-feed"
 								className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 font-medium transition-colors"
 							>
 								<ArrowLeft size={20} />
