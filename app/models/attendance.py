@@ -25,24 +25,3 @@ class Attendance(db.Model):
             "userId": self.user_id,
             "user": self.user.to_dict_no_posts() if self.user else None,
         }
-
-
-# attendances = db.Table(
-#     "attendances",
-#     db.Model.metadata,
-#     db.Column(
-#         "user_id",
-#         db.Integer,
-#         db.ForeignKey(add_prefix_for_prod("users.id")),
-#         primary_key=True,
-#     ),
-#     db.Column(
-#         "event_id",
-#         db.Integer,
-#         db.ForeignKey(add_prefix_for_prod("events.id")),
-#         primary_key=True,
-#     ),
-# )
-
-# if environment == "production":
-#     attendances.schema = SCHEMA
