@@ -483,7 +483,7 @@ const ProfileDetails: React.FC = () => {
 				<div className="max-w-7xl mx-auto px-4 py-4">
 					<div className="flex items-center justify-between">
 						<Link
-							to="/posts-feed"
+							to="/similar-feed"
 							className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all duration-200"
 						>
 							<ArrowLeft size={18} />
