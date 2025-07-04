@@ -173,7 +173,7 @@ export const router = createBrowserRouter([
 				// action: postActions,
 			},
 			{
-				path: "posts-feed",
+				path: "similar-feed",
 				// loader: profilesLoader,
 				loader: profileFeedLoader,
 				element: <Posts />,
