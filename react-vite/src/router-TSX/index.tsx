@@ -23,6 +23,8 @@ const ProfileFeed = lazy(
 	() => import("../components/Profile/CRUD/ProfileFeed"),
 );
 const Posts = lazy(() => import("../components/Posts"));
+const PostDetails = lazy(() => import("../components/Posts/Details"));
+const PostsFeed = lazy(() => import("../components/Posts/Feed"));
 const CreatePost = lazy(() => import("../components/Posts/CRUD/Create"));
 const UpdatePost = lazy(() => import("../components/Posts/CRUD/Update"));
 const Partnership = lazy(() => import("../components/Partnership"));
@@ -215,11 +217,31 @@ export const router = createBrowserRouter([
 				),
 			},
 			{
-				path: "posts-feed",
+				path: "similar-feed",
 				loader: similarPostsLoader,
 				element: (
 					<SuspenseWrapper>
 						<Posts />
+					</SuspenseWrapper>
+				),
+				action: postAction,
+			},
+			{
+				path: "posts-feed",
+				loader: similarPostsLoader,
+				element: (
+					<SuspenseWrapper>
+						<PostsFeed />
+					</SuspenseWrapper>
+				),
+				action: postAction,
+			},
+			{
+				path: "posts/:postId",
+				loader: postDetailsLoader,
+				element: (
+					<SuspenseWrapper>
+						<PostDetails />
 					</SuspenseWrapper>
 				),
 				action: postAction,
