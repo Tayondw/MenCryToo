@@ -381,7 +381,7 @@ export const postActions = async ({ request }) => {
 			method: "POST",
 			body: formData,
 		});
-		if (response.ok) return (window.location.href = "/posts-feed");
+		if (response.ok) return (window.location.href = "/similar-feed");
 		else console.log(errors);
 	}
 
