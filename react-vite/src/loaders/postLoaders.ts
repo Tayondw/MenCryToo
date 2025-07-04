@@ -195,7 +195,7 @@ export const postDetailsLoader = async ({ params }: LoaderFunctionArgs) => {
 		return postDetails;
 	} catch (error) {
 		console.error("Error loading post details:", error);
-		return redirect("/posts-feed");
+		return redirect("/similar-feed");
 	}
 };
 
