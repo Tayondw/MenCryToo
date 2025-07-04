@@ -33,9 +33,11 @@ const mockUser: User = {
 	firstName: "John",
 	lastName: "Doe",
 	email: "john.doe@example.com",
+	hashedPassword: "mock_hashed_password_123",
 	bio: "Passionate developer and community builder focused on mental health advocacy and creating supportive environments for men to express their emotions.",
 	profileImage:
 		"https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop",
+	createdAt: "2024-01-01T08:00:00Z",
 	updatedAt: "2024-01-20T15:30:00Z",
 	usersTags: [
 		{ id: 1, name: "ANXIETY" },
@@ -55,8 +57,8 @@ const mockUser: User = {
 			creator: 1,
 			createdAt: "2024-01-15T10:30:00Z",
 			updatedAt: "2024-01-15T10:30:00Z",
-			user: {} as User,
-			comments: "",
+			user: {} as User, // This creates a circular reference - will remove or providing a minimal user object
+			comments: "", // This should be an array of Comment objects based on the interface - will fix later
 		},
 		{
 			id: 2,
@@ -168,22 +170,40 @@ const mockUser: User = {
 		{
 			id: 1,
 			content: "Thank you for sharing your story, it really helped me!",
+			userId: 2, // Added optional fields for better data completeness
+			postId: 1,
+			createdAt: "2024-01-16T09:15:00Z",
+			updatedAt: "2024-01-16T09:15:00Z",
 		},
 		{
 			id: 2,
 			content: "Your post about anxiety management was incredibly helpful.",
+			userId: 3,
+			postId: 1,
+			createdAt: "2024-01-16T14:30:00Z",
+			updatedAt: "2024-01-16T14:30:00Z",
 		},
 		{
 			id: 3,
 			content:
 				"I appreciate your vulnerability and openness about mental health.",
+			userId: 4,
+			postId: 3,
+			createdAt: "2024-01-06T10:20:00Z",
+			updatedAt: "2024-01-06T10:20:00Z",
 		},
-		{ id: 4, content: "Looking forward to the next group session!" },
+		{
+			id: 4,
+			content: "Looking forward to the next group session!",
+			userId: 5,
+			createdAt: "2024-01-18T16:45:00Z",
+			updatedAt: "2024-01-18T16:45:00Z",
+		},
 	],
 };
 
 const Profile: React.FC = () => {
-	// Get data from React Router loader (now using optimized /api/auth/profile endpoint)
+	// Get data from React Router loader
 	const loaderData = useLoaderData() as { user: User } | null;
 	const navigate = useNavigate();
 
