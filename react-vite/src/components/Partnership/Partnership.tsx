@@ -39,12 +39,46 @@ const Partnership: React.FC = () => {
 		message: "",
 	});
 
+	// Character limits and validation constants
+	const FIRST_NAME_MIN_LENGTH = 2;
+	const FIRST_NAME_MAX_LENGTH = 20;
+	const LAST_NAME_MIN_LENGTH = 2;
+	const LAST_NAME_MAX_LENGTH = 20;
+	const SUBJECT_MIN_LENGTH = 5;
+	const SUBJECT_MAX_LENGTH = 255;
+	const MESSAGE_MIN_LENGTH = 10;
+	const MESSAGE_MAX_LENGTH = 500;
+
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
 	) => {
 		const { name, value } = e.target;
 		setFormData((prev) => ({ ...prev, [name]: value }));
 	};
+
+	// Form validation logic
+	const isEmailValid = (email: string) => {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		return emailRegex.test(email);
+	};
+
+	const isPhoneValid = (phone: string) => {
+		const phoneRegex = /^[+]?[1-9][\d]{0,15}$/;
+		return phoneRegex.test(phone.replace(/[\s\-()]/g, ""));
+	};
+
+	// Calculate if form is valid
+	const isFormValid =
+		formData.firstName.length >= FIRST_NAME_MIN_LENGTH &&
+		formData.firstName.length <= FIRST_NAME_MAX_LENGTH &&
+		formData.lastName.length >= LAST_NAME_MIN_LENGTH &&
+		formData.lastName.length <= LAST_NAME_MAX_LENGTH &&
+		isEmailValid(formData.email) &&
+		isPhoneValid(formData.phone) &&
+		formData.subject.length >= SUBJECT_MIN_LENGTH &&
+		formData.subject.length <= SUBJECT_MAX_LENGTH &&
+		formData.message.length >= MESSAGE_MIN_LENGTH &&
+		formData.message.length <= MESSAGE_MAX_LENGTH;
 
 	const benefits = [
 		"Access to mental health resources and tools",
@@ -198,18 +232,40 @@ const Partnership: React.FC = () => {
 														? "border-red-300"
 														: "border-slate-300"
 												} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors`}
+												maxLength={FIRST_NAME_MAX_LENGTH}
 												required
+												disabled={isSubmitting}
 											/>
 											<User
 												size={16}
 												className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
 											/>
 										</div>
-										{errors.firstName && (
-											<p className="mt-1 text-sm text-red-600">
-												{errors.firstName}
-											</p>
-										)}
+										{/* Validation feedback */}
+										<div className="flex justify-between items-center text-xs mt-1">
+											<div>
+												{errors.firstName ? (
+													<p className="text-red-600">{errors.firstName}</p>
+												) : (
+													<p className="text-slate-500">
+														{formData.firstName.length < FIRST_NAME_MIN_LENGTH
+															? `Please enter at least ${FIRST_NAME_MIN_LENGTH} characters`
+															: "Great! Your first name looks good"}
+													</p>
+												)}
+											</div>
+											<div
+												className={`${
+													formData.firstName.length > FIRST_NAME_MAX_LENGTH - 5
+														? "text-orange-500"
+														: formData.firstName.length >= FIRST_NAME_MIN_LENGTH
+														? "text-green-500"
+														: "text-slate-500"
+												}`}
+											>
+												{formData.firstName.length}/{FIRST_NAME_MAX_LENGTH}
+											</div>
+										</div>
 									</div>
 
 									{/* Last Name */}
@@ -233,18 +289,40 @@ const Partnership: React.FC = () => {
 														? "border-red-300"
 														: "border-slate-300"
 												} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors`}
+												maxLength={LAST_NAME_MAX_LENGTH}
 												required
+												disabled={isSubmitting}
 											/>
 											<User
 												size={16}
 												className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
 											/>
 										</div>
-										{errors.lastName && (
-											<p className="mt-1 text-sm text-red-600">
-												{errors.lastName}
-											</p>
-										)}
+										{/* Validation feedback */}
+										<div className="flex justify-between items-center text-xs mt-1">
+											<div>
+												{errors.lastName ? (
+													<p className="text-red-600">{errors.lastName}</p>
+												) : (
+													<p className="text-slate-500">
+														{formData.lastName.length < LAST_NAME_MIN_LENGTH
+															? `Please enter at least ${LAST_NAME_MIN_LENGTH} characters`
+															: "Great! Your last name looks good"}
+													</p>
+												)}
+											</div>
+											<div
+												className={`${
+													formData.lastName.length > LAST_NAME_MAX_LENGTH - 5
+														? "text-orange-500"
+														: formData.lastName.length >= LAST_NAME_MIN_LENGTH
+														? "text-green-500"
+														: "text-slate-500"
+												}`}
+											>
+												{formData.lastName.length}/{LAST_NAME_MAX_LENGTH}
+											</div>
+										</div>
 									</div>
 								</div>
 
@@ -268,14 +346,24 @@ const Partnership: React.FC = () => {
 												errors.email ? "border-red-300" : "border-slate-300"
 											} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors`}
 											required
+											disabled={isSubmitting}
 										/>
 										<Mail
 											size={16}
 											className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
 										/>
 									</div>
-									{errors.email && (
-										<p className="mt-1 text-sm text-red-600">{errors.email}</p>
+									{/* Email validation feedback */}
+									{errors.email ? (
+										<p className="mt-1 text-xs text-red-600">{errors.email}</p>
+									) : (
+										<p className="mt-1 text-xs text-slate-500">
+											{formData.email.length === 0
+												? "Please enter your email address"
+												: isEmailValid(formData.email)
+												? "Great! Your email looks good"
+												: "Please enter a valid email address"}
+										</p>
 									)}
 								</div>
 
@@ -299,14 +387,24 @@ const Partnership: React.FC = () => {
 												errors.phone ? "border-red-300" : "border-slate-300"
 											} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors`}
 											required
+											disabled={isSubmitting}
 										/>
 										<Phone
 											size={16}
 											className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
 										/>
 									</div>
-									{errors.phone && (
-										<p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+									{/* Phone validation feedback */}
+									{errors.phone ? (
+										<p className="mt-1 text-xs text-red-600">{errors.phone}</p>
+									) : (
+										<p className="mt-1 text-xs text-slate-500">
+											{formData.phone.length === 0
+												? "Please enter your phone number"
+												: isPhoneValid(formData.phone)
+												? "Great! Your phone number looks good"
+												: "Please enter a valid phone number"}
+										</p>
 									)}
 								</div>
 							</div>
@@ -336,7 +434,9 @@ const Partnership: React.FC = () => {
 											className={`w-full px-4 py-3 pl-10 border ${
 												errors.subject ? "border-red-300" : "border-slate-300"
 											} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors`}
+											maxLength={SUBJECT_MAX_LENGTH}
 											required
+											disabled={isSubmitting}
 										/>
 										<Briefcase
 											size={16}
@@ -348,11 +448,31 @@ const Partnership: React.FC = () => {
 										professional, include your organization type (Non-Profit,
 										Government, Healthcare, etc.)
 									</p>
-									{errors.subject && (
-										<p className="mt-1 text-sm text-red-600">
-											{errors.subject}
-										</p>
-									)}
+									{/* Subject validation feedback */}
+									<div className="flex justify-between items-center text-xs mt-1">
+										<div>
+											{errors.subject ? (
+												<p className="text-red-600">{errors.subject}</p>
+											) : (
+												<p className="text-slate-500">
+													{formData.subject.length < SUBJECT_MIN_LENGTH
+														? `Please enter at least ${SUBJECT_MIN_LENGTH} characters`
+														: "Great! Your organization info looks good"}
+												</p>
+											)}
+										</div>
+										<div
+											className={`${
+												formData.subject.length > SUBJECT_MAX_LENGTH - 30
+													? "text-orange-500"
+													: formData.subject.length >= SUBJECT_MIN_LENGTH
+													? "text-green-500"
+													: "text-slate-500"
+											}`}
+										>
+											{formData.subject.length}/{SUBJECT_MAX_LENGTH}
+										</div>
+									</div>
 								</div>
 							</div>
 
@@ -380,23 +500,37 @@ const Partnership: React.FC = () => {
 											rows={6}
 											className={`w-full px-4 py-3 border ${
 												errors.message ? "border-red-300" : "border-slate-300"
-											} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors`}
+											} rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors resize-none`}
+											maxLength={MESSAGE_MAX_LENGTH}
 											required
+											disabled={isSubmitting}
 										/>
 									</div>
-									<div className="flex justify-between mt-1">
-										<p className="text-xs text-slate-500">
-											Minimum 10 characters required
-										</p>
-										<p className="text-xs text-slate-500">
-											{formData.message.length}/500 characters
-										</p>
+									{/* Message validation feedback */}
+									<div className="flex justify-between items-center text-xs mt-1">
+										<div>
+											{errors.message ? (
+												<p className="text-red-600">{errors.message}</p>
+											) : (
+												<p className="text-slate-500">
+													{formData.message.length < MESSAGE_MIN_LENGTH
+														? `Please write at least ${MESSAGE_MIN_LENGTH} characters`
+														: "Great! Your message looks good"}
+												</p>
+											)}
+										</div>
+										<div
+											className={`${
+												formData.message.length > MESSAGE_MAX_LENGTH - 50
+													? "text-orange-500"
+													: formData.message.length >= MESSAGE_MIN_LENGTH
+													? "text-green-500"
+													: "text-slate-500"
+											}`}
+										>
+											{formData.message.length}/{MESSAGE_MAX_LENGTH}
+										</div>
 									</div>
-									{errors.message && (
-										<p className="mt-1 text-sm text-red-600">
-											{errors.message}
-										</p>
-									)}
 								</div>
 							</div>
 
@@ -404,17 +538,21 @@ const Partnership: React.FC = () => {
 							<div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row gap-4 justify-end">
 								<Link
 									to="/"
-									className="px-6 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-all duration-200 text-center font-medium flex items-center justify-center gap-2"
+									className={`px-6 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-all duration-200 text-center font-medium flex items-center justify-center gap-2 ${
+										isSubmitting ? "opacity-50 pointer-events-none" : ""
+									}`}
 								>
 									<X size={18} />
 									Cancel
 								</Link>
 								<button
 									type="submit"
-									disabled={isSubmitting}
-									className={`px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-md hover:shadow-lg text-center font-medium flex items-center justify-center gap-2 ${
-										isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-									}`}
+									disabled={!isFormValid || isSubmitting}
+									className={`px-6 py-3 rounded-lg font-medium flex items-center justify-center gap-2 ${
+										isFormValid && !isSubmitting
+											? "bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-md hover:shadow-lg"
+											: "bg-slate-300 text-slate-500 cursor-not-allowed"
+									} transition-all duration-200`}
 								>
 									{isSubmitting ? (
 										<>
@@ -559,3 +697,4 @@ const Partnership: React.FC = () => {
 };
 
 export default Partnership;
+
