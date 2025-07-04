@@ -93,7 +93,7 @@ const GroupDetails: React.FC = () => {
 		}
 	}, [groupDetails, navigate]);
 
-	// CRITICAL FIX: Ensure members array is always defined and includes organizer
+	// Ensure members array is always defined and includes organizer
 	const safeMembers = useMemo(() => {
 		if (!groupDetails) return [];
 
@@ -148,8 +148,6 @@ const GroupDetails: React.FC = () => {
 	const isOrganizer = useMemo(() => {
 		return sessionUser?.id === groupDetails?.organizerId;
 	}, [sessionUser, groupDetails]);
-
-	// Note: currentMemberData removed as it's not needed with current implementation
 
 	// Separate upcoming and past events
 	const { upcomingEvents, pastEvents } = useMemo(() => {
@@ -700,7 +698,7 @@ const GroupDetails: React.FC = () => {
 												to={`/users/${member.userId}`}
 												className="flex items-center gap-3 p-4 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100 relative"
 											>
-												{/* CRITICAL FIX: Organizer crown indicator */}
+												{/* Organizer crown indicator */}
 												{member.isOrganizer && (
 													<div className="absolute top-2 right-2">
 														<Crown
