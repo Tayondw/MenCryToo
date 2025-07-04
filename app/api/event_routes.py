@@ -146,7 +146,7 @@ def delete_event(eventId):
         return {"errors": {"message": "Error deleting event"}}, 500
 
 
-# ! EVENT - ATTENDEES (FIXED WITH AUTO-ORGANIZER ATTENDANCE)
+# ! EVENT - ATTENDEES (AUTO-ORGANIZER ATTENDANCE)
 @event_routes.route("/<int:eventId>/attend-event", methods=["GET", "POST"])
 @login_required
 def attend_event(eventId):
