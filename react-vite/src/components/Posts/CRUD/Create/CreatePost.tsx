@@ -111,7 +111,7 @@ const CreatePost: React.FC = () => {
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="flex items-center justify-between h-16">
 						<Link
-							to="/posts-feed"
+							to="/similar-feed"
 							className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 font-medium transition-colors"
 						>
 							<ArrowLeft size={20} />
@@ -415,7 +415,7 @@ const CreatePost: React.FC = () => {
 							{/* Form Actions */}
 							<div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row gap-4 justify-end">
 								<Link
-									to="/posts-feed"
+									to="/similar-feed"
 									className="px-6 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-all duration-200 text-center font-medium"
 								>
 									Cancel
