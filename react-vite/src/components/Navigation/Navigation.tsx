@@ -18,7 +18,8 @@ import {
 	Heart,
 	Settings,
 	Calendar,
-	PenTool,
+      PenTool,
+      StickyNote,
 	ChevronDown,
 	type LucideIcon,
 } from "lucide-react";
@@ -222,7 +223,8 @@ const Navigation: React.FC = memo(() => {
 					{ path: "/", label: "Home", icon: Home },
 					{ path: "/groups", label: "Groups", icon: Users },
 					{ path: "/events", label: "Events", icon: Calendar },
-					{ path: "/posts-feed", label: "Posts", icon: Heart },
+					{ path: "/posts-feed", label: "Feed", icon: StickyNote },
+					{ path: "/similar-feed", label: "Similar Users Feed", icon: Heart },
 					{ path: "/posts/create", label: "Share Story", icon: PenTool },
 			  ]
 			: [
