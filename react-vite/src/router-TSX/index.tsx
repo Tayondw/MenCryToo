@@ -59,6 +59,7 @@ import {
 	postAction,
 	similarPostsLoader,
 } from "../loaders/postLoaders";
+import { postsFeedLoader, postsFeedAction } from "../loaders/postsFeedLoaders";
 import { partnershipActions } from "../loaders/partnershipActions";
 import { contactActions } from "../loaders/contactActions";
 
@@ -228,13 +229,13 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "posts-feed",
-				loader: similarPostsLoader,
+				loader: postsFeedLoader,
 				element: (
 					<SuspenseWrapper>
 						<PostsFeed />
 					</SuspenseWrapper>
 				),
-				action: postAction,
+				action: postsFeedAction,
 			},
 			{
 				path: "posts/:postId",
