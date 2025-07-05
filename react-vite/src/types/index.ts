@@ -4,16 +4,16 @@ export interface User {
 	username: string;
 	firstName: string;
 	lastName: string;
-      email: string;
-      hashedPassword: string;
+	email: string;
+	hashedPassword?: string; // Optional since it shouldn't be sent to frontend (this is for mock user)
 	bio: string;
 	profileImage: string;
 	usersTags: Tag[];
 	posts: Post[];
 	group: Group[];
 	events: Event[];
-      userComments: Comment[];
-      createdAt?: string;
+	userComments: Comment[];
+	createdAt?: string;
 	updatedAt?: string;
 }
 
@@ -27,9 +27,9 @@ export interface Post {
 	title: string;
 	caption: string;
 	image: string;
-      likes: number;
-      creator: number;
-      comments: string;
+	likes: number;
+	creator: number;
+	comments: number; // Changed from string to number for count
 	createdAt: string;
 	updatedAt: string;
 	user: User;
@@ -74,7 +74,7 @@ export interface Venue {
 
 export interface Comment {
 	id: number;
-	content: string;
+	comment: string;
 	userId?: number;
 	postId?: number;
 	createdAt?: string;
