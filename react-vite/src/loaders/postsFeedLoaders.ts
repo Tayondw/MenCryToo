@@ -66,7 +66,7 @@ async function checkAuth(): Promise<{
 	return authData;
 }
 
-// Fetch posts feed data
+// Fetch posts feed data using the new unified approach
 async function fetchFeedData(
 	endpoint: string,
 	page: number,
@@ -100,6 +100,72 @@ async function fetchFeedData(
 	setCachedData(cacheKey, data);
 
 	return data;
+}
+
+// New batch loader for optimal performance
+async function fetchBatchFeedData(
+	page: number,
+	perPage: number,
+): Promise<PostsFeedLoaderData> {
+	const cacheKey = `batch-feed-${page}-${perPage}`;
+
+	// Check cache first
+	const cached = getCachedData<PostsFeedLoaderData>(cacheKey);
+	if (cached) {
+		return cached;
+	}
+
+	const response = await fetch(
+		`/api/posts/feed/batch?page=${page}&per_page=${perPage}`,
+		{
+			headers: {
+				"Cache-Control": "max-age=60",
+			},
+		},
+	);
+
+	if (!response.ok) {
+		const errorText = await response.text();
+		console.error("API Error for batch feed:", response.status, errorText);
+		throw new Error(`HTTP ${response.status}: ${errorText}`);
+	}
+
+	const data = await response.json();
+
+	// Transform the data to match our expected format
+	const result: PostsFeedLoaderData = {
+		allPosts: data.allPosts || [],
+		similarPosts: data.similarPosts || [],
+		allPostsPagination: data.allPostsPagination || {
+			page: 1,
+			pages: 0,
+			per_page: perPage,
+			total: 0,
+			has_next: false,
+			has_prev: false,
+		},
+		similarPostsPagination: data.similarPostsPagination || {
+			page: 1,
+			pages: 0,
+			per_page: perPage,
+			total: 0,
+			has_next: false,
+			has_prev: false,
+		},
+		stats: data.stats || {
+			totalPosts: 0,
+			similarUsers: 0,
+			similarPosts: 0,
+			userTags: 0,
+		},
+		activeTab: data.activeTab || "all",
+		message: data.message,
+	};
+
+	// Cache the response
+	setCachedData(cacheKey, result);
+
+	return result;
 }
 
 // Fetch feed stats
@@ -140,7 +206,7 @@ async function fetchFeedStats(): Promise<FeedStats> {
 	}
 }
 
-// Main posts feed loader
+// Main posts feed loader - enhanced version
 export const postsFeedLoader = async ({
 	request,
 }: {
@@ -161,91 +227,106 @@ export const postsFeedLoader = async ({
 			| "all"
 			| "similar";
 
-		// Fetch both feeds in parallel for efficiency
-		const [allPostsResponse, similarPostsResponse, stats] =
-			await Promise.allSettled([
-				fetchFeedData(
-					"feed/all",
-					page,
-					perPage,
-					`all-posts-${page}-${perPage}`,
-				),
-				fetchFeedData(
-					"feed/similar",
-					page,
-					perPage,
-					`similar-posts-${page}-${perPage}`,
-				),
-				fetchFeedStats(),
-			]);
+		// Use batch loader for better performance
+		try {
+			const batchData = await fetchBatchFeedData(page, perPage);
 
-		// Handle all posts response
-		let allPosts: FeedPost[] = [];
-		let allPostsPagination: Pagination = {
-			page: 1,
-			pages: 0,
-			per_page: perPage,
-			total: 0,
-			has_next: false,
-			has_prev: false,
-		};
+			// Override activeTab from URL if different
+			batchData.activeTab = activeTab;
 
-		if (allPostsResponse.status === "fulfilled") {
-			allPosts = allPostsResponse.value.posts || [];
-			allPostsPagination =
-				allPostsResponse.value.pagination || allPostsPagination;
-		} else {
-			console.error("Error fetching all posts:", allPostsResponse.reason);
-		}
-
-		// Handle similar posts response
-		let similarPosts: FeedPost[] = [];
-		let similarPostsPagination: Pagination = {
-			page: 1,
-			pages: 0,
-			per_page: perPage,
-			total: 0,
-			has_next: false,
-			has_prev: false,
-		};
-		let message: string | undefined;
-
-		if (similarPostsResponse.status === "fulfilled") {
-			similarPosts = similarPostsResponse.value.posts || [];
-			similarPostsPagination =
-				similarPostsResponse.value.pagination || similarPostsPagination;
-			message = similarPostsResponse.value.message;
-		} else {
-			console.error(
-				"Error fetching similar posts:",
-				similarPostsResponse.reason,
+			return batchData;
+		} catch (batchError) {
+			console.warn(
+				"Batch loader failed, falling back to individual requests:",
+				batchError,
 			);
-			message = "Failed to load posts from similar users";
+
+			// Fallback to individual requests if batch fails
+			const [allPostsResponse, similarPostsResponse, stats] =
+				await Promise.allSettled([
+					fetchFeedData(
+						"feed/all",
+						page,
+						perPage,
+						`all-posts-${page}-${perPage}`,
+					),
+					fetchFeedData(
+						"feed/similar",
+						page,
+						perPage,
+						`similar-posts-${page}-${perPage}`,
+					),
+					fetchFeedStats(),
+				]);
+
+			// Handle all posts response
+			let allPosts: FeedPost[] = [];
+			let allPostsPagination: Pagination = {
+				page: 1,
+				pages: 0,
+				per_page: perPage,
+				total: 0,
+				has_next: false,
+				has_prev: false,
+			};
+
+			if (allPostsResponse.status === "fulfilled") {
+				allPosts = allPostsResponse.value.posts || [];
+				allPostsPagination =
+					allPostsResponse.value.pagination || allPostsPagination;
+			} else {
+				console.error("Error fetching all posts:", allPostsResponse.reason);
+			}
+
+			// Handle similar posts response
+			let similarPosts: FeedPost[] = [];
+			let similarPostsPagination: Pagination = {
+				page: 1,
+				pages: 0,
+				per_page: perPage,
+				total: 0,
+				has_next: false,
+				has_prev: false,
+			};
+			let message: string | undefined;
+
+			if (similarPostsResponse.status === "fulfilled") {
+				similarPosts = similarPostsResponse.value.posts || [];
+				similarPostsPagination =
+					similarPostsResponse.value.pagination || similarPostsPagination;
+				message = similarPostsResponse.value.message;
+			} else {
+				console.error(
+					"Error fetching similar posts:",
+					similarPostsResponse.reason,
+				);
+				message = "Failed to load posts from similar users";
+			}
+
+			// Handle stats response
+			let feedStats: FeedStats = {
+				totalPosts: 0,
+				similarUsers: 0,
+				similarPosts: 0,
+				userTags: 0,
+			};
+
+			if (stats.status === "fulfilled") {
+				feedStats = stats.value;
+			} else {
+				console.warn("Error fetching feed stats:", stats.reason);
+			}
+
+			return {
+				allPosts,
+				similarPosts,
+				allPostsPagination,
+				similarPostsPagination,
+				stats: feedStats,
+				activeTab,
+				message,
+			};
 		}
-
-		// Handle stats response
-		let feedStats: FeedStats = {
-			totalPosts: 0,
-			similarUsers: 0,
-			similarPosts: 0,
-			userTags: 0,
-		};
-
-		if (stats.status === "fulfilled") {
-			feedStats = stats.value;
-		} else {
-			console.warn("Error fetching feed stats:", stats.reason);
-		}
-
-		return {
-			allPosts,
-			similarPosts,
-			allPostsPagination,
-			similarPostsPagination,
-			stats: feedStats,
-			activeTab,
-			message,
-		};
 	} catch (error) {
 		console.error("Error in postsFeedLoader:", error);
 
@@ -282,7 +363,7 @@ export const postsFeedLoader = async ({
 	}
 };
 
-// Action handler for posts feed
+// Enhanced action handler for posts feed
 export const postsFeedAction = async ({ request }: { request: Request }) => {
 	const formData = await request.formData();
 	const intent = formData.get("intent") as string;
@@ -305,12 +386,13 @@ export const postsFeedAction = async ({ request }: { request: Request }) => {
 					// Clear relevant caches
 					clearPostsFeedCache("posts");
 					clearPostsFeedCache("stats");
+					clearPostsFeedCache("batch");
 					return json({ success: true });
 				} else {
 					const errorData = await response.json();
 					return json(
 						{ error: errorData.message || "Failed to like post" },
-						{ status: 500 },
+						{ status: response.status },
 					);
 				}
 			}
@@ -331,12 +413,13 @@ export const postsFeedAction = async ({ request }: { request: Request }) => {
 					// Clear relevant caches
 					clearPostsFeedCache("posts");
 					clearPostsFeedCache("stats");
+					clearPostsFeedCache("batch");
 					return json({ success: true });
 				} else {
 					const errorData = await response.json();
 					return json(
 						{ error: errorData.message || "Failed to unlike post" },
-						{ status: 500 },
+						{ status: response.status },
 					);
 				}
 			}
@@ -356,6 +439,20 @@ export const postsFeedAction = async ({ request }: { request: Request }) => {
 	}
 };
 
+// Utility function to prefetch feed data
+export const prefetchFeedData = async (
+	activeTab: "all" | "similar" = "all",
+	page: number = 1,
+	perPage: number = 20,
+): Promise<void> => {
+	try {
+		await fetchBatchFeedData(page, perPage);
+		console.log(`Prefetched feed data for tab: ${activeTab}, page: ${page}`);
+	} catch (error) {
+		console.warn("Failed to prefetch feed data:", error);
+	}
+};
+
 // Legacy support - redirect old loaders
 export const similarPostsLoader = async (
 	args: LoaderFunctionArgs | undefined,
@@ -364,5 +461,39 @@ export const similarPostsLoader = async (
 	return postsFeedLoader(args);
 };
 
-// Re-export types for convenience (components should import from types/ instead)
+// Enhanced error boundary handler
+export const postsFeedErrorBoundary = ({ error }: { error: Error }) => {
+	console.error("Posts feed error boundary:", error);
+
+	return {
+		allPosts: [],
+		similarPosts: [],
+		allPostsPagination: {
+			page: 1,
+			pages: 0,
+			per_page: 20,
+			total: 0,
+			has_next: false,
+			has_prev: false,
+		},
+		similarPostsPagination: {
+			page: 1,
+			pages: 0,
+			per_page: 20,
+			total: 0,
+			has_next: false,
+			has_prev: false,
+		},
+		stats: {
+			totalPosts: 0,
+			similarUsers: 0,
+			similarPosts: 0,
+			userTags: 0,
+		},
+		activeTab: "all" as const,
+		error: `Error loading posts feed: ${error.message}`,
+	};
+};
+
+// Re-export types for convenience
 export type { PostsFeedLoaderData, FeedPost } from "../types/postsFeed";
