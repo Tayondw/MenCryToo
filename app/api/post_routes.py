@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from app.models import db, User, Post, Comment, Likes, UserTags, Tag
 from app.forms import PostForm, CommentForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import joinedload, selectinload, load_only
 from sqlalchemy import desc, func, text
 import logging
 
@@ -539,18 +539,30 @@ def similar_users_posts_feed():
 @login_required
 def post(postId):
     """
-    Single post view with minimal queries
+    Single post view with optimized queries
     """
     try:
+        # Single optimized query with eager loading
         post = (
             db.session.query(Post)
             .options(
+                # Load user data in the same query
                 joinedload(Post.user).load_only(
                     "id", "username", "first_name", "last_name", "profile_image_url"
                 ),
-                selectinload(Post.post_comments)
-                .joinedload(Comment.commenter)
-                .load_only("id", "username"),
+                # Load comments and their authors in the same query
+                selectinload(Post.post_comments).options(
+                    joinedload(Comment.commenter).load_only("id", "username"),
+                    load_only(
+                        "id",
+                        "user_id",
+                        "post_id",
+                        "comment",
+                        "parent_id",
+                        "created_at",
+                        "updated_at",
+                    ),
+                ),
             )
             .filter(Post.id == postId)
             .first()
@@ -559,7 +571,7 @@ def post(postId):
         if not post:
             return jsonify({"errors": {"message": "Not Found"}}), 404
 
-        # Get like count efficiently
+        # Get like count with a single efficient query
         like_count = (
             db.session.execute(
                 text("SELECT COUNT(*) FROM likes WHERE post_id = :post_id"),
@@ -568,7 +580,7 @@ def post(postId):
             or 0
         )
 
-        # Build response with optimized data
+        # Build response - all data is already loaded
         post_data = {
             "id": post.id,
             "title": post.title,
@@ -587,35 +599,25 @@ def post(postId):
                 if post.user
                 else None
             ),
-            "postComments": (
-                [
-                    {
-                        "id": comment.id,
-                        "userId": comment.user_id,
-                        "postId": comment.post_id,
-                        "comment": comment.comment,
-                        "username": (
-                            comment.commenter.username
-                            if comment.commenter
-                            else "Unknown"
-                        ),
-                        "parentId": comment.parent_id,
-                        "created_at": (
-                            comment.created_at.isoformat()
-                            if comment.created_at
-                            else None
-                        ),
-                        "updated_at": (
-                            comment.updated_at.isoformat()
-                            if comment.updated_at
-                            else None
-                        ),
-                    }
-                    for comment in post.post_comments
-                ]
-                if hasattr(post, "post_comments")
-                else []
-            ),
+            "postComments": [
+                {
+                    "id": comment.id,
+                    "userId": comment.user_id,
+                    "postId": comment.post_id,
+                    "comment": comment.comment,
+                    "username": (
+                        comment.commenter.username if comment.commenter else "Unknown"
+                    ),
+                    "parentId": comment.parent_id,
+                    "created_at": (
+                        comment.created_at.isoformat() if comment.created_at else None
+                    ),
+                    "updated_at": (
+                        comment.updated_at.isoformat() if comment.updated_at else None
+                    ),
+                }
+                for comment in post.post_comments
+            ],
             "createdAt": post.created_at.isoformat() if post.created_at else None,
             "updatedAt": post.updated_at.isoformat() if post.updated_at else None,
         }
@@ -766,23 +768,20 @@ def delete_comment(postId, commentId):
 @login_required
 def like_post(postId):
     """
-    Post liking with direct SQL operations
+    Post liking with database-agnostic atomic operation
     """
     try:
-        # Check if post exists
-        post_exists = db.session.execute(
-            text("SELECT 1 FROM posts WHERE id = :post_id"), {"post_id": postId}
-        ).fetchone()
-
-        if not post_exists:
-            return {"errors": {"message": "Post not found"}}, 404
-
-        # Use optimized like addition
-        success = db.session.execute(
+        # Single operation that handles both check and insert
+        result = db.session.execute(
             text(
                 """
-                INSERT OR IGNORE INTO likes (user_id, post_id)
-                VALUES (:user_id, :post_id)
+                INSERT INTO likes (user_id, post_id) 
+                SELECT :user_id, :post_id
+                WHERE EXISTS (SELECT 1 FROM posts WHERE id = :post_id)
+                AND NOT EXISTS (
+                    SELECT 1 FROM likes 
+                    WHERE user_id = :user_id AND post_id = :post_id
+                )
             """
             ),
             {"user_id": current_user.id, "post_id": postId},
@@ -790,9 +789,18 @@ def like_post(postId):
 
         db.session.commit()
 
-        if success.rowcount > 0:
+        if result.rowcount > 0:
             return {"message": "Like added"}, 200
-        return {"errors": {"message": "Post already liked"}}, 400
+        else:
+            # Check why it failed - post doesn't exist or already liked
+            post_exists = db.session.execute(
+                text("SELECT 1 FROM posts WHERE id = :post_id"), {"post_id": postId}
+            ).fetchone()
+
+            if not post_exists:
+                return {"errors": {"message": "Post not found"}}, 404
+            else:
+                return {"errors": {"message": "Post already liked"}}, 400
 
     except Exception as e:
         db.session.rollback()
@@ -804,18 +812,36 @@ def like_post(postId):
 @login_required
 def unlike_post(postId):
     """
-    Post unliking with direct SQL operations
+    Post unliking with atomic operation
     """
     try:
+        # Atomic delete operation
         result = db.session.execute(
-            text("DELETE FROM likes WHERE user_id = :user_id AND post_id = :post_id"),
+            text(
+                """
+                DELETE FROM likes 
+                WHERE user_id = :user_id 
+                AND post_id = :post_id
+                AND EXISTS (SELECT 1 FROM posts WHERE id = :post_id)
+            """
+            ),
             {"user_id": current_user.id, "post_id": postId},
         )
 
+        db.session.commit()
+
         if result.rowcount > 0:
-            db.session.commit()
             return {"message": "Like removed"}, 200
-        return {"errors": {"message": "Post not liked"}}, 400
+        else:
+            # Check if post exists
+            post_exists = db.session.execute(
+                text("SELECT 1 FROM posts WHERE id = :post_id"), {"post_id": postId}
+            ).fetchone()
+
+            if not post_exists:
+                return {"errors": {"message": "Post not found"}}, 404
+            else:
+                return {"errors": {"message": "Post not liked"}}, 400
 
     except Exception as e:
         db.session.rollback()
