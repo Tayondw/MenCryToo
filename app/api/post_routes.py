@@ -1,38 +1,30 @@
-from flask import Blueprint, request, abort, redirect, render_template, jsonify
+from flask import Blueprint, request, redirect, jsonify
 from flask_login import login_required, current_user
 from app.models import db, User, Post, Comment, Likes, UserTags, Tag
 from app.forms import PostForm, CommentForm
 from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
-from sqlalchemy.orm import joinedload, selectinload, load_only
-from sqlalchemy import desc, func, text, and_, or_
+from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy import desc, func, text
 import logging
 
 post_routes = Blueprint("posts", __name__)
 logger = logging.getLogger(__name__)
 
-
+# ! POSTS
 @post_routes.route("/feed/all")
 @login_required
 def all_posts_feed():
     """
-    ALL posts with pagination and minimal data loading
+    ALL posts with pagination and optimized loading
     """
     try:
         page = request.args.get("page", 1, type=int)
         per_page = min(request.args.get("per_page", 20, type=int), 50)
 
-        # Get all posts with optimized loading
-        posts_query = (
-            db.session.query(Post)
-            .options(
-                joinedload(Post.user).load_only(
-                    "id", "username", "first_name", "last_name", "profile_image_url"
-                ),
-            )
-            .order_by(desc(Post.created_at))
+        # Get posts with pagination
+        posts = Post.query.order_by(desc(Post.created_at)).paginate(
+            page=page, per_page=per_page, error_out=False
         )
-
-        posts = posts_query.paginate(page=page, per_page=per_page, error_out=False)
 
         if not posts.items:
             return jsonify(
@@ -49,68 +41,61 @@ def all_posts_feed():
                 }
             )
 
-        # Batch load like counts for all posts
-        post_ids = [post.id for post in posts.items]
-        like_counts = {}
-        comment_counts = {}
-
-        if post_ids:
-            # Get like counts in batch
-            like_count_results = db.session.execute(
-                text(
-                    """
-                    SELECT post_id, COUNT(*) as like_count 
-                    FROM likes 
-                    WHERE post_id IN :post_ids 
-                    GROUP BY post_id
-                """
-                ),
-                {"post_ids": tuple(post_ids)},
-            ).fetchall()
-
-            like_counts = {row[0]: row[1] for row in like_count_results}
-
-            # Get comment counts in batch
-            comment_count_results = db.session.execute(
-                text(
-                    """
-                    SELECT post_id, COUNT(*) as comment_count 
-                    FROM comments 
-                    WHERE post_id IN :post_ids 
-                    GROUP BY post_id
-                """
-                ),
-                {"post_ids": tuple(post_ids)},
-            ).fetchall()
-
-            comment_counts = {row[0]: row[1] for row in comment_count_results}
-
-        # Build optimized response
+        # Build response
         posts_data = []
         for post in posts.items:
-            post_dict = {
-                "id": post.id,
-                "title": post.title,
-                "caption": post.caption,
-                "creator": post.creator,
-                "image": post.image,
-                "likes": like_counts.get(post.id, 0),
-                "comments": comment_counts.get(post.id, 0),
-                "createdAt": post.created_at.isoformat() if post.created_at else None,
-                "updatedAt": post.updated_at.isoformat() if post.updated_at else None,
-                "user": (
-                    {
-                        "id": post.user.id,
-                        "username": post.user.username,
-                        "firstName": post.user.first_name,
-                        "lastName": post.user.last_name,
-                        "profileImage": post.user.profile_image_url,
-                    }
-                    if post.user
-                    else None
-                ),
-            }
-            posts_data.append(post_dict)
+            try:
+                # Load user
+                user_data = None
+                if post.creator:
+                    user = User.query.get(post.creator)
+                    if user:
+                        user_data = {
+                            "id": user.id,
+                            "username": user.username,
+                            "firstName": user.first_name or "",
+                            "lastName": user.last_name or "",
+                            "profileImage": user.profile_image_url or "",
+                        }
+
+                # Get counts
+                like_count = (
+                    db.session.execute(
+                        text("SELECT COUNT(*) FROM likes WHERE post_id = :post_id"),
+                        {"post_id": post.id},
+                    ).scalar()
+                    or 0
+                )
+
+                comment_count = (
+                    db.session.execute(
+                        text("SELECT COUNT(*) FROM comments WHERE post_id = :post_id"),
+                        {"post_id": post.id},
+                    ).scalar()
+                    or 0
+                )
+
+                post_dict = {
+                    "id": post.id,
+                    "title": post.title or "",
+                    "caption": post.caption or "",
+                    "creator": post.creator,
+                    "image": post.image or "",
+                    "likes": like_count,
+                    "comments": comment_count,
+                    "createdAt": (
+                        post.created_at.isoformat() if post.created_at else None
+                    ),
+                    "updatedAt": (
+                        post.updated_at.isoformat() if post.updated_at else None
+                    ),
+                    "user": user_data,
+                }
+                posts_data.append(post_dict)
+
+            except Exception as post_error:
+                logger.warning(f"Error processing post {post.id}: {post_error}")
+                continue
 
         return jsonify(
             {
@@ -141,7 +126,7 @@ def similar_posts_feed():
         page = request.args.get("page", 1, type=int)
         per_page = min(request.args.get("per_page", 20, type=int), 50)
 
-        # Get current user's tags
+        # Check if user has tags
         if not current_user.users_tags:
             return jsonify(
                 {
@@ -158,29 +143,85 @@ def similar_posts_feed():
                 }
             )
 
-        # Get tag IDs from the relationship
+        # Get user's tag IDs
         user_tag_ids = [tag.id for tag in current_user.users_tags]
 
-        # Find posts from users with similar tags using efficient query
-        posts_query = (
-            db.session.query(Post)
-            .join(User, Post.creator == User.id)
-            .join(User.users_tags)
-            .filter(
-                Tag.id.in_(user_tag_ids),
-                User.id != current_user.id,
-                User.profile_image_url.isnot(None),
-            )
-            .options(
-                joinedload(Post.user).load_only(
-                    "id", "username", "first_name", "last_name", "profile_image_url"
-                ),
-            )
-            .distinct()
-            .order_by(desc(Post.created_at))
-        )
+        # Find users with similar tags (SQLite compatible)
+        try:
+            similar_user_ids = []
 
-        posts = posts_query.paginate(page=page, per_page=per_page, error_out=False)
+            if len(user_tag_ids) == 1:
+                # Single tag case
+                result = db.session.execute(
+                    text(
+                        """
+                        SELECT DISTINCT user_id 
+                        FROM user_tags 
+                        WHERE tag_id = :tag_id 
+                        AND user_id != :current_user_id
+                    """
+                    ),
+                    {"tag_id": user_tag_ids[0], "current_user_id": current_user.id},
+                ).fetchall()
+                similar_user_ids = [row[0] for row in result]
+            else:
+                # Multiple tags case
+                tag_conditions = []
+                params = {"current_user_id": current_user.id}
+
+                for i, tag_id in enumerate(user_tag_ids):
+                    tag_conditions.append(f"tag_id = :tag_id_{i}")
+                    params[f"tag_id_{i}"] = tag_id
+
+                query = f"""
+                    SELECT DISTINCT user_id 
+                    FROM user_tags 
+                    WHERE ({' OR '.join(tag_conditions)})
+                    AND user_id != :current_user_id
+                """
+
+                result = db.session.execute(text(query), params).fetchall()
+                similar_user_ids = [row[0] for row in result]
+
+            if not similar_user_ids:
+                return jsonify(
+                    {
+                        "posts": [],
+                        "pagination": {
+                            "page": page,
+                            "pages": 0,
+                            "per_page": per_page,
+                            "total": 0,
+                            "has_next": False,
+                            "has_prev": False,
+                        },
+                        "message": "No posts found from users with similar interests.",
+                    }
+                )
+
+            # Get posts from these users
+            posts = (
+                Post.query.filter(Post.creator.in_(similar_user_ids))
+                .order_by(desc(Post.created_at))
+                .paginate(page=page, per_page=per_page, error_out=False)
+            )
+
+        except Exception as query_error:
+            logger.error(f"Error finding similar users: {query_error}")
+            return jsonify(
+                {
+                    "posts": [],
+                    "pagination": {
+                        "page": page,
+                        "pages": 0,
+                        "per_page": per_page,
+                        "total": 0,
+                        "has_next": False,
+                        "has_prev": False,
+                    },
+                    "message": "Error finding similar users.",
+                }
+            )
 
         if not posts.items:
             return jsonify(
@@ -198,64 +239,61 @@ def similar_posts_feed():
                 }
             )
 
-        # Batch load like and comment counts
-        post_ids = [post.id for post in posts.items]
-        like_counts = {}
-        comment_counts = {}
-
-        if post_ids:
-            # Get like counts
-            like_count_results = db.session.execute(
-                text(
-                    """
-                    SELECT post_id, COUNT(*) as like_count 
-                    FROM likes 
-                    WHERE post_id IN :post_ids 
-                    GROUP BY post_id
-                """
-                ),
-                {"post_ids": tuple(post_ids)},
-            ).fetchall()
-
-            like_counts = {row[0]: row[1] for row in like_count_results}
-
-            # Get comment counts
-            comment_count_results = db.session.execute(
-                text(
-                    """
-                    SELECT post_id, COUNT(*) as comment_count 
-                    FROM comments 
-                    WHERE post_id IN :post_ids 
-                    GROUP BY post_id
-                """
-                ),
-                {"post_ids": tuple(post_ids)},
-            ).fetchall()
-
-            comment_counts = {row[0]: row[1] for row in comment_count_results}
-
         # Build response
         posts_data = []
         for post in posts.items:
-            post_dict = {
-                "id": post.id,
-                "title": post.title,
-                "caption": post.caption,
-                "creator": post.creator,
-                "image": post.image,
-                "likes": like_counts.get(post.id, 0),
-                "comments": comment_counts.get(post.id, 0),
-                "createdAt": post.created_at.isoformat() if post.created_at else None,
-                "updatedAt": post.updated_at.isoformat() if post.updated_at else None,
-                "user": {
-                    "id": post.user.id,
-                    "username": post.user.username,
-                    "firstName": post.user.first_name,
-                    "lastName": post.user.last_name,
-                    "profileImage": post.user.profile_image_url,
-                },
-            }
-            posts_data.append(post_dict)
+            try:
+                # Load user
+                user_data = None
+                if post.creator:
+                    user = User.query.get(post.creator)
+                    if user:
+                        user_data = {
+                            "id": user.id,
+                            "username": user.username,
+                            "firstName": user.first_name or "",
+                            "lastName": user.last_name or "",
+                            "profileImage": user.profile_image_url or "",
+                        }
+
+                # Get counts
+                like_count = (
+                    db.session.execute(
+                        text("SELECT COUNT(*) FROM likes WHERE post_id = :post_id"),
+                        {"post_id": post.id},
+                    ).scalar()
+                    or 0
+                )
+
+                comment_count = (
+                    db.session.execute(
+                        text("SELECT COUNT(*) FROM comments WHERE post_id = :post_id"),
+                        {"post_id": post.id},
+                    ).scalar()
+                    or 0
+                )
+
+                post_dict = {
+                    "id": post.id,
+                    "title": post.title or "",
+                    "caption": post.caption or "",
+                    "creator": post.creator,
+                    "image": post.image or "",
+                    "likes": like_count,
+                    "comments": comment_count,
+                    "createdAt": (
+                        post.created_at.isoformat() if post.created_at else None
+                    ),
+                    "updatedAt": (
+                        post.updated_at.isoformat() if post.updated_at else None
+                    ),
+                    "user": user_data,
+                }
+                posts_data.append(post_dict)
+
+            except Exception as post_error:
+                logger.warning(f"Error processing similar post {post.id}: {post_error}")
+                continue
 
         return jsonify(
             {
@@ -276,27 +314,6 @@ def similar_posts_feed():
         return jsonify({"errors": {"message": "Internal server error"}}), 500
 
 
-@post_routes.route("/feed/unified")
-@login_required
-def unified_posts_feed():
-    """
-    Returns both all posts and similar posts in one call
-    """
-    try:
-        page = request.args.get("page", 1, type=int)
-        per_page = min(request.args.get("per_page", 20, type=int), 50)
-        feed_type = request.args.get("type", "all")  # "all" or "similar"
-
-        if feed_type == "similar":
-            return similar_posts_feed()
-        else:
-            return all_posts_feed()
-
-    except Exception as e:
-        logger.error(f"Error in unified_posts_feed: {str(e)}")
-        return jsonify({"errors": {"message": "Internal server error"}}), 500
-
-
 @post_routes.route("/feed/stats")
 @login_required
 def posts_feed_stats():
@@ -314,32 +331,94 @@ def posts_feed_stats():
         if current_user.users_tags:
             user_tag_ids = [tag.id for tag in current_user.users_tags]
 
-            # Count similar users
-            similar_users_count = (
-                db.session.query(func.count(func.distinct(User.id)))
-                .join(User.users_tags)
-                .filter(
-                    Tag.id.in_(user_tag_ids),
-                    User.id != current_user.id,
-                    User.profile_image_url.isnot(None),
-                )
-                .scalar()
-                or 0
-            )
+            try:
+                if len(user_tag_ids) == 1:
+                    # Single tag case
+                    similar_users_count = (
+                        db.session.execute(
+                            text(
+                                """
+                            SELECT COUNT(DISTINCT user_id) 
+                            FROM user_tags 
+                            WHERE tag_id = :tag_id 
+                            AND user_id != :current_user_id
+                        """
+                            ),
+                            {
+                                "tag_id": user_tag_ids[0],
+                                "current_user_id": current_user.id,
+                            },
+                        ).scalar()
+                        or 0
+                    )
+                else:
+                    # Multiple tags case
+                    tag_conditions = []
+                    params = {"current_user_id": current_user.id}
 
-            # Count posts from similar users
-            similar_posts_count = (
-                db.session.query(func.count(func.distinct(Post.id)))
-                .join(User, Post.creator == User.id)
-                .join(User.users_tags)
-                .filter(
-                    Tag.id.in_(user_tag_ids),
-                    User.id != current_user.id,
-                    User.profile_image_url.isnot(None),
-                )
-                .scalar()
-                or 0
-            )
+                    for i, tag_id in enumerate(user_tag_ids):
+                        tag_conditions.append(f"tag_id = :tag_id_{i}")
+                        params[f"tag_id_{i}"] = tag_id
+
+                    query = f"""
+                        SELECT COUNT(DISTINCT user_id) 
+                        FROM user_tags 
+                        WHERE ({' OR '.join(tag_conditions)})
+                        AND user_id != :current_user_id
+                    """
+
+                    similar_users_count = (
+                        db.session.execute(text(query), params).scalar() or 0
+                    )
+
+                # Count posts from similar users if any exist
+                if similar_users_count > 0:
+                    if len(user_tag_ids) == 1:
+                        similar_user_ids_result = db.session.execute(
+                            text(
+                                """
+                                SELECT DISTINCT user_id 
+                                FROM user_tags 
+                                WHERE tag_id = :tag_id 
+                                AND user_id != :current_user_id
+                            """
+                            ),
+                            {
+                                "tag_id": user_tag_ids[0],
+                                "current_user_id": current_user.id,
+                            },
+                        ).fetchall()
+                    else:
+                        similar_user_ids_result = db.session.execute(
+                            text(query), params
+                        ).fetchall()
+
+                    similar_user_ids = [row[0] for row in similar_user_ids_result]
+
+                    if similar_user_ids:
+                        posts_count_query = "SELECT COUNT(*) FROM posts WHERE "
+                        posts_count_conditions = []
+                        posts_params = {}
+
+                        for i, user_id in enumerate(similar_user_ids):
+                            posts_count_conditions.append(f"creator = :user_id_{i}")
+                            posts_params[f"user_id_{i}"] = user_id
+
+                        posts_count_query += (
+                            "(" + " OR ".join(posts_count_conditions) + ")"
+                        )
+
+                        similar_posts_count = (
+                            db.session.execute(
+                                text(posts_count_query), posts_params
+                            ).scalar()
+                            or 0
+                        )
+
+            except Exception as stats_error:
+                logger.warning(f"Error calculating similar stats: {stats_error}")
+                similar_users_count = 0
+                similar_posts_count = 0
 
         return jsonify(
             {
@@ -354,6 +433,86 @@ def posts_feed_stats():
 
     except Exception as e:
         logger.error(f"Error getting feed stats: {str(e)}")
+        return jsonify({"errors": {"message": "Internal server error"}}), 500
+
+
+@post_routes.route("/feed/batch")
+@login_required
+def batch_posts_feed():
+    """
+    Returns both all posts and similar posts data in a single API call
+    """
+    try:
+        page = request.args.get("page", 1, type=int)
+        per_page = min(request.args.get("per_page", 20, type=int), 50)
+
+        # Get stats safely
+        try:
+            stats_response = posts_feed_stats()
+            stats_data = (
+                stats_response.get_json() if hasattr(stats_response, "get_json") else {}
+            )
+        except Exception:
+            stats_data = {
+                "totalPosts": 0,
+                "similarUsers": 0,
+                "similarPosts": 0,
+                "userTags": 0,
+            }
+
+        # Get all posts safely
+        try:
+            all_posts_response = all_posts_feed()
+            if isinstance(all_posts_response, tuple) and all_posts_response[1] != 200:
+                all_posts_data = {"posts": [], "pagination": {}}
+            else:
+                all_posts_data = (
+                    all_posts_response.get_json()
+                    if hasattr(all_posts_response, "get_json")
+                    else {"posts": [], "pagination": {}}
+                )
+        except Exception:
+            all_posts_data = {"posts": [], "pagination": {}}
+
+        # Get similar posts safely
+        try:
+            similar_posts_response = similar_posts_feed()
+            if (
+                isinstance(similar_posts_response, tuple)
+                and similar_posts_response[1] != 200
+            ):
+                similar_posts_data = {
+                    "posts": [],
+                    "pagination": {},
+                    "message": "Error loading similar posts",
+                }
+            else:
+                similar_posts_data = (
+                    similar_posts_response.get_json()
+                    if hasattr(similar_posts_response, "get_json")
+                    else {"posts": [], "pagination": {}}
+                )
+        except Exception:
+            similar_posts_data = {
+                "posts": [],
+                "pagination": {},
+                "message": "Error loading similar posts",
+            }
+
+        return jsonify(
+            {
+                "allPosts": all_posts_data.get("posts", []),
+                "similarPosts": similar_posts_data.get("posts", []),
+                "allPostsPagination": all_posts_data.get("pagination", {}),
+                "similarPostsPagination": similar_posts_data.get("pagination", {}),
+                "stats": stats_data,
+                "message": similar_posts_data.get("message"),
+                "activeTab": "all",
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Error in batch_posts_feed: {str(e)}")
         return jsonify({"errors": {"message": "Internal server error"}}), 500
 
 
@@ -374,145 +533,6 @@ def similar_users_posts_feed():
     Legacy endpoint - redirects to optimized version
     """
     return redirect("/api/posts/feed/similar")
-
-
-# from flask import Blueprint, request, abort, redirect, render_template, jsonify
-# from flask_login import login_required, current_user
-# from app.models import db, User, Post, Comment, Likes, UserTags
-# from app.forms import PostForm, CommentForm
-# from app.aws import get_unique_filename, upload_file_to_s3, remove_file_from_s3
-# from sqlalchemy.orm import joinedload, selectinload, load_only
-# from sqlalchemy import desc, func, text, and_
-# import logging
-# import app
-
-# post_routes = Blueprint("posts", __name__)
-
-# # Configure logging
-# logger = logging.getLogger(__name__)
-
-
-# # ! POSTS
-# @post_routes.route("/feed")
-# @login_required
-# def all_posts():
-#     """
-#     Posts feed with pagination, caching, and minimal data loading
-#     """
-#     try:
-#         page = request.args.get("page", 1, type=int)
-#         per_page = min(request.args.get("per_page", 20, type=int), 50)
-
-#         # Get current user's tag IDs in a single query
-#         current_user_tag_ids = (
-#             db.session.query(db.text("tag_id"))
-#             .from_text("user_tags")
-#             .filter(db.text("user_id = :user_id"))
-#             .params(user_id=current_user.id)
-#             .all()
-#         )
-#         current_user_tag_ids = (
-#             [row[0] for row in current_user_tag_ids] if current_user_tag_ids else []
-#         )
-
-#         if current_user_tag_ids:
-#             # Use raw SQL for better performance on large datasets
-#             posts_query = (
-#                 db.session.query(Post)
-#                 .join(User, Post.creator == User.id)
-#                 .join(db.text("user_tags ON users.id = user_tags.user_id"))
-#                 .filter(db.text("user_tags.tag_id IN :tag_ids"))
-#                 .options(
-#                     joinedload(Post.user).load_only(
-#                         "id", "username", "first_name", "last_name", "profile_image_url"
-#                     ),
-#                     # Don't load relationships here for feed - use counts instead
-#                 )
-#                 .distinct()
-#                 .order_by(desc(Post.created_at))
-#                 .params(tag_ids=tuple(current_user_tag_ids))
-#             )
-#         else:
-#             # Fallback to recent posts if user has no tags
-#             posts_query = (
-#                 db.session.query(Post)
-#                 .options(
-#                     joinedload(Post.user).load_only(
-#                         "id", "username", "first_name", "last_name", "profile_image_url"
-#                     ),
-#                 )
-#                 .order_by(desc(Post.created_at))
-#             )
-
-#         posts = posts_query.paginate(page=page, per_page=per_page, error_out=False)
-
-#         if not posts.items:
-#             return jsonify({"errors": {"message": "Not Found"}}), 404
-
-#         # Batch load like counts for all posts
-#         post_ids = [post.id for post in posts.items]
-#         like_counts = {}
-
-#         if post_ids:
-#             like_count_results = db.session.execute(
-#                 text(
-#                     """
-#                     SELECT post_id, COUNT(*) as like_count
-#                     FROM likes
-#                     WHERE post_id IN :post_ids
-#                     GROUP BY post_id
-#                 """
-#                 ),
-#                 {"post_ids": tuple(post_ids)},
-#             ).fetchall()
-
-#             like_counts = {row[0]: row[1] for row in like_count_results}
-
-#         # Build optimized response
-#         posts_data = []
-#         for post in posts.items:
-#             post_dict = {
-#                 "id": post.id,
-#                 "title": post.title,
-#                 "caption": (
-#                     post.caption[:100] + "..."
-#                     if len(post.caption) > 100
-#                     else post.caption
-#                 ),
-#                 "creator": post.creator,
-#                 "image": post.image,
-#                 "likes": like_counts.get(post.id, 0),
-#                 "createdAt": post.created_at.isoformat() if post.created_at else None,
-#                 "updatedAt": post.updated_at.isoformat() if post.updated_at else None,
-#                 "user": (
-#                     {
-#                         "id": post.user.id,
-#                         "username": post.user.username,
-#                         "profileImage": post.user.profile_image_url,
-#                     }
-#                     if post.user
-#                     else None
-#                 ),
-#             }
-#             posts_data.append(post_dict)
-
-#         return jsonify(
-#             {
-#                 "posts": posts_data,
-#                 "pagination": {
-#                     "page": page,
-#                     "pages": posts.pages,
-#                     "per_page": per_page,
-#                     "total": posts.total,
-#                     "has_next": posts.has_next,
-#                     "has_prev": posts.has_prev,
-#                 },
-#             }
-#         )
-
-#     except Exception as e:
-#         logger.error(f"Error in all_posts: {str(e)}")
-#         return jsonify({"errors": {"message": "Internal server error"}}), 500
 
 
 @post_routes.route("/<int:postId>")
@@ -605,218 +625,6 @@ def post(postId):
     except Exception as e:
         logger.error(f"Error in post {postId}: {str(e)}")
         return jsonify({"errors": {"message": "Internal server error"}}), 500
-
-
-# @post_routes.route("/similar-feed")
-# @login_required
-# def similar_users_posts_feed():
-#     """
-#     Using UserTags table correctly
-#     """
-#     try:
-#         page = request.args.get("page", 1, type=int)
-#         per_page = min(request.args.get("per_page", 20, type=int), 50)
-
-#         # Get current user's tags using the relationship
-#         if not current_user.users_tags:
-#             return jsonify(
-#                 {
-#                     "posts": [],
-#                     "pagination": {
-#                         "page": 1,
-#                         "pages": 0,
-#                         "per_page": per_page,
-#                         "total": 0,
-#                         "has_next": False,
-#                         "has_prev": False,
-#                     },
-#                     "message": "Add tags to your profile to discover posts from similar users!",
-#                 }
-#             )
-
-#         # Get tag IDs from the relationship
-#         user_tag_ids = [tag.id for tag in current_user.users_tags]
-
-#         # Find users with similar tags using the Tag model
-#         from app.models import Tag, User
-
-#         # Get all users who have these tags
-#         similar_users = (
-#             User.query.join(User.users_tags)
-#             .filter(
-#                 Tag.id.in_(user_tag_ids),
-#                 User.id != current_user.id,
-#                 User.profile_image_url.isnot(None),
-#             )
-#             .distinct()
-#             .all()
-#         )
-
-#         if not similar_users:
-#             return jsonify(
-#                 {
-#                     "posts": [],
-#                     "pagination": {
-#                         "page": page,
-#                         "pages": 0,
-#                         "per_page": per_page,
-#                         "total": 0,
-#                         "has_next": False,
-#                         "has_prev": False,
-#                     },
-#                     "message": "No users found with similar interests.",
-#                 }
-#             )
-
-#         # Get user IDs
-#         similar_user_ids = [user.id for user in similar_users]
-
-#         # Get posts from those users
-#         posts_query = Post.query.filter(Post.creator.in_(similar_user_ids)).order_by(
-#             Post.created_at.desc()
-#         )
-
-#         # Paginate
-#         posts = posts_query.paginate(page=page, per_page=per_page, error_out=False)
-
-#         if not posts.items:
-#             return jsonify(
-#                 {
-#                     "posts": [],
-#                     "pagination": {
-#                         "page": page,
-#                         "pages": 0,
-#                         "per_page": per_page,
-#                         "total": 0,
-#                         "has_next": False,
-#                         "has_prev": False,
-#                     },
-#                     "message": "No posts found from users with similar interests.",
-#                 }
-#             )
-
-#         # Build response
-#         posts_data = []
-#         for post in posts.items:
-#             post_dict = {
-#                 "id": post.id,
-#                 "title": post.title,
-#                 "caption": post.caption,
-#                 "creator": post.creator,
-#                 "image": post.image,
-#                 "likes": post.get_like_count_optimized(),
-#                 "comments": 0,
-#                 "createdAt": post.created_at.isoformat() if post.created_at else None,
-#                 "updatedAt": post.updated_at.isoformat() if post.updated_at else None,
-#                 "user": {
-#                     "id": post.user.id if post.user else post.creator,
-#                     "username": post.user.username if post.user else "Unknown",
-#                     "firstName": post.user.first_name if post.user else "",
-#                     "lastName": post.user.last_name if post.user else "",
-#                     "profileImage": post.user.profile_image_url if post.user else "",
-#                 },
-#             }
-#             posts_data.append(post_dict)
-
-#         return jsonify(
-#             {
-#                 "posts": posts_data,
-#                 "pagination": {
-#                     "page": page,
-#                     "pages": posts.pages,
-#                     "per_page": per_page,
-#                     "total": posts.total,
-#                     "has_next": posts.has_next,
-#                     "has_prev": posts.has_prev,
-#                 },
-#             }
-#         )
-
-#     except Exception as e:
-#         print(f"ERROR in similar feed alt: {str(e)}")
-#         import traceback
-
-#         traceback.print_exc()
-#         return jsonify({"errors": {"message": str(e)}}), 500
-
-# @post_routes.route("/feed-stats")
-# @login_required
-# def posts_feed_stats():
-#     """
-#     OPTIONAL: Get stats about similar users and available posts
-#     Useful for showing user insights
-#     """
-#     try:
-#         # Get current user's tags
-#         current_user_tag_ids = db.session.execute(
-#             text("SELECT tag_id FROM user_tags WHERE user_id = :user_id"),
-#             {"user_id": current_user.id},
-#         ).fetchall()
-#         current_user_tag_ids = [row[0] for row in current_user_tag_ids]
-
-#         if not current_user_tag_ids:
-#             return jsonify(
-#                 {
-#                     "similarUsers": 0,
-#                     "availablePosts": 0,
-#                     "message": "Add tags to discover similar users",
-#                 }
-#             )
-
-#         # Count similar users
-#         similar_users_count = (
-#             db.session.execute(
-#                 text(
-#                     """
-#                 SELECT COUNT(DISTINCT users.id)
-#                 FROM users
-#                 JOIN user_tags ON users.id = user_tags.user_id
-#                 WHERE user_tags.tag_id IN :tag_ids
-#                 AND users.id != :current_user_id
-#                 AND users.profile_image_url IS NOT NULL
-#             """
-#                 ),
-#                 {
-#                     "tag_ids": tuple(current_user_tag_ids),
-#                     "current_user_id": current_user.id,
-#                 },
-#             ).scalar()
-#             or 0
-#         )
-
-#         # Count available posts from similar users
-#         available_posts_count = (
-#             db.session.execute(
-#                 text(
-#                     """
-#                 SELECT COUNT(DISTINCT posts.id)
-#                 FROM posts
-#                 JOIN users ON posts.creator = users.id
-#                 JOIN user_tags ON users.id = user_tags.user_id
-#                 WHERE user_tags.tag_id IN :tag_ids
-#                 AND users.id != :current_user_id
-#                 AND users.profile_image_url IS NOT NULL
-#             """
-#                 ),
-#                 {
-#                     "tag_ids": tuple(current_user_tag_ids),
-#                     "current_user_id": current_user.id,
-#                 },
-#             ).scalar()
-#             or 0
-#         )
-
-#         return jsonify(
-#             {
-#                 "similarUsers": similar_users_count,
-#                 "availablePosts": available_posts_count,
-#                 "userTags": len(current_user_tag_ids),
-#             }
-#         )
-
-#     except Exception as e:
-#         logger.error(f"Error getting feed stats: {str(e)}")
-#         return jsonify({"errors": {"message": "Internal server error"}}), 500
 
 
 @post_routes.route("/<int:postId>/delete", methods=["DELETE"])
