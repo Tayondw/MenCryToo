@@ -224,7 +224,7 @@ const Navigation: React.FC = memo(() => {
 					{ path: "/groups", label: "Groups", icon: Users },
 					{ path: "/events", label: "Events", icon: Calendar },
 					{ path: "/posts-feed", label: "Feed", icon: StickyNote },
-					{ path: "/similar-feed", label: "Similar Users Feed", icon: Heart },
+					{ path: "/profile-feed", label: "Similar To You", icon: Heart },
 					{ path: "/posts/create", label: "Share Story", icon: PenTool },
 			  ]
 			: [
