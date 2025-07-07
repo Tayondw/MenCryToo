@@ -9,7 +9,7 @@ class CommentAPI {
 	private baseUrl = "/api";
 
 	/**
-	 * Get comments for a specific post
+	 * Get comments for a specific post - Fixed endpoint
 	 */
 	async getPostComments(
 		postId: number,
@@ -17,8 +17,9 @@ class CommentAPI {
 		perPage: number = 20,
 	): Promise<CommentResponse> {
 		try {
+			// Updated to use the correct endpoint that exists in your backend
 			const response = await fetch(
-				`${this.baseUrl}/posts/${postId}/comments?page=${page}&per_page=${perPage}`,
+				`${this.baseUrl}/comments/posts/${postId}/comments?page=${page}&per_page=${perPage}`,
 				{
 					method: "GET",
 					headers: {
@@ -86,7 +87,7 @@ class CommentAPI {
 	}
 
 	/**
-	 * Create a new comment
+	 * Create a new comment - Fixed endpoint
 	 */
 	async createComment(
 		commentData: CommentFormData,
@@ -101,8 +102,9 @@ class CommentAPI {
 				formData.append("csrf_token", csrfToken);
 			}
 
+			// Updated to use the correct endpoint
 			const response = await fetch(
-				`${this.baseUrl}/posts/${commentData.postId}/comments`,
+				`${this.baseUrl}/comments/posts/${commentData.postId}/comments`,
 				{
 					method: "POST",
 					body: formData,
@@ -128,7 +130,7 @@ class CommentAPI {
 	}
 
 	/**
-	 * Create a reply to a comment
+	 * Create a reply to a comment - Fixed endpoint
 	 */
 	async createReply(
 		commentData: CommentFormData,
@@ -156,8 +158,9 @@ class CommentAPI {
 				formData.append("csrf_token", csrfToken);
 			}
 
+			// Updated to use the correct endpoint
 			const response = await fetch(
-				`${this.baseUrl}/posts/${commentData.postId}/comments`,
+				`${this.baseUrl}/comments/posts/${commentData.postId}/comments`,
 				{
 					method: "POST",
 					body: formData,
@@ -221,15 +224,16 @@ class CommentAPI {
 	}
 
 	/**
-	 * Delete a comment
+	 * Delete a comment - Fixed endpoint
 	 */
 	async deleteComment(
 		postId: number,
 		commentId: number,
 	): Promise<{ success: boolean; message: string }> {
 		try {
+			// Updated to use the correct endpoint
 			const response = await fetch(
-				`${this.baseUrl}/posts/${postId}/comments/${commentId}`,
+				`${this.baseUrl}/comments/posts/${postId}/comments/${commentId}`,
 				{
 					method: "DELETE",
 					headers: {
