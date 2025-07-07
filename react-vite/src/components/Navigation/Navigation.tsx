@@ -216,7 +216,7 @@ const Navigation: React.FC = memo(() => {
 	const profileRef = useRef<HTMLDivElement>(null);
 	const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-	// OPTIMIZED: Memoized navigation links
+	// Memoized navigation links
 	const navLinks = useMemo(() => {
 		return sessionUser
 			? [
