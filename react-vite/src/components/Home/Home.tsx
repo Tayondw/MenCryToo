@@ -1,4 +1,3 @@
-// react-vite/src/components/Home/Home.tsx
 import React from "react";
 import { useLoaderData } from "react-router-dom";
 import AuthHome from "./AuthHome/AuthHome";
