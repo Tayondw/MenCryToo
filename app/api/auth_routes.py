@@ -109,7 +109,7 @@ def login():
         login_user(user)
 
         # Return only essential data for login
-        return user.to_dict_auth_optimized()
+        return user.to_dict_auth()
     return form.errors, 401
 
 
@@ -171,7 +171,7 @@ def sign_up():
         login_user(user)
 
         # Return minimal data for faster response
-        return user.to_dict_auth_optimized()
+        return user.to_dict_auth()
     return form.errors, 401
 
 
@@ -179,17 +179,17 @@ def sign_up():
 @login_required
 def get_profile():
     """
-    Optimized endpoint specifically for the profile page.
+    Endpoint specifically for the profile page.
     Returns all data needed for profile display in a single efficient query.
     """
     if current_user.is_authenticated:
-        # Single optimized query with selective loading
+        # Single query with selective loading
         user = (
             db.session.query(User)
             .options(
                 # Load user tags
                 selectinload(User.users_tags).load_only("id", "name"),
-                # Load groups where user is a MEMBER (optimized)
+                # Load groups where user is a MEMBER
                 selectinload(User.memberships)
                 .joinedload(Membership.group)
                 .options(
@@ -205,7 +205,7 @@ def get_profile():
                     ),
                     selectinload(Group.memberships).load_only("id"),  # For count
                 ),
-                # Load groups where user is ORGANIZER (optimized)
+                # Load groups where user is ORGANIZER
                 selectinload(User.groups).options(
                     load_only(
                         "id",
@@ -219,7 +219,7 @@ def get_profile():
                     ),
                     selectinload(Group.memberships).load_only("id"),  # For count
                 ),
-                # Load events user is ATTENDING (optimized)
+                # Load events user is ATTENDING
                 selectinload(User.attendances)
                 .joinedload(Attendance.event)
                 .options(
@@ -269,7 +269,7 @@ def get_profile():
         )
 
         if user:
-            return user.to_dict_profile_optimized()
+            return user.to_dict_profile()
 
     return {"errors": {"message": "Unauthorized"}}, 401
 
