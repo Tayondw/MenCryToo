@@ -29,7 +29,7 @@ group_routes = Blueprint("groups", __name__)
 @group_routes.route("")
 def all_groups():
     """
-    Query for all groups with optimized pagination and minimal data loading
+    Query for all groups with pagination and minimal data loading
     """
     page = request.args.get("page", 1, type=int)
     per_page = min(request.args.get("per_page", 20, type=int), 50)
@@ -40,7 +40,7 @@ def all_groups():
     city = request.args.get("city", "").strip()
     state = request.args.get("state", "").strip()
 
-    # Build query with optimized loading
+    # Build query with loading
     groups_query = db.session.query(Group).options(
         joinedload(Group.organizer).load_only(
             "id", "username", "first_name", "last_name", "profile_image_url"
@@ -148,7 +148,7 @@ def all_groups():
 @group_routes.route("/<int:groupId>")
 def group(groupId):
     """
-    Query for group by id with optimized loading
+    Query for group by id with loading
     """
     group = (
         db.session.query(Group)
@@ -260,7 +260,7 @@ def create_group():
 @login_required
 def edit_group(groupId):
     """
-    Update group with optimized response
+    Update group with response
     """
     group_to_edit = Group.query.get(groupId)
 
@@ -325,7 +325,7 @@ def edit_group(groupId):
 @login_required
 def delete_group(groupId):
     """
-    Delete group with optimized batch operations and proper transaction handling
+    Delete group with batch operations and proper transaction handling
     """
     group_to_delete = Group.query.get(groupId)
 
@@ -404,7 +404,7 @@ def delete_group(groupId):
 @login_required
 def join_group(groupId):
     """
-    Join group with optimized checks
+    Join group with checks
     """
     group = Group.query.get(groupId)
 
