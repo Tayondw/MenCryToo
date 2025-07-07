@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 @login_required
 def all_posts_feed():
     """
-    ALL posts with pagination and optimized loading
+    ALL posts with pagination and loading
     """
     try:
         page = request.args.get("page", 1, type=int)
@@ -521,7 +521,7 @@ def batch_posts_feed():
 @login_required
 def all_posts():
     """
-    Legacy endpoint - redirects to optimized version
+    Legacy endpoint - redirects to other version
     """
     return redirect("/api/posts/feed/all")
 
@@ -530,7 +530,7 @@ def all_posts():
 @login_required
 def similar_users_posts_feed():
     """
-    Legacy endpoint - redirects to optimized version
+    Legacy endpoint - redirects to other version
     """
     return redirect("/api/posts/feed/similar")
 
@@ -539,10 +539,10 @@ def similar_users_posts_feed():
 @login_required
 def post(postId):
     """
-    Single post view with optimized queries
+    Single post view with queries
     """
     try:
-        # Single optimized query with eager loading
+        # Single query with eager loading
         post = (
             db.session.query(Post)
             .options(
