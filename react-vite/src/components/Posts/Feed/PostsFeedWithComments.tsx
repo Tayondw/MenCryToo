@@ -31,12 +31,45 @@ import CommentModal from "../../Comments/CommentModal";
 import { useComments } from "../../../hooks/useComments";
 import { PostsFeedLoaderData } from "../../../loaders/postsFeedLoaders";
 import { PostCardProps, SessionUser } from "../../../types/postsFeed";
-import type { FeedPostWithComments } from "../../../types/comments";
+import type { Comment } from "../../../types/comments"; // Import the correct Comment type
 
 interface RootState {
 	session: {
 		user: SessionUser | null;
 	};
+}
+
+// Create a type that represents a post with optional comments array
+interface OldComment {
+	id: number;
+	userId: number;
+	postId: number;
+	comment: string;
+	username: string;
+	parentId: number | null;
+	created_at: string;
+	updated_at: string;
+}
+
+interface PostWithComments {
+	id: number;
+	title: string;
+	caption: string;
+	image: string;
+	likes: number;
+	creator: number;
+	comments: number; // Count of comments
+	createdAt: string;
+	updatedAt: string;
+	user: {
+		id: number;
+		username: string;
+		firstName: string;
+		lastName: string;
+		profileImage: string;
+	};
+	// Optional array of comment objects in old format
+	postComments?: OldComment[];
 }
 
 const PostsFeedWithComments: React.FC = () => {
@@ -190,13 +223,45 @@ const PostsFeedWithComments: React.FC = () => {
 		[sessionUser, navigate, fetcher],
 	);
 
-	// Handle comment modal open
+	// Handle comment modal open - Fixed to properly transform comment data
 	const handleCommentClick = useCallback(
-		(postId: number, initialComments?: Comment[]) => {
+		(postId: number, post: PostWithComments) => {
+			// Convert old format comments to new format if they exist
+			let initialComments: Comment[] = [];
+
+			if (post.postComments) {
+				initialComments = post.postComments.map((oldComment: OldComment) => {
+					console.log("Transforming old comment:", oldComment);
+
+					const newComment: Comment = {
+						id: oldComment.id,
+						userId: oldComment.userId,
+						postId: oldComment.postId,
+						comment: oldComment.comment,
+						parentId: oldComment.parentId,
+						createdAt: oldComment.created_at,
+						updatedAt: oldComment.updated_at,
+						commenter: {
+							id: oldComment.userId,
+							username: oldComment.username, // This field exists in OldComment
+							firstName: "", // These don't exist in old format, so use empty strings
+							lastName: "",
+							profileImage: "/default-avatar.png", // Default image
+						},
+						replies: [], // Initialize empty replies array
+					};
+
+					return newComment;
+				});
+
+				console.log("Transformed comments for modal:", initialComments);
+			}
+
 			openCommentModal(postId, initialComments);
 		},
 		[openCommentModal],
 	);
+      
 
 	// Clear filters
 	const clearFilters = useCallback(() => {
@@ -580,7 +645,7 @@ const PostsFeedWithComments: React.FC = () => {
 // Enhanced PostCard Component with comment functionality
 const PostCardWithComments: React.FC<
 	PostCardProps & {
-		handleCommentClick: (postId: number, initialComments?: Comment[]) => void;
+		handleCommentClick: (postId: number, post: PostWithComments) => void;
 	}
 > = ({
 	post,
@@ -590,8 +655,9 @@ const PostCardWithComments: React.FC<
 	handleCommentClick,
 	isLiked,
 }) => {
-	// Convert FeedPost to FeedPostWithComments for this component
-	const postWithComments = post as FeedPostWithComments;
+	// Cast post to PostWithComments type for this component
+	const postWithComments = post as PostWithComments;
+
 	return (
 		<div
 			className={`bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg transition-all duration-300 ${
@@ -664,9 +730,7 @@ const PostCardWithComments: React.FC<
 									</span>
 								</button>
 								<button
-									onClick={() =>
-										handleCommentClick(post.id, postWithComments.postComments)
-									}
+									onClick={() => handleCommentClick(post.id, postWithComments)}
 									className="flex items-center gap-1 text-slate-500 hover:text-blue-500 transition-colors"
 								>
 									<MessageCircle size={18} />
@@ -753,9 +817,7 @@ const PostCardWithComments: React.FC<
 									</span>
 								</button>
 								<button
-									onClick={() =>
-										handleCommentClick(post.id, postWithComments.postComments)
-									}
+									onClick={() => handleCommentClick(post.id, postWithComments)}
 									className="flex items-center gap-1 text-slate-500 hover:text-blue-500 transition-colors"
 								>
 									<MessageCircle size={16} />
