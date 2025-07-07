@@ -27,7 +27,7 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=datetime.now, index=True)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    # Optimized relationships with lazy loading
+    # Relationships with lazy loading
     posts = db.relationship("Post", back_populates="user", lazy="select")
     user_likes = db.relationship(
         "Post", secondary=likes, back_populates="post_likes", lazy="select"
@@ -59,7 +59,7 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
-    def to_dict_auth_optimized(self):
+    def to_dict_auth(self):
         """Ultra-lightweight version for authentication - fastest possible loading"""
 
         # Get user's groups with organizerId included
@@ -351,8 +351,8 @@ class User(db.Model, UserMixin):
             "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
         }
 
-    def to_dict_list_optimized(self):
-        """Optimized for user lists - minimal data"""
+    def to_dict_list(self):
+        """For user lists - minimal data"""
         return {
             "id": self.id,
             "firstName": self.first_name,
@@ -367,8 +367,8 @@ class User(db.Model, UserMixin):
             ),
         }
 
-    def to_dict_feed_optimized(self):
-        """Optimized for profile feed - minimal data to reduce load time"""
+    def to_dict_feed(self):
+        """For profile feed - minimal data to reduce load time"""
         return {
             "id": self.id,
             "firstName": self.first_name,
@@ -386,9 +386,9 @@ class User(db.Model, UserMixin):
             "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
         }
 
-    def to_dict_profile_optimized(self):
+    def to_dict_profile(self):
         """
-        Optimized method specifically for profile page.
+        Method specifically for profile page.
         Returns all necessary data with efficient structure.
         """
 
@@ -489,7 +489,7 @@ class User(db.Model, UserMixin):
                     }
                     user_events.append(event_data)
 
-        # Collect user posts with optimized data (recent 20 posts max)
+        # Collect user posts with data (recent 20 posts max)
         user_posts = []
         if hasattr(self, "posts") and self.posts:
             # Sort posts by creation date and limit to 20 most recent
@@ -586,8 +586,8 @@ class User(db.Model, UserMixin):
             "profileImage": self.profile_image_url,
         }
 
-    def to_dict_optimized(self):
-        """Optimized version for authentication - includes essential data only"""
+    def to_dict(self):
+        """Authentication - includes essential data only"""
         return {
             "id": self.id,
             "firstName": self.first_name,
@@ -620,7 +620,7 @@ class User(db.Model, UserMixin):
             "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
         }
 
-    # Legacy methods kept for backward compatibility but optimized
+    # Legacy methods kept for backward compatibility
     def to_dict(
         self,
         posts=False,
