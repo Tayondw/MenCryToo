@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import { RouterProvider } from "react-router-dom";
 import configureStore from "./store/store";
-import { router } from "./router-TSX";
+import { router } from "./router";
 import * as sessionActions from "./store/session";
 import "./index.css";
 
