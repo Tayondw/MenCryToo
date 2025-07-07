@@ -17,7 +17,7 @@ venue_routes = Blueprint("venues", __name__)
 @venue_routes.route("/")
 def all_venues():
     """
-    Query for all venues and returns them in a list of venue dictionaries - optimized with pagination
+    Query for all venues and returns them in a list of venue dictionaries - with pagination
     """
     page = request.args.get("page", 1, type=int)
     per_page = min(request.args.get("per_page", 20, type=int), 50)
@@ -47,7 +47,7 @@ def all_venues():
 @venue_routes.route("/<int:venueId>")
 def venue(venueId):
     """
-    Query for a venue by id and returns that venue in a dictionary - optimized with eager loading
+    Query for a venue by id and returns that venue in a dictionary - with eager loading
     """
     venue = (
         db.session.query(Venue)
@@ -70,9 +70,9 @@ def venue(venueId):
 @login_required
 def edit_venue(venueId):
     """
-    Update venue - optimized authorization check and selective loading
+    Update venue - authorization check and selective loading
     """
-    # Optimized query to get venue and group data in one query
+    # Query to get venue and group data in one query
     venue_to_edit = (
         db.session.query(Venue)
         .options(joinedload(Venue.groups).load_only("id", "organizer_id"))
