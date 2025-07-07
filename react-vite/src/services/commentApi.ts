@@ -9,7 +9,7 @@ class CommentAPI {
 	private baseUrl = "/api";
 
 	/**
-	 * Get comments for a specific post - Fixed endpoint
+	 * Get comments for a specific post - Fixed endpoint to match backend routes
 	 */
 	async getPostComments(
 		postId: number,
@@ -17,24 +17,29 @@ class CommentAPI {
 		perPage: number = 20,
 	): Promise<CommentResponse> {
 		try {
-			// Updated to use the correct endpoint that exists in your backend
+			// Use the correct endpoint that matches your backend routes
 			const response = await fetch(
-				`${this.baseUrl}/comments/posts/${postId}/comments?page=${page}&per_page=${perPage}`,
+				`${this.baseUrl}/comments/posts/${postId}/comments?page=${page}&per_page=${perPage}&include_replies=true`,
 				{
 					method: "GET",
 					headers: {
 						"Content-Type": "application/json",
 					},
+					credentials: "include", // Important for session/auth
 				},
 			);
 
 			if (!response.ok) {
-				throw new Error(`Failed to fetch comments: ${response.status}`);
+				const errorData = await response.json().catch(() => ({}));
+				throw new Error(
+					errorData.message || `Failed to fetch comments: ${response.status}`,
+				);
 			}
 
 			const data = await response.json();
+			console.log("Raw API response:", data);
 
-			// Handle different response formats
+			// Handle different response formats from your backend
 			if (Array.isArray(data)) {
 				return {
 					comments: data,
@@ -48,7 +53,17 @@ class CommentAPI {
 				};
 			}
 
-			return data;
+			// Handle the expected format from your backend
+			return {
+				comments: data.comments || [],
+				pagination: data.pagination || {
+					page: 1,
+					pages: 1,
+					total: 0,
+					hasNext: false,
+					hasPrev: false,
+				},
+			};
 		} catch (error) {
 			console.error("Error fetching post comments:", error);
 			throw error;
@@ -71,11 +86,16 @@ class CommentAPI {
 					headers: {
 						"Content-Type": "application/json",
 					},
+					credentials: "include",
 				},
 			);
 
 			if (!response.ok) {
-				throw new Error(`Failed to fetch comment replies: ${response.status}`);
+				const errorData = await response.json().catch(() => ({}));
+				throw new Error(
+					errorData.message ||
+						`Failed to fetch comment replies: ${response.status}`,
+				);
 			}
 
 			const data = await response.json();
@@ -87,7 +107,7 @@ class CommentAPI {
 	}
 
 	/**
-	 * Create a new comment - Fixed endpoint
+	 * Create a new comment - Fixed endpoint and format
 	 */
 	async createComment(
 		commentData: CommentFormData,
@@ -102,25 +122,55 @@ class CommentAPI {
 				formData.append("csrf_token", csrfToken);
 			}
 
-			// Updated to use the correct endpoint
+			console.log("Creating comment with data:", {
+				postId: commentData.postId,
+				comment: commentData.comment,
+			});
+
+			// Use the correct endpoint that matches your backend routes
 			const response = await fetch(
 				`${this.baseUrl}/comments/posts/${commentData.postId}/comments`,
 				{
 					method: "POST",
 					body: formData,
+					credentials: "include",
 				},
 			);
 
 			if (!response.ok) {
-				const errorData = await response.json();
+				const errorData = await response.json().catch(() => ({}));
+				console.error("Error response:", errorData);
 				throw new Error(
-					errorData.message || `Failed to create comment: ${response.status}`,
+					errorData.message ||
+						errorData.errors?.comment ||
+						`Failed to create comment: ${response.status}`,
 				);
 			}
 
 			const data = await response.json();
+			console.log("Comment creation response:", data);
+
+			// Transform the response to match expected format
+			const comment: Comment = {
+				id: data.id,
+				userId: data.userId || data.user_id,
+				postId: data.postId || data.post_id,
+				comment: data.comment,
+				parentId: data.parentId || data.parent_id || null,
+				createdAt: data.createdAt || data.created_at,
+				updatedAt: data.updatedAt || data.updated_at,
+				commenter: data.commenter || {
+					id: data.userId || data.user_id,
+					username: data.username || "unknown",
+					firstName: "",
+					lastName: "",
+					profileImage: "/default-avatar.png",
+				},
+				replies: [],
+			};
+
 			return {
-				comment: data,
+				comment,
 				success: true,
 			};
 		} catch (error) {
@@ -130,7 +180,7 @@ class CommentAPI {
 	}
 
 	/**
-	 * Create a reply to a comment - Fixed endpoint
+	 * Create a reply to a comment - Fixed endpoint and format
 	 */
 	async createReply(
 		commentData: CommentFormData,
@@ -158,25 +208,56 @@ class CommentAPI {
 				formData.append("csrf_token", csrfToken);
 			}
 
-			// Updated to use the correct endpoint
+			console.log("Creating reply with data:", {
+				postId: commentData.postId,
+				parentId: commentData.parentId,
+				comment: commentText,
+			});
+
+			// Use the same endpoint as regular comments - your backend handles replies
 			const response = await fetch(
 				`${this.baseUrl}/comments/posts/${commentData.postId}/comments`,
 				{
 					method: "POST",
 					body: formData,
+					credentials: "include",
 				},
 			);
 
 			if (!response.ok) {
-				const errorData = await response.json();
+				const errorData = await response.json().catch(() => ({}));
+				console.error("Error response:", errorData);
 				throw new Error(
-					errorData.message || `Failed to create reply: ${response.status}`,
+					errorData.message ||
+						errorData.errors?.comment ||
+						`Failed to create reply: ${response.status}`,
 				);
 			}
 
 			const data = await response.json();
+			console.log("Reply creation response:", data);
+
+			// Transform the response to match expected format
+			const comment: Comment = {
+				id: data.id,
+				userId: data.userId || data.user_id,
+				postId: data.postId || data.post_id,
+				comment: data.comment,
+				parentId: data.parentId || data.parent_id || commentData.parentId,
+				createdAt: data.createdAt || data.created_at,
+				updatedAt: data.updatedAt || data.updated_at,
+				commenter: data.commenter || {
+					id: data.userId || data.user_id,
+					username: data.username || "unknown",
+					firstName: "",
+					lastName: "",
+					profileImage: "/default-avatar.png",
+				},
+				replies: [],
+			};
+
 			return {
-				comment: data,
+				comment,
 				success: true,
 			};
 		} catch (error) {
@@ -200,12 +281,13 @@ class CommentAPI {
 					headers: {
 						"Content-Type": "application/json",
 					},
+					credentials: "include",
 					body: JSON.stringify({ comment: newText }),
 				},
 			);
 
 			if (!response.ok) {
-				const errorData = await response.json();
+				const errorData = await response.json().catch(() => ({}));
 				throw new Error(
 					errorData.message || `Failed to update comment: ${response.status}`,
 				);
@@ -231,7 +313,7 @@ class CommentAPI {
 		commentId: number,
 	): Promise<{ success: boolean; message: string }> {
 		try {
-			// Updated to use the correct endpoint
+			// Use the correct endpoint that matches your backend routes
 			const response = await fetch(
 				`${this.baseUrl}/comments/posts/${postId}/comments/${commentId}`,
 				{
@@ -239,11 +321,12 @@ class CommentAPI {
 					headers: {
 						"Content-Type": "application/json",
 					},
+					credentials: "include",
 				},
 			);
 
 			if (!response.ok) {
-				const errorData = await response.json();
+				const errorData = await response.json().catch(() => ({}));
 				throw new Error(
 					errorData.message || `Failed to delete comment: ${response.status}`,
 				);
@@ -274,6 +357,7 @@ class CommentAPI {
 					headers: {
 						"Content-Type": "application/json",
 					},
+					credentials: "include",
 				},
 			);
 
@@ -302,6 +386,7 @@ class CommentAPI {
 				headers: {
 					"Content-Type": "application/json",
 				},
+				credentials: "include",
 			});
 
 			if (!response.ok) {
@@ -331,6 +416,7 @@ class CommentAPI {
 					headers: {
 						"Content-Type": "application/json",
 					},
+					credentials: "include",
 				},
 			);
 
