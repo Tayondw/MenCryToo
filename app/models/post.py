@@ -24,7 +24,7 @@ class Post(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now, index=True)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    # Optimized relationships with better lazy loading strategies
+    # Relationships with better lazy loading strategies
     user = db.relationship("User", back_populates="posts", lazy="joined")
     post_likes = db.relationship(
         "User", secondary=likes, back_populates="user_likes", lazy="select"
@@ -45,8 +45,8 @@ class Post(db.Model):
             raise ValueError("Caption must be at least 5 characters long")
         return caption.strip()
 
-    def add_like_optimized(self, user_id):
-        """Ultra-optimized like addition using efficient SQL operations"""
+    def add_like(self, user_id):
+        """Like addition using efficient SQL operations"""
         try:
             # Use INSERT ... ON CONFLICT for PostgreSQL or INSERT IGNORE for MySQL
             if environment == "production":
@@ -90,8 +90,8 @@ class Post(db.Model):
             db.session.rollback()
             return False
 
-    def remove_like_optimized(self, user_id):
-        """Ultra-optimized like removal using efficient SQL"""
+    def remove_like(self, user_id):
+        """Like removal using efficient SQL"""
         try:
             result = db.session.execute(
                 text(
@@ -109,7 +109,7 @@ class Post(db.Model):
             db.session.rollback()
             return False
 
-    def get_like_count_optimized(self):
+    def get_like_count(self):
         """Get like count using efficient aggregation"""
         try:
             result = db.session.execute(
@@ -133,7 +133,7 @@ class Post(db.Model):
         except Exception:
             return False
 
-    def to_dict_feed_optimized(self):
+    def to_dict_feed(self):
         """Ultra-lightweight version for feeds - fastest loading"""
         return {
             "id": self.id,
@@ -143,7 +143,7 @@ class Post(db.Model):
             ),
             "creator": self.creator,
             "image": self.image,
-            "likes": self.get_like_count_optimized(),
+            "likes": self.get_like_count(),
             "createdAt": self.created_at.isoformat() if self.created_at else None,
             "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
             "user": (
@@ -157,15 +157,15 @@ class Post(db.Model):
             ),
         }
 
-    def to_dict_detail_optimized(self):
-        """Optimized for single post view with comments"""
+    def to_dict_detail(self):
+        """For single post view with comments"""
         return {
             "id": self.id,
             "title": self.title,
             "caption": self.caption,
             "creator": self.creator,
             "image": self.image,
-            "likes": self.get_like_count_optimized(),
+            "likes": self.get_like_count(),
             "user": (
                 {
                     "id": self.user.id,
@@ -221,7 +221,7 @@ class Post(db.Model):
             "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
         }
 
-    def to_dict_create_optimized(self):
+    def to_dict_create(self):
         """Minimal version for post creation responses"""
         return {
             "id": self.id,
@@ -244,29 +244,21 @@ class Post(db.Model):
             ),
             "creator": self.creator,
             "image": self.image,
-            "likes": self.get_like_count_optimized(),
+            "likes": self.get_like_count(),
             "createdAt": self.created_at.isoformat() if self.created_at else None,
             "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
         }
 
-    # Legacy methods for backward compatibility
-    def add_like(self, user_id):
-        """Legacy method - use add_like_optimized instead"""
-        return self.add_like_optimized(user_id)
-
-    def remove_like(self, user_id):
-        """Legacy method - use remove_like_optimized instead"""
-        return self.remove_like_optimized(user_id)
 
     def to_dict(self, post_comments=False, post_likes=False):
-        """Legacy full dictionary representation - use optimized versions instead"""
+        """Legacy full dictionary representation - use other versions instead"""
         dict_post = {
             "id": self.id,
             "title": self.title,
             "caption": self.caption,
             "creator": self.creator,
             "image": self.image,
-            "likes": self.get_like_count_optimized(),
+            "likes": self.get_like_count(),
             "user": (
                 {
                     "id": self.user.id,
