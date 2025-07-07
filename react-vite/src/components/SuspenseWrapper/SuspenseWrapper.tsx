@@ -1,4 +1,3 @@
-// react-vite/src/components/SuspenseWrapper/SuspenseWrapper.tsx
 import React, { Suspense } from "react";
 import PageLoader from "../PageLoader/PageLoader";
 
