@@ -58,7 +58,7 @@ const mockUser: User = {
 			createdAt: "2024-01-15T10:30:00Z",
 			updatedAt: "2024-01-15T10:30:00Z",
 			user: {} as User, // This creates a circular reference - will remove or providing a minimal user object
-			comments: "", // This should be an array of Comment objects based on the interface - will fix later
+			comments: 3, // This should be an array of Comment objects based on the interface - will fix later
 		},
 		{
 			id: 2,
@@ -72,7 +72,7 @@ const mockUser: User = {
 			createdAt: "2024-01-10T14:20:00Z",
 			updatedAt: "2024-01-10T14:20:00Z",
 			user: {} as User,
-			comments: "",
+			comments: 1,
 		},
 		{
 			id: 3,
@@ -86,7 +86,7 @@ const mockUser: User = {
 			createdAt: "2024-01-05T16:45:00Z",
 			updatedAt: "2024-01-05T16:45:00Z",
 			user: {} as User,
-			comments: "",
+			comments: 5,
 		},
 	],
 	group: [
@@ -169,7 +169,7 @@ const mockUser: User = {
 	userComments: [
 		{
 			id: 1,
-			content: "Thank you for sharing your story, it really helped me!",
+			comment: "Thank you for sharing your story, it really helped me!",
 			userId: 2, // Added optional fields for better data completeness
 			postId: 1,
 			createdAt: "2024-01-16T09:15:00Z",
@@ -177,7 +177,7 @@ const mockUser: User = {
 		},
 		{
 			id: 2,
-			content: "Your post about anxiety management was incredibly helpful.",
+			comment: "Your post about anxiety management was incredibly helpful.",
 			userId: 3,
 			postId: 1,
 			createdAt: "2024-01-16T14:30:00Z",
@@ -185,7 +185,7 @@ const mockUser: User = {
 		},
 		{
 			id: 3,
-			content:
+			comment:
 				"I appreciate your vulnerability and openness about mental health.",
 			userId: 4,
 			postId: 3,
@@ -194,7 +194,7 @@ const mockUser: User = {
 		},
 		{
 			id: 4,
-			content: "Looking forward to the next group session!",
+			comment: "Looking forward to the next group session!",
 			userId: 5,
 			createdAt: "2024-01-18T16:45:00Z",
 			updatedAt: "2024-01-18T16:45:00Z",
