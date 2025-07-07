@@ -1,6 +1,7 @@
 export * from "./comments";
 
 // User types
+// User types
 export interface User {
 	id: number;
 	username: string;
@@ -14,11 +15,10 @@ export interface User {
 	posts: Post[];
 	group: Group[];
 	events: Event[];
-	userComments: Comment[];
+	userComments: UserComment[]; // Renamed to avoid conflict with Comment interface
 	createdAt?: string;
 	updatedAt?: string;
 }
-
 export interface Tag {
 	id: number;
 	name: string;
@@ -74,8 +74,8 @@ export interface Venue {
 	longitude: number;
 }
 
-// Basic comment interface (for backwards compatibility)
-export interface Comment {
+// Basic comment interface (for backwards compatibility) - renamed to avoid conflict
+export interface UserComment {
 	id: number;
 	comment: string;
 	userId?: number;
