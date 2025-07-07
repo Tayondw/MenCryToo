@@ -1,7 +1,7 @@
 import { redirect, json, LoaderFunctionArgs } from "react-router-dom";
 import { User, Tag } from "../types";
 
-// Loader to fetch user details by ID (optimized with caching)
+// Loader to fetch user details by ID (with caching)
 export const userDetailsLoader = async ({ params }: LoaderFunctionArgs) => {
 	const { userId } = params;
 
