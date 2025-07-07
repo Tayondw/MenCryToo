@@ -1,3 +1,5 @@
+export * from "./comments";
+
 // User types
 export interface User {
 	id: number;
@@ -39,13 +41,13 @@ export interface Group {
 	id: number;
 	name: string;
 	about: string;
-      image: string;
-      city: string;
-      state: string;
+	image: string;
+	city: string;
+	state: string;
 	numMembers: number;
 	events: Event[];
-      type: string;
-      organizerId: number;
+	type: string;
+	organizerId: number;
 }
 
 export interface Event {
@@ -57,21 +59,22 @@ export interface Event {
 	capacity: number;
 	type: string;
 	startDate: string;
-      endDate: string;
-      venueInfo: Venue;
-      groupInfo: Group;
+	endDate: string;
+	venueInfo: Venue;
+	groupInfo: Group;
 }
 
 export interface Venue {
-      id: number;
-      groupId: number;
-      address: string;
-      city: string;
-      state: string;
-      latitude: number;
-      longitude: number;
+	id: number;
+	groupId: number;
+	address: string;
+	city: string;
+	state: string;
+	latitude: number;
+	longitude: number;
 }
 
+// Basic comment interface (for backwards compatibility)
 export interface Comment {
 	id: number;
 	comment: string;
@@ -79,8 +82,9 @@ export interface Comment {
 	postId?: number;
 	createdAt?: string;
 	updatedAt?: string;
+	parentId?: number | null; // Added for threading support
+	username?: string; // Added for easier display
 }
-
 export interface ProfilesData {
 	users_profile: User[];
 }
