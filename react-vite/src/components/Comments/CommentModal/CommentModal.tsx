@@ -1,4 +1,4 @@
-// src/components/Comments/CommentModal.tsx
+// Fixed CommentModal.tsx - prevents duplicate loading
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
@@ -12,8 +12,8 @@ import {
 	Loader,
 } from "lucide-react";
 import { useSelector } from "react-redux";
-import CommentForm from "../CommentForm";
-import CommentThread from "../CommentThread";
+import CommentForm from "../CommentForm/CommentForm";
+import CommentThread from "../CommentThread/CommentThread";
 import { commentApi } from "../../../services/commentApi";
 import {
 	organizeCommentsIntoThreads,
@@ -25,6 +25,38 @@ import type {
 	CommentFormData,
 } from "../../../types/comments";
 import type { RootState } from "../../../types";
+
+// Helper function to transform API comments to our expected format
+const transformApiComment = (apiComment: any): Comment => {
+	console.log("Transforming API comment:", apiComment);
+
+	// If the API comment already has a commenter object, use it
+	if (apiComment.commenter) {
+		return apiComment as Comment;
+	}
+
+	// Otherwise, transform old/API format to new format
+	return {
+		id: apiComment.id,
+		userId: apiComment.userId || apiComment.user_id,
+		postId: apiComment.postId || apiComment.post_id,
+		comment: apiComment.comment,
+		parentId: apiComment.parentId || apiComment.parent_id || null,
+		createdAt: apiComment.createdAt || apiComment.created_at,
+		updatedAt: apiComment.updatedAt || apiComment.updated_at,
+		commenter: {
+			id: apiComment.userId || apiComment.user_id,
+			username: apiComment.username || "unknown",
+			firstName: apiComment.firstName || apiComment.first_name || "",
+			lastName: apiComment.lastName || apiComment.last_name || "",
+			profileImage:
+				apiComment.profileImage ||
+				apiComment.profile_image_url ||
+				"/default-avatar.png",
+		},
+		replies: [],
+	};
+};
 
 const CommentModal: React.FC<CommentModalProps> = ({
 	isOpen,
@@ -47,17 +79,43 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	);
 	const [page, setPage] = useState(1);
 	const [hasMore, setHasMore] = useState(true);
+	const [hasLoadedFromApi, setHasLoadedFromApi] = useState(false); // Track if we've loaded from API
 
-	// Initialize comments
+	// Initialize comments - FIXED to prevent duplicate loading
 	useEffect(() => {
 		if (isOpen && postId) {
-			setComments(initialComments);
-			loadComments(true);
+			console.log("Modal opened for post:", postId);
+			console.log("Initial comments:", initialComments);
+
+			// Reset state when modal opens
+			setHasLoadedFromApi(false);
+			setPage(1);
+			setError(null);
+
+			// If we have initial comments, use them and don't load from API initially
+			if (initialComments && initialComments.length > 0) {
+				const transformedComments = initialComments.map(transformApiComment);
+				console.log("Using initial comments:", transformedComments);
+				setComments(transformedComments);
+				// Don't auto-load from API if we have initial comments
+			} else {
+				// Only load from API if no initial comments
+				console.log("No initial comments, loading from API");
+				setComments([]);
+				loadComments(true);
+			}
+		} else {
+			// Reset when modal closes
+			setComments([]);
+			setThreaded([]);
+			setHasLoadedFromApi(false);
 		}
-	}, [isOpen, postId]);
+	}, [isOpen, postId]); // Removed initialComments from dependency array to prevent re-runs
 
 	// Organize comments into threads when comments change
 	useEffect(() => {
+		console.log("Processing comments:", comments);
+
 		let processedComments = [...comments];
 
 		// Apply search filter
@@ -90,14 +148,22 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		});
 
 		const organized = organizeCommentsIntoThreads(processedComments);
+		console.log("Organized comments:", organized);
 		setThreaded(organized);
 	}, [comments, searchTerm, sortBy]);
 
-	// Load comments from API
+	// Load comments from API - FIXED to prevent duplicates
 	const loadComments = useCallback(
 		async (reset = false) => {
 			if (!postId) return;
 
+			// Don't load if we already have initial comments and this is the first API call
+			if (!hasLoadedFromApi && initialComments.length > 0 && !reset) {
+				console.log("Skipping API load - already have initial comments");
+				return;
+			}
+
+			console.log("Loading comments from API for post:", postId);
 			setIsLoading(true);
 			setError(null);
 
@@ -109,14 +175,27 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					20,
 				);
 
-				const newComments = response.comments || [];
+				console.log("API response:", response);
 
-				setComments((prev) =>
-					reset ? newComments : [...prev, ...newComments],
-				);
+				// Transform API comments to our expected format
+				const apiComments = response.comments || [];
+				const transformedComments = apiComments.map(transformApiComment);
+
+				console.log("Transformed API comments:", transformedComments);
+
+				if (reset) {
+					// Replace all comments with fresh API data
+					setComments(transformedComments);
+				} else {
+					// Add to existing comments (pagination)
+					setComments((prev) => [...prev, ...transformedComments]);
+				}
+
+				setHasLoadedFromApi(true);
 				setHasMore(response.pagination?.hasNext || false);
 				setPage(reset ? 2 : currentPage + 1);
 			} catch (err) {
+				console.error("Error loading comments:", err);
 				setError(
 					err instanceof Error ? err.message : "Failed to load comments",
 				);
@@ -124,7 +203,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 				setIsLoading(false);
 			}
 		},
-		[postId, page],
+		[postId, page, hasLoadedFromApi, initialComments.length],
 	);
 
 	// Add new comment
@@ -132,33 +211,43 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		async (formData: CommentFormData) => {
 			if (!sessionUser) throw new Error("You must be logged in to comment");
 
+			console.log("Adding comment:", formData);
 			setIsSubmitting(true);
 
-			const response = formData.parentId
-				? await commentApi.createReply(formData)
-				: await commentApi.createComment(formData);
+			try {
+				const response = formData.parentId
+					? await commentApi.createReply(formData)
+					: await commentApi.createComment(formData);
 
-			const newComment = {
-				...response.comment,
-				commenter: {
-					id: sessionUser.id,
-					username: sessionUser.username,
-					firstName: sessionUser.firstName,
-					lastName: sessionUser.lastName,
-					profileImage: sessionUser.profileImage,
-				},
-			};
+				console.log("Comment created:", response);
 
-			// Add comment to state
-			setComments((prev) => [newComment, ...prev]);
-			setIsSubmitting(false);
+				const newComment: Comment = {
+					...response.comment,
+					commenter: {
+						id: sessionUser.id,
+						username: sessionUser.username,
+						firstName: sessionUser.firstName || "",
+						lastName: sessionUser.lastName || "",
+						profileImage: sessionUser.profileImage || "/default-avatar.png",
+					},
+				};
+
+				// Add comment to state
+				setComments((prev) => [newComment, ...prev]);
+			} catch (error) {
+				console.error("Error adding comment:", error);
+				throw error;
+			} finally {
+				setIsSubmitting(false);
+			}
 		},
 		[sessionUser],
 	);
 
 	// Handle reply
 	const handleReply = useCallback(
-		(_parentId: number, _replyToUsername: string) => {
+		(parentId: number, replyToUsername: string) => {
+			console.log("Reply triggered for:", parentId, replyToUsername);
 			// This will be handled by the CommentThread component
 			// The reply form is shown inline in the thread
 		},
@@ -168,20 +257,27 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	// Edit comment
 	const handleEditComment = useCallback(
 		async (commentId: number, newText: string) => {
-			await commentApi.updateComment(commentId, newText);
+			console.log("Editing comment:", commentId, newText);
 
-			// Update comment in state
-			setComments((prev) =>
-				prev.map((comment) =>
-					comment.id === commentId
-						? {
-								...comment,
-								comment: newText,
-								updatedAt: new Date().toISOString(),
-						  }
-						: comment,
-				),
-			);
+			try {
+				await commentApi.updateComment(commentId, newText);
+
+				// Update comment in state
+				setComments((prev) =>
+					prev.map((comment) =>
+						comment.id === commentId
+							? {
+									...comment,
+									comment: newText,
+									updatedAt: new Date().toISOString(),
+							  }
+							: comment,
+					),
+				);
+			} catch (error) {
+				console.error("Error editing comment:", error);
+				throw error;
+			}
 		},
 		[],
 	);
@@ -189,28 +285,45 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	// Delete comment
 	const handleDeleteComment = useCallback(
 		async (commentId: number) => {
-			await commentApi.deleteComment(postId, commentId);
+			console.log("Deleting comment:", commentId);
 
-			// Remove comment from state (including nested replies)
-			const removeCommentRecursively = (comments: Comment[]): Comment[] => {
-				return comments.filter((comment) => {
-					if (comment.id === commentId) return false;
-					if (comment.replies) {
-						comment.replies = removeCommentRecursively(comment.replies);
-					}
-					return true;
-				});
-			};
+			try {
+				await commentApi.deleteComment(postId, commentId);
 
-			setComments((prev) => removeCommentRecursively(prev));
+				// Remove comment from state (including nested replies)
+				const removeCommentRecursively = (comments: Comment[]): Comment[] => {
+					return comments.filter((comment) => {
+						if (comment.id === commentId) return false;
+						if (comment.replies) {
+							comment.replies = removeCommentRecursively(comment.replies);
+						}
+						return true;
+					});
+				};
+
+				setComments((prev) => removeCommentRecursively(prev));
+			} catch (error) {
+				console.error("Error deleting comment:", error);
+				throw error;
+			}
 		},
 		[postId],
 	);
+
+	// Handle manual refresh button - always loads from API
+	const handleRefresh = useCallback(() => {
+		console.log("Manual refresh triggered");
+		setHasLoadedFromApi(false); // Reset the flag
+		loadComments(true); // Force reload from API
+	}, [loadComments]);
 
 	// Handle modal close
 	const handleClose = useCallback(() => {
 		setSearchTerm("");
 		setError(null);
+		setComments([]);
+		setThreaded([]);
+		setHasLoadedFromApi(false);
 		onClose();
 	}, [onClose]);
 
@@ -246,6 +359,16 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	const totalComments = comments.length;
 	const filteredComments = threaded.length;
 
+	console.log("Rendering modal with:", {
+		totalComments,
+		filteredComments,
+		threaded,
+		isLoading,
+		error,
+		hasLoadedFromApi,
+		initialCommentsCount: initialComments.length,
+	});
+
 	return (
 		<div
 			className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
@@ -268,16 +391,19 @@ const CommentModal: React.FC<CommentModalProps> = ({
 								{searchTerm && filteredComments !== totalComments && (
 									<span> • {filteredComments} shown</span>
 								)}
+								{initialComments.length > 0 && !hasLoadedFromApi && (
+									<span className="text-orange-600"> • from post data</span>
+								)}
 							</p>
 						</div>
 					</div>
 
 					<div className="flex items-center gap-2">
 						<button
-							onClick={() => loadComments(true)}
+							onClick={handleRefresh}
 							disabled={isLoading}
 							className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-							title="Refresh comments"
+							title="Refresh comments from server"
 						>
 							<RefreshCw
 								size={18}
@@ -326,7 +452,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					</div>
 				</div>
 
-				{/* Comment form */}
+				{/* Comment form - Only show ONE form */}
 				{sessionUser && (
 					<div className="p-4 border-b border-gray-100">
 						<div className="flex items-start gap-3">
@@ -354,7 +480,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 							<AlertCircle size={16} />
 							<span>{error}</span>
 							<button
-								onClick={() => loadComments(true)}
+								onClick={handleRefresh}
 								className="ml-auto text-red-600 hover:text-red-800 font-medium"
 							>
 								Retry
@@ -399,8 +525,8 @@ const CommentModal: React.FC<CommentModalProps> = ({
 								/>
 							))}
 
-							{/* Load more button */}
-							{hasMore && !isLoading && (
+							{/* Load more button - only show if we've loaded from API and there's more */}
+							{hasMore && hasLoadedFromApi && !isLoading && (
 								<div className="text-center pt-4">
 									<button
 										onClick={() => loadComments(false)}
@@ -410,6 +536,20 @@ const CommentModal: React.FC<CommentModalProps> = ({
 									</button>
 								</div>
 							)}
+
+							{/* Initial load button - show if we have initial comments but haven't loaded from API */}
+							{!hasLoadedFromApi &&
+								initialComments.length > 0 &&
+								!isLoading && (
+									<div className="text-center pt-4">
+										<button
+											onClick={() => loadComments(true)}
+											className="px-6 py-3 bg-orange-100 hover:bg-orange-200 text-orange-700 font-medium rounded-lg transition-colors"
+										>
+											Load latest comments from server
+										</button>
+									</div>
+								)}
 
 							{/* Loading indicator */}
 							{isLoading && (
