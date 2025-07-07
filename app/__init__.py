@@ -8,7 +8,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import logging
 from logging.handlers import RotatingFileHandler
 
-# Import models with optimized loading
+# Import models with loading
 from .models import (
     db,
     User,
@@ -71,19 +71,19 @@ def create_app(config_class=Config):
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     )
 
-    # Setup login manager with optimized user loading
+    # Setup login manager with user loading
     login = LoginManager(app)
     login.login_view = "auth.unauthorized"
 
     @login.user_loader
     def load_user(id):
-        """Optimized user loader with minimal data fetching"""
+        """User loader with minimal data fetching"""
         return db.session.get(User, int(id))
 
     # Add seed commands
     app.cli.add_command(seed_commands)
 
-    # Register blueprints with optimized prefixes
+    # Register blueprints with prefixes
     app.register_blueprint(auth_routes, url_prefix="/api/auth")
     app.register_blueprint(user_routes, url_prefix="/api/users")
     app.register_blueprint(group_routes, url_prefix="/api/groups")
@@ -177,7 +177,7 @@ def create_app(config_class=Config):
 
         return route_list
 
-    # React app routes with optimized static file serving
+    # React app routes with static file serving
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
     def react_root(path):
