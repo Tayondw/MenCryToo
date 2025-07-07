@@ -51,7 +51,7 @@ class Group(db.Model):
     users = association_proxy("memberships", "user")
 
     def to_dict_minimal(self):
-        """Lightweight version for lists - optimized for performance"""
+        """Lightweight version for lists - for performance"""
         return {
             "id": self.id,
             "name": self.name,
