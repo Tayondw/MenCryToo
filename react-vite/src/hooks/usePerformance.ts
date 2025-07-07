@@ -113,7 +113,7 @@ export const usePagination = (
 	};
 };
 
-// Hook for optimized filtering and sorting
+// Hook for filtering and sorting
 export const useFilterAndSort = <T>(
 	data: T[],
 	filterFn: (item: T, filters: any) => boolean,
@@ -191,7 +191,7 @@ export const useLazyLoading = (options = {}) => {
 	return { targetRef, isIntersecting, hasLoaded };
 };
 
-// Hook for optimized API caching
+// Hook for  API caching
 export const useAPICache = <T>(
 	key: string,
 	fetcher: () => Promise<T>,
