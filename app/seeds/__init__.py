@@ -43,7 +43,7 @@ def seed_production_minimal():
 
         print("Minimal production seeding completed!")
 
-        # Optimize database after seeding
+        # Database after seeding
         if environment == "production" and db.engine.url.drivername == "postgresql":
             print("Analyzing database for optimal query plans...")
             db.session.execute("ANALYZE;")
@@ -55,7 +55,7 @@ def seed_production_minimal():
         raise
 
 
-# Optimized seeding with better transaction management
+# Seeding with better transaction management
 @seed_commands.command("all")
 def seed():
     """Seed all data with proper order and transaction management"""
@@ -114,7 +114,7 @@ def seed():
 
         print("Seeding completed successfully!")
 
-        # Optimize database after seeding
+        
         if environment == "production" and db.engine.url.drivername == "postgresql":
             print("Analyzing database for optimal query plans...")
             db.session.execute("ANALYZE;")
@@ -200,7 +200,7 @@ def seed_fast():
 
 @seed_commands.command("production")
 def seed_production():
-    """Production-optimized seeding with performance considerations"""
+    """Production seeding with performance considerations"""
     if environment != "production":
         print("This command is only for production environment")
         return
@@ -224,7 +224,7 @@ def seed_production():
         seed_venues()
         seed_events()
 
-        # Re-enable constraints and optimize
+        # Re-enable constraints
         db.session.execute("SET synchronous_commit = ON;")
         db.session.execute("ANALYZE;")
         db.session.execute("VACUUM ANALYZE;")
