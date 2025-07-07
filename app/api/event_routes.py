@@ -23,12 +23,12 @@ event_routes = Blueprint("events", __name__)
 @event_routes.route("")
 def all_events():
     """
-    Query for all events and returns them in a list of event dictionaries
+    For all events and returns them in a list of event dictionaries
     """
     page = request.args.get("page", 1, type=int)
     per_page = min(request.args.get("per_page", 20, type=int), 50)
 
-    # Optimized query with selective loading
+    # Query with selective loading
     events_query = (
         db.session.query(Event)
         .options(
@@ -69,7 +69,7 @@ def event(eventId):
     """
     Query for event by id and returns that event in a dictionary
     """
-    # Use optimized query with selective loading
+    # Query with selective loading
     event = (
         db.session.query(Event)
         .options(
@@ -153,7 +153,7 @@ def attend_event(eventId):
     """
     Attend an event
     """
-    # Get event and group data in one optimized query
+    # Get event and group data in one query
     event = (
         db.session.query(Event)
         .options(
@@ -298,7 +298,7 @@ def add_event_image(eventId):
     """
     Add an event image by the event's id
     """
-    # Optimized query to get event and group data in one query
+    # Query to get event and group data in one query
     event = (
         db.session.query(Event)
         .options(joinedload(Event.groups).load_only("organizer_id"))
