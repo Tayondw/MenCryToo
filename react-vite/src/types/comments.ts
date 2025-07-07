@@ -44,7 +44,7 @@ export interface CommentModalState {
 }
 
 export interface CommentActions {
-	openModal: (postId: number) => void;
+	openModal: (postId: number, initialComments?: Comment[]) => void;
 	closeModal: () => void;
 	addComment: (commentData: CommentFormData) => Promise<void>;
 	editComment: (commentId: number, newText: string) => Promise<void>;
@@ -106,7 +106,7 @@ export interface CommentError {
 	code?: string;
 }
 
-// Extended FeedPost to include postComments
+// Extended FeedPost to include postComments - using proper Comment type
 export interface FeedPostWithComments {
 	id: number;
 	title: string;
