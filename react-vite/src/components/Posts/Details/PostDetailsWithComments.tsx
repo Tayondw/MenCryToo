@@ -75,6 +75,9 @@ const PostDetailsWithComments: React.FC = () => {
 	const [replyToComment, setReplyToComment] = useState<number | null>(null);
 	const [replyText, setReplyText] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [showAllReplies, setShowAllReplies] = useState<{
+		[key: number]: boolean;
+	}>({});
 
 	// Transform post comments to Comment format on component mount
 	React.useEffect(() => {
@@ -125,13 +128,13 @@ const PostDetailsWithComments: React.FC = () => {
 			}
 		});
 
-		// Sort by creation date
+		// Sort by creation date (newest first for root, oldest first for replies)
 		rootComments.sort(
 			(a, b) =>
-				new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+				new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
 		);
 
-		// Sort replies too
+		// Sort replies chronologically
 		rootComments.forEach((comment) => {
 			if (comment.replies) {
 				comment.replies.sort(
@@ -210,9 +213,10 @@ const PostDetailsWithComments: React.FC = () => {
 					lastName: sessionUser.lastName || "",
 					profileImage: sessionUser.profileImage || "/default-avatar.png",
 				},
+				replies: [],
 			};
 
-			setComments((prev) => [...prev, newCommentObj]);
+			setComments((prev) => [newCommentObj, ...prev]);
 			setNewComment("");
 		} catch (error) {
 			console.error("Error adding comment:", error);
@@ -246,6 +250,7 @@ const PostDetailsWithComments: React.FC = () => {
 					lastName: sessionUser.lastName || "",
 					profileImage: sessionUser.profileImage || "/default-avatar.png",
 				},
+				replies: [],
 			};
 
 			// Add reply to the correct parent comment
@@ -255,6 +260,22 @@ const PostDetailsWithComments: React.FC = () => {
 						return {
 							...comment,
 							replies: [...(comment.replies || []), newReply],
+						};
+					}
+					// Check in replies too for nested replies
+					if (comment.replies) {
+						const updatedReplies = comment.replies.map((reply) => {
+							if (reply.id === parentId) {
+								return {
+									...reply,
+									replies: [...(reply.replies || []), newReply],
+								};
+							}
+							return reply;
+						});
+						return {
+							...comment,
+							replies: updatedReplies,
 						};
 					}
 					return comment;
@@ -311,6 +332,14 @@ const PostDetailsWithComments: React.FC = () => {
 			// Your existing delete logic here
 		}
 		setShowOptions(false);
+	};
+
+	// Toggle show all replies for a comment
+	const toggleShowAllReplies = (commentId: number) => {
+		setShowAllReplies((prev) => ({
+			...prev,
+			[commentId]: !prev[commentId],
+		}));
 	};
 
 	return (
@@ -490,114 +519,20 @@ const PostDetailsWithComments: React.FC = () => {
 							{comments.length > 0 ? (
 								<div className="space-y-4">
 									{comments.map((comment) => (
-										<div key={comment.id} className="space-y-3">
-											{/* Main Comment */}
-											<div className="flex gap-3">
-												<img
-													src={
-														comment.commenter?.profileImage ||
-														"/default-avatar.png"
-													}
-													alt={comment.commenter?.username}
-													className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 flex-shrink-0"
-												/>
-												<div className="flex-1">
-													<div className="bg-slate-50 rounded-lg p-3">
-														<div className="flex items-center gap-2 mb-1">
-															<span className="font-semibold text-slate-900 text-sm">
-																{comment.commenter?.username}
-															</span>
-															<span className="text-xs text-slate-500">
-																{formatTimeAgo(comment.createdAt)}
-															</span>
-														</div>
-														<p className="text-slate-700 text-sm">
-															{comment.comment}
-														</p>
-													</div>
-													<button
-														onClick={() => setReplyToComment(comment.id)}
-														className="flex items-center gap-1 mt-2 text-xs text-slate-500 hover:text-orange-600 transition-colors"
-													>
-														<Reply size={12} />
-														Reply
-													</button>
-												</div>
-											</div>
-
-											{/* Reply Form */}
-											{replyToComment === comment.id && sessionUser && (
-												<div className="ml-13 flex gap-3">
-													<img
-														src={sessionUser.profileImage}
-														alt={sessionUser.username}
-														className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 flex-shrink-0"
-													/>
-													<div className="flex-1">
-														<div className="relative">
-															<textarea
-																value={replyText}
-																onChange={(e) => setReplyText(e.target.value)}
-																placeholder={`Reply to @${comment.commenter?.username}...`}
-																className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm"
-																rows={2}
-															/>
-															<div className="flex items-center justify-between mt-2">
-																<button
-																	onClick={() => {
-																		setReplyToComment(null);
-																		setReplyText("");
-																	}}
-																	className="text-xs text-slate-500 hover:text-slate-700"
-																>
-																	Cancel
-																</button>
-																<button
-																	onClick={() => handleAddReply(comment.id)}
-																	disabled={!replyText.trim() || isSubmitting}
-																	className="px-3 py-1 bg-orange-500 text-white text-xs rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-																>
-																	{isSubmitting ? "Posting..." : "Reply"}
-																</button>
-															</div>
-														</div>
-													</div>
-												</div>
-											)}
-
-											{/* Replies */}
-											{comment.replies && comment.replies.length > 0 && (
-												<div className="ml-13 space-y-3">
-													{comment.replies.map((reply) => (
-														<div key={reply.id} className="flex gap-3">
-															<img
-																src={
-																	reply.commenter?.profileImage ||
-																	"/default-avatar.png"
-																}
-																alt={reply.commenter?.username}
-																className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 flex-shrink-0"
-															/>
-															<div className="flex-1">
-																<div className="bg-slate-50 rounded-lg p-3">
-																	<div className="flex items-center gap-2 mb-1">
-																		<span className="font-semibold text-slate-900 text-sm">
-																			{reply.commenter?.username}
-																		</span>
-																		<span className="text-xs text-slate-500">
-																			{formatTimeAgo(reply.createdAt)}
-																		</span>
-																	</div>
-																	<p className="text-slate-700 text-sm">
-																		{reply.comment}
-																	</p>
-																</div>
-															</div>
-														</div>
-													))}
-												</div>
-											)}
-										</div>
+										<CommentThreadComponent
+											key={comment.id}
+											comment={comment}
+											sessionUser={sessionUser}
+											replyToComment={replyToComment}
+											setReplyToComment={setReplyToComment}
+											replyText={replyText}
+											setReplyText={setReplyText}
+											handleAddReply={handleAddReply}
+											isSubmitting={isSubmitting}
+											formatTimeAgo={formatTimeAgo}
+											showAllReplies={showAllReplies}
+											toggleShowAllReplies={toggleShowAllReplies}
+										/>
 									))}
 								</div>
 							) : (
@@ -623,6 +558,186 @@ const PostDetailsWithComments: React.FC = () => {
 				postId={commentModal.postId || post.id}
 				initialComments={commentModal.comments}
 			/>
+		</div>
+	);
+};
+
+// Comment Thread Component for Post Details - Fixed for proper threading and reply limits
+interface CommentThreadComponentProps {
+	comment: Comment;
+	sessionUser: any;
+	replyToComment: number | null;
+	setReplyToComment: (id: number | null) => void;
+	replyText: string;
+	setReplyText: (text: string) => void;
+	handleAddReply: (parentId: number) => void;
+	isSubmitting: boolean;
+	formatTimeAgo: (date: string) => string;
+	showAllReplies: { [key: number]: boolean };
+	toggleShowAllReplies: (commentId: number) => void;
+	depth?: number;
+}
+
+const CommentThreadComponent: React.FC<CommentThreadComponentProps> = ({
+	comment,
+	sessionUser,
+	replyToComment,
+	setReplyToComment,
+	replyText,
+	setReplyText,
+	handleAddReply,
+	isSubmitting,
+	formatTimeAgo,
+	showAllReplies,
+	toggleShowAllReplies,
+	depth = 0,
+}) => {
+	const maxVisibleReplies = 0;
+	const hasReplies = comment.replies && comment.replies.length > 0;
+	const hasMoreReplies =
+		comment.replies && comment.replies.length > maxVisibleReplies;
+	const shouldShowAll = showAllReplies[comment.id];
+	const visibleReplies = shouldShowAll
+		? comment.replies
+		: comment.replies?.slice(0, maxVisibleReplies);
+
+	// Calculate proper indentation based on depth
+	const getIndentationClass = (currentDepth: number) => {
+		if (currentDepth === 0) return "";
+		// Use standard Tailwind classes for better reliability
+		switch (currentDepth) {
+			case 1:
+				return "ml-12"; // 48px
+			case 2:
+				return "ml-16"; // 64px
+			case 3:
+				return "ml-20"; // 80px
+			case 4:
+				return "ml-24"; // 96px
+			default:
+				return "ml-24"; // Max indentation
+		}
+	};
+
+	return (
+		<div className="space-y-3">
+			{/* Main Comment */}
+			<div
+				className={`flex gap-3 ${depth > 0 ? getIndentationClass(depth) : ""}`}
+			>
+				<img
+					src={comment.commenter?.profileImage || "/default-avatar.png"}
+					alt={comment.commenter?.username}
+					className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 flex-shrink-0"
+				/>
+				<div className="flex-1">
+					<div className="bg-slate-50 rounded-lg p-3">
+						<div className="flex items-center gap-2 mb-1">
+							<span className="font-semibold text-slate-900 text-sm">
+								{comment.commenter?.username}
+							</span>
+							<span className="text-xs text-slate-500">
+								{formatTimeAgo(comment.createdAt)}
+							</span>
+						</div>
+						<p className="text-slate-700 text-sm">{comment.comment}</p>
+					</div>
+					{sessionUser && (
+						<button
+							onClick={() => setReplyToComment(comment.id)}
+							className="flex items-center gap-1 mt-2 text-xs text-slate-500 hover:text-orange-600 transition-colors"
+						>
+							<Reply size={12} />
+							Reply
+						</button>
+					)}
+				</div>
+			</div>
+
+			{/* Reply Form */}
+			{replyToComment === comment.id && sessionUser && (
+				<div className={`flex gap-3 ${getIndentationClass(depth + 1)}`}>
+					<img
+						src={sessionUser.profileImage}
+						alt={sessionUser.username}
+						className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 flex-shrink-0"
+					/>
+					<div className="flex-1">
+						<div className="relative">
+							<textarea
+								value={replyText}
+								onChange={(e) => setReplyText(e.target.value)}
+								placeholder={`Reply to @${comment.commenter?.username}...`}
+								className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm"
+								rows={2}
+							/>
+							<div className="flex items-center justify-between mt-2">
+								<button
+									onClick={() => {
+										setReplyToComment(null);
+										setReplyText("");
+									}}
+									className="text-xs text-slate-500 hover:text-slate-700"
+								>
+									Cancel
+								</button>
+								<button
+									onClick={() => handleAddReply(comment.id)}
+									disabled={!replyText.trim() || isSubmitting}
+									className="px-3 py-1 bg-orange-500 text-white text-xs rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+								>
+									{isSubmitting ? "Posting..." : "Reply"}
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* Replies - Each reply will have its own indentation */}
+			{hasReplies && (
+				<div className="space-y-3">
+					{visibleReplies?.map((reply) => (
+						<CommentThreadComponent
+							key={reply.id}
+							comment={reply}
+							sessionUser={sessionUser}
+							replyToComment={replyToComment}
+							setReplyToComment={setReplyToComment}
+							replyText={replyText}
+							setReplyText={setReplyText}
+							handleAddReply={handleAddReply}
+							isSubmitting={isSubmitting}
+							formatTimeAgo={formatTimeAgo}
+							showAllReplies={showAllReplies}
+							toggleShowAllReplies={toggleShowAllReplies}
+							depth={depth + 1}
+						/>
+					))}
+
+					{/* Show more/less replies buttons */}
+					{hasMoreReplies && (
+						<div className={getIndentationClass(depth + 1)}>
+							{!shouldShowAll ? (
+								<button
+									onClick={() => toggleShowAllReplies(comment.id)}
+									className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+								>
+									View {comment.replies!.length - maxVisibleReplies} more
+									replies
+								</button>
+							) : (
+								<button
+									onClick={() => toggleShowAllReplies(comment.id)}
+									className="text-sm text-slate-600 hover:text-slate-700 font-medium"
+								>
+									Show less
+								</button>
+							)}
+						</div>
+					)}
+				</div>
+			)}
 		</div>
 	);
 };
