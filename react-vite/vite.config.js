@@ -1,5 +1,3 @@
-// react-vite/vite.config.js - PERFORMANCE OPTIMIZED
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import eslint from "vite-plugin-eslint";
@@ -10,14 +8,14 @@ export default defineConfig(({ mode }) => ({
 		// Only run ESLint in development
 		mode === "development" &&
 			eslint({
-				lintOnStart: false,
+				lintOnStart: true,
 				failOnError: false,
 			}),
 	].filter(Boolean),
 
-	// OPTIMIZED: Build configuration for production
+	// Build configuration for production
 	build: {
-		// Optimize chunk splitting for better caching
+		// Chunk splitting for better caching
 		rollupOptions: {
 			output: {
 				manualChunks: {
@@ -32,11 +30,11 @@ export default defineConfig(({ mode }) => ({
 				},
 			},
 		},
-		// Optimize build size
+		// Build size
 		chunkSizeWarningLimit: 1000,
 		// Enable source maps only in development
 		sourcemap: mode === "development",
-		// Optimize minification
+		// Minification
 		minify: "terser",
 		terserOptions: {
 			compress: {
@@ -46,7 +44,7 @@ export default defineConfig(({ mode }) => ({
 		},
 	},
 
-	// OPTIMIZED: Development server configuration
+	// Development server configuration
 	server: {
 		proxy: {
 			"/api": {
@@ -63,16 +61,16 @@ export default defineConfig(({ mode }) => ({
 		},
 		// Enable HTTP/2 for development
 		https: false,
-		// Optimize HMR
+		// HMR
 		hmr: {
 			overlay: false,
 		},
-		// Optimize host and port
+		// Host and port
 		host: true,
 		port: 5173,
 	},
 
-	// OPTIMIZED: Dependency optimization
+	// Dependency optimization
 	optimizeDeps: {
 		include: [
 			"react",
@@ -86,15 +84,15 @@ export default defineConfig(({ mode }) => ({
 		force: mode === "development",
 	},
 
-	// OPTIMIZED: Define global constants
+	// Define global constants
 	define: {
 		__DEV__: mode === "development",
 		__PROD__: mode === "production",
 	},
 
-	// OPTIMIZED: CSS configuration
+	// CSS configuration
 	css: {
-		// Optimize CSS processing
+		// CSS processing
 		devSourcemap: mode === "development",
 	},
 }));
