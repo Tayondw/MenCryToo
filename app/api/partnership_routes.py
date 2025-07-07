@@ -59,7 +59,7 @@ def send_email_async(email_data):
 @partnership_routes.route("/", methods=["POST"])
 def partnerships():
     """
-    Create a partnership request with optimized processing
+    Create a partnership request with processing
     """
     form = PartnershipForm()
     form["csrf_token"].data = request.cookies["csrf_token"]
