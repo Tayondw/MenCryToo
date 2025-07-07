@@ -7,7 +7,7 @@ import { router } from "./router-TSX";
 import * as sessionActions from "./store/session";
 import "./index.css";
 
-// OPTIMIZED: Configure store with performance settings
+// Configure store with performance settings
 const store = configureStore();
 
 // Type declarations for development globals - must be at top level
@@ -18,13 +18,13 @@ declare global {
 	}
 }
 
-// OPTIMIZED: Attach to window only in development (without CSRF)
+// Attach to window only in development (without CSRF)
 if (import.meta.env.MODE !== "production") {
 	window.store = store;
 	window.sessionActions = sessionActions;
 }
 
-// OPTIMIZED: Single root render with performance optimizations
+// Single root render with performance optimizations
 ReactDOM.createRoot(document.getElementById("root")!).render(
 	<React.StrictMode>
 		<Provider store={store}>
