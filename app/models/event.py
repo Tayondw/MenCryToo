@@ -71,7 +71,7 @@ class Event(db.Model):
         return capacity
 
     def to_dict_minimal(self):
-        """Lightweight version for lists - optimized for performance"""
+        """Lightweight version for lists - for performance"""
         return {
             "id": self.id,
             "name": self.name,
@@ -150,7 +150,7 @@ class Event(db.Model):
         }
 
     def to_dict(self):
-        """Full dictionary representation - optimized to avoid N+1 queries"""
+        """Full dictionary representation - to avoid N+1 queries"""
         # Get organizer info efficiently
         organizer = None
         if (
