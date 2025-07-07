@@ -9,7 +9,7 @@ tag_routes = Blueprint("tags", __name__)
 @tag_routes.route("")
 def tags():
     """
-    Query for all tags and returns them in a list of tag dictionaries - optimized with caching consideration
+    Query for all tags and returns them in a list of tag dictionaries - with caching consideration
     """
     # Since tags are relatively static, we can load them efficiently
     # Consider adding Redis caching here in production for even better performance
@@ -21,7 +21,7 @@ def tags():
 @tag_routes.route("/<int:tagId>")
 def tag_detail(tagId):
     """
-    Query for a tag by id and returns that tag in a dictionary - optimized with selective loading
+    Query for a tag by id and returns that tag in a dictionary - with selective loading
     """
     tag = Tag.query.options(load_only("id", "name")).filter_by(id=tagId).first()
 
@@ -34,7 +34,7 @@ def tag_detail(tagId):
 @tag_routes.route("/popular")
 def popular_tags():
     """
-    Get most popular tags based on user usage - optimized query
+    Get most popular tags based on user usage - query
     """
     limit = request.args.get("limit", 10, type=int)
     limit = min(limit, 50)  # Cap at 50 for performance
@@ -61,7 +61,7 @@ def popular_tags():
 @tag_routes.route("/search")
 def search_tags():
     """
-    Search tags by name - optimized with ILIKE for case-insensitive search
+    Search tags by name - with ILIKE for case-insensitive search
     """
     query = request.args.get("q", "").strip()
     limit = request.args.get("limit", 20, type=int)
@@ -86,7 +86,7 @@ def search_tags():
 @login_required
 def user_tags(userId):
     """
-    Get tags for a specific user - optimized query
+    Get tags for a specific user - query
     """
     user = User.query.options(load_only("id", "username")).filter_by(id=userId).first()
 
