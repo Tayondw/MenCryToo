@@ -17,9 +17,9 @@ group_image_routes = Blueprint("group_images", __name__)
 @login_required
 def delete_group_image(imageId):
     """
-    Deletes a group image if the user is authorized - optimized with single query
+    Deletes a group image if the user is authorized - with single query
     """
-    # Optimized query to get group image and group data in one go
+    # Query to get group image and group data in one go
     group_image = (
         db.session.query(GroupImage)
         .join(Group)
