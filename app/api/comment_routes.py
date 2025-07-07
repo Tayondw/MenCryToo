@@ -1,106 +1,138 @@
 from flask import Blueprint, request, abort, jsonify
 from flask_login import login_required, current_user
 from app.models import db, User, Post, Likes, Comment
-from sqlalchemy.orm import joinedload
-from sqlalchemy import and_
+from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy import and_, desc, func, text
+import logging
 
 comment_routes = Blueprint("comments", __name__)
+logger = logging.getLogger(__name__)
 
 
 @comment_routes.route("/<int:commentId>", methods=["GET"])
 @login_required
 def get_comment(commentId):
     """
-    Get a specific comment with loading
+    Get a specific comment with its commenter info
     """
-    comment = (
-        db.session.query(Comment)
-        .options(
-            joinedload(Comment.commenter).load_only(
-                "id", "username", "first_name", "last_name", "profile_image_url"
+    try:
+        comment = (
+            db.session.query(Comment)
+            .options(
+                joinedload(Comment.commenter).load_only(
+                    "id", "username", "first_name", "last_name", "profile_image_url"
+                )
             )
+            .filter(Comment.id == commentId)
+            .first()
         )
-        .filter(Comment.id == commentId)
-        .first()
-    )
 
-    if not comment:
-        return jsonify({"errors": {"message": "Comment not found"}}), 404
+        if not comment:
+            return jsonify({"errors": {"message": "Comment not found"}}), 404
 
-    return jsonify(comment.to_dict())
+        return jsonify(comment.to_dict())
+    except Exception as e:
+        logger.error(f"Error fetching comment {commentId}: {str(e)}")
+        return jsonify({"errors": {"message": "Error fetching comment"}}), 500
 
 
 @comment_routes.route("/<int:commentId>/replies", methods=["GET"])
 @login_required
 def get_comment_replies(commentId):
     """
-    Get replies to a specific comment with pagination
+    Get replies to a specific comment with pagination and threading
     """
-    page = request.args.get("page", 1, type=int)
-    per_page = min(request.args.get("per_page", 10, type=int), 20)
+    try:
+        page = request.args.get("page", 1, type=int)
+        per_page = min(request.args.get("per_page", 10, type=int), 20)
 
-    replies_query = (
-        db.session.query(Comment)
-        .options(
-            joinedload(Comment.commenter).load_only(
-                "id", "username", "profile_image_url"
+        # Check if parent comment exists
+        parent_comment = Comment.query.get(commentId)
+        if not parent_comment:
+            return jsonify({"errors": {"message": "Parent comment not found"}}), 404
+
+        # Get replies with pagination
+        replies_query = (
+            db.session.query(Comment)
+            .options(
+                joinedload(Comment.commenter).load_only(
+                    "id", "username", "first_name", "last_name", "profile_image_url"
+                )
             )
+            .filter(Comment.parent_id == commentId)
+            .order_by(Comment.created_at.asc())  # Chronological order for replies
         )
-        .filter(Comment.parent_id == commentId)
-        .order_by(Comment.created_at.asc())
-    )
 
-    replies = replies_query.paginate(page=page, per_page=per_page, error_out=False)
+        replies = replies_query.paginate(page=page, per_page=per_page, error_out=False)
 
-    return jsonify(
-        {
-            "replies": [reply.to_dict() for reply in replies.items],
-            "pagination": {
-                "page": page,
-                "pages": replies.pages,
-                "per_page": per_page,
-                "total": replies.total,
-                "has_next": replies.has_next,
-                "has_prev": replies.has_prev,
-            },
-        }
-    )
+        return jsonify(
+            {
+                "replies": [reply.to_dict() for reply in replies.items],
+                "pagination": {
+                    "page": page,
+                    "pages": replies.pages,
+                    "per_page": per_page,
+                    "total": replies.total,
+                    "has_next": replies.has_next,
+                    "has_prev": replies.has_prev,
+                },
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error fetching replies for comment {commentId}: {str(e)}")
+        return jsonify({"errors": {"message": "Error fetching replies"}}), 500
 
 
 @comment_routes.route("/<int:commentId>/edit", methods=["PUT"])
 @login_required
 def edit_comment(commentId):
     """
-    Edit a comment with minimal response
+    Edit a comment with authorization check
     """
-    comment = Comment.query.filter_by(id=commentId).first()
-
-    if not comment:
-        return jsonify({"errors": {"message": "Comment not found"}}), 404
-
-    if comment.user_id != current_user.id:
-        return jsonify({"errors": {"message": "Unauthorized"}}), 403
-
-    data = request.get_json()
-    comment_text = data.get("comment", "").strip()
-
-    if not comment_text or len(comment_text) < 1 or len(comment_text) > 255:
-        return (
-            jsonify(
-                {"errors": {"message": "Comment must be between 1 and 255 characters"}}
-            ),
-            400,
-        )
-
     try:
+        comment = Comment.query.filter_by(id=commentId).first()
+
+        if not comment:
+            return jsonify({"errors": {"message": "Comment not found"}}), 404
+
+        if comment.user_id != current_user.id:
+            return jsonify({"errors": {"message": "Unauthorized"}}), 403
+
+        data = request.get_json()
+        comment_text = data.get("comment", "").strip()
+
+        if not comment_text or len(comment_text) < 1 or len(comment_text) > 500:
+            return (
+                jsonify(
+                    {
+                        "errors": {
+                            "message": "Comment must be between 1 and 500 characters"
+                        }
+                    }
+                ),
+                400,
+            )
+
         comment.comment = comment_text
         db.session.commit()
+
+        # Return updated comment with user info
+        updated_comment = (
+            db.session.query(Comment)
+            .options(
+                joinedload(Comment.commenter).load_only(
+                    "id", "username", "first_name", "last_name", "profile_image_url"
+                )
+            )
+            .filter(Comment.id == commentId)
+            .first()
+        )
 
         return (
             jsonify(
                 {
                     "message": "Comment updated successfully",
-                    "comment": comment.to_dict(),
+                    "comment": updated_comment.to_dict(),
                 }
             ),
             200,
@@ -108,6 +140,7 @@ def edit_comment(commentId):
 
     except Exception as e:
         db.session.rollback()
+        logger.error(f"Error updating comment {commentId}: {str(e)}")
         return jsonify({"errors": {"message": "Error updating comment"}}), 500
 
 
@@ -116,49 +149,475 @@ def edit_comment(commentId):
 def like_comment(commentId):
     """
     Like/unlike a comment (toggle functionality)
+    Future enhancement - implement comment likes table
     """
-    comment = Comment.query.get(commentId)
-    if not comment:
-        return jsonify({"errors": {"message": "Comment not found"}}), 404
+    try:
+        comment = Comment.query.get(commentId)
+        if not comment:
+            return jsonify({"errors": {"message": "Comment not found"}}), 404
 
-    # Check if user already liked this comment (if you have a likes system for comments)
-    # For now, just return success
-    return jsonify({"message": "Comment liked"}), 200
+        # For now, just return success
+        # TODO: Implement comment likes table similar to post likes
+        return jsonify({"message": "Comment liked", "liked": True}), 200
+
+    except Exception as e:
+        logger.error(f"Error liking comment {commentId}: {str(e)}")
+        return jsonify({"errors": {"message": "Error liking comment"}}), 500
 
 
 @comment_routes.route("/recent", methods=["GET"])
 @login_required
 def get_recent_comments():
     """
-    Get recent comments with minimal data for dashboard/feed
+    Get recent comments with pagination (for admin/dashboard use)
     """
-    page = request.args.get("page", 1, type=int)
-    per_page = min(request.args.get("per_page", 20, type=int), 50)
+    try:
+        page = request.args.get("page", 1, type=int)
+        per_page = min(request.args.get("per_page", 20, type=int), 50)
 
-    comments_query = (
-        db.session.query(Comment)
-        .options(
-            joinedload(Comment.commenter).load_only(
-                "id", "username", "profile_image_url"
-            ),
-            joinedload(Comment.post).load_only("id", "title", "image"),
+        comments_query = (
+            db.session.query(Comment)
+            .options(
+                joinedload(Comment.commenter).load_only(
+                    "id", "username", "first_name", "last_name", "profile_image_url"
+                ),
+                joinedload(Comment.post).load_only("id", "title", "image"),
+            )
+            .filter(Comment.parent_id.is_(None))  # Only top-level comments
+            .order_by(Comment.created_at.desc())
         )
-        .filter(Comment.parent_id.is_(None))  # Only top-level comments
-        .order_by(Comment.created_at.desc())
-    )
 
-    comments = comments_query.paginate(page=page, per_page=per_page, error_out=False)
+        comments = comments_query.paginate(
+            page=page, per_page=per_page, error_out=False
+        )
 
-    return jsonify(
-        {
-            "comments": [comment.to_dict() for comment in comments.items],
-            "pagination": {
+        return jsonify(
+            {
+                "comments": [comment.to_dict() for comment in comments.items],
+                "pagination": {
+                    "page": page,
+                    "pages": comments.pages,
+                    "per_page": per_page,
+                    "total": comments.total,
+                    "has_next": comments.has_next,
+                    "has_prev": comments.has_prev,
+                },
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error fetching recent comments: {str(e)}")
+        return jsonify({"errors": {"message": "Error fetching recent comments"}}), 500
+
+
+# Enhanced post comment routes with threading support
+@comment_routes.route("/posts/<int:postId>/comments", methods=["GET"])
+@login_required
+def get_post_comments(postId):
+    """
+    Get all comments for a post with hierarchical structure
+    """
+    try:
+        page = request.args.get("page", 1, type=int)
+        per_page = min(request.args.get("per_page", 20, type=int), 50)
+        include_replies = request.args.get("include_replies", "true").lower() == "true"
+
+        # Check if post exists
+        post = Post.query.get(postId)
+        if not post:
+            return jsonify({"errors": {"message": "Post not found"}}), 404
+
+        # Base query for comments
+        comments_query = (
+            db.session.query(Comment)
+            .options(
+                joinedload(Comment.commenter).load_only(
+                    "id", "username", "first_name", "last_name", "profile_image_url"
+                )
+            )
+            .filter(Comment.post_id == postId)
+        )
+
+        if include_replies:
+            # Get all comments (including replies) for hierarchical organization
+            all_comments = comments_query.order_by(
+                Comment.created_at.desc()
+            ).all()  # Root comments newest first
+
+            # Organize into hierarchical structure
+            comment_dict = {comment.id: comment for comment in all_comments}
+            root_comments = []
+
+            # First pass: identify root comments and attach replies
+            for comment in all_comments:
+                if comment.parent_id is None:
+                    root_comments.append(comment)
+                    comment.replies = []
+                else:
+                    parent = comment_dict.get(comment.parent_id)
+                    if parent:
+                        if not hasattr(parent, "replies"):
+                            parent.replies = []
+                        parent.replies.append(comment)
+
+            # Sort replies chronologically
+            def sort_replies(comment):
+                if hasattr(comment, "replies") and comment.replies:
+                    comment.replies.sort(key=lambda x: x.created_at)
+                    for reply in comment.replies:
+                        sort_replies(reply)
+
+            for comment in root_comments:
+                sort_replies(comment)
+
+            # Apply pagination to root comments only
+            total_root = len(root_comments)
+            start_idx = (page - 1) * per_page
+            end_idx = start_idx + per_page
+            paginated_comments = root_comments[start_idx:end_idx]
+
+            # Convert to dict with replies
+            def comment_to_dict_with_replies(comment):
+                result = comment.to_dict()
+                if hasattr(comment, "replies") and comment.replies:
+                    result["replies"] = [
+                        comment_to_dict_with_replies(reply) for reply in comment.replies
+                    ]
+                return result
+
+            comments_data = [
+                comment_to_dict_with_replies(comment) for comment in paginated_comments
+            ]
+
+            pagination = {
+                "page": page,
+                "pages": (total_root + per_page - 1) // per_page,
+                "per_page": per_page,
+                "total": total_root,
+                "has_next": end_idx < total_root,
+                "has_prev": page > 1,
+            }
+
+        else:
+            # Get only root comments (no replies)
+            root_comments_query = comments_query.filter(Comment.parent_id.is_(None))
+            comments = root_comments_query.order_by(Comment.created_at.desc()).paginate(
+                page=page, per_page=per_page, error_out=False
+            )
+
+            comments_data = [comment.to_dict() for comment in comments.items]
+            pagination = {
                 "page": page,
                 "pages": comments.pages,
                 "per_page": per_page,
                 "total": comments.total,
                 "has_next": comments.has_next,
                 "has_prev": comments.has_prev,
-            },
-        }
-    )
+            }
+
+        return jsonify(
+            {
+                "comments": comments_data,
+                "pagination": pagination,
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Error fetching comments for post {postId}: {str(e)}")
+        return jsonify({"errors": {"message": "Error fetching comments"}}), 500
+
+
+@comment_routes.route("/posts/<int:postId>/comments", methods=["POST"])
+@login_required
+def add_comment(postId):
+    """
+    Add a comment to a post (supports both root comments and replies)
+    """
+    try:
+        # Check if post exists
+        post_exists = db.session.execute(
+            text("SELECT 1 FROM posts WHERE id = :post_id"), {"post_id": postId}
+        ).fetchone()
+
+        if not post_exists:
+            return jsonify({"error": "Post not found"}), 404
+
+        # Get form data
+        comment_text = request.form.get("comment", "").strip()
+        parent_id = request.form.get("parent_id")  # For threading
+
+        # Validate comment text
+        if not comment_text or len(comment_text) < 1 or len(comment_text) > 500:
+            return (
+                jsonify(
+                    {
+                        "errors": {
+                            "comment": "Comment must be between 1 and 500 characters"
+                        }
+                    }
+                ),
+                400,
+            )
+
+        # Validate parent comment if this is a reply
+        if parent_id:
+            try:
+                parent_id = int(parent_id)
+                parent_comment = Comment.query.filter_by(
+                    id=parent_id, post_id=postId
+                ).first()
+
+                if not parent_comment:
+                    return (
+                        jsonify({"errors": {"parent_id": "Parent comment not found"}}),
+                        400,
+                    )
+            except (ValueError, TypeError):
+                return (
+                    jsonify({"errors": {"parent_id": "Invalid parent comment ID"}}),
+                    400,
+                )
+        else:
+            parent_id = None
+
+        # Create comment
+        comment = Comment(
+            post_id=postId,
+            user_id=current_user.id,
+            comment=comment_text,
+            parent_id=parent_id,
+        )
+
+        db.session.add(comment)
+        db.session.commit()
+
+        # Return comment with user info
+        comment_with_user = (
+            db.session.query(Comment)
+            .options(
+                joinedload(Comment.commenter).load_only(
+                    "id", "username", "first_name", "last_name", "profile_image_url"
+                )
+            )
+            .filter(Comment.id == comment.id)
+            .first()
+        )
+
+        return jsonify(comment_with_user.to_dict()), 201
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding comment to post {postId}: {str(e)}")
+        return jsonify({"errors": {"message": "Error creating comment"}}), 500
+
+
+@comment_routes.route(
+    "/posts/<int:postId>/comments/<int:commentId>", methods=["DELETE"]
+)
+@login_required
+def delete_comment(postId, commentId):
+    """
+    Delete a comment and all its nested replies
+    """
+    try:
+        comment = Comment.query.filter_by(id=commentId, post_id=postId).first()
+
+        if not comment:
+            return jsonify({"errors": {"message": "Comment not found"}}), 404
+
+        if comment.user_id != current_user.id:
+            return jsonify({"errors": {"message": "Unauthorized"}}), 403
+
+        # Delete all nested replies recursively using raw SQL for efficiency
+        # This will cascade delete all child comments
+        def delete_comment_tree(comment_id):
+            # Get all child comments
+            child_comments = db.session.execute(
+                text("SELECT id FROM comments WHERE parent_id = :parent_id"),
+                {"parent_id": comment_id},
+            ).fetchall()
+
+            # Recursively delete children
+            for child in child_comments:
+                delete_comment_tree(child[0])
+
+            # Delete the comment itself
+            db.session.execute(
+                text("DELETE FROM comments WHERE id = :comment_id"),
+                {"comment_id": comment_id},
+            )
+
+        delete_comment_tree(commentId)
+        db.session.commit()
+
+        return jsonify({"message": "Comment deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting comment {commentId}: {str(e)}")
+        return jsonify({"errors": {"message": "Error deleting comment"}}), 500
+
+
+# from flask import Blueprint, request, abort, jsonify
+# from flask_login import login_required, current_user
+# from app.models import db, User, Post, Likes, Comment
+# from sqlalchemy.orm import joinedload
+# from sqlalchemy import and_
+
+# comment_routes = Blueprint("comments", __name__)
+
+
+# @comment_routes.route("/<int:commentId>", methods=["GET"])
+# @login_required
+# def get_comment(commentId):
+#     """
+#     Get a specific comment with loading
+#     """
+#     comment = (
+#         db.session.query(Comment)
+#         .options(
+#             joinedload(Comment.commenter).load_only(
+#                 "id", "username", "first_name", "last_name", "profile_image_url"
+#             )
+#         )
+#         .filter(Comment.id == commentId)
+#         .first()
+#     )
+
+#     if not comment:
+#         return jsonify({"errors": {"message": "Comment not found"}}), 404
+
+#     return jsonify(comment.to_dict())
+
+
+# @comment_routes.route("/<int:commentId>/replies", methods=["GET"])
+# @login_required
+# def get_comment_replies(commentId):
+#     """
+#     Get replies to a specific comment with pagination
+#     """
+#     page = request.args.get("page", 1, type=int)
+#     per_page = min(request.args.get("per_page", 10, type=int), 20)
+
+#     replies_query = (
+#         db.session.query(Comment)
+#         .options(
+#             joinedload(Comment.commenter).load_only(
+#                 "id", "username", "profile_image_url"
+#             )
+#         )
+#         .filter(Comment.parent_id == commentId)
+#         .order_by(Comment.created_at.asc())
+#     )
+
+#     replies = replies_query.paginate(page=page, per_page=per_page, error_out=False)
+
+#     return jsonify(
+#         {
+#             "replies": [reply.to_dict() for reply in replies.items],
+#             "pagination": {
+#                 "page": page,
+#                 "pages": replies.pages,
+#                 "per_page": per_page,
+#                 "total": replies.total,
+#                 "has_next": replies.has_next,
+#                 "has_prev": replies.has_prev,
+#             },
+#         }
+#     )
+
+
+# @comment_routes.route("/<int:commentId>/edit", methods=["PUT"])
+# @login_required
+# def edit_comment(commentId):
+#     """
+#     Edit a comment with minimal response
+#     """
+#     comment = Comment.query.filter_by(id=commentId).first()
+
+#     if not comment:
+#         return jsonify({"errors": {"message": "Comment not found"}}), 404
+
+#     if comment.user_id != current_user.id:
+#         return jsonify({"errors": {"message": "Unauthorized"}}), 403
+
+#     data = request.get_json()
+#     comment_text = data.get("comment", "").strip()
+
+#     if not comment_text or len(comment_text) < 1 or len(comment_text) > 255:
+#         return (
+#             jsonify(
+#                 {"errors": {"message": "Comment must be between 1 and 255 characters"}}
+#             ),
+#             400,
+#         )
+
+#     try:
+#         comment.comment = comment_text
+#         db.session.commit()
+
+#         return (
+#             jsonify(
+#                 {
+#                     "message": "Comment updated successfully",
+#                     "comment": comment.to_dict(),
+#                 }
+#             ),
+#             200,
+#         )
+
+#     except Exception as e:
+#         db.session.rollback()
+#         return jsonify({"errors": {"message": "Error updating comment"}}), 500
+
+
+# @comment_routes.route("/<int:commentId>/like", methods=["POST"])
+# @login_required
+# def like_comment(commentId):
+#     """
+#     Like/unlike a comment (toggle functionality)
+#     """
+#     comment = Comment.query.get(commentId)
+#     if not comment:
+#         return jsonify({"errors": {"message": "Comment not found"}}), 404
+
+#     # Check if user already liked this comment (if you have a likes system for comments)
+#     # For now, just return success
+#     return jsonify({"message": "Comment liked"}), 200
+
+
+# @comment_routes.route("/recent", methods=["GET"])
+# @login_required
+# def get_recent_comments():
+#     """
+#     Get recent comments with minimal data for dashboard/feed
+#     """
+#     page = request.args.get("page", 1, type=int)
+#     per_page = min(request.args.get("per_page", 20, type=int), 50)
+
+#     comments_query = (
+#         db.session.query(Comment)
+#         .options(
+#             joinedload(Comment.commenter).load_only(
+#                 "id", "username", "profile_image_url"
+#             ),
+#             joinedload(Comment.post).load_only("id", "title", "image"),
+#         )
+#         .filter(Comment.parent_id.is_(None))  # Only top-level comments
+#         .order_by(Comment.created_at.desc())
+#     )
+
+#     comments = comments_query.paginate(page=page, per_page=per_page, error_out=False)
+
+#     return jsonify(
+#         {
+#             "comments": [comment.to_dict() for comment in comments.items],
+#             "pagination": {
+#                 "page": page,
+#                 "pages": comments.pages,
+#                 "per_page": per_page,
+#                 "total": comments.total,
+#                 "has_next": comments.has_next,
+#                 "has_prev": comments.has_prev,
+#             },
+#         }
+#     )
