@@ -57,7 +57,7 @@ def send_contact_email_async(email_data):
 @contact_routes.route("/", methods=["POST"])
 def contact():
     """
-    Create a contact request with optimized processing
+    Create a contact request with processing
     """
     form = ContactForm()
     form["csrf_token"].data = request.cookies["csrf_token"]
