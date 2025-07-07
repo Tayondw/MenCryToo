@@ -11,7 +11,7 @@ comment_routes = Blueprint("comments", __name__)
 @login_required
 def get_comment(commentId):
     """
-    Get a specific comment with optimized loading
+    Get a specific comment with loading
     """
     comment = (
         db.session.query(Comment)
