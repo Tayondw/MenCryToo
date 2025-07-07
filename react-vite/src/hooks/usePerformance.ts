@@ -1,4 +1,3 @@
-// Custom hooks for performance optimization
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../types";
@@ -113,15 +112,19 @@ export const usePagination = (
 	};
 };
 
+// Define filter and sort function types
+type FilterFunction<T, F> = (item: T, filters: F) => boolean;
+type SortFunction<T> = (a: T, b: T, sortBy: string) => number;
+
 // Hook for filtering and sorting
-export const useFilterAndSort = <T>(
+export const useFilterAndSort = <T, F extends Record<string, unknown>>(
 	data: T[],
-	filterFn: (item: T, filters: any) => boolean,
-	sortFn: (a: T, b: T, sortBy: string) => number,
-	initialFilters: any = {},
+	filterFn: FilterFunction<T, F>,
+	sortFn: SortFunction<T>,
+	initialFilters: F,
 	initialSortBy: string = "recent",
 ) => {
-	const [filters, setFilters] = useState(initialFilters);
+	const [filters, setFilters] = useState<F>(initialFilters);
 	const [sortBy, setSortBy] = useState(initialSortBy);
 
 	const filteredAndSortedData = useMemo(() => {
@@ -138,8 +141,8 @@ export const useFilterAndSort = <T>(
 		return result;
 	}, [data, filters, sortBy, filterFn, sortFn]);
 
-	const updateFilter = useCallback((key: string, value: any) => {
-		setFilters((prev) => ({ ...prev, [key]: value }));
+	const updateFilter = useCallback(<K extends keyof F>(key: K, value: F[K]) => {
+		setFilters((prev: F) => ({ ...prev, [key]: value }));
 	}, []);
 
 	const clearFilters = useCallback(() => {
@@ -158,12 +161,14 @@ export const useFilterAndSort = <T>(
 };
 
 // Hook for lazy loading with intersection observer
-export const useLazyLoading = (options = {}) => {
+export const useLazyLoading = (options: IntersectionObserverInit = {}) => {
 	const [isIntersecting, setIsIntersecting] = useState(false);
 	const [hasLoaded, setHasLoaded] = useState(false);
 	const targetRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
+		const currentTarget = targetRef.current; // Copy ref to variable
+
 		const observer = new IntersectionObserver(
 			([entry]) => {
 				if (entry.isIntersecting && !hasLoaded) {
@@ -177,13 +182,13 @@ export const useLazyLoading = (options = {}) => {
 			},
 		);
 
-		if (targetRef.current) {
-			observer.observe(targetRef.current);
+		if (currentTarget) {
+			observer.observe(currentTarget);
 		}
 
 		return () => {
-			if (targetRef.current) {
-				observer.unobserve(targetRef.current);
+			if (currentTarget) {
+				observer.unobserve(currentTarget);
 			}
 		};
 	}, [hasLoaded, options]);
@@ -191,7 +196,7 @@ export const useLazyLoading = (options = {}) => {
 	return { targetRef, isIntersecting, hasLoaded };
 };
 
-// Hook for  API caching
+// Hook for API caching
 export const useAPICache = <T>(
 	key: string,
 	fetcher: () => Promise<T>,
