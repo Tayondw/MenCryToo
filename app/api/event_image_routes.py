@@ -19,9 +19,9 @@ event_image_routes = Blueprint("event_images", __name__)
 @login_required
 def delete_event_image(imageId):
     """
-    Deletes an event image if the user is authorized - optimized with single query
+    Deletes an event image if the user is authorized - with single query
     """
-    # Optimized query to get all necessary data in one go
+    # Query to get all necessary data in one go
     event_image = (
         db.session.query(EventImage)
         .join(Event)
