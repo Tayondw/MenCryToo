@@ -1,4 +1,4 @@
-// Fixed CommentModal.tsx - prevents duplicate loading
+// Fixed CommentModal.tsx - Complete rewrite to match PostDetails styling
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
@@ -10,14 +10,15 @@ import {
 	Users,
 	AlertCircle,
 	Loader,
+	Send,
+	Reply,
 } from "lucide-react";
 import { useSelector } from "react-redux";
-import CommentForm from "../CommentForm/CommentForm";
-import CommentThread from "../CommentThread/CommentThread";
 import { commentApi } from "../../../services/commentApi";
 import {
 	organizeCommentsIntoThreads,
 	searchComments,
+	formatCommentTime,
 } from "../../../utils/commentUtils";
 import type {
 	Comment,
@@ -79,7 +80,12 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	);
 	const [page, setPage] = useState(1);
 	const [hasMore, setHasMore] = useState(true);
-	const [hasLoadedFromApi, setHasLoadedFromApi] = useState(false); // Track if we've loaded from API
+	const [hasLoadedFromApi, setHasLoadedFromApi] = useState(false);
+
+	// Comment form states
+	const [newComment, setNewComment] = useState("");
+	const [replyToComment, setReplyToComment] = useState<number | null>(null);
+	const [replyText, setReplyText] = useState("");
 
 	// Initialize comments - FIXED to prevent duplicate loading
 	useEffect(() => {
@@ -91,13 +97,15 @@ const CommentModal: React.FC<CommentModalProps> = ({
 			setHasLoadedFromApi(false);
 			setPage(1);
 			setError(null);
+			setNewComment("");
+			setReplyToComment(null);
+			setReplyText("");
 
 			// If we have initial comments, use them and don't load from API initially
 			if (initialComments && initialComments.length > 0) {
 				const transformedComments = initialComments.map(transformApiComment);
 				console.log("Using initial comments:", transformedComments);
 				setComments(transformedComments);
-				// Don't auto-load from API if we have initial comments
 			} else {
 				// Only load from API if no initial comments
 				console.log("No initial comments, loading from API");
@@ -110,7 +118,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 			setThreaded([]);
 			setHasLoadedFromApi(false);
 		}
-	}, [isOpen, postId]); // Removed initialComments from dependency array to prevent re-runs
+	}, [isOpen, postId]);
 
 	// Organize comments into threads when comments change
 	useEffect(() => {
@@ -152,7 +160,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		setThreaded(organized);
 	}, [comments, searchTerm, sortBy]);
 
-	// Load comments from API - FIXED to prevent duplicates
+	// Load comments from API
 	const loadComments = useCallback(
 		async (reset = false) => {
 			if (!postId) return;
@@ -207,21 +215,56 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	);
 
 	// Add new comment
-	const handleAddComment = useCallback(
-		async (formData: CommentFormData) => {
-			if (!sessionUser) throw new Error("You must be logged in to comment");
+	const handleAddComment = useCallback(async () => {
+		if (!sessionUser || !newComment.trim()) return;
 
-			console.log("Adding comment:", formData);
+		setIsSubmitting(true);
+		try {
+			const response = await commentApi.createComment({
+				comment: newComment.trim(),
+				postId: postId,
+			});
+
+			const newCommentObj: Comment = {
+				...response.comment,
+				commenter: {
+					id: sessionUser.id,
+					username: sessionUser.username,
+					firstName: sessionUser.firstName || "",
+					lastName: sessionUser.lastName || "",
+					profileImage: sessionUser.profileImage || "/default-avatar.png",
+				},
+				replies: [],
+			};
+
+			setComments((prev) => [newCommentObj, ...prev]);
+			setNewComment("");
+		} catch (error) {
+			console.error("Error adding comment:", error);
+			setError("Failed to add comment");
+		} finally {
+			setIsSubmitting(false);
+		}
+	}, [sessionUser, newComment, postId]);
+
+	// Add reply
+	const handleAddReply = useCallback(
+		async (parentId: number) => {
+			if (!sessionUser || !replyText.trim()) return;
+
 			setIsSubmitting(true);
-
 			try {
-				const response = formData.parentId
-					? await commentApi.createReply(formData)
-					: await commentApi.createComment(formData);
+				const parentComment = findCommentById(parentId);
+				const replyToUsername = parentComment?.commenter?.username || "";
 
-				console.log("Comment created:", response);
+				const response = await commentApi.createReply({
+					comment: replyText.trim(),
+					postId: postId,
+					parentId,
+					replyToUsername,
+				});
 
-				const newComment: Comment = {
+				const newReply: Comment = {
 					...response.comment,
 					commenter: {
 						id: sessionUser.id,
@@ -230,85 +273,79 @@ const CommentModal: React.FC<CommentModalProps> = ({
 						lastName: sessionUser.lastName || "",
 						profileImage: sessionUser.profileImage || "/default-avatar.png",
 					},
+					replies: [],
 				};
 
-				// Add comment to state
-				setComments((prev) => [newComment, ...prev]);
+				// Add reply to the correct parent comment
+				setComments((prev) => {
+					return prev.map((comment) => {
+						if (comment.id === parentId) {
+							return {
+								...comment,
+								replies: [...(comment.replies || []), newReply],
+							};
+						}
+						// Check in replies too
+						if (comment.replies) {
+							const updatedReplies = comment.replies.map((reply) => {
+								if (reply.id === parentId) {
+									return {
+										...reply,
+										replies: [...(reply.replies || []), newReply],
+									};
+								}
+								return reply;
+							});
+							return {
+								...comment,
+								replies: updatedReplies,
+							};
+						}
+						return comment;
+					});
+				});
+
+				setReplyText("");
+				setReplyToComment(null);
 			} catch (error) {
-				console.error("Error adding comment:", error);
-				throw error;
+				console.error("Error adding reply:", error);
+				setError("Failed to add reply");
 			} finally {
 				setIsSubmitting(false);
 			}
 		},
-		[sessionUser],
+		[sessionUser, replyText, postId],
 	);
 
-	// Handle reply
-	const handleReply = useCallback(
-		(parentId: number, replyToUsername: string) => {
-			console.log("Reply triggered for:", parentId, replyToUsername);
-			// This will be handled by the CommentThread component
-			// The reply form is shown inline in the thread
-		},
-		[],
-	);
-
-	// Edit comment
-	const handleEditComment = useCallback(
-		async (commentId: number, newText: string) => {
-			console.log("Editing comment:", commentId, newText);
-
-			try {
-				await commentApi.updateComment(commentId, newText);
-
-				// Update comment in state
-				setComments((prev) =>
-					prev.map((comment) =>
-						comment.id === commentId
-							? {
-									...comment,
-									comment: newText,
-									updatedAt: new Date().toISOString(),
-							  }
-							: comment,
-					),
-				);
-			} catch (error) {
-				console.error("Error editing comment:", error);
-				throw error;
+	// Helper to find comment by ID
+	const findCommentById = (id: number): Comment | null => {
+		for (const comment of comments) {
+			if (comment.id === id) return comment;
+			if (comment.replies) {
+				for (const reply of comment.replies) {
+					if (reply.id === id) return reply;
+				}
 			}
-		},
-		[],
-	);
+		}
+		return null;
+	};
 
-	// Delete comment
-	const handleDeleteComment = useCallback(
-		async (commentId: number) => {
-			console.log("Deleting comment:", commentId);
+	// Format time ago
+	const formatTimeAgo = (dateString: string) => {
+		const now = new Date();
+		const date = new Date(dateString);
+		const diffInHours = Math.floor(
+			(now.getTime() - date.getTime()) / (1000 * 60 * 60),
+		);
 
-			try {
-				await commentApi.deleteComment(postId, commentId);
+		if (diffInHours < 1) return "just now";
+		if (diffInHours < 24) return `${diffInHours}h ago`;
 
-				// Remove comment from state (including nested replies)
-				const removeCommentRecursively = (comments: Comment[]): Comment[] => {
-					return comments.filter((comment) => {
-						if (comment.id === commentId) return false;
-						if (comment.replies) {
-							comment.replies = removeCommentRecursively(comment.replies);
-						}
-						return true;
-					});
-				};
+		const diffInDays = Math.floor(diffInHours / 24);
+		if (diffInDays < 7) return `${diffInDays}d ago`;
 
-				setComments((prev) => removeCommentRecursively(prev));
-			} catch (error) {
-				console.error("Error deleting comment:", error);
-				throw error;
-			}
-		},
-		[postId],
-	);
+		return date.toLocaleDateString();
+	};
 
 	// Handle manual refresh button - always loads from API
 	const handleRefresh = useCallback(() => {
@@ -324,6 +361,9 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		setComments([]);
 		setThreaded([]);
 		setHasLoadedFromApi(false);
+		setNewComment("");
+		setReplyToComment(null);
+		setReplyText("");
 		onClose();
 	}, [onClose]);
 
@@ -359,16 +399,6 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	const totalComments = comments.length;
 	const filteredComments = threaded.length;
 
-	console.log("Rendering modal with:", {
-		totalComments,
-		filteredComments,
-		threaded,
-		isLoading,
-		error,
-		hasLoadedFromApi,
-		initialCommentsCount: initialComments.length,
-	});
-
 	return (
 		<div
 			className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
@@ -390,9 +420,6 @@ const CommentModal: React.FC<CommentModalProps> = ({
 								{totalComments} {totalComments === 1 ? "comment" : "comments"}
 								{searchTerm && filteredComments !== totalComments && (
 									<span> • {filteredComments} shown</span>
-								)}
-								{initialComments.length > 0 && !hasLoadedFromApi && (
-									<span className="text-orange-600"> • from post data</span>
 								)}
 							</p>
 						</div>
@@ -452,22 +479,36 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					</div>
 				</div>
 
-				{/* Comment form - Only show ONE form */}
+				{/* Add Comment Section */}
 				{sessionUser && (
 					<div className="p-4 border-b border-gray-100">
-						<div className="flex items-start gap-3">
+						<div className="flex gap-3">
 							<img
 								src={sessionUser.profileImage}
 								alt={sessionUser.username}
-								className="w-8 h-8 rounded-full object-cover border border-gray-200 flex-shrink-0"
+								className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 flex-shrink-0"
 							/>
 							<div className="flex-1">
-								<CommentForm
-									postId={postId}
-									onSubmit={handleAddComment}
-									placeholder="Write a comment..."
-									isSubmitting={isSubmitting}
-								/>
+								<div className="relative">
+									<textarea
+										value={newComment}
+										onChange={(e) => setNewComment(e.target.value)}
+										placeholder="Write a comment..."
+										className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none"
+										rows={3}
+									/>
+									<button
+										onClick={handleAddComment}
+										disabled={!newComment.trim() || isSubmitting}
+										className="absolute bottom-3 right-3 p-2 bg-orange-500 text-white rounded-full hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+									>
+										{isSubmitting ? (
+											<div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+										) : (
+											<Send size={16} />
+										)}
+									</button>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -516,16 +557,18 @@ const CommentModal: React.FC<CommentModalProps> = ({
 								<CommentThread
 									key={comment.id}
 									comment={comment}
-									depth={0}
-									maxDepth={5}
-									onReply={handleReply}
-									onEdit={handleEditComment}
-									onDelete={handleDeleteComment}
-									currentUserId={sessionUser?.id}
+									sessionUser={sessionUser}
+									replyToComment={replyToComment}
+									setReplyToComment={setReplyToComment}
+									replyText={replyText}
+									setReplyText={setReplyText}
+									handleAddReply={handleAddReply}
+									isSubmitting={isSubmitting}
+									formatTimeAgo={formatTimeAgo}
 								/>
 							))}
 
-							{/* Load more button - only show if we've loaded from API and there's more */}
+							{/* Load more button */}
 							{hasMore && hasLoadedFromApi && !isLoading && (
 								<div className="text-center pt-4">
 									<button
@@ -537,7 +580,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 								</div>
 							)}
 
-							{/* Initial load button - show if we have initial comments but haven't loaded from API */}
+							{/* Initial load button */}
 							{!hasLoadedFromApi &&
 								initialComments.length > 0 &&
 								!isLoading && (
@@ -591,6 +634,157 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					</div>
 				</div>
 			</div>
+		</div>
+	);
+};
+
+// Comment Thread Component - styled like PostDetails
+interface CommentThreadProps {
+	comment: Comment;
+	sessionUser: any;
+	replyToComment: number | null;
+	setReplyToComment: (id: number | null) => void;
+	replyText: string;
+	setReplyText: (text: string) => void;
+	handleAddReply: (parentId: number) => void;
+	isSubmitting: boolean;
+	formatTimeAgo: (date: string) => string;
+	depth?: number;
+}
+
+const CommentThread: React.FC<CommentThreadProps> = ({
+	comment,
+	sessionUser,
+	replyToComment,
+	setReplyToComment,
+	replyText,
+	setReplyText,
+	handleAddReply,
+	isSubmitting,
+	formatTimeAgo,
+	depth = 0,
+}) => {
+	const [showAllReplies, setShowAllReplies] = useState(false);
+	const maxVisibleReplies = 2;
+	const hasMoreReplies =
+		comment.replies && comment.replies.length > maxVisibleReplies;
+	const visibleReplies = showAllReplies
+		? comment.replies
+		: comment.replies?.slice(0, maxVisibleReplies);
+
+	return (
+		<div className={`space-y-3 ${depth > 0 ? "ml-13" : ""}`}>
+			{/* Main Comment */}
+			<div className="flex gap-3">
+				<img
+					src={comment.commenter?.profileImage || "/default-avatar.png"}
+					alt={comment.commenter?.username}
+					className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 flex-shrink-0"
+				/>
+				<div className="flex-1">
+					<div className="bg-slate-50 rounded-lg p-3">
+						<div className="flex items-center gap-2 mb-1">
+							<span className="font-semibold text-slate-900 text-sm">
+								{comment.commenter?.username}
+							</span>
+							<span className="text-xs text-slate-500">
+								{formatTimeAgo(comment.createdAt)}
+							</span>
+						</div>
+						<p className="text-slate-700 text-sm">{comment.comment}</p>
+					</div>
+					{sessionUser && (
+						<button
+							onClick={() => setReplyToComment(comment.id)}
+							className="flex items-center gap-1 mt-2 text-xs text-slate-500 hover:text-orange-600 transition-colors"
+						>
+							<Reply size={12} />
+							Reply
+						</button>
+					)}
+				</div>
+			</div>
+
+			{/* Reply Form */}
+			{replyToComment === comment.id && sessionUser && (
+				<div className="ml-13 flex gap-3">
+					<img
+						src={sessionUser.profileImage}
+						alt={sessionUser.username}
+						className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 flex-shrink-0"
+					/>
+					<div className="flex-1">
+						<div className="relative">
+							<textarea
+								value={replyText}
+								onChange={(e) => setReplyText(e.target.value)}
+								placeholder={`Reply to @${comment.commenter?.username}...`}
+								className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm"
+								rows={2}
+							/>
+							<div className="flex items-center justify-between mt-2">
+								<button
+									onClick={() => {
+										setReplyToComment(null);
+										setReplyText("");
+									}}
+									className="text-xs text-slate-500 hover:text-slate-700"
+								>
+									Cancel
+								</button>
+								<button
+									onClick={() => handleAddReply(comment.id)}
+									disabled={!replyText.trim() || isSubmitting}
+									className="px-3 py-1 bg-orange-500 text-white text-xs rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+								>
+									{isSubmitting ? "Posting..." : "Reply"}
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* Replies */}
+			{visibleReplies && visibleReplies.length > 0 && (
+				<div className="ml-13 space-y-3">
+					{visibleReplies.map((reply) => (
+						<CommentThread
+							key={reply.id}
+							comment={reply}
+							sessionUser={sessionUser}
+							replyToComment={replyToComment}
+							setReplyToComment={setReplyToComment}
+							replyText={replyText}
+							setReplyText={setReplyText}
+							handleAddReply={handleAddReply}
+							isSubmitting={isSubmitting}
+							formatTimeAgo={formatTimeAgo}
+							depth={depth + 1}
+						/>
+					))}
+
+					{/* Show more replies button */}
+					{hasMoreReplies && !showAllReplies && (
+						<button
+							onClick={() => setShowAllReplies(true)}
+							className="text-sm text-orange-600 hover:text-orange-700 font-medium ml-13"
+						>
+							View {comment.replies!.length - maxVisibleReplies} more replies
+						</button>
+					)}
+
+					{/* Show less replies button */}
+					{hasMoreReplies && showAllReplies && (
+						<button
+							onClick={() => setShowAllReplies(false)}
+							className="text-sm text-slate-600 hover:text-slate-700 font-medium ml-13"
+						>
+							Show less
+						</button>
+					)}
+				</div>
+			)}
 		</div>
 	);
 };
