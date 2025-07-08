@@ -21,7 +21,7 @@ import {
 import type { Comment, CommentModalProps } from "../../../types/comments";
 import type { RootState } from "../../../types";
 
-// Define proper SessionUser type instead of using 'any'
+// Define proper SessionUser type
 interface SessionUser {
 	id: number;
 	username: string;
@@ -30,37 +30,73 @@ interface SessionUser {
 	profileImage: string;
 }
 
-// Helper function to transform API comments to our expected format
-const transformApiComment = (apiComment: any): Comment => {
+// Enhanced comment transformation with better profile image handling
+const transformApiComment = (
+	apiComment: Comment | ApiCommentResponse,
+): Comment => {
 	console.log("Transforming API comment:", apiComment);
 
 	// If the API comment already has a commenter object, use it
-	if (apiComment.commenter) {
-		return apiComment as Comment;
+	if ("commenter" in apiComment && apiComment.commenter) {
+		return {
+			...apiComment,
+			commenter: {
+				...apiComment.commenter,
+				// Ensure profile image has a fallback
+				profileImage:
+					apiComment.commenter.profileImage || "/default-avatar.png",
+			},
+		} as Comment;
 	}
 
-	// Otherwise, transform old/API format to new format
+	// Transform old/API format to new format
+	const oldComment = apiComment as ApiCommentResponse;
 	return {
-		id: apiComment.id,
-		userId: apiComment.userId || apiComment.user_id,
-		postId: apiComment.postId || apiComment.post_id,
-		comment: apiComment.comment,
-		parentId: apiComment.parentId || apiComment.parent_id || null,
-		createdAt: apiComment.createdAt || apiComment.created_at,
-		updatedAt: apiComment.updatedAt || apiComment.updated_at,
+		id: oldComment.id,
+		userId: oldComment.userId || oldComment.user_id || 0,
+		postId: oldComment.postId || oldComment.post_id || 0,
+		comment: oldComment.comment || "",
+		parentId: oldComment.parentId || oldComment.parent_id || null,
+		createdAt:
+			oldComment.createdAt || oldComment.created_at || new Date().toISOString(),
+		updatedAt:
+			oldComment.updatedAt || oldComment.updated_at || new Date().toISOString(),
 		commenter: {
-			id: apiComment.userId || apiComment.user_id,
-			username: apiComment.username || "unknown",
-			firstName: apiComment.firstName || apiComment.first_name || "",
-			lastName: apiComment.lastName || apiComment.last_name || "",
+			id: oldComment.userId || oldComment.user_id || 0,
+			username: oldComment.username || "unknown",
+			firstName: oldComment.firstName || oldComment.first_name || "",
+			lastName: oldComment.lastName || oldComment.last_name || "",
 			profileImage:
-				apiComment.profileImage ||
-				apiComment.profile_image_url ||
+				oldComment.profileImage ||
+				oldComment.profile_image_url ||
 				"/default-avatar.png",
 		},
 		replies: [],
 	};
 };
+
+// Type for API response that might not have commenter
+interface ApiCommentResponse {
+	id: number;
+	userId?: number;
+	user_id?: number;
+	postId?: number;
+	post_id?: number;
+	comment: string;
+	parentId?: number | null;
+	parent_id?: number | null;
+	createdAt?: string;
+	created_at?: string;
+	updatedAt?: string;
+	updated_at?: string;
+	username?: string;
+	firstName?: string;
+	first_name?: string;
+	lastName?: string;
+	last_name?: string;
+	profileImage?: string;
+	profile_image_url?: string;
+}
 
 const CommentModal: React.FC<CommentModalProps> = ({
 	isOpen,
@@ -87,7 +123,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	const [hasMore, setHasMore] = useState(true);
 	const [hasLoadedFromApi, setHasLoadedFromApi] = useState(false);
 
-	// Comment form states - Same as PostDetails
+	// Comment form states
 	const [newComment, setNewComment] = useState("");
 	const [replyToComment, setReplyToComment] = useState<number | null>(null);
 	const [replyText, setReplyText] = useState("");
@@ -95,7 +131,37 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		[key: number]: boolean;
 	}>({});
 
-	// Initialize comments
+	// Enhanced comment transformation for consistent profile images
+	const enhanceCommentWithProfileData = (comment: Comment): Comment => {
+		// If we have session user data and this is their comment, use their profile image
+		if (sessionUser && comment.userId === sessionUser.id) {
+			return {
+				...comment,
+				commenter: {
+					...comment.commenter,
+					id: sessionUser.id,
+					username: sessionUser.username,
+					firstName: sessionUser.firstName || "",
+					lastName: sessionUser.lastName || "",
+					profileImage: sessionUser.profileImage || "/default-avatar.png",
+				},
+			};
+		}
+
+		// Ensure commenter exists and has proper fallbacks
+		return {
+			...comment,
+			commenter: comment.commenter || {
+				id: comment.userId,
+				username: "unknown",
+				firstName: "",
+				lastName: "",
+				profileImage: "/default-avatar.png",
+			},
+		};
+	};
+
+	// Initialize comments with enhanced profile data
 	useEffect(() => {
 		if (isOpen && postId) {
 			console.log("Modal opened for post:", postId);
@@ -110,13 +176,14 @@ const CommentModal: React.FC<CommentModalProps> = ({
 			setReplyText("");
 			setShowAllReplies({});
 
-			// If we have initial comments, use them
+			// If we have initial comments, transform and enhance them
 			if (initialComments && initialComments.length > 0) {
-				const transformedComments = initialComments.map(transformApiComment);
-				console.log("Using initial comments:", transformedComments);
-				setComments(transformedComments);
+				const enhancedComments = initialComments
+					.map(transformApiComment)
+					.map(enhanceCommentWithProfileData);
+				console.log("Using enhanced initial comments:", enhancedComments);
+				setComments(enhancedComments);
 			} else {
-				// Only load from API if no initial comments
 				console.log("No initial comments, loading from API");
 				setComments([]);
 				loadComments(true);
@@ -127,7 +194,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 			setThreaded([]);
 			setHasLoadedFromApi(false);
 		}
-	}, [isOpen, postId]);
+	}, [isOpen, postId, sessionUser]); // Add sessionUser as dependency
 
 	// Organize comments into threads when comments change
 	useEffect(() => {
@@ -168,12 +235,11 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		setThreaded(organized);
 	}, [comments, searchTerm, sortBy]);
 
-	// Load comments from API
+	// Enhanced load comments with better profile data handling
 	const loadComments = useCallback(
 		async (reset = false) => {
 			if (!postId) return;
 
-			// Don't load if we already have initial comments and this is the first API call
 			if (!hasLoadedFromApi && initialComments.length > 0 && !reset) {
 				console.log("Skipping API load - already have initial comments");
 				return;
@@ -193,16 +259,17 @@ const CommentModal: React.FC<CommentModalProps> = ({
 
 				console.log("API response:", response);
 
-				// Transform API comments to our expected format
 				const apiComments = response.comments || [];
-				const transformedComments = apiComments.map(transformApiComment);
+				const enhancedComments = apiComments
+					.map(transformApiComment)
+					.map(enhanceCommentWithProfileData);
 
-				console.log("Transformed API comments:", transformedComments);
+				console.log("Enhanced API comments:", enhancedComments);
 
 				if (reset) {
-					setComments(transformedComments);
+					setComments(enhancedComments);
 				} else {
-					setComments((prev) => [...prev, ...transformedComments]);
+					setComments((prev) => [...prev, ...enhancedComments]);
 				}
 
 				setHasLoadedFromApi(true);
@@ -217,10 +284,10 @@ const CommentModal: React.FC<CommentModalProps> = ({
 				setIsLoading(false);
 			}
 		},
-		[postId, page, hasLoadedFromApi, initialComments.length],
+		[postId, page, hasLoadedFromApi, initialComments.length, sessionUser],
 	);
 
-	// Add new comment
+	// Enhanced add comment with proper profile data
 	const handleAddComment = useCallback(async () => {
 		if (!sessionUser || !newComment.trim()) return;
 
@@ -253,7 +320,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		}
 	}, [sessionUser, newComment, postId]);
 
-	// Add reply
+	// Enhanced add reply with proper profile data
 	const handleAddReply = useCallback(
 		async (parentId: number) => {
 			if (!sessionUser || !replyText.trim()) return;
@@ -464,7 +531,6 @@ const CommentModal: React.FC<CommentModalProps> = ({
 
 				{/* Search and filters */}
 				<div className="p-4 border-b border-gray-100 space-y-3">
-					{/* Search */}
 					<div className="relative">
 						<Search
 							className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -479,7 +545,6 @@ const CommentModal: React.FC<CommentModalProps> = ({
 						/>
 					</div>
 
-					{/* Sort */}
 					<div className="flex items-center gap-2">
 						<SortDesc size={16} className="text-gray-500" />
 						<select
@@ -496,15 +561,19 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					</div>
 				</div>
 
-				{/* Add Comment Section - Same as PostDetails */}
+				{/* Add Comment Section */}
 				{sessionUser && (
 					<div className="p-4 border-b border-gray-100">
 						<div className="flex gap-3">
 							<Link to={`/users/${sessionUser.id}`} className="flex-shrink-0">
 								<img
-									src={sessionUser.profileImage}
+									src={sessionUser.profileImage || "/default-avatar.png"}
 									alt={sessionUser.username}
 									className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
+									onError={(e) => {
+										const target = e.target as HTMLImageElement;
+										target.src = "/default-avatar.png";
+									}}
 								/>
 							</Link>
 							<div className="flex-1">
@@ -601,20 +670,6 @@ const CommentModal: React.FC<CommentModalProps> = ({
 								</div>
 							)}
 
-							{/* Initial load button */}
-							{!hasLoadedFromApi &&
-								initialComments.length > 0 &&
-								!isLoading && (
-									<div className="text-center pt-4">
-										<button
-											onClick={() => loadComments(true)}
-											className="px-6 py-3 bg-orange-100 hover:bg-orange-200 text-orange-700 font-medium rounded-lg transition-colors"
-										>
-											Load latest comments from server
-										</button>
-									</div>
-								)}
-
 							{/* Loading indicator */}
 							{isLoading && (
 								<div className="text-center py-4">
@@ -659,7 +714,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	);
 };
 
-// Modal Comment Thread Component - Same functionality as PostDetails
+// Enhanced Modal Comment Thread Component with better profile image handling
 interface ModalCommentThreadProps {
 	comment: Comment;
 	sessionUser: SessionUser | null;
@@ -689,7 +744,7 @@ const ModalCommentThread: React.FC<ModalCommentThreadProps> = ({
 	toggleShowAllReplies,
 	depth = 0,
 }) => {
-	const maxVisibleReplies = 2;
+	const maxVisibleReplies = 0;
 	const hasReplies = comment.replies && comment.replies.length > 0;
 	const hasMoreReplies =
 		comment.replies && comment.replies.length > maxVisibleReplies;
@@ -727,8 +782,12 @@ const ModalCommentThread: React.FC<ModalCommentThreadProps> = ({
 				>
 					<img
 						src={comment.commenter?.profileImage || "/default-avatar.png"}
-						alt={comment.commenter?.username}
+						alt={comment.commenter?.username || "User"}
 						className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
+						onError={(e) => {
+							const target = e.target as HTMLImageElement;
+							target.src = "/default-avatar.png";
+						}}
 					/>
 				</Link>
 				<div className="flex-1">
@@ -738,7 +797,7 @@ const ModalCommentThread: React.FC<ModalCommentThreadProps> = ({
 								to={`/users/${comment.commenter?.id || comment.userId}`}
 								className="font-semibold text-slate-900 text-sm hover:text-orange-600 transition-colors"
 							>
-								{comment.commenter?.username}
+								{comment.commenter?.username || "Unknown User"}
 							</Link>
 							<span className="text-xs text-slate-500">
 								{formatTimeAgo(comment.createdAt)}
@@ -763,9 +822,13 @@ const ModalCommentThread: React.FC<ModalCommentThreadProps> = ({
 				<div className={`flex gap-3 ${getIndentationClass(depth + 1)}`}>
 					<Link to={`/users/${sessionUser.id}`} className="flex-shrink-0">
 						<img
-							src={sessionUser.profileImage}
+							src={sessionUser.profileImage || "/default-avatar.png"}
 							alt={sessionUser.username}
 							className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
+							onError={(e) => {
+								const target = e.target as HTMLImageElement;
+								target.src = "/default-avatar.png";
+							}}
 						/>
 					</Link>
 					<div className="flex-1">
