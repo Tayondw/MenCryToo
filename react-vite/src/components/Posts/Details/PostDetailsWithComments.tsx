@@ -90,20 +90,12 @@ const PostDetailsWithComments: React.FC = () => {
 		[key: number]: boolean;
 	}>({});
 
-	// Transform post comments to Comment format on component mount
-	React.useEffect(() => {
-		if (post.postComments) {
-			const transformedComments = organizeComments(post.postComments);
-			setComments(transformedComments);
-		}
-	}, [post.postComments]);
-
-	// Helper function to organize flat comments into threaded structure
+	// Enhanced comment organization function
 	const organizeComments = (flatComments: PostComment[]): Comment[] => {
 		const commentMap = new Map<number, Comment>();
 		const rootComments: Comment[] = [];
 
-		// First pass: create Comment objects
+		// First pass: create Comment objects with enhanced user data
 		flatComments.forEach((pc) => {
 			const comment: Comment = {
 				id: pc.id,
@@ -115,7 +107,7 @@ const PostDetailsWithComments: React.FC = () => {
 				updatedAt: pc.updated_at,
 				commenter: {
 					id: pc.userId,
-					username: pc.username,
+					username: pc.username || "Unknown User",
 					firstName: "",
 					lastName: "",
 					profileImage: "/default-avatar.png",
@@ -157,6 +149,14 @@ const PostDetailsWithComments: React.FC = () => {
 
 		return rootComments;
 	};
+
+	// Transform post comments to Comment format on component mount
+	React.useEffect(() => {
+		if (post.postComments) {
+			const transformedComments = organizeComments(post.postComments);
+			setComments(transformedComments);
+		}
+	}, [post.postComments]);
 
 	// Format date
 	const formatDate = (dateString: string) => {
@@ -331,7 +331,7 @@ const PostDetailsWithComments: React.FC = () => {
 				updatedAt: pc.updated_at,
 				commenter: {
 					id: pc.userId,
-					username: pc.username,
+					username: pc.username || "Unknown User",
 					firstName: "",
 					lastName: "",
 					profileImage: "/default-avatar.png",
@@ -434,6 +434,10 @@ const PostDetailsWithComments: React.FC = () => {
 									src={post.user.profileImage}
 									alt={post.user.username}
 									className="w-12 h-12 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
+									onError={(e) => {
+										const target = e.target as HTMLImageElement;
+										target.src = "/default-avatar.png";
+									}}
 								/>
 							</Link>
 							<div>
@@ -467,7 +471,7 @@ const PostDetailsWithComments: React.FC = () => {
 							{post.caption}
 						</p>
 
-						{/* Post Actions */}
+						{/* Post Actions - Fixed comment count */}
 						<div className="flex items-center justify-between border-t border-b border-slate-200 py-4 my-4">
 							<div className="flex items-center gap-6">
 								<button
@@ -486,7 +490,9 @@ const PostDetailsWithComments: React.FC = () => {
 									className="flex items-center gap-2 text-slate-500 hover:text-blue-500 transition-colors"
 								>
 									<MessageCircle size={20} />
-									<span className="font-medium">{comments.length}</span>
+									<span className="font-medium">
+										{post.postComments?.length || 0}
+									</span>
 								</button>
 							</div>
 							<div className="flex items-center gap-3">
@@ -511,6 +517,10 @@ const PostDetailsWithComments: React.FC = () => {
 											src={sessionUser.profileImage}
 											alt={sessionUser.username}
 											className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
+											onError={(e) => {
+												const target = e.target as HTMLImageElement;
+												target.src = "/default-avatar.png";
+											}}
 										/>
 									</Link>
 									<div className="flex-1">
@@ -539,13 +549,13 @@ const PostDetailsWithComments: React.FC = () => {
 							</div>
 						)}
 
-						{/* Comments Section */}
+						{/* Comments Section - Fixed count */}
 						<div className="space-y-6">
 							<div className="flex items-center justify-between">
 								<h2 className="text-xl font-semibold text-slate-900">
-									Comments ({comments.length})
+									Comments ({post.postComments?.length || 0})
 								</h2>
-								{comments.length > 3 && (
+								{(post.postComments?.length || 0) > 3 && (
 									<button
 										onClick={handleOpenComments}
 										className="text-orange-600 hover:text-orange-700 font-medium text-sm"
@@ -602,7 +612,7 @@ const PostDetailsWithComments: React.FC = () => {
 	);
 };
 
-// Comment Thread Component for Post Details
+// Enhanced Comment Thread Component for Post Details
 interface CommentThreadComponentProps {
 	comment: Comment;
 	sessionUser: SessionUser | null;
@@ -656,9 +666,28 @@ const CommentThreadComponent: React.FC<CommentThreadComponentProps> = ({
 			default:
 				return "ml-24"; // Max indentation
 		}
-      };
-      
-      console.log(comment)
+	};
+
+	// Enhanced commenter data with better fallbacks
+	const getCommenterData = () => {
+		// If we have proper commenter data, use it
+		if (comment.commenter) {
+			return {
+				id: comment.commenter.id,
+				username: comment.commenter.username || "Unknown User",
+				profileImage: comment.commenter.profileImage || "/default-avatar.png",
+			};
+		}
+
+		// Fallback to comment data
+		return {
+			id: comment.userId,
+			username: "Unknown User",
+			profileImage: "/default-avatar.png",
+		};
+	};
+
+	const commenterData = getCommenterData();
 
 	return (
 		<div className="space-y-3">
@@ -666,24 +695,25 @@ const CommentThreadComponent: React.FC<CommentThreadComponentProps> = ({
 			<div
 				className={`flex gap-3 ${depth > 0 ? getIndentationClass(depth) : ""}`}
 			>
-				<Link
-					to={`/users/${comment.commenter?.id || comment.userId}`}
-					className="flex-shrink-0"
-				>
+				<Link to={`/users/${commenterData.id}`} className="flex-shrink-0">
 					<img
-						src={comment.commenter?.profileImage || "/default-avatar.png"}
-						alt={comment.commenter?.username}
+						src={commenterData.profileImage}
+						alt={commenterData.username}
 						className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
+						onError={(e) => {
+							const target = e.target as HTMLImageElement;
+							target.src = "/default-avatar.png";
+						}}
 					/>
 				</Link>
 				<div className="flex-1">
 					<div className="bg-slate-50 rounded-lg p-3">
 						<div className="flex items-center gap-2 mb-1">
 							<Link
-								to={`/users/${comment.commenter?.id || comment.userId}`}
+								to={`/users/${commenterData.id}`}
 								className="font-semibold text-slate-900 text-sm hover:text-orange-600 transition-colors"
 							>
-								{comment.commenter?.username}
+								{commenterData.username}
 							</Link>
 							<span className="text-xs text-slate-500">
 								{formatTimeAgo(comment.createdAt)}
@@ -708,9 +738,13 @@ const CommentThreadComponent: React.FC<CommentThreadComponentProps> = ({
 				<div className={`flex gap-3 ${getIndentationClass(depth + 1)}`}>
 					<Link to={`/users/${sessionUser.id}`} className="flex-shrink-0">
 						<img
-							src={sessionUser.profileImage}
+							src={sessionUser.profileImage || "/default-avatar.png"}
 							alt={sessionUser.username}
 							className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
+							onError={(e) => {
+								const target = e.target as HTMLImageElement;
+								target.src = "/default-avatar.png";
+							}}
 						/>
 					</Link>
 					<div className="flex-1">
@@ -718,7 +752,7 @@ const CommentThreadComponent: React.FC<CommentThreadComponentProps> = ({
 							<textarea
 								value={replyText}
 								onChange={(e) => setReplyText(e.target.value)}
-								placeholder={`Reply to @${comment.commenter?.username}...`}
+								placeholder={`Reply to @${commenterData.username}...`}
 								className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm"
 								rows={2}
 							/>
