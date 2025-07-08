@@ -146,7 +146,7 @@ def similar_posts_feed():
         # Get user's tag IDs
         user_tag_ids = [tag.id for tag in current_user.users_tags]
 
-        # Find users with similar tags (SQLite compatible)
+        # Find users with similar tags
         try:
             similar_user_ids = []
 
@@ -539,29 +539,23 @@ def similar_users_posts_feed():
 @login_required
 def post(postId):
     """
-    Single post view with queries
+    Single post view with ALL commenter data properly loaded
     """
     try:
-        # Single query with eager loading
+        # Load post with ALL comment user data
         post = (
             db.session.query(Post)
             .options(
-                # Load user data in the same query
+                # Load post user data
                 joinedload(Post.user).load_only(
                     "id", "username", "first_name", "last_name", "profile_image_url"
                 ),
-                # Load comments and their authors in the same query
+                # Load ALL comments with their respective user data
                 selectinload(Post.post_comments).options(
-                    joinedload(Comment.commenter).load_only("id", "username"),
-                    load_only(
-                        "id",
-                        "user_id",
-                        "post_id",
-                        "comment",
-                        "parent_id",
-                        "created_at",
-                        "updated_at",
-                    ),
+                    # Load commenter for EVERY comment
+                    joinedload(Comment.commenter).load_only(
+                        "id", "username", "first_name", "last_name", "profile_image_url"
+                    )
                 ),
             )
             .filter(Post.id == postId)
@@ -571,7 +565,7 @@ def post(postId):
         if not post:
             return jsonify({"errors": {"message": "Not Found"}}), 404
 
-        # Get like count with a single efficient query
+        # Get like count
         like_count = (
             db.session.execute(
                 text("SELECT COUNT(*) FROM likes WHERE post_id = :post_id"),
@@ -580,7 +574,7 @@ def post(postId):
             or 0
         )
 
-        # Build response - all data is already loaded
+        # Build response with PROPER commenter data for ALL comments
         post_data = {
             "id": post.id,
             "title": post.title,
@@ -614,6 +608,25 @@ def post(postId):
                     ),
                     "updated_at": (
                         comment.updated_at.isoformat() if comment.updated_at else None
+                    ),
+                    # Include actual commenter data for EVERY comment
+                    "commenter": (
+                        {
+                            "id": comment.commenter.id,
+                            "username": comment.commenter.username,
+                            "firstName": comment.commenter.first_name or "",
+                            "lastName": comment.commenter.last_name or "",
+                            "profileImage": comment.commenter.profile_image_url
+                            or "/default-avatar.png",
+                        }
+                        if comment.commenter
+                        else {
+                            "id": comment.user_id,
+                            "username": "Unknown User",
+                            "firstName": "",
+                            "lastName": "",
+                            "profileImage": "/default-avatar.png",
+                        }
                     ),
                 }
                 for comment in post.post_comments
