@@ -1,5 +1,3 @@
-// Fixed CommentModal.tsx - Complete rewrite to match PostDetails styling
-
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
 	X,
@@ -14,18 +12,23 @@ import {
 	Reply,
 } from "lucide-react";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { commentApi } from "../../../services/commentApi";
 import {
 	organizeCommentsIntoThreads,
 	searchComments,
-	formatCommentTime,
 } from "../../../utils/commentUtils";
-import type {
-	Comment,
-	CommentModalProps,
-	CommentFormData,
-} from "../../../types/comments";
+import type { Comment, CommentModalProps } from "../../../types/comments";
 import type { RootState } from "../../../types";
+
+// Define proper SessionUser type instead of using 'any'
+interface SessionUser {
+	id: number;
+	username: string;
+	firstName?: string;
+	lastName?: string;
+	profileImage: string;
+}
 
 // Helper function to transform API comments to our expected format
 const transformApiComment = (apiComment: any): Comment => {
@@ -65,7 +68,9 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	postId,
 	initialComments = [],
 }) => {
-	const sessionUser = useSelector((state: RootState) => state.session.user);
+	const sessionUser = useSelector(
+		(state: RootState) => state.session.user,
+	) as SessionUser | null;
 	const modalRef = useRef<HTMLDivElement>(null);
 
 	// State management
@@ -82,12 +87,15 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	const [hasMore, setHasMore] = useState(true);
 	const [hasLoadedFromApi, setHasLoadedFromApi] = useState(false);
 
-	// Comment form states
+	// Comment form states - Same as PostDetails
 	const [newComment, setNewComment] = useState("");
 	const [replyToComment, setReplyToComment] = useState<number | null>(null);
 	const [replyText, setReplyText] = useState("");
+	const [showAllReplies, setShowAllReplies] = useState<{
+		[key: number]: boolean;
+	}>({});
 
-	// Initialize comments - FIXED to prevent duplicate loading
+	// Initialize comments
 	useEffect(() => {
 		if (isOpen && postId) {
 			console.log("Modal opened for post:", postId);
@@ -100,8 +108,9 @@ const CommentModal: React.FC<CommentModalProps> = ({
 			setNewComment("");
 			setReplyToComment(null);
 			setReplyText("");
+			setShowAllReplies({});
 
-			// If we have initial comments, use them and don't load from API initially
+			// If we have initial comments, use them
 			if (initialComments && initialComments.length > 0) {
 				const transformedComments = initialComments.map(transformApiComment);
 				console.log("Using initial comments:", transformedComments);
@@ -139,7 +148,6 @@ const CommentModal: React.FC<CommentModalProps> = ({
 						new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
 					);
 				case "popular": {
-					// Sort by reply count, then by creation date
 					const aReplies = a.replies?.length || 0;
 					const bReplies = b.replies?.length || 0;
 					if (aReplies !== bReplies) return bReplies - aReplies;
@@ -192,10 +200,8 @@ const CommentModal: React.FC<CommentModalProps> = ({
 				console.log("Transformed API comments:", transformedComments);
 
 				if (reset) {
-					// Replace all comments with fresh API data
 					setComments(transformedComments);
 				} else {
-					// Add to existing comments (pagination)
 					setComments((prev) => [...prev, ...transformedComments]);
 				}
 
@@ -347,11 +353,19 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		return date.toLocaleDateString();
 	};
 
-	// Handle manual refresh button - always loads from API
+	// Toggle show all replies for a comment
+	const toggleShowAllReplies = (commentId: number) => {
+		setShowAllReplies((prev) => ({
+			...prev,
+			[commentId]: !prev[commentId],
+		}));
+	};
+
+	// Handle manual refresh button
 	const handleRefresh = useCallback(() => {
 		console.log("Manual refresh triggered");
-		setHasLoadedFromApi(false); // Reset the flag
-		loadComments(true); // Force reload from API
+		setHasLoadedFromApi(false);
+		loadComments(true);
 	}, [loadComments]);
 
 	// Handle modal close
@@ -364,6 +378,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		setNewComment("");
 		setReplyToComment(null);
 		setReplyText("");
+		setShowAllReplies({});
 		onClose();
 	}, [onClose]);
 
@@ -469,7 +484,9 @@ const CommentModal: React.FC<CommentModalProps> = ({
 						<SortDesc size={16} className="text-gray-500" />
 						<select
 							value={sortBy}
-							onChange={(e) => setSortBy(e.target.value as any)}
+							onChange={(e) =>
+								setSortBy(e.target.value as "newest" | "oldest" | "popular")
+							}
 							className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
 						>
 							<option value="newest">Newest first</option>
@@ -479,15 +496,17 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					</div>
 				</div>
 
-				{/* Add Comment Section */}
+				{/* Add Comment Section - Same as PostDetails */}
 				{sessionUser && (
 					<div className="p-4 border-b border-gray-100">
 						<div className="flex gap-3">
-							<img
-								src={sessionUser.profileImage}
-								alt={sessionUser.username}
-								className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 flex-shrink-0"
-							/>
+							<Link to={`/users/${sessionUser.id}`} className="flex-shrink-0">
+								<img
+									src={sessionUser.profileImage}
+									alt={sessionUser.username}
+									className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
+								/>
+							</Link>
 							<div className="flex-1">
 								<div className="relative">
 									<textarea
@@ -554,7 +573,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					) : (
 						<div className="p-4 space-y-6">
 							{threaded.map((comment) => (
-								<CommentThread
+								<ModalCommentThread
 									key={comment.id}
 									comment={comment}
 									sessionUser={sessionUser}
@@ -565,6 +584,8 @@ const CommentModal: React.FC<CommentModalProps> = ({
 									handleAddReply={handleAddReply}
 									isSubmitting={isSubmitting}
 									formatTimeAgo={formatTimeAgo}
+									showAllReplies={showAllReplies}
+									toggleShowAllReplies={toggleShowAllReplies}
 								/>
 							))}
 
@@ -638,10 +659,10 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	);
 };
 
-// Comment Thread Component - styled like PostDetails
-interface CommentThreadProps {
+// Modal Comment Thread Component - Same functionality as PostDetails
+interface ModalCommentThreadProps {
 	comment: Comment;
-	sessionUser: any;
+	sessionUser: SessionUser | null;
 	replyToComment: number | null;
 	setReplyToComment: (id: number | null) => void;
 	replyText: string;
@@ -649,10 +670,12 @@ interface CommentThreadProps {
 	handleAddReply: (parentId: number) => void;
 	isSubmitting: boolean;
 	formatTimeAgo: (date: string) => string;
+	showAllReplies: { [key: number]: boolean };
+	toggleShowAllReplies: (commentId: number) => void;
 	depth?: number;
 }
 
-const CommentThread: React.FC<CommentThreadProps> = ({
+const ModalCommentThread: React.FC<ModalCommentThreadProps> = ({
 	comment,
 	sessionUser,
 	replyToComment,
@@ -662,31 +685,61 @@ const CommentThread: React.FC<CommentThreadProps> = ({
 	handleAddReply,
 	isSubmitting,
 	formatTimeAgo,
+	showAllReplies,
+	toggleShowAllReplies,
 	depth = 0,
 }) => {
-	const [showAllReplies, setShowAllReplies] = useState(false);
 	const maxVisibleReplies = 2;
+	const hasReplies = comment.replies && comment.replies.length > 0;
 	const hasMoreReplies =
 		comment.replies && comment.replies.length > maxVisibleReplies;
-	const visibleReplies = showAllReplies
+	const shouldShowAll = showAllReplies[comment.id];
+	const visibleReplies = shouldShowAll
 		? comment.replies
 		: comment.replies?.slice(0, maxVisibleReplies);
 
+	// Calculate proper indentation based on depth
+	const getIndentationClass = (currentDepth: number) => {
+		if (currentDepth === 0) return "";
+		switch (currentDepth) {
+			case 1:
+				return "ml-12"; // 48px
+			case 2:
+				return "ml-16"; // 64px
+			case 3:
+				return "ml-20"; // 80px
+			case 4:
+				return "ml-24"; // 96px
+			default:
+				return "ml-24"; // Max indentation
+		}
+	};
+
 	return (
-		<div className={`space-y-3 ${depth > 0 ? "ml-13" : ""}`}>
+		<div className="space-y-3">
 			{/* Main Comment */}
-			<div className="flex gap-3">
-				<img
-					src={comment.commenter?.profileImage || "/default-avatar.png"}
-					alt={comment.commenter?.username}
-					className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 flex-shrink-0"
-				/>
+			<div
+				className={`flex gap-3 ${depth > 0 ? getIndentationClass(depth) : ""}`}
+			>
+				<Link
+					to={`/users/${comment.commenter?.id || comment.userId}`}
+					className="flex-shrink-0"
+				>
+					<img
+						src={comment.commenter?.profileImage || "/default-avatar.png"}
+						alt={comment.commenter?.username}
+						className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
+					/>
+				</Link>
 				<div className="flex-1">
 					<div className="bg-slate-50 rounded-lg p-3">
 						<div className="flex items-center gap-2 mb-1">
-							<span className="font-semibold text-slate-900 text-sm">
+							<Link
+								to={`/users/${comment.commenter?.id || comment.userId}`}
+								className="font-semibold text-slate-900 text-sm hover:text-orange-600 transition-colors"
+							>
 								{comment.commenter?.username}
-							</span>
+							</Link>
 							<span className="text-xs text-slate-500">
 								{formatTimeAgo(comment.createdAt)}
 							</span>
@@ -707,12 +760,14 @@ const CommentThread: React.FC<CommentThreadProps> = ({
 
 			{/* Reply Form */}
 			{replyToComment === comment.id && sessionUser && (
-				<div className="ml-13 flex gap-3">
-					<img
-						src={sessionUser.profileImage}
-						alt={sessionUser.username}
-						className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 flex-shrink-0"
-					/>
+				<div className={`flex gap-3 ${getIndentationClass(depth + 1)}`}>
+					<Link to={`/users/${sessionUser.id}`} className="flex-shrink-0">
+						<img
+							src={sessionUser.profileImage}
+							alt={sessionUser.username}
+							className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
+						/>
+					</Link>
 					<div className="flex-1">
 						<div className="relative">
 							<textarea
@@ -746,10 +801,10 @@ const CommentThread: React.FC<CommentThreadProps> = ({
 			)}
 
 			{/* Replies */}
-			{visibleReplies && visibleReplies.length > 0 && (
-				<div className="ml-13 space-y-3">
-					{visibleReplies.map((reply) => (
-						<CommentThread
+			{hasReplies && (
+				<div className="space-y-3">
+					{visibleReplies?.map((reply) => (
+						<ModalCommentThread
 							key={reply.id}
 							comment={reply}
 							sessionUser={sessionUser}
@@ -760,28 +815,32 @@ const CommentThread: React.FC<CommentThreadProps> = ({
 							handleAddReply={handleAddReply}
 							isSubmitting={isSubmitting}
 							formatTimeAgo={formatTimeAgo}
+							showAllReplies={showAllReplies}
+							toggleShowAllReplies={toggleShowAllReplies}
 							depth={depth + 1}
 						/>
 					))}
 
-					{/* Show more replies button */}
-					{hasMoreReplies && !showAllReplies && (
-						<button
-							onClick={() => setShowAllReplies(true)}
-							className="text-sm text-orange-600 hover:text-orange-700 font-medium ml-13"
-						>
-							View {comment.replies!.length - maxVisibleReplies} more replies
-						</button>
-					)}
-
-					{/* Show less replies button */}
-					{hasMoreReplies && showAllReplies && (
-						<button
-							onClick={() => setShowAllReplies(false)}
-							className="text-sm text-slate-600 hover:text-slate-700 font-medium ml-13"
-						>
-							Show less
-						</button>
+					{/* Show more/less replies buttons */}
+					{hasMoreReplies && (
+						<div className={getIndentationClass(depth + 1)}>
+							{!shouldShowAll ? (
+								<button
+									onClick={() => toggleShowAllReplies(comment.id)}
+									className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+								>
+									View {comment.replies!.length - maxVisibleReplies} more
+									replies
+								</button>
+							) : (
+								<button
+									onClick={() => toggleShowAllReplies(comment.id)}
+									className="text-sm text-slate-600 hover:text-slate-700 font-medium"
+								>
+									Show less
+								</button>
+							)}
+						</div>
 					)}
 				</div>
 			)}
