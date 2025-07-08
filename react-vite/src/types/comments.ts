@@ -6,14 +6,12 @@ export interface Comment {
 	parentId: number | null;
 	createdAt: string;
 	updatedAt: string;
-
-	// Relationships - Make commenter properties non-optional to match usage
-	commenter?: {
+	commenter: {
 		id: number;
 		username: string;
-		firstName: string; // Non-optional but can be empty string
-		lastName: string; // Non-optional but can be empty string
-		profileImage: string; // Non-optional but can be default avatar
+		firstName: string;
+		lastName: string;
+		profileImage: string;
 	};
 
 	// For threading
@@ -24,6 +22,37 @@ export interface Comment {
 	isEditing?: boolean;
 	showReplies?: boolean;
 	isReplying?: boolean;
+}
+
+// Helper type for legacy comment data transformation
+export interface LegacyCommentData {
+	id: number;
+	userId?: number;
+	user_id?: number;
+	postId?: number;
+	post_id?: number;
+	comment: string;
+	parentId?: number | null;
+	parent_id?: number | null;
+	createdAt?: string;
+	created_at?: string;
+	updatedAt?: string;
+	updated_at?: string;
+	username?: string;
+	firstName?: string;
+	first_name?: string;
+	lastName?: string;
+	last_name?: string;
+	profileImage?: string;
+	profile_image_url?: string;
+	// API response
+	commenter?: {
+		id: number;
+		username: string;
+		firstName: string;
+		lastName: string;
+		profileImage: string;
+	};
 }
 
 export interface CommentFormData {
@@ -106,7 +135,26 @@ export interface CommentError {
 	code?: string;
 }
 
-// Extended FeedPost to include postComments - using proper Comment type
+// Transformation utility type
+export interface CommentTransformOptions {
+	sessionUser?: {
+		id: number;
+		username: string;
+		firstName?: string;
+		lastName?: string;
+		profileImage: string;
+	};
+	postCreator?: {
+		id: number;
+		username: string;
+		firstName: string;
+		lastName: string;
+		profileImage: string;
+	};
+	fallbackProfileImage?: string;
+}
+
+// FeedPost to include postComments
 export interface FeedPostWithComments {
 	id: number;
 	title: string;
@@ -115,7 +163,7 @@ export interface FeedPostWithComments {
 	likes: number;
 	creator: number;
 	comments: number; // Count of comments
-	postComments?: Comment[]; // Optional array of actual comment objects
+	postComments?: Comment[]; // Optional array of actual comment objects with proper typing
 	createdAt: string;
 	updatedAt: string;
 	user: {
