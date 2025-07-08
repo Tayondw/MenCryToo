@@ -1,5 +1,61 @@
 import type { Comment } from "../types/comments";
 
+// Define a type for legacy comment format
+interface LegacyComment {
+	id: number;
+	userId?: number;
+	user_id?: number;
+	postId?: number;
+	post_id?: number;
+	comment: string;
+	parentId?: number | null;
+	parent_id?: number | null;
+	createdAt?: string;
+	created_at?: string;
+	updatedAt?: string;
+	updated_at?: string;
+	username?: string;
+	firstName?: string;
+	first_name?: string;
+	lastName?: string;
+	last_name?: string;
+	profileImage?: string;
+	profile_image_url?: string;
+	commenter?: {
+		id: number;
+		username: string;
+		firstName: string;
+		lastName: string;
+		profileImage: string;
+	};
+	[key: string]: unknown; // For any additional properties
+}
+
+/**
+ * Helper function to create a safe commenter object with proper defaults
+ */
+export function createSafeCommenter(data: {
+	id?: number;
+	username?: string;
+	firstName?: string;
+	lastName?: string;
+	profileImage?: string;
+}): {
+	id: number;
+	username: string;
+	firstName: string;
+	lastName: string;
+	profileImage: string;
+} {
+	return {
+		id: data.id || 0,
+		username: data.username || "unknown",
+		firstName: data.firstName || "",
+		lastName: data.lastName || "",
+		profileImage: data.profileImage || "/default-avatar.png",
+	};
+}
+
 /**
  * Organize flat comments into a threaded structure - Enhanced for better threading
  */
@@ -429,25 +485,26 @@ export function getCommentStats(comments: Comment[]): {
 /**
  * Transform old comment format to new Comment interface
  */
-export function transformLegacyComment(oldComment: any): Comment {
+export function transformLegacyComment(oldComment: LegacyComment): Comment {
 	return {
 		id: oldComment.id,
-		userId: oldComment.userId || oldComment.user_id,
-		postId: oldComment.postId || oldComment.post_id,
+		userId: oldComment.userId || oldComment.user_id || 0,
+		postId: oldComment.postId || oldComment.post_id || 0,
 		comment: oldComment.comment,
 		parentId: oldComment.parentId || oldComment.parent_id || null,
-		createdAt: oldComment.createdAt || oldComment.created_at,
-		updatedAt: oldComment.updatedAt || oldComment.updated_at,
-		commenter: oldComment.commenter || {
-			id: oldComment.userId || oldComment.user_id,
-			username: oldComment.username || "unknown",
-			firstName: oldComment.firstName || oldComment.first_name || "",
-			lastName: oldComment.lastName || oldComment.last_name || "",
-			profileImage:
-				oldComment.profileImage ||
-				oldComment.profile_image_url ||
-				"/default-avatar.png",
-		},
+		createdAt:
+			oldComment.createdAt || oldComment.created_at || new Date().toISOString(),
+		updatedAt:
+			oldComment.updatedAt || oldComment.updated_at || new Date().toISOString(),
+		commenter:
+			oldComment.commenter ||
+			createSafeCommenter({
+				id: oldComment.userId || oldComment.user_id,
+				username: oldComment.username,
+				firstName: oldComment.firstName || oldComment.first_name,
+				lastName: oldComment.lastName || oldComment.last_name,
+				profileImage: oldComment.profileImage || oldComment.profile_image_url,
+			}),
 		replies: [],
 	};
 }
