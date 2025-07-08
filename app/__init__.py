@@ -83,7 +83,7 @@ def create_app(config_class=Config):
     # Add seed commands
     app.cli.add_command(seed_commands)
 
-    # Register blueprints with prefixes - FIXED COMMENT ROUTES
+    # Register blueprints with prefixes - COMMENT ROUTES
     app.register_blueprint(auth_routes, url_prefix="/api/auth")
     app.register_blueprint(user_routes, url_prefix="/api/users")
     app.register_blueprint(group_routes, url_prefix="/api/groups")
