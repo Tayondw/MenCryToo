@@ -3,13 +3,17 @@ import type {
 	CommentResponse,
 	SingleCommentResponse,
 	CommentFormData,
+	LegacyCommentData,
 } from "../types/comments";
+import {
+	transformLegacyComment,
+} from "../utils/commentUtils";
 
 class CommentAPI {
 	private baseUrl = "/api";
 
 	/**
-	 * Get comments for a specific post
+	 * Get comments for a specific post with enhanced user data
 	 */
 	async getPostComments(
 		postId: number,
@@ -17,7 +21,6 @@ class CommentAPI {
 		perPage: number = 20,
 	): Promise<CommentResponse> {
 		try {
-			// Use the correct endpoint that matches your backend routes
 			const response = await fetch(
 				`${this.baseUrl}/comments/posts/${postId}/comments?page=${page}&per_page=${perPage}&include_replies=true`,
 				{
@@ -25,7 +28,7 @@ class CommentAPI {
 					headers: {
 						"Content-Type": "application/json",
 					},
-					credentials: "include", // Important for session/auth
+					credentials: "include",
 				},
 			);
 
@@ -39,23 +42,13 @@ class CommentAPI {
 			const data = await response.json();
 			console.log("Raw API response:", data);
 
-			// Handle different response formats from your backend
-			if (Array.isArray(data)) {
-				return {
-					comments: data,
-					pagination: {
-						page: 1,
-						pages: 1,
-						total: data.length,
-						hasNext: false,
-						hasPrev: false,
-					},
-				};
-			}
+			// Transform API response to ensure consistent Comment format
+			const transformedComments = this.transformApiComments(
+				data.comments || [],
+			);
 
-			// Handle the expected format from your backend
 			return {
-				comments: data.comments || [],
+				comments: transformedComments,
 				pagination: data.pagination || {
 					page: 1,
 					pages: 1,
@@ -71,43 +64,7 @@ class CommentAPI {
 	}
 
 	/**
-	 * Get replies for a specific comment
-	 */
-	async getCommentReplies(
-		commentId: number,
-		page: number = 1,
-		perPage: number = 10,
-	): Promise<CommentResponse> {
-		try {
-			const response = await fetch(
-				`${this.baseUrl}/comments/${commentId}/replies?page=${page}&per_page=${perPage}`,
-				{
-					method: "GET",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					credentials: "include",
-				},
-			);
-
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-				throw new Error(
-					errorData.message ||
-						`Failed to fetch comment replies: ${response.status}`,
-				);
-			}
-
-			const data = await response.json();
-			return data;
-		} catch (error) {
-			console.error("Error fetching comment replies:", error);
-			throw error;
-		}
-	}
-
-	/**
-	 * Create a new comment
+	 * Create a new comment with enhanced response handling
 	 */
 	async createComment(
 		commentData: CommentFormData,
@@ -127,7 +84,6 @@ class CommentAPI {
 				comment: commentData.comment,
 			});
 
-			// Use the correct endpoint that matches your backend routes
 			const response = await fetch(
 				`${this.baseUrl}/comments/posts/${commentData.postId}/comments`,
 				{
@@ -150,24 +106,8 @@ class CommentAPI {
 			const data = await response.json();
 			console.log("Comment creation response:", data);
 
-			// Transform the response to match expected format
-			const comment: Comment = {
-				id: data.id,
-				userId: data.userId || data.user_id,
-				postId: data.postId || data.post_id,
-				comment: data.comment,
-				parentId: data.parentId || data.parent_id || null,
-				createdAt: data.createdAt || data.created_at,
-				updatedAt: data.updatedAt || data.updated_at,
-				commenter: data.commenter || {
-					id: data.userId || data.user_id,
-					username: data.username || "unknown",
-					firstName: "",
-					lastName: "",
-					profileImage: "/default-avatar.png",
-				},
-				replies: [],
-			};
+			// Transform the response to ensure consistent format
+			const comment = this.transformApiComment(data);
 
 			return {
 				comment,
@@ -180,7 +120,7 @@ class CommentAPI {
 	}
 
 	/**
-	 * Create a reply to a comment
+	 * Create a reply to a comment with enhanced handling
 	 */
 	async createReply(
 		commentData: CommentFormData,
@@ -214,7 +154,6 @@ class CommentAPI {
 				comment: commentText,
 			});
 
-			// Use the same endpoint as regular comments - your backend handles replies
 			const response = await fetch(
 				`${this.baseUrl}/comments/posts/${commentData.postId}/comments`,
 				{
@@ -237,24 +176,8 @@ class CommentAPI {
 			const data = await response.json();
 			console.log("Reply creation response:", data);
 
-			// Transform the response to match expected format
-			const comment: Comment = {
-				id: data.id,
-				userId: data.userId || data.user_id,
-				postId: data.postId || data.post_id,
-				comment: data.comment,
-				parentId: data.parentId || data.parent_id || commentData.parentId,
-				createdAt: data.createdAt || data.created_at,
-				updatedAt: data.updatedAt || data.updated_at,
-				commenter: data.commenter || {
-					id: data.userId || data.user_id,
-					username: data.username || "unknown",
-					firstName: "",
-					lastName: "",
-					profileImage: "/default-avatar.png",
-				},
-				replies: [],
-			};
+			// Transform the response to ensure consistent format
+			const comment = this.transformApiComment(data);
 
 			return {
 				comment,
@@ -264,6 +187,42 @@ class CommentAPI {
 			console.error("Error creating reply:", error);
 			throw error;
 		}
+	}
+
+	/**
+	 * Transform API comment data to consistent Comment format
+	 */
+	private transformApiComment(apiData: any): Comment {
+		// If it's already in the new format with enhanced commenter data
+		if (apiData.commenter && typeof apiData.commenter === "object") {
+			return {
+				id: apiData.id,
+				userId: apiData.userId || apiData.user_id,
+				postId: apiData.postId || apiData.post_id,
+				comment: apiData.comment,
+				parentId: apiData.parentId ?? apiData.parent_id ?? null,
+				createdAt: apiData.createdAt || apiData.created_at,
+				updatedAt: apiData.updatedAt || apiData.updated_at,
+				commenter: {
+					id: apiData.commenter.id,
+					username: apiData.commenter.username,
+					firstName: apiData.commenter.firstName || "",
+					lastName: apiData.commenter.lastName || "",
+					profileImage: apiData.commenter.profileImage || "/default-avatar.png",
+				},
+				replies: [],
+			};
+		}
+
+		// Legacy format transformation
+		return transformLegacyComment(apiData as LegacyCommentData);
+	}
+
+	/**
+	 * Transform array of API comments
+	 */
+	private transformApiComments(apiComments: any[]): Comment[] {
+		return apiComments.map((comment) => this.transformApiComment(comment));
 	}
 
 	/**
@@ -294,8 +253,10 @@ class CommentAPI {
 			}
 
 			const data = await response.json();
+			const comment = this.transformApiComment(data.comment);
+
 			return {
-				comment: data.comment,
+				comment,
 				success: true,
 				message: data.message,
 			};
@@ -313,7 +274,6 @@ class CommentAPI {
 		commentId: number,
 	): Promise<{ success: boolean; message: string }> {
 		try {
-			// Use the correct endpoint that matches your backend routes
 			const response = await fetch(
 				`${this.baseUrl}/comments/posts/${postId}/comments/${commentId}`,
 				{
@@ -339,6 +299,53 @@ class CommentAPI {
 			};
 		} catch (error) {
 			console.error("Error deleting comment:", error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Get replies for a specific comment
+	 */
+	async getCommentReplies(
+		commentId: number,
+		page: number = 1,
+		perPage: number = 10,
+	): Promise<CommentResponse> {
+		try {
+			const response = await fetch(
+				`${this.baseUrl}/comments/${commentId}/replies?page=${page}&per_page=${perPage}`,
+				{
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					credentials: "include",
+				},
+			);
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				throw new Error(
+					errorData.message ||
+						`Failed to fetch comment replies: ${response.status}`,
+				);
+			}
+
+			const data = await response.json();
+			const transformedComments = this.transformApiComments(data.replies || []);
+
+			return {
+				comments: transformedComments,
+				pagination: data.pagination || {
+					page: 1,
+					pages: 1,
+					total: 0,
+					hasNext: false,
+					hasPrev: false,
+				},
+			};
+		} catch (error) {
+			console.error("Error fetching comment replies:", error);
 			throw error;
 		}
 	}
@@ -394,7 +401,7 @@ class CommentAPI {
 			}
 
 			const data = await response.json();
-			return data;
+			return this.transformApiComment(data);
 		} catch (error) {
 			console.error("Error fetching comment:", error);
 			throw error;
@@ -425,7 +432,20 @@ class CommentAPI {
 			}
 
 			const data = await response.json();
-			return data;
+			const transformedComments = this.transformApiComments(
+				data.comments || [],
+			);
+
+			return {
+				comments: transformedComments,
+				pagination: data.pagination || {
+					page: 1,
+					pages: 1,
+					total: 0,
+					hasNext: false,
+					hasPrev: false,
+				},
+			};
 		} catch (error) {
 			console.error("Error fetching recent comments:", error);
 			throw error;
@@ -438,28 +458,6 @@ class CommentAPI {
 	private getCsrfToken(): string | null {
 		const match = document.cookie.match(/csrf_token=([^;]+)/);
 		return match ? decodeURIComponent(match[1]) : null;
-	}
-
-	/**
-	 * Helper to handle API errors consistently
-	 */
-	private handleApiError(error: unknown): never {
-		if (error && typeof error === "object" && "response" in error) {
-			const apiError = error as {
-				response: { status: number; data?: { message?: string } };
-			};
-			throw new Error(
-				`API Error: ${apiError.response.status} - ${
-					apiError.response.data?.message || "Unknown error"
-				}`,
-			);
-		} else if (error && typeof error === "object" && "request" in error) {
-			throw new Error("Network error: Unable to reach server");
-		} else {
-			const errorMessage =
-				error instanceof Error ? error.message : "Unknown error";
-			throw new Error(`Error: ${errorMessage}`);
-		}
 	}
 }
 
