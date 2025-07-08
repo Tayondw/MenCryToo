@@ -7,13 +7,13 @@ export interface Comment {
 	createdAt: string;
 	updatedAt: string;
 
-	// Relationships
+	// Relationships - Make commenter properties non-optional to match usage
 	commenter?: {
 		id: number;
 		username: string;
-		firstName: string;
-		lastName: string;
-		profileImage: string;
+		firstName: string; // Non-optional but can be empty string
+		lastName: string; // Non-optional but can be empty string
+		profileImage: string; // Non-optional but can be default avatar
 	};
 
 	// For threading
