@@ -15,15 +15,15 @@ class Comment(db.Model):
     post_id = db.Column(
         db.Integer, db.ForeignKey(add_prefix_for_prod("posts.id")), nullable=False
     )
-    comment = db.Column(db.String(500), nullable=False)  # Increased from 255 to 500
+    comment = db.Column(db.String(500), nullable=False)
     parent_id = db.Column(
         db.Integer, db.ForeignKey(add_prefix_for_prod("comments.id")), nullable=True
     )
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    # Relationship attributes
-    commenter = db.relationship("User", back_populates="user_comments")
+    # Relationship attributes with proper lazy loading
+    commenter = db.relationship("User", back_populates="user_comments", lazy="joined")
     post = db.relationship("Post", back_populates="post_comments")
 
     # Self-referencing relationship for nested comments (replies)
@@ -39,7 +39,7 @@ class Comment(db.Model):
 
     def to_dict(self, include_replies=False, max_depth=5, current_depth=0):
         """
-        Convert comment to dictionary with optional nested replies
+        Convert comment to dictionary with proper commenter data
         """
         base_dict = {
             "id": self.id,
@@ -51,17 +51,28 @@ class Comment(db.Model):
             "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
         }
 
-        # Add commenter info if available
+        # Always include commenter info if available
         if self.commenter:
             base_dict["commenter"] = {
                 "id": self.commenter.id,
                 "username": self.commenter.username,
-                "firstName": self.commenter.first_name,
-                "lastName": self.commenter.last_name,
-                "profileImage": self.commenter.profile_image_url,
+                "firstName": self.commenter.first_name or "",
+                "lastName": self.commenter.last_name or "",
+                "profileImage": self.commenter.profile_image_url
+                or "/default-avatar.png",
             }
         else:
-            base_dict["username"] = "Unknown"
+            # Fallback if commenter relationship failed to load
+            base_dict["commenter"] = {
+                "id": self.user_id,
+                "username": "Unknown User",
+                "firstName": "",
+                "lastName": "",
+                "profileImage": "/default-avatar.png",
+            }
+
+        # Legacy username field for backward compatibility
+        base_dict["username"] = base_dict["commenter"]["username"]
 
         # Include replies if requested and within depth limit
         if (
@@ -218,13 +229,18 @@ class Comment(db.Model):
         return self.comment
 
     @classmethod
-    def get_comments_for_post(cls, post_id, page=1, per_page=20, include_replies=True):
+    def get_comments_for_post_with_users(
+        cls, post_id, page=1, per_page=20, include_replies=True
+    ):
         """
-        Get comments for a post with pagination and optional threading
+        Get comments for a post with ALL user data properly loaded
         """
         from sqlalchemy.orm import joinedload
+        from sqlalchemy import and_
 
+        # Build query with explicit user loading for ALL comments
         query = cls.query.options(
+            # Load commenter data for EVERY comment
             joinedload(cls.commenter).load_only(
                 "id", "username", "first_name", "last_name", "profile_image_url"
             )
@@ -233,6 +249,7 @@ class Comment(db.Model):
         if not include_replies:
             query = query.filter(cls.parent_id.is_(None))
 
+        # Order by creation time
         query = query.order_by(cls.created_at.desc())
 
         return query.paginate(page=page, per_page=per_page, error_out=False)
@@ -278,50 +295,3 @@ class Comment(db.Model):
         )
 
         return query.all()
-
-
-# from .db import db, environment, SCHEMA, add_prefix_for_prod
-# from datetime import datetime
-
-
-# class Comment(db.Model):
-#     __tablename__ = "comments"
-
-#     if environment == "production":
-#         __table_args__ = {"schema": SCHEMA}
-
-#     id = db.Column(db.Integer, primary_key=True)
-#     user_id = db.Column(
-#         db.Integer, db.ForeignKey(add_prefix_for_prod("users.id")), nullable=False
-#     )
-#     post_id = db.Column(
-#         db.Integer, db.ForeignKey(add_prefix_for_prod("posts.id")), nullable=False
-#     )
-#     comment = db.Column(db.String(255), nullable=False)
-#     parent_id = db.Column(
-#         db.Integer, db.ForeignKey(add_prefix_for_prod("comments.id")), nullable=True
-#     )
-#     created_at = db.Column(db.DateTime, default=datetime.now)
-#     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
-
-#     # Relationship attributes
-#     commenter = db.relationship("User", back_populates="user_comments")
-#     post = db.relationship("Post", back_populates="post_comments")
-
-#     # Self-referencing relationship for nested comments (replies)
-#     replies = db.relationship("Comment", backref=db.backref("parent", remote_side=[id]))
-
-#     def __repr__(self):
-#         return f"< Comment id: {self.id} by: {self.commenter.username} >"
-
-#     def to_dict(self):
-#         return {
-#             "id": self.id,
-#             "userId": self.user_id,
-#             "postId": self.post_id,
-#             "comment": self.comment,
-#             "username": self.commenter.username,
-#             "parentId": self.parent_id,
-#             "created_at": self.created_at,
-#             "updated_at": self.updated_at,
-#         }
