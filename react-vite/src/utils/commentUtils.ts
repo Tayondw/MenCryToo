@@ -1,68 +1,140 @@
-import type { Comment } from "../types/comments";
+import type {
+	Comment,
+	LegacyCommentData,
+	CommentTransformOptions,
+} from "../types/comments";
 
-// Define a type for legacy comment format
-interface LegacyComment {
-	id: number;
-	userId?: number;
-	user_id?: number;
-	postId?: number;
-	post_id?: number;
-	comment: string;
-	parentId?: number | null;
-	parent_id?: number | null;
-	createdAt?: string;
-	created_at?: string;
-	updatedAt?: string;
-	updated_at?: string;
-	username?: string;
-	firstName?: string;
-	first_name?: string;
-	lastName?: string;
-	last_name?: string;
-	profileImage?: string;
-	profile_image_url?: string;
-	commenter?: {
+/**
+ * Function to create a safe commenter object with proper defaults
+ */
+export function createSafeCommenter(
+	data: Partial<{
 		id: number;
 		username: string;
 		firstName: string;
 		lastName: string;
 		profileImage: string;
-	};
-	[key: string]: unknown; // For any additional properties
-}
-
-/**
- * Helper function to create a safe commenter object with proper defaults
- */
-export function createSafeCommenter(data: {
-	id?: number;
-	username?: string;
-	firstName?: string;
-	lastName?: string;
-	profileImage?: string;
-}): {
-	id: number;
-	username: string;
-	firstName: string;
-	lastName: string;
-	profileImage: string;
-} {
+	}>,
+	options: CommentTransformOptions = {},
+): Comment["commenter"] {
 	return {
 		id: data.id || 0,
-		username: data.username || "unknown",
+		username: data.username || "Unknown User",
 		firstName: data.firstName || "",
 		lastName: data.lastName || "",
-		profileImage: data.profileImage || "/default-avatar.png",
+		profileImage:
+			data.profileImage ||
+			options.fallbackProfileImage ||
+			"/default-avatar.png",
 	};
 }
 
 /**
- * Organize flat comments into a threaded structure - Enhanced for better threading
+ * Comment transformation with better user data handling
+ */
+export function transformLegacyComment(
+	oldComment: LegacyCommentData,
+	options: CommentTransformOptions = {},
+): Comment {
+	console.log("Transforming legacy comment:", oldComment);
+
+	// If the comment already has enhanced commenter data, use it
+	if (oldComment.commenter) {
+		return {
+			id: oldComment.id,
+			userId: oldComment.userId || oldComment.user_id || 0,
+			postId: oldComment.postId || oldComment.post_id || 0,
+			comment: oldComment.comment,
+			parentId: oldComment.parentId ?? oldComment.parent_id ?? null,
+			createdAt:
+				oldComment.createdAt ||
+				oldComment.created_at ||
+				new Date().toISOString(),
+			updatedAt:
+				oldComment.updatedAt ||
+				oldComment.updated_at ||
+				new Date().toISOString(),
+			commenter: {
+				...oldComment.commenter,
+				// Ensure profile image has fallback
+				profileImage:
+					oldComment.commenter.profileImage ||
+					options.fallbackProfileImage ||
+					"/default-avatar.png",
+			},
+			replies: [],
+		};
+	}
+
+	// Determine the best commenter data to use
+	const userId = oldComment.userId || oldComment.user_id || 0;
+	let commenterData: Comment["commenter"];
+
+	// Check if this is the session user
+	if (options.sessionUser && userId === options.sessionUser.id) {
+		commenterData = createSafeCommenter(
+			{
+				id: options.sessionUser.id,
+				username: options.sessionUser.username,
+				firstName: options.sessionUser.firstName,
+				lastName: options.sessionUser.lastName,
+				profileImage: options.sessionUser.profileImage,
+			},
+			options,
+		);
+	}
+	// Check if this is the post creator
+	else if (options.postCreator && userId === options.postCreator.id) {
+		commenterData = createSafeCommenter(
+			{
+				id: options.postCreator.id,
+				username: options.postCreator.username,
+				firstName: options.postCreator.firstName,
+				lastName: options.postCreator.lastName,
+				profileImage: options.postCreator.profileImage,
+			},
+			options,
+		);
+	}
+	// Use available data from the legacy comment
+	else {
+		commenterData = createSafeCommenter(
+			{
+				id: userId,
+				username: oldComment.username,
+				firstName: oldComment.firstName || oldComment.first_name,
+				lastName: oldComment.lastName || oldComment.last_name,
+				profileImage: oldComment.profileImage || oldComment.profile_image_url,
+			},
+			options,
+		);
+	}
+
+	const transformedComment: Comment = {
+		id: oldComment.id,
+		userId: userId,
+		postId: oldComment.postId || oldComment.post_id || 0,
+		comment: oldComment.comment,
+		parentId: oldComment.parentId ?? oldComment.parent_id ?? null,
+		createdAt:
+			oldComment.createdAt || oldComment.created_at || new Date().toISOString(),
+		updatedAt:
+			oldComment.updatedAt || oldComment.updated_at || new Date().toISOString(),
+		commenter: commenterData,
+		replies: [],
+	};
+
+	console.log("Transformed comment:", transformedComment);
+	return transformedComment;
+}
+
+/**
+ * Organize flat comments into a threaded structure with enhanced user data
  */
 export function organizeCommentsIntoThreads(
 	flatComments: Comment[],
 ): Comment[] {
-	console.log("Organizing comments:", flatComments);
+	console.log("Organizing comments into threads:", flatComments);
 
 	const commentMap = new Map<number, Comment>();
 	const rootComments: Comment[] = [];
@@ -122,7 +194,46 @@ export function organizeCommentsIntoThreads(
 }
 
 /**
- * Format time ago for comments - Enhanced with more granular time display
+ * Transform multiple legacy comments with consistent user data
+ */
+export function transformLegacyComments(
+	legacyComments: LegacyCommentData[],
+	options: CommentTransformOptions = {},
+): Comment[] {
+	return legacyComments.map((comment) =>
+		transformLegacyComment(comment, options),
+	);
+}
+
+/**
+ * Comment validation
+ */
+export function validateComment(text: string): {
+	isValid: boolean;
+	error?: string;
+} {
+	const trimmed = text.trim();
+
+	if (!trimmed) {
+		return { isValid: false, error: "Comment cannot be empty" };
+	}
+
+	if (trimmed.length < 1) {
+		return { isValid: false, error: "Comment is too short" };
+	}
+
+	if (trimmed.length > 500) {
+		return {
+			isValid: false,
+			error: "Comment is too long (max 500 characters)",
+		};
+	}
+
+	return { isValid: true };
+}
+
+/**
+ * Format time ago for comments
  */
 export function formatCommentTime(dateString: string): string {
 	const now = new Date();
@@ -169,20 +280,13 @@ export function formatCommentTime(dateString: string): string {
 }
 
 /**
- * Generate @ mention text for replies
+ * Check if user can edit/delete comment
  */
-export function generateMentionText(
-	replyToUsername: string,
-	commentText: string,
-): string {
-	const mention = `@${replyToUsername}`;
-
-	// Don't add mention if it already exists at the start
-	if (commentText.trim().startsWith(mention)) {
-		return commentText;
-	}
-
-	return `${mention} ${commentText}`;
+export function canModifyComment(
+	comment: Comment,
+	currentUserId?: number,
+): boolean {
+	return currentUserId !== undefined && comment.userId === currentUserId;
 }
 
 /**
@@ -194,81 +298,7 @@ export function extractMentionFromComment(commentText: string): string | null {
 }
 
 /**
- * Count total replies in a comment thread - Enhanced to handle nested replies
- */
-export function countTotalReplies(comment: Comment): number {
-	let count = 0;
-
-	if (comment.replies) {
-		count += comment.replies.length;
-		comment.replies.forEach((reply) => {
-			count += countTotalReplies(reply);
-		});
-	}
-
-	return count;
-}
-
-/**
- * Get the depth of nested comments
- */
-export function getCommentDepth(
-	comment: Comment,
-	allComments: Comment[],
-): number {
-	let depth = 0;
-	let currentParentId = comment.parentId;
-
-	while (currentParentId !== null) {
-		depth++;
-		const parentComment = allComments.find((c) => c.id === currentParentId);
-		currentParentId = parentComment?.parentId || null;
-
-		// Prevent infinite loops
-		if (depth > 10) break;
-	}
-
-	return depth;
-}
-
-/**
- * Validate comment text - Enhanced validation
- */
-export function validateComment(text: string): {
-	isValid: boolean;
-	error?: string;
-} {
-	const trimmed = text.trim();
-
-	if (!trimmed) {
-		return { isValid: false, error: "Comment cannot be empty" };
-	}
-
-	if (trimmed.length < 1) {
-		return { isValid: false, error: "Comment is too short" };
-	}
-
-	if (trimmed.length > 500) {
-		return {
-			isValid: false,
-			error: "Comment is too long (max 500 characters)",
-		};
-	}
-
-	// Check for excessive @ mentions (spam prevention)
-	const mentionCount = (trimmed.match(/@\w+/g) || []).length;
-	if (mentionCount > 5) {
-		return {
-			isValid: false,
-			error: "Too many @ mentions (max 5 allowed)",
-		};
-	}
-
-	return { isValid: true };
-}
-
-/**
- * Search comments by text - Enhanced search with better matching
+ * Search comments by text with enhanced matching
  */
 export function searchComments(
 	comments: Comment[],
@@ -280,12 +310,15 @@ export function searchComments(
 
 	const matchesSearch = (comment: Comment): boolean => {
 		const commentMatch = comment.comment.toLowerCase().includes(term);
-		const usernameMatch =
-			comment.commenter?.username?.toLowerCase().includes(term) ?? false;
-		const firstNameMatch =
-			comment.commenter?.firstName?.toLowerCase().includes(term) ?? false;
-		const lastNameMatch =
-			comment.commenter?.lastName?.toLowerCase().includes(term) ?? false;
+		const usernameMatch = comment.commenter.username
+			.toLowerCase()
+			.includes(term);
+		const firstNameMatch = comment.commenter.firstName
+			.toLowerCase()
+			.includes(term);
+		const lastNameMatch = comment.commenter.lastName
+			.toLowerCase()
+			.includes(term);
 
 		return commentMatch || usernameMatch || firstNameMatch || lastNameMatch;
 	};
@@ -309,38 +342,23 @@ export function searchComments(
 }
 
 /**
- * Get comment permalink
+ * Count total replies in a comment thread
  */
-export function getCommentPermalink(postId: number, commentId: number): string {
-	return `/posts/${postId}#comment-${commentId}`;
+export function countTotalReplies(comment: Comment): number {
+	let count = 0;
+
+	if (comment.replies) {
+		count += comment.replies.length;
+		comment.replies.forEach((reply) => {
+			count += countTotalReplies(reply);
+		});
+	}
+
+	return count;
 }
 
 /**
- * Check if user can edit/delete comment
- */
-export function canModifyComment(
-	comment: Comment,
-	currentUserId?: number,
-): boolean {
-	return currentUserId !== undefined && comment.userId === currentUserId;
-}
-
-/**
- * Truncate long comments for preview
- */
-export function truncateComment(text: string, maxLength: number = 100): string {
-	if (text.length <= maxLength) return text;
-
-	const truncated = text.substring(0, maxLength).trim();
-	const lastSpace = truncated.lastIndexOf(" ");
-
-	return (
-		(lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + "..."
-	);
-}
-
-/**
- * Flatten comment tree into a list - Useful for certain operations
+ * Flatten comment tree into a list
  */
 export function flattenCommentTree(comments: Comment[]): Comment[] {
 	const flattened: Comment[] = [];
@@ -354,40 +372,6 @@ export function flattenCommentTree(comments: Comment[]): Comment[] {
 
 	comments.forEach(flatten);
 	return flattened;
-}
-
-/**
- * Get all parent comments for a given comment
- */
-export function getCommentParents(
-	comment: Comment,
-	allComments: Comment[],
-): Comment[] {
-	const parents: Comment[] = [];
-	let currentParentId = comment.parentId;
-
-	while (currentParentId !== null) {
-		const parentComment = allComments.find((c) => c.id === currentParentId);
-		if (parentComment) {
-			parents.unshift(parentComment); // Add to beginning to maintain order
-			currentParentId = parentComment.parentId;
-		} else {
-			break;
-		}
-
-		// Prevent infinite loops
-		if (parents.length > 10) break;
-	}
-
-	return parents;
-}
-
-/**
- * Check if a comment is a reply to a specific user
- */
-export function isReplyToUser(comment: Comment, username: string): boolean {
-	const mentionedUser = extractMentionFromComment(comment.comment);
-	return mentionedUser === username;
 }
 
 /**
@@ -439,107 +423,6 @@ export function sortComments(
 }
 
 /**
- * Get comment statistics
- */
-export function getCommentStats(comments: Comment[]): {
-	totalComments: number;
-	totalReplies: number;
-	maxDepth: number;
-	avgRepliesPerComment: number;
-} {
-	const flatComments = flattenCommentTree(comments);
-	const totalComments = flatComments.length;
-	const rootComments = comments.length;
-	const totalReplies = totalComments - rootComments;
-
-	let maxDepth = 0;
-	const calculateDepth = (comment: Comment, depth: number = 0): number => {
-		maxDepth = Math.max(maxDepth, depth);
-		let childMaxDepth = depth;
-
-		if (comment.replies) {
-			comment.replies.forEach((reply) => {
-				childMaxDepth = Math.max(
-					childMaxDepth,
-					calculateDepth(reply, depth + 1),
-				);
-			});
-		}
-
-		return childMaxDepth;
-	};
-
-	comments.forEach((comment) => calculateDepth(comment));
-
-	const avgRepliesPerComment =
-		rootComments > 0 ? totalReplies / rootComments : 0;
-
-	return {
-		totalComments,
-		totalReplies,
-		maxDepth,
-		avgRepliesPerComment: Math.round(avgRepliesPerComment * 100) / 100,
-	};
-}
-
-/**
- * Transform old comment format to new Comment interface
- */
-export function transformLegacyComment(oldComment: LegacyComment): Comment {
-	return {
-		id: oldComment.id,
-		userId: oldComment.userId || oldComment.user_id || 0,
-		postId: oldComment.postId || oldComment.post_id || 0,
-		comment: oldComment.comment,
-		parentId: oldComment.parentId || oldComment.parent_id || null,
-		createdAt:
-			oldComment.createdAt || oldComment.created_at || new Date().toISOString(),
-		updatedAt:
-			oldComment.updatedAt || oldComment.updated_at || new Date().toISOString(),
-		commenter:
-			oldComment.commenter ||
-			createSafeCommenter({
-				id: oldComment.userId || oldComment.user_id,
-				username: oldComment.username,
-				firstName: oldComment.firstName || oldComment.first_name,
-				lastName: oldComment.lastName || oldComment.last_name,
-				profileImage: oldComment.profileImage || oldComment.profile_image_url,
-			}),
-		replies: [],
-	};
-}
-
-/**
- * Build comment breadcrumb for navigation
- */
-export function buildCommentBreadcrumb(
-	comment: Comment,
-	allComments: Comment[],
-): string[] {
-	const parents = getCommentParents(comment, allComments);
-	const breadcrumb = parents.map(
-		(parent) => `@${parent.commenter?.username || "unknown"}`,
-	);
-	breadcrumb.push(`@${comment.commenter?.username || "unknown"}`);
-	return breadcrumb;
-}
-
-/**
- * Check if comment contains sensitive content (basic implementation)
- */
-export function containsSensitiveContent(commentText: string): boolean {
-	const sensitiveWords = [
-		// Add your list of sensitive words here
-		"spam",
-		"scam",
-		// This is a basic example - in production you'd use a more comprehensive list
-	];
-
-	const lowerText = commentText.toLowerCase();
-	return sensitiveWords.some((word) => lowerText.includes(word));
-}
-
-/**
  * Generate comment summary for notifications
  */
 export function generateCommentSummary(
@@ -560,56 +443,29 @@ export function generateCommentSummary(
 }
 
 /**
- * Calculate comment engagement score (for sorting/ranking)
+ * Check if comment contains @ mention for a specific user
  */
-export function calculateEngagementScore(comment: Comment): number {
-	const replyCount = countTotalReplies(comment);
-	const ageInHours =
-		(Date.now() - new Date(comment.createdAt).getTime()) / (1000 * 60 * 60);
-
-	// Higher score for more recent comments with more engagement
-	// This is a simple algorithm - you could make it more sophisticated
-	const recencyFactor = Math.max(0, 1 - ageInHours / (24 * 7)); // Decay over a week
-	const engagementFactor = Math.log(replyCount + 1); // Logarithmic scaling for replies
-
-	return recencyFactor * engagementFactor;
+export function isReplyToUser(comment: Comment, username: string): boolean {
+	const mentionedUser = extractMentionFromComment(comment.comment);
+	return mentionedUser === username;
 }
 
 /**
- * Filter comments by date range
+ * Build comment with user data
  */
-export function filterCommentsByDateRange(
-	comments: Comment[],
-	startDate: Date,
-	endDate: Date,
-): Comment[] {
-	return comments.filter((comment) => {
-		const commentDate = new Date(comment.createdAt);
-		return commentDate >= startDate && commentDate <= endDate;
-	});
-}
-
-/**
- * Group comments by user
- */
-export function groupCommentsByUser(
-	comments: Comment[],
-): Map<string, Comment[]> {
-	const groups = new Map<string, Comment[]>();
-
-	const addToGroup = (comment: Comment) => {
-		const username = comment.commenter?.username || "unknown";
-		if (!groups.has(username)) {
-			groups.set(username, []);
-		}
-		groups.get(username)!.push(comment);
-
-		// Also process replies
-		if (comment.replies) {
-			comment.replies.forEach(addToGroup);
-		}
+export function buildEnhancedComment(
+	baseComment: Partial<Comment>,
+	commenterData: Comment["commenter"],
+): Comment {
+	return {
+		id: baseComment.id || 0,
+		userId: baseComment.userId || 0,
+		postId: baseComment.postId || 0,
+		comment: baseComment.comment || "",
+		parentId: baseComment.parentId || null,
+		createdAt: baseComment.createdAt || new Date().toISOString(),
+		updatedAt: baseComment.updatedAt || new Date().toISOString(),
+		commenter: commenterData,
+		replies: baseComment.replies || [],
 	};
-
-	comments.forEach(addToGroup);
-	return groups;
 }
