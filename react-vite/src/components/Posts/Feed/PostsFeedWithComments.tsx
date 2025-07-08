@@ -49,8 +49,15 @@ interface OldComment {
 	parentId: number | null;
 	created_at: string;
 	updated_at: string;
+	// CRITICAL: Add commenter field
+	commenter?: {
+		id: number;
+		username: string;
+		firstName: string;
+		lastName: string;
+		profileImage: string;
+	};
 }
-
 interface PostWithComments {
 	id: number;
 	title: string;
@@ -231,15 +238,12 @@ const PostsFeedWithComments: React.FC = () => {
 			let initialComments: Comment[] = [];
 
 			if (post.postComments && post.postComments.length > 0) {
-				
-				initialComments = post.postComments.map((oldComment: OldComment) => {
-					console.log(
-						"Processing comment from user:",
-						oldComment.userId,
-						oldComment,
-					);
+				console.log("Processing post comments:", post.postComments);
 
-					
+				initialComments = post.postComments.map((oldComment: OldComment) => {
+					console.log("Processing comment:", oldComment);
+
+					// CRITICAL FIX: Use commenter data from API if available
 					let commenterData = {
 						id: oldComment.userId,
 						username: oldComment.username || "Unknown User",
@@ -248,35 +252,52 @@ const PostsFeedWithComments: React.FC = () => {
 						profileImage: "/default-avatar.png",
 					};
 
-					// If this is the current user's comment, use their session data
-					if (sessionUser && oldComment.userId === sessionUser.id) {
+					// Check if API provided commenter data
+					if (oldComment.commenter) {
+						console.log("Using API commenter data:", oldComment.commenter);
 						commenterData = {
-							id: sessionUser.id,
-							username: sessionUser.username,
-							firstName: sessionUser.firstName || "",
-							lastName: sessionUser.lastName || "",
-							profileImage: sessionUser.profileImage || "/default-avatar.png",
+							id: oldComment.commenter.id,
+							username: oldComment.commenter.username,
+							firstName: oldComment.commenter.firstName || "",
+							lastName: oldComment.commenter.lastName || "",
+							profileImage:
+								oldComment.commenter.profileImage || "/default-avatar.png",
 						};
 					}
-					// If it's the post creator, use their data
-					else if (oldComment.userId === post.user.id) {
-						commenterData = {
-							id: post.user.id,
-							username: post.user.username,
-							firstName: post.user.firstName,
-							lastName: post.user.lastName,
-							profileImage: post.user.profileImage,
-						};
-					}
-					// For other users, use available data from the comment
+					// Fallback to user matching only if API data is missing
 					else {
-						commenterData = {
-							id: oldComment.userId,
-							username: oldComment.username || "Unknown User",
-							firstName: "", // Not available in old format
-							lastName: "", // Not available in old format
-							profileImage: "/default-avatar.png", // Default for other users
-						};
+						console.log("No API commenter data, using fallback");
+
+						// If this is the current user's comment, use their session data
+						if (sessionUser && oldComment.userId === sessionUser.id) {
+							commenterData = {
+								id: sessionUser.id,
+								username: sessionUser.username,
+								firstName: sessionUser.firstName || "",
+								lastName: sessionUser.lastName || "",
+								profileImage: sessionUser.profileImage || "/default-avatar.png",
+							};
+						}
+						// If it's the post creator, use their data
+						else if (oldComment.userId === post.user.id) {
+							commenterData = {
+								id: post.user.id,
+								username: post.user.username,
+								firstName: post.user.firstName,
+								lastName: post.user.lastName,
+								profileImage: post.user.profileImage,
+							};
+						}
+						// For other users, use whatever data we have
+						else {
+							commenterData = {
+								id: oldComment.userId,
+								username: oldComment.username || "Unknown User",
+								firstName: "",
+								lastName: "",
+								profileImage: "/default-avatar.png",
+							};
+						}
 					}
 
 					const newComment: Comment = {
@@ -288,7 +309,7 @@ const PostsFeedWithComments: React.FC = () => {
 						createdAt: oldComment.created_at,
 						updatedAt: oldComment.updated_at,
 						commenter: commenterData,
-						replies: [], // Initialize empty replies array
+						replies: [],
 					};
 
 					console.log("Transformed comment:", newComment);
@@ -309,6 +330,9 @@ const PostsFeedWithComments: React.FC = () => {
 
 					if (response.ok) {
 						const data = await response.json();
+						console.log("Fetched comments from API:", data);
+
+						// The API should now return properly formatted comments with commenter data
 						initialComments = (data.comments || []).map((apiComment: any) => ({
 							id: apiComment.id,
 							userId: apiComment.userId || apiComment.user_id,
@@ -317,6 +341,7 @@ const PostsFeedWithComments: React.FC = () => {
 							parentId: apiComment.parentId || apiComment.parent_id || null,
 							createdAt: apiComment.createdAt || apiComment.created_at,
 							updatedAt: apiComment.updatedAt || apiComment.updated_at,
+							// Use commenter data from API response
 							commenter: apiComment.commenter || {
 								id: apiComment.userId || apiComment.user_id,
 								username: apiComment.username || "unknown",
