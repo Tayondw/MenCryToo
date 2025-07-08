@@ -31,7 +31,7 @@ import CommentModal from "../../Comments/CommentModal";
 import { useComments } from "../../../hooks/useComments";
 import { PostsFeedLoaderData } from "../../../loaders/postsFeedLoaders";
 import { PostCardProps, SessionUser } from "../../../types/postsFeed";
-import type { Comment } from "../../../types/comments"; // Import the correct Comment type
+import type { Comment } from "../../../types/comments";
 
 interface RootState {
 	session: {
@@ -72,14 +72,12 @@ interface PostWithComments {
 	postComments?: OldComment[];
 }
 
-
 const PostsFeedWithComments: React.FC = () => {
 	const loaderData = useLoaderData() as PostsFeedLoaderData;
 	const sessionUser = useSelector((state: RootState) => state.session.user);
 	const navigate = useNavigate();
 	const [searchParams, setSearchParams] = useSearchParams();
-      const fetcher = useFetcher();
-      const [isLoading, setIsLoading] = useState(false);
+	const fetcher = useFetcher();
 
 	// Comment management
 	const {
@@ -94,6 +92,7 @@ const PostsFeedWithComments: React.FC = () => {
 	const [selectedTags, setSelectedTags] = useState<string[]>([]);
 	const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
 	const [isRefreshing, setIsRefreshing] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 
 	// Get current tab from URL or default to "all"
 	const activeTab =
@@ -225,80 +224,78 @@ const PostsFeedWithComments: React.FC = () => {
 		[sessionUser, navigate, fetcher],
 	);
 
-	// Handle comment modal open - Fixed to properly transform comment data
 	const handleCommentClick = useCallback(
 		async (postId: number, post: PostWithComments) => {
 			console.log("Opening comment modal for post:", postId, post);
 
-			// Enhanced transformation with user data lookup
 			let initialComments: Comment[] = [];
 
-			if (post.postComments) {
-				// Create a more robust transformation that includes proper user data
-				initialComments = await Promise.all(
-					post.postComments.map(async (oldComment: OldComment) => {
-						console.log("Transforming old comment:", oldComment);
+			if (post.postComments && post.postComments.length > 0) {
+				
+				initialComments = post.postComments.map((oldComment: OldComment) => {
+					console.log(
+						"Processing comment from user:",
+						oldComment.userId,
+						oldComment,
+					);
 
-						// Enhanced commenter data - try to get from session user if it's their comment
-						let commenterData = {
+					
+					let commenterData = {
+						id: oldComment.userId,
+						username: oldComment.username || "Unknown User",
+						firstName: "",
+						lastName: "",
+						profileImage: "/default-avatar.png",
+					};
+
+					// If this is the current user's comment, use their session data
+					if (sessionUser && oldComment.userId === sessionUser.id) {
+						commenterData = {
+							id: sessionUser.id,
+							username: sessionUser.username,
+							firstName: sessionUser.firstName || "",
+							lastName: sessionUser.lastName || "",
+							profileImage: sessionUser.profileImage || "/default-avatar.png",
+						};
+					}
+					// If it's the post creator, use their data
+					else if (oldComment.userId === post.user.id) {
+						commenterData = {
+							id: post.user.id,
+							username: post.user.username,
+							firstName: post.user.firstName,
+							lastName: post.user.lastName,
+							profileImage: post.user.profileImage,
+						};
+					}
+					// For other users, use available data from the comment
+					else {
+						commenterData = {
 							id: oldComment.userId,
-							username: oldComment.username || "unknown",
-							firstName: "",
-							lastName: "",
-							profileImage: "/default-avatar.png",
+							username: oldComment.username || "Unknown User",
+							firstName: "", // Not available in old format
+							lastName: "", // Not available in old format
+							profileImage: "/default-avatar.png", // Default for other users
 						};
+					}
 
-						// If this is the current user's comment, use their session data
-						if (sessionUser && oldComment.userId === sessionUser.id) {
-							commenterData = {
-								id: sessionUser.id,
-								username: sessionUser.username,
-								firstName: sessionUser.firstName || "",
-								lastName: sessionUser.lastName || "",
-								profileImage: sessionUser.profileImage || "/default-avatar.png",
-							};
-						}
-						// If it's the post creator, use their data
-						else if (oldComment.userId === post.user.id) {
-							commenterData = {
-								id: post.user.id,
-								username: post.user.username,
-								firstName: post.user.firstName,
-								lastName: post.user.lastName,
-								profileImage: post.user.profileImage,
-							};
-						}
-						// For other users, we might need to fetch their data or use available info
-						else {
-							// Try to find user info from the post's user if it matches
-							if (post.user.id === oldComment.userId) {
-								commenterData = {
-									id: post.user.id,
-									username: post.user.username,
-									firstName: post.user.firstName,
-									lastName: post.user.lastName,
-									profileImage: post.user.profileImage,
-								};
-							}
-						}
+					const newComment: Comment = {
+						id: oldComment.id,
+						userId: oldComment.userId,
+						postId: oldComment.postId,
+						comment: oldComment.comment,
+						parentId: oldComment.parentId,
+						createdAt: oldComment.created_at,
+						updatedAt: oldComment.updated_at,
+						commenter: commenterData,
+						replies: [], // Initialize empty replies array
+					};
 
-						const newComment: Comment = {
-							id: oldComment.id,
-							userId: oldComment.userId,
-							postId: oldComment.postId,
-							comment: oldComment.comment,
-							parentId: oldComment.parentId,
-							createdAt: oldComment.created_at,
-							updatedAt: oldComment.updated_at,
-							commenter: commenterData,
-							replies: [], // Initialize empty replies array
-						};
+					console.log("Transformed comment:", newComment);
+					return newComment;
+				});
 
-						return newComment;
-					}),
-				);
-
-				console.log("Enhanced comments for modal:", initialComments);
+				console.log("All transformed comments for modal:", initialComments);
 			} else {
 				// If no postComments, try to fetch them from the API
 				try {
@@ -340,10 +337,12 @@ const PostsFeedWithComments: React.FC = () => {
 				}
 			}
 
+			console.log("Final comments for modal:", initialComments);
 			openCommentModal(postId, initialComments);
 		},
 		[openCommentModal, sessionUser],
 	);
+
 	// Clear filters
 	const clearFilters = useCallback(() => {
 		setSearchTerm("");
@@ -723,7 +722,6 @@ const PostsFeedWithComments: React.FC = () => {
 	);
 };
 
-// Enhanced PostCard Component with comment functionality
 const PostCardWithComments: React.FC<
 	PostCardProps & {
 		handleCommentClick: (postId: number, post: PostWithComments) => void;
@@ -736,13 +734,17 @@ const PostCardWithComments: React.FC<
 	handleCommentClick,
 	isLiked,
 }) => {
-      const [isLoading, setIsLoading] = useState(false);
-
 	// Cast post to PostWithComments type for this component
 	const postWithComments = post as PostWithComments;
 
-	// Enhanced comment button with loading state
+	// Enhanced comment button with better logging
 	const handleCommentButtonClick = () => {
+		console.log(
+			"Comment button clicked for post:",
+			post.id,
+			"Post data:",
+			postWithComments,
+		);
 		handleCommentClick(post.id, postWithComments);
 	};
 
@@ -824,7 +826,6 @@ const PostCardWithComments: React.FC<
 								<button
 									onClick={handleCommentButtonClick}
 									className="flex items-center gap-1 text-slate-500 hover:text-blue-500 transition-colors"
-									disabled={isLoading}
 								>
 									<MessageCircle size={18} />
 									<span className="text-sm font-medium">{post.comments}</span>
@@ -916,7 +917,6 @@ const PostCardWithComments: React.FC<
 								<button
 									onClick={handleCommentButtonClick}
 									className="flex items-center gap-1 text-slate-500 hover:text-blue-500 transition-colors"
-									disabled={isLoading}
 								>
 									<MessageCircle size={16} />
 									<span className="text-sm font-medium">{post.comments}</span>
