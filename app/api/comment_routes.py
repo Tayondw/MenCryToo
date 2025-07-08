@@ -209,7 +209,7 @@ def get_recent_comments():
         return jsonify({"errors": {"message": "Error fetching recent comments"}}), 500
 
 
-# Enhanced post comment routes with threading support
+# Post comment routes with threading support
 @comment_routes.route("/posts/<int:postId>/comments", methods=["GET"])
 @login_required
 def get_post_comments(postId):
@@ -226,11 +226,11 @@ def get_post_comments(postId):
         if not post:
             return jsonify({"errors": {"message": "Post not found"}}), 404
 
-        # CRITICAL: Load ALL comments with their respective user data
+        # Load ALL comments with their respective user data
         comments_query = (
             db.session.query(Comment)
             .options(
-                # Load commenter for EVERY comment - this is the key fix
+                # Load commenter for EVERY comment
                 joinedload(Comment.commenter).load_only(
                     "id", "username", "first_name", "last_name", "profile_image_url"
                 )
@@ -274,7 +274,7 @@ def get_post_comments(postId):
             end_idx = start_idx + per_page
             paginated_comments = root_comments[start_idx:end_idx]
 
-            # Convert to dict - using the enhanced to_dict method
+            # Convert to dict - using the to_dict method
             comments_data = [
                 comment.to_dict(include_replies=True) for comment in paginated_comments
             ]
@@ -295,7 +295,7 @@ def get_post_comments(postId):
                 page=page, per_page=per_page, error_out=False
             )
 
-            # Use enhanced to_dict method
+            # Use to_dict method
             comments_data = [comment.to_dict() for comment in comments.items]
 
             pagination = {
@@ -383,7 +383,7 @@ def add_comment(postId):
         db.session.add(comment)
         db.session.commit()
 
-        # CRITICAL: Reload with user data
+        # Reload with user data
         comment_with_user = (
             db.session.query(Comment)
             .options(
