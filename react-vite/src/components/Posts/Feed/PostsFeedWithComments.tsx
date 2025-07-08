@@ -72,12 +72,14 @@ interface PostWithComments {
 	postComments?: OldComment[];
 }
 
+
 const PostsFeedWithComments: React.FC = () => {
 	const loaderData = useLoaderData() as PostsFeedLoaderData;
 	const sessionUser = useSelector((state: RootState) => state.session.user);
 	const navigate = useNavigate();
 	const [searchParams, setSearchParams] = useSearchParams();
-	const fetcher = useFetcher();
+      const fetcher = useFetcher();
+      const [isLoading, setIsLoading] = useState(false);
 
 	// Comment management
 	const {
@@ -225,44 +227,123 @@ const PostsFeedWithComments: React.FC = () => {
 
 	// Handle comment modal open - Fixed to properly transform comment data
 	const handleCommentClick = useCallback(
-		(postId: number, post: PostWithComments) => {
-			// Convert old format comments to new format if they exist
+		async (postId: number, post: PostWithComments) => {
+			console.log("Opening comment modal for post:", postId, post);
+
+			// Enhanced transformation with user data lookup
 			let initialComments: Comment[] = [];
 
 			if (post.postComments) {
-				initialComments = post.postComments.map((oldComment: OldComment) => {
-					console.log("Transforming old comment:", oldComment);
+				// Create a more robust transformation that includes proper user data
+				initialComments = await Promise.all(
+					post.postComments.map(async (oldComment: OldComment) => {
+						console.log("Transforming old comment:", oldComment);
 
-					const newComment: Comment = {
-						id: oldComment.id,
-						userId: oldComment.userId,
-						postId: oldComment.postId,
-						comment: oldComment.comment,
-						parentId: oldComment.parentId,
-						createdAt: oldComment.created_at,
-						updatedAt: oldComment.updated_at,
-						commenter: {
+						// Enhanced commenter data - try to get from session user if it's their comment
+						let commenterData = {
 							id: oldComment.userId,
-							username: oldComment.username, // This field exists in OldComment
-							firstName: "", // These don't exist in old format, so use empty strings
+							username: oldComment.username || "unknown",
+							firstName: "",
 							lastName: "",
-							profileImage: "/default-avatar.png", // Default image
+							profileImage: "/default-avatar.png",
+						};
+
+						// If this is the current user's comment, use their session data
+						if (sessionUser && oldComment.userId === sessionUser.id) {
+							commenterData = {
+								id: sessionUser.id,
+								username: sessionUser.username,
+								firstName: sessionUser.firstName || "",
+								lastName: sessionUser.lastName || "",
+								profileImage: sessionUser.profileImage || "/default-avatar.png",
+							};
+						}
+						// If it's the post creator, use their data
+						else if (oldComment.userId === post.user.id) {
+							commenterData = {
+								id: post.user.id,
+								username: post.user.username,
+								firstName: post.user.firstName,
+								lastName: post.user.lastName,
+								profileImage: post.user.profileImage,
+							};
+						}
+						// For other users, we might need to fetch their data or use available info
+						else {
+							// Try to find user info from the post's user if it matches
+							if (post.user.id === oldComment.userId) {
+								commenterData = {
+									id: post.user.id,
+									username: post.user.username,
+									firstName: post.user.firstName,
+									lastName: post.user.lastName,
+									profileImage: post.user.profileImage,
+								};
+							}
+						}
+
+						const newComment: Comment = {
+							id: oldComment.id,
+							userId: oldComment.userId,
+							postId: oldComment.postId,
+							comment: oldComment.comment,
+							parentId: oldComment.parentId,
+							createdAt: oldComment.created_at,
+							updatedAt: oldComment.updated_at,
+							commenter: commenterData,
+							replies: [], // Initialize empty replies array
+						};
+
+						return newComment;
+					}),
+				);
+
+				console.log("Enhanced comments for modal:", initialComments);
+			} else {
+				// If no postComments, try to fetch them from the API
+				try {
+					setIsLoading(true);
+					const response = await fetch(
+						`/api/comments/posts/${postId}/comments?include_replies=true`,
+						{
+							credentials: "include",
 						},
-						replies: [], // Initialize empty replies array
-					};
+					);
 
-					return newComment;
-				});
-
-				console.log("Transformed comments for modal:", initialComments);
+					if (response.ok) {
+						const data = await response.json();
+						initialComments = (data.comments || []).map((apiComment: any) => ({
+							id: apiComment.id,
+							userId: apiComment.userId || apiComment.user_id,
+							postId: apiComment.postId || apiComment.post_id,
+							comment: apiComment.comment,
+							parentId: apiComment.parentId || apiComment.parent_id || null,
+							createdAt: apiComment.createdAt || apiComment.created_at,
+							updatedAt: apiComment.updatedAt || apiComment.updated_at,
+							commenter: apiComment.commenter || {
+								id: apiComment.userId || apiComment.user_id,
+								username: apiComment.username || "unknown",
+								firstName: apiComment.firstName || apiComment.first_name || "",
+								lastName: apiComment.lastName || apiComment.last_name || "",
+								profileImage:
+									apiComment.profileImage ||
+									apiComment.profile_image_url ||
+									"/default-avatar.png",
+							},
+							replies: [],
+						}));
+					}
+				} catch (error) {
+					console.error("Failed to fetch comments for modal:", error);
+				} finally {
+					setIsLoading(false);
+				}
 			}
 
 			openCommentModal(postId, initialComments);
 		},
-		[openCommentModal],
+		[openCommentModal, sessionUser],
 	);
-      
-
 	// Clear filters
 	const clearFilters = useCallback(() => {
 		setSearchTerm("");
@@ -655,8 +736,15 @@ const PostCardWithComments: React.FC<
 	handleCommentClick,
 	isLiked,
 }) => {
+      const [isLoading, setIsLoading] = useState(false);
+
 	// Cast post to PostWithComments type for this component
 	const postWithComments = post as PostWithComments;
+
+	// Enhanced comment button with loading state
+	const handleCommentButtonClick = () => {
+		handleCommentClick(post.id, postWithComments);
+	};
 
 	return (
 		<div
@@ -687,6 +775,10 @@ const PostCardWithComments: React.FC<
 									alt={post.user.username}
 									className="w-10 h-10 rounded-full object-cover border-2 border-slate-200"
 									loading="lazy"
+									onError={(e) => {
+										const target = e.target as HTMLImageElement;
+										target.src = "/default-avatar.png";
+									}}
 								/>
 							</Link>
 							<div className="min-w-0">
@@ -730,8 +822,9 @@ const PostCardWithComments: React.FC<
 									</span>
 								</button>
 								<button
-									onClick={() => handleCommentClick(post.id, postWithComments)}
+									onClick={handleCommentButtonClick}
 									className="flex items-center gap-1 text-slate-500 hover:text-blue-500 transition-colors"
+									disabled={isLoading}
 								>
 									<MessageCircle size={18} />
 									<span className="text-sm font-medium">{post.comments}</span>
@@ -774,6 +867,10 @@ const PostCardWithComments: React.FC<
 									alt={post.user.username}
 									className="w-8 h-8 rounded-full object-cover border-2 border-slate-200"
 									loading="lazy"
+									onError={(e) => {
+										const target = e.target as HTMLImageElement;
+										target.src = "/default-avatar.png";
+									}}
 								/>
 							</Link>
 							<div className="min-w-0">
@@ -817,8 +914,9 @@ const PostCardWithComments: React.FC<
 									</span>
 								</button>
 								<button
-									onClick={() => handleCommentClick(post.id, postWithComments)}
+									onClick={handleCommentButtonClick}
 									className="flex items-center gap-1 text-slate-500 hover:text-blue-500 transition-colors"
+									disabled={isLoading}
 								>
 									<MessageCircle size={16} />
 									<span className="text-sm font-medium">{post.comments}</span>
