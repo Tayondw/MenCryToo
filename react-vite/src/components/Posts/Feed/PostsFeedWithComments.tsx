@@ -49,7 +49,6 @@ interface OldComment {
 	parentId: number | null;
 	created_at: string;
 	updated_at: string;
-	// CRITICAL: Add commenter field
 	commenter?: {
 		id: number;
 		username: string;
@@ -243,7 +242,7 @@ const PostsFeedWithComments: React.FC = () => {
 				initialComments = post.postComments.map((oldComment: OldComment) => {
 					console.log("Processing comment:", oldComment);
 
-					// CRITICAL FIX: Use commenter data from API if available
+					// Use commenter data from API if available
 					let commenterData = {
 						id: oldComment.userId,
 						username: oldComment.username || "Unknown User",
@@ -762,7 +761,7 @@ const PostCardWithComments: React.FC<
 	// Cast post to PostWithComments type for this component
 	const postWithComments = post as PostWithComments;
 
-	// Enhanced comment button with better logging
+	// Comment button with better logging
 	const handleCommentButtonClick = () => {
 		console.log(
 			"Comment button clicked for post:",
