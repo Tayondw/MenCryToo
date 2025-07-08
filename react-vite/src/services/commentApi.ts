@@ -9,7 +9,7 @@ class CommentAPI {
 	private baseUrl = "/api";
 
 	/**
-	 * Get comments for a specific post - Fixed endpoint to match backend routes
+	 * Get comments for a specific post
 	 */
 	async getPostComments(
 		postId: number,
@@ -107,7 +107,7 @@ class CommentAPI {
 	}
 
 	/**
-	 * Create a new comment - Fixed endpoint and format
+	 * Create a new comment
 	 */
 	async createComment(
 		commentData: CommentFormData,
@@ -180,7 +180,7 @@ class CommentAPI {
 	}
 
 	/**
-	 * Create a reply to a comment - Fixed endpoint and format
+	 * Create a reply to a comment
 	 */
 	async createReply(
 		commentData: CommentFormData,
@@ -306,7 +306,7 @@ class CommentAPI {
 	}
 
 	/**
-	 * Delete a comment - Fixed endpoint
+	 * Delete a comment
 	 */
 	async deleteComment(
 		postId: number,
