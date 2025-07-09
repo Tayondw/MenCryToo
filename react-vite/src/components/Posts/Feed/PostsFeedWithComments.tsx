@@ -2,13 +2,11 @@ import React, { useState, useMemo, useCallback } from "react";
 import {
 	useLoaderData,
 	Link,
-	useNavigate,
 	useSearchParams,
 	useFetcher,
 } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
-	Heart,
 	MessageCircle,
 	Share2,
 	Search,
@@ -26,11 +24,13 @@ import {
 	Users,
 	AlertCircle,
 } from "lucide-react";
-import HeartFilled from "./HeartFilled";
+import LikeButton from "../../Likes/LikesButton";
+import LikesModal from "../../Likes/LikesModal";
 import CommentModal from "../../Comments/CommentModal";
 import { useComments } from "../../../hooks/useComments";
+import { useLikes, useLikesModal } from "../../../hooks/useLikes";
 import { PostsFeedLoaderData } from "../../../loaders/postsFeedLoaders";
-import { PostCardProps, SessionUser } from "../../../types/postsFeed";
+import { SessionUser } from "../../../types/postsFeed";
 import type { Comment } from "../../../types/comments";
 
 interface RootState {
@@ -57,6 +57,7 @@ interface OldComment {
 		profileImage: string;
 	};
 }
+
 interface PostWithComments {
 	id: number;
 	title: string;
@@ -81,7 +82,6 @@ interface PostWithComments {
 const PostsFeedWithComments: React.FC = () => {
 	const loaderData = useLoaderData() as PostsFeedLoaderData;
 	const sessionUser = useSelector((state: RootState) => state.session.user);
-	const navigate = useNavigate();
 	const [searchParams, setSearchParams] = useSearchParams();
 	const fetcher = useFetcher();
 
@@ -92,13 +92,20 @@ const PostsFeedWithComments: React.FC = () => {
 		closeModal: closeCommentModal,
 	} = useComments();
 
+	// Likes management
+	const { likeStates, toggleLike, setLikeState, fetchLikeStatus } = useLikes();
+	const {
+		isOpen: isLikesModalOpen,
+		postId: likesModalPostId,
+		openModal: openLikesModal,
+		closeModal: closeLikesModal,
+	} = useLikesModal();
+
 	// State for UI controls
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedTags, setSelectedTags] = useState<string[]>([]);
-	const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
 	const [isRefreshing, setIsRefreshing] = useState(false);
-	const [isLoading, setIsLoading] = useState(false);
 
 	// Get current tab from URL or default to "all"
 	const activeTab =
@@ -120,6 +127,19 @@ const PostsFeedWithComments: React.FC = () => {
 			activePagination: loaderData.allPostsPagination,
 		};
 	}, [activeTab, loaderData]);
+
+	// Initialize like states from loader data
+	React.useEffect(() => {
+		activePosts.forEach((post) => {
+			if (!likeStates.has(post.id)) {
+				// We'll need to fetch like status for each post
+				// For now, assume not liked and use the count from the post
+				setLikeState(post.id, false, post.likes);
+				// Fetch actual like status asynchronously
+				fetchLikeStatus(post.id);
+			}
+		});
+	}, [activePosts, likeStates, setLikeState, fetchLikeStatus]);
 
 	// Filter posts based on search term and selected tags
 	const filteredPosts = useMemo(() => {
@@ -199,35 +219,12 @@ const PostsFeedWithComments: React.FC = () => {
 		}, 1000);
 	}, [fetcher]);
 
-	// Handle like/unlike
-	const handleLikePost = useCallback(
-		async (postId: number, isLiked: boolean) => {
-			if (!sessionUser) {
-				navigate("/login");
-				return;
-			}
-
-			// Optimistic update
-			setLikedPosts((prev) => {
-				const newSet = new Set(prev);
-				if (isLiked) {
-					newSet.delete(postId);
-				} else {
-					newSet.add(postId);
-				}
-				return newSet;
-			});
-
-			// Submit to server
-			fetcher.submit(
-				{
-					intent: isLiked ? "unlike-post" : "like-post",
-					postId: postId.toString(),
-				},
-				{ method: "post" },
-			);
+	// Handle likes modal open
+	const handleLikesClick = useCallback(
+		(postId: number) => {
+			openLikesModal(postId);
 		},
-		[sessionUser, navigate, fetcher],
+		[openLikesModal],
 	);
 
 	const handleCommentClick = useCallback(
@@ -319,7 +316,6 @@ const PostsFeedWithComments: React.FC = () => {
 			} else {
 				// If no postComments, try to fetch them from the API
 				try {
-					setIsLoading(true);
 					const response = await fetch(
 						`/api/comments/posts/${postId}/comments?include_replies=true`,
 						{
@@ -332,32 +328,65 @@ const PostsFeedWithComments: React.FC = () => {
 						console.log("Fetched comments from API:", data);
 
 						// The API should now return properly formatted comments with commenter data
-						initialComments = (data.comments || []).map((apiComment: any) => ({
-							id: apiComment.id,
-							userId: apiComment.userId || apiComment.user_id,
-							postId: apiComment.postId || apiComment.post_id,
-							comment: apiComment.comment,
-							parentId: apiComment.parentId || apiComment.parent_id || null,
-							createdAt: apiComment.createdAt || apiComment.created_at,
-							updatedAt: apiComment.updatedAt || apiComment.updated_at,
-							// Use commenter data from API response
-							commenter: apiComment.commenter || {
-								id: apiComment.userId || apiComment.user_id,
-								username: apiComment.username || "unknown",
-								firstName: apiComment.firstName || apiComment.first_name || "",
-								lastName: apiComment.lastName || apiComment.last_name || "",
-								profileImage:
-									apiComment.profileImage ||
-									apiComment.profile_image_url ||
-									"/default-avatar.png",
-							},
-							replies: [],
-						}));
+						interface ApiComment {
+							id: number;
+							userId?: number;
+							user_id?: number;
+							postId?: number;
+							post_id?: number;
+							comment: string;
+							parentId?: number | null;
+							parent_id?: number | null;
+							createdAt?: string;
+							created_at?: string;
+							updatedAt?: string;
+							updated_at?: string;
+							commenter?: {
+								id: number;
+								username: string;
+								firstName?: string;
+								first_name?: string;
+								lastName?: string;
+								last_name?: string;
+								profileImage?: string;
+								profile_image_url?: string;
+							};
+							username?: string;
+							firstName?: string;
+							first_name?: string;
+							lastName?: string;
+							last_name?: string;
+							profileImage?: string;
+							profile_image_url?: string;
+						}
+
+						initialComments = (data.comments || []).map(
+							(apiComment: ApiComment) => ({
+								id: apiComment.id,
+								userId: apiComment.userId || apiComment.user_id || 0,
+								postId: apiComment.postId || apiComment.post_id || postId,
+								comment: apiComment.comment,
+								parentId: apiComment.parentId || apiComment.parent_id || null,
+								createdAt: apiComment.createdAt || apiComment.created_at || "",
+								updatedAt: apiComment.updatedAt || apiComment.updated_at || "",
+								// Use commenter data from API response
+								commenter: apiComment.commenter || {
+									id: apiComment.userId || apiComment.user_id || 0,
+									username: apiComment.username || "unknown",
+									firstName:
+										apiComment.firstName || apiComment.first_name || "",
+									lastName: apiComment.lastName || apiComment.last_name || "",
+									profileImage:
+										apiComment.profileImage ||
+										apiComment.profile_image_url ||
+										"/default-avatar.png",
+								},
+								replies: [],
+							}),
+						);
 					}
 				} catch (error) {
 					console.error("Failed to fetch comments for modal:", error);
-				} finally {
-					setIsLoading(false);
 				}
 			}
 
@@ -632,9 +661,10 @@ const PostsFeedWithComments: React.FC = () => {
 									post={post}
 									viewMode={viewMode}
 									formatTimeAgo={formatTimeAgo}
-									handleLikePost={handleLikePost}
 									handleCommentClick={handleCommentClick}
-									isLiked={likedPosts.has(post.id)}
+									handleLikesClick={handleLikesClick}
+									likeState={likeStates.get(post.id)}
+									setLikeState={setLikeState}
 									sessionUser={sessionUser}
 								/>
 							))}
@@ -742,21 +772,40 @@ const PostsFeedWithComments: React.FC = () => {
 				postId={commentModal.postId || 0}
 				initialComments={commentModal.comments}
 			/>
+
+			{/* Likes Modal */}
+			{isLikesModalOpen && likesModalPostId && (
+				<LikesModal
+					isOpen={isLikesModalOpen}
+					onClose={closeLikesModal}
+					postId={likesModalPostId}
+					initialCount={likeStates.get(likesModalPostId)?.likeCount || 0}
+				/>
+			)}
 		</div>
 	);
 };
 
-const PostCardWithComments: React.FC<
-	PostCardProps & {
-		handleCommentClick: (postId: number, post: PostWithComments) => void;
-	}
-> = ({
+// Define proper interface for PostCard props
+interface PostCardWithCommentsProps {
+	post: PostWithComments;
+	viewMode: "grid" | "list";
+	formatTimeAgo: (dateString: string) => string;
+	handleCommentClick: (postId: number, post: PostWithComments) => void;
+	handleLikesClick: (postId: number) => void;
+	likeState?: { isLiked: boolean; likeCount: number; isLoading: boolean };
+	setLikeState: (postId: number, isLiked: boolean, count: number) => void;
+	sessionUser: SessionUser | null;
+}
+
+const PostCardWithComments: React.FC<PostCardWithCommentsProps> = ({
 	post,
 	viewMode,
 	formatTimeAgo,
-	handleLikePost,
 	handleCommentClick,
-	isLiked,
+	handleLikesClick,
+	likeState,
+	setLikeState,
 }) => {
 	// Cast post to PostWithComments type for this component
 	const postWithComments = post as PostWithComments;
@@ -834,19 +883,17 @@ const PostCardWithComments: React.FC<
 						{/* Post Actions */}
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-4">
-								<button
-									onClick={() => handleLikePost(post.id, isLiked)}
-									className={`flex items-center gap-1 transition-colors ${
-										isLiked
-											? "text-red-500"
-											: "text-slate-500 hover:text-red-500"
-									}`}
-								>
-									{isLiked ? <HeartFilled size={18} /> : <Heart size={18} />}
-									<span className="text-sm font-medium">
-										{post.likes + (isLiked ? 1 : 0)}
-									</span>
-								</button>
+								<LikeButton
+									postId={post.id}
+									initialLikeCount={likeState?.likeCount || post.likes}
+									initialIsLiked={likeState?.isLiked || false}
+									onLikeToggle={(postId, isLiked, newCount) => {
+										setLikeState(postId, isLiked, newCount);
+									}}
+									onLikesClick={handleLikesClick}
+									size={18}
+									disabled={likeState?.isLoading}
+								/>
 								<button
 									onClick={handleCommentButtonClick}
 									className="flex items-center gap-1 text-slate-500 hover:text-blue-500 transition-colors"
@@ -925,19 +972,17 @@ const PostCardWithComments: React.FC<
 						{/* Post Actions */}
 						<div className="flex items-center justify-between mt-auto">
 							<div className="flex items-center gap-4">
-								<button
-									onClick={() => handleLikePost(post.id, isLiked)}
-									className={`flex items-center gap-1 transition-colors ${
-										isLiked
-											? "text-red-500"
-											: "text-slate-500 hover:text-red-500"
-									}`}
-								>
-									{isLiked ? <HeartFilled size={16} /> : <Heart size={16} />}
-									<span className="text-sm font-medium">
-										{post.likes + (isLiked ? 1 : 0)}
-									</span>
-								</button>
+								<LikeButton
+									postId={post.id}
+									initialLikeCount={likeState?.likeCount || post.likes}
+									initialIsLiked={likeState?.isLiked || false}
+									onLikeToggle={(postId, isLiked, newCount) => {
+										setLikeState(postId, isLiked, newCount);
+									}}
+									onLikesClick={handleLikesClick}
+									size={16}
+									disabled={likeState?.isLoading}
+								/>
 								<button
 									onClick={handleCommentButtonClick}
 									className="flex items-center gap-1 text-slate-500 hover:text-blue-500 transition-colors"
