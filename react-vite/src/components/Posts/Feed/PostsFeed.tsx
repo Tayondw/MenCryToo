@@ -26,7 +26,7 @@ import {
 	Users,
 	AlertCircle,
 } from "lucide-react";
-import HeartFilled from "./HeartFilled";
+import HeartFilled from "../../HeartsFilled/HeartFilled";
 import { PostsFeedLoaderData } from "../../../loaders/postsFeedLoaders";
 import { PostCardProps, SessionUser } from "../../../types/postsFeed";
 
