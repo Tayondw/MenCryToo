@@ -1,7 +1,6 @@
 export * from "./comments";
 
 // User types
-// User types
 export interface User {
 	id: number;
 	username: string;
@@ -82,8 +81,8 @@ export interface UserComment {
 	postId?: number;
 	createdAt?: string;
 	updatedAt?: string;
-	parentId?: number | null; // Added for threading support
-	username?: string; // Added for easier display
+	parentId?: number | null;
+	username?: string;
 }
 export interface ProfilesData {
 	users_profile: User[];
