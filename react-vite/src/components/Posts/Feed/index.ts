@@ -1,2 +1,1 @@
-import PostsFeed from "./PostsFeed";
-export default PostsFeed;
+export { default } from "./PostsFeedWithComments";
