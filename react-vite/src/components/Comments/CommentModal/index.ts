@@ -1,2 +1,1 @@
-import CommentModal from "./CommentModal";
-export default CommentModal;
+export { default } from "./CommentModal";
