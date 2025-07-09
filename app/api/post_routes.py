@@ -777,86 +777,224 @@ def delete_comment(postId, commentId):
 
 
 # ! POST - LIKES
+@post_routes.route("/<int:postId>/likes")
+@login_required
+def get_post_likes(postId):
+    """
+    Get all users who liked a specific post
+    """
+    try:
+        # Check if post exists
+        post = Post.query.get(postId)
+        if not post:
+            return jsonify({"errors": {"message": "Post not found"}}), 404
+
+        # Get all users who liked this post with minimal data for performance
+        liked_users = (
+            db.session.query(User)
+            .join(Likes, User.id == Likes.c.user_id)
+            .filter(Likes.c.post_id == postId)
+            .options(
+                load_only(
+                    "id", "username", "first_name", "last_name", "profile_image_url"
+                )
+            )
+            .all()
+        )
+
+        # Format response
+        users_data = [
+            {
+                "id": user.id,
+                "username": user.username,
+                "firstName": user.first_name or "",
+                "lastName": user.last_name or "",
+                "profileImage": user.profile_image_url or "/default-avatar.png",
+            }
+            for user in liked_users
+        ]
+
+        return jsonify(
+            {"likes": users_data, "count": len(users_data), "postId": postId}
+        )
+
+    except Exception as e:
+        logger.error(f"Error getting post likes {postId}: {str(e)}")
+        return jsonify({"errors": {"message": "Internal server error"}}), 500
+
+
+@post_routes.route("/<int:postId>/like-status")
+@login_required
+def get_post_like_status(postId):
+    """
+    Get like status for current user and total count
+    """
+    try:
+        # Check if post exists
+        post = Post.query.get(postId)
+        if not post:
+            return jsonify({"errors": {"message": "Post not found"}}), 404
+
+        # Check if current user liked this post
+        is_liked = post.is_liked_by_user(current_user.id)
+
+        # Get total like count
+        like_count = post.get_like_count()
+
+        return jsonify({"isLiked": is_liked, "likeCount": like_count, "postId": postId})
+
+    except Exception as e:
+        logger.error(f"Error getting like status for post {postId}: {str(e)}")
+        return jsonify({"errors": {"message": "Internal server error"}}), 500
+
+
 @post_routes.route("/<int:postId>/like", methods=["POST"])
 @login_required
 def like_post(postId):
     """
-    Post liking with database-agnostic atomic operation
+    Toggle post like - like if not liked, unlike if already liked
     """
     try:
-        # Single operation that handles both check and insert
-        result = db.session.execute(
-            text(
-                """
-                INSERT INTO likes (user_id, post_id) 
-                SELECT :user_id, :post_id
-                WHERE EXISTS (SELECT 1 FROM posts WHERE id = :post_id)
-                AND NOT EXISTS (
-                    SELECT 1 FROM likes 
-                    WHERE user_id = :user_id AND post_id = :post_id
-                )
-            """
-            ),
+        # Check if post exists
+        post_exists = db.session.execute(
+            text("SELECT 1 FROM posts WHERE id = :post_id"), {"post_id": postId}
+        ).fetchone()
+
+        if not post_exists:
+            return jsonify({"errors": {"message": "Post not found"}}), 404
+
+        # Check current like status
+        is_currently_liked = db.session.execute(
+            text("SELECT 1 FROM likes WHERE user_id = :user_id AND post_id = :post_id"),
             {"user_id": current_user.id, "post_id": postId},
-        )
+        ).fetchone()
+
+        if is_currently_liked:
+            # Unlike the post
+            db.session.execute(
+                text(
+                    "DELETE FROM likes WHERE user_id = :user_id AND post_id = :post_id"
+                ),
+                {"user_id": current_user.id, "post_id": postId},
+            )
+            action = "unliked"
+        else:
+            # Like the post
+            db.session.execute(
+                text(
+                    "INSERT INTO likes (user_id, post_id) VALUES (:user_id, :post_id)"
+                ),
+                {"user_id": current_user.id, "post_id": postId},
+            )
+            action = "liked"
 
         db.session.commit()
 
-        if result.rowcount > 0:
-            return {"message": "Like added"}, 200
-        else:
-            # Check why it failed - post doesn't exist or already liked
-            post_exists = db.session.execute(
-                text("SELECT 1 FROM posts WHERE id = :post_id"), {"post_id": postId}
-            ).fetchone()
-
-            if not post_exists:
-                return {"errors": {"message": "Post not found"}}, 404
-            else:
-                return {"errors": {"message": "Post already liked"}}, 400
-
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error liking post {postId}: {str(e)}")
-        return {"errors": {"message": "Error adding like"}}, 500
-
-
-@post_routes.route("/<int:postId>/unlike", methods=["POST"])
-@login_required
-def unlike_post(postId):
-    """
-    Post unliking with atomic operation
-    """
-    try:
-        # Atomic delete operation
-        result = db.session.execute(
-            text(
-                """
-                DELETE FROM likes 
-                WHERE user_id = :user_id 
-                AND post_id = :post_id
-                AND EXISTS (SELECT 1 FROM posts WHERE id = :post_id)
-            """
-            ),
-            {"user_id": current_user.id, "post_id": postId},
+        # Get updated like count
+        new_like_count = (
+            db.session.execute(
+                text("SELECT COUNT(*) FROM likes WHERE post_id = :post_id"),
+                {"post_id": postId},
+            ).scalar()
+            or 0
         )
 
-        db.session.commit()
-
-        if result.rowcount > 0:
-            return {"message": "Like removed"}, 200
-        else:
-            # Check if post exists
-            post_exists = db.session.execute(
-                text("SELECT 1 FROM posts WHERE id = :post_id"), {"post_id": postId}
-            ).fetchone()
-
-            if not post_exists:
-                return {"errors": {"message": "Post not found"}}, 404
-            else:
-                return {"errors": {"message": "Post not liked"}}, 400
+        return jsonify(
+            {
+                "success": True,
+                "action": action,
+                "isLiked": action == "liked",
+                "likeCount": new_like_count,
+                "postId": postId,
+            }
+        )
 
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error unliking post {postId}: {str(e)}")
-        return {"errors": {"message": "Error removing like"}}, 500
+        logger.error(f"Error toggling like for post {postId}: {str(e)}")
+        return jsonify({"errors": {"message": "Error updating like"}}), 500
+
+
+# @post_routes.route("/<int:postId>/like", methods=["POST"])
+# @login_required
+# def like_post(postId):
+#     """
+#     Post liking with database-agnostic atomic operation
+#     """
+#     try:
+#         # Single operation that handles both check and insert
+#         result = db.session.execute(
+#             text(
+#                 """
+#                 INSERT INTO likes (user_id, post_id) 
+#                 SELECT :user_id, :post_id
+#                 WHERE EXISTS (SELECT 1 FROM posts WHERE id = :post_id)
+#                 AND NOT EXISTS (
+#                     SELECT 1 FROM likes 
+#                     WHERE user_id = :user_id AND post_id = :post_id
+#                 )
+#             """
+#             ),
+#             {"user_id": current_user.id, "post_id": postId},
+#         )
+
+#         db.session.commit()
+
+#         if result.rowcount > 0:
+#             return {"message": "Like added"}, 200
+#         else:
+#             # Check why it failed - post doesn't exist or already liked
+#             post_exists = db.session.execute(
+#                 text("SELECT 1 FROM posts WHERE id = :post_id"), {"post_id": postId}
+#             ).fetchone()
+
+#             if not post_exists:
+#                 return {"errors": {"message": "Post not found"}}, 404
+#             else:
+#                 return {"errors": {"message": "Post already liked"}}, 400
+
+#     except Exception as e:
+#         db.session.rollback()
+#         logger.error(f"Error liking post {postId}: {str(e)}")
+#         return {"errors": {"message": "Error adding like"}}, 500
+
+
+# @post_routes.route("/<int:postId>/unlike", methods=["POST"])
+# @login_required
+# def unlike_post(postId):
+#     """
+#     Post unliking with atomic operation
+#     """
+#     try:
+#         # Atomic delete operation
+#         result = db.session.execute(
+#             text(
+#                 """
+#                 DELETE FROM likes 
+#                 WHERE user_id = :user_id 
+#                 AND post_id = :post_id
+#                 AND EXISTS (SELECT 1 FROM posts WHERE id = :post_id)
+#             """
+#             ),
+#             {"user_id": current_user.id, "post_id": postId},
+#         )
+
+#         db.session.commit()
+
+#         if result.rowcount > 0:
+#             return {"message": "Like removed"}, 200
+#         else:
+#             # Check if post exists
+#             post_exists = db.session.execute(
+#                 text("SELECT 1 FROM posts WHERE id = :post_id"), {"post_id": postId}
+#             ).fetchone()
+
+#             if not post_exists:
+#                 return {"errors": {"message": "Post not found"}}, 404
+#             else:
+#                 return {"errors": {"message": "Post not liked"}}, 400
+
+#     except Exception as e:
+#         db.session.rollback()
+#         logger.error(f"Error unliking post {postId}: {str(e)}")
+#         return {"errors": {"message": "Error removing like"}}, 500
