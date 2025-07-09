@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {
+	useState,
+	useEffect,
+	useCallback,
+	useRef,
+	useMemo,
+} from "react";
 import {
 	X,
 	MessageCircle,
@@ -9,19 +15,15 @@ import {
 	AlertCircle,
 	Loader,
 	Send,
-	Reply,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { searchComments } from "../../../utils/commentUtils";
+import CommentThread from "../CommentThread";
 import { commentApi } from "../../../services/commentApi";
-import {
-	organizeCommentsIntoThreads,
-	searchComments,
-} from "../../../utils/commentUtils";
 import type { Comment, CommentModalProps } from "../../../types/comments";
 import type { RootState } from "../../../types";
 
-// Define proper SessionUser type
 interface SessionUser {
 	id: number;
 	username: string;
@@ -30,72 +32,22 @@ interface SessionUser {
 	profileImage: string;
 }
 
-// Enhanced comment transformation with better profile image handling
-const transformApiComment = (
-	apiComment: Comment | ApiCommentResponse,
-): Comment => {
-	console.log("Transforming API comment:", apiComment);
-
-	// If the API comment already has a commenter object, use it
-	if ("commenter" in apiComment && apiComment.commenter) {
-		return {
-			...apiComment,
-			commenter: {
-				...apiComment.commenter,
-				// Ensure profile image has a fallback
-				profileImage:
-					apiComment.commenter.profileImage || "/default-avatar.png",
-			},
-		} as Comment;
-	}
-
-	// Transform old/API format to new format
-	const oldComment = apiComment as ApiCommentResponse;
-	return {
-		id: oldComment.id,
-		userId: oldComment.userId || oldComment.user_id || 0,
-		postId: oldComment.postId || oldComment.post_id || 0,
-		comment: oldComment.comment || "",
-		parentId: oldComment.parentId || oldComment.parent_id || null,
-		createdAt:
-			oldComment.createdAt || oldComment.created_at || new Date().toISOString(),
-		updatedAt:
-			oldComment.updatedAt || oldComment.updated_at || new Date().toISOString(),
-		commenter: {
-			id: oldComment.userId || oldComment.user_id || 0,
-			username: oldComment.username || "unknown",
-			firstName: oldComment.firstName || oldComment.first_name || "",
-			lastName: oldComment.lastName || oldComment.last_name || "",
-			profileImage:
-				oldComment.profileImage ||
-				oldComment.profile_image_url ||
-				"/default-avatar.png",
-		},
-		replies: [],
-	};
-};
-
-// Type for API response that might not have commenter
-interface ApiCommentResponse {
+interface PostComment {
 	id: number;
-	userId?: number;
-	user_id?: number;
-	postId?: number;
-	post_id?: number;
+	userId: number;
+	postId: number;
 	comment: string;
-	parentId?: number | null;
-	parent_id?: number | null;
-	createdAt?: string;
-	created_at?: string;
-	updatedAt?: string;
-	updated_at?: string;
-	username?: string;
-	firstName?: string;
-	first_name?: string;
-	lastName?: string;
-	last_name?: string;
-	profileImage?: string;
-	profile_image_url?: string;
+	username: string;
+	parentId: number | null;
+	created_at: string;
+	updated_at: string;
+	commenter?: {
+		id: number;
+		username: string;
+		firstName: string;
+		lastName: string;
+		profileImage: string;
+	};
 }
 
 const CommentModal: React.FC<CommentModalProps> = ({
@@ -110,8 +62,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	const modalRef = useRef<HTMLDivElement>(null);
 
 	// State management
-	const [comments, setComments] = useState<Comment[]>([]);
-	const [threaded, setThreaded] = useState<Comment[]>([]);
+	const [commentsData, setCommentsData] = useState<PostComment[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -119,9 +70,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	const [sortBy, setSortBy] = useState<"newest" | "oldest" | "popular">(
 		"newest",
 	);
-	const [page, setPage] = useState(1);
-	const [hasMore, setHasMore] = useState(true);
-	const [hasLoadedFromApi, setHasLoadedFromApi] = useState(false);
+	const [hasInitialized, setHasInitialized] = useState(false);
 
 	// Comment form states
 	const [newComment, setNewComment] = useState("");
@@ -131,75 +80,150 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		[key: number]: boolean;
 	}>({});
 
-	// Enhanced comment transformation for consistent profile images
-	const enhanceCommentWithProfileData = (comment: Comment): Comment => {
-		// If we have session user data and this is their comment, use their profile image
-		if (sessionUser && comment.userId === sessionUser.id) {
-			return {
-				...comment,
-				commenter: {
-					...comment.commenter,
-					id: sessionUser.id,
-					username: sessionUser.username,
-					firstName: sessionUser.firstName || "",
-					lastName: sessionUser.lastName || "",
-					profileImage: sessionUser.profileImage || "/default-avatar.png",
-				},
+	// Helper function to flatten nested Comment structure to flat PostComment array
+	const flattenCommentStructure = useCallback(
+		(comments: Comment[]): PostComment[] => {
+			const flattened: PostComment[] = [];
+
+			const processComment = (comment: Comment) => {
+				// Add the main comment
+				const postComment: PostComment = {
+					id: comment.id,
+					userId: comment.userId,
+					postId: comment.postId,
+					comment: comment.comment,
+					username: comment.commenter?.username || "Unknown User",
+					parentId: comment.parentId,
+					created_at: comment.createdAt,
+					updated_at: comment.updatedAt,
+					commenter: comment.commenter,
+				};
+				flattened.push(postComment);
+
+				// Process all replies recursively
+				if (comment.replies && comment.replies.length > 0) {
+					comment.replies.forEach(processComment);
+				}
 			};
-		}
 
-		// Ensure commenter exists and has proper fallbacks
-		return {
-			...comment,
-			commenter: comment.commenter || {
-				id: comment.userId,
-				username: "unknown",
-				firstName: "",
-				lastName: "",
-				profileImage: "/default-avatar.png",
-			},
-		};
-	};
+			comments.forEach(processComment);
+			console.log(
+				"Flattened structure result:",
+				flattened.length,
+				"total items",
+			);
+			return flattened;
+		},
+		[],
+	);
 
-	// Initialize comments with enhanced profile data
-	useEffect(() => {
-		if (isOpen && postId) {
-			console.log("Modal opened for post:", postId);
-			console.log("Initial comments:", initialComments);
+	const organizeComments = useCallback(
+		(flatComments: PostComment[]): Comment[] => {
+			console.log("Organizing comments - input:", flatComments.length);
 
-			// Reset state when modal opens
-			setHasLoadedFromApi(false);
-			setPage(1);
-			setError(null);
-			setNewComment("");
-			setReplyToComment(null);
-			setReplyText("");
-			setShowAllReplies({});
-
-			// If we have initial comments, transform and enhance them
-			if (initialComments && initialComments.length > 0) {
-				const enhancedComments = initialComments
-					.map(transformApiComment)
-					.map(enhanceCommentWithProfileData);
-				console.log("Using enhanced initial comments:", enhancedComments);
-				setComments(enhancedComments);
-			} else {
-				console.log("No initial comments, loading from API");
-				setComments([]);
-				loadComments(true);
+			if (!flatComments || flatComments.length === 0) {
+				return [];
 			}
-		} else {
-			// Reset when modal closes
-			setComments([]);
-			setThreaded([]);
-			setHasLoadedFromApi(false);
+
+			const commentMap = new Map<number, Comment>();
+			const rootComments: Comment[] = [];
+
+			// First pass: create Comment objects with proper commenter data
+			flatComments.forEach((pc) => {
+				// Handle commenter data with multiple fallback strategies
+				let commenterData: Comment["commenter"];
+
+				if (pc.commenter) {
+					commenterData = {
+						id: pc.commenter.id,
+						username: pc.commenter.username,
+						firstName: pc.commenter.firstName || "",
+						lastName: pc.commenter.lastName || "",
+						profileImage: pc.commenter.profileImage || "/default-avatar.png",
+					};
+				} else if (sessionUser && pc.userId === sessionUser.id) {
+					commenterData = {
+						id: sessionUser.id,
+						username: sessionUser.username,
+						firstName: sessionUser.firstName || "",
+						lastName: sessionUser.lastName || "",
+						profileImage: sessionUser.profileImage || "/default-avatar.png",
+					};
+				} else {
+					commenterData = {
+						id: pc.userId,
+						username: pc.username || "Unknown User",
+						firstName: "",
+						lastName: "",
+						profileImage: "/default-avatar.png",
+					};
+				}
+
+				const comment: Comment = {
+					id: pc.id,
+					userId: pc.userId,
+					postId: pc.postId,
+					comment: pc.comment,
+					parentId: pc.parentId,
+					createdAt: pc.created_at,
+					updatedAt: pc.updated_at,
+					commenter: commenterData,
+					replies: [],
+				};
+
+				commentMap.set(pc.id, comment);
+			});
+
+			// Second pass: organize into tree structure
+			flatComments.forEach((pc) => {
+				const comment = commentMap.get(pc.id)!;
+
+				if (pc.parentId === null || pc.parentId === undefined) {
+					rootComments.push(comment);
+				} else {
+					const parent = commentMap.get(pc.parentId);
+					if (parent) {
+						parent.replies = parent.replies || [];
+						parent.replies.push(comment);
+					} else {
+						// Parent not found, add as root
+						rootComments.push(comment);
+					}
+				}
+			});
+
+			// Sort by creation date (newest first for root, oldest first for replies)
+			rootComments.sort(
+				(a, b) =>
+					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+			);
+
+			// Sort replies chronologically
+			rootComments.forEach((comment) => {
+				if (comment.replies && comment.replies.length > 0) {
+					comment.replies.sort(
+						(a, b) =>
+							new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+					);
+				}
+			});
+
+			console.log("Organized result:", rootComments.length, "root comments");
+			return rootComments;
+		},
+		[sessionUser],
+	);
+
+	// Memoize the organized comments
+	const comments = useMemo(() => {
+		if (commentsData && commentsData.length > 0) {
+			return organizeComments(commentsData);
 		}
-	}, [isOpen, postId, sessionUser]); // Add sessionUser as dependency
+		return [];
+	}, [commentsData, organizeComments]);
 
-	// Organize comments into threads when comments change
-	useEffect(() => {
-		console.log("Processing comments:", comments);
-
+	// Process comments for display (search, sort)
+	const processedComments = useMemo(() => {
 		let processedComments = [...comments];
 
 		// Apply search filter
@@ -230,64 +254,137 @@ const CommentModal: React.FC<CommentModalProps> = ({
 			}
 		});
 
-		const organized = organizeCommentsIntoThreads(processedComments);
-		console.log("Organized comments:", organized);
-		setThreaded(organized);
+		return processedComments;
 	}, [comments, searchTerm, sortBy]);
 
-	// Enhanced load comments with better profile data handling
-	const loadComments = useCallback(
-		async (reset = false) => {
-			if (!postId) return;
+	// Load comments from API
+	const loadCommentsFromApi = useCallback(async () => {
+		if (!postId) return;
 
-			if (!hasLoadedFromApi && initialComments.length > 0 && !reset) {
-				console.log("Skipping API load - already have initial comments");
-				return;
+		console.log("Loading comments from API for post:", postId);
+		setIsLoading(true);
+		setError(null);
+
+		try {
+			const response = await fetch(`/api/posts/${postId}`, {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				credentials: "include",
+			});
+
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 			}
 
-			console.log("Loading comments from API for post:", postId);
-			setIsLoading(true);
+			const postData = await response.json();
+			const apiComments = postData.postComments || [];
+
+			console.log("API returned", apiComments.length, "comments");
+			setCommentsData(apiComments);
+			setHasInitialized(true);
+		} catch (error) {
+			console.error("Error loading comments from API:", error);
+			setError(
+				error instanceof Error ? error.message : "Failed to load comments",
+			);
+		} finally {
+			setIsLoading(false);
+		}
+	}, [postId]);
+
+	// Initialize comments when modal opens - IMMEDIATE LOAD
+	useEffect(() => {
+		if (!isOpen || !postId) {
+			// Reset when closed
+			setCommentsData([]);
 			setError(null);
+			setNewComment("");
+			setReplyToComment(null);
+			setReplyText("");
+			setShowAllReplies({});
+			setSearchTerm("");
+			setHasInitialized(false);
+			return;
+		}
 
-			try {
-				const currentPage = reset ? 1 : page;
-				const response = await commentApi.getPostComments(
-					postId,
-					currentPage,
-					20,
+		console.log("Modal opened - immediate initialization");
+		console.log("Initial comments:", initialComments?.length || 0);
+
+		// Reset form state
+		setError(null);
+		setNewComment("");
+		setReplyToComment(null);
+		setReplyText("");
+		setShowAllReplies({});
+
+		// Try to use initial comments first, but ALWAYS verify with API
+		if (initialComments && initialComments.length > 0) {
+			console.log("Processing initial comments immediately");
+
+			// Check if initialComments are already in the threaded structure or flat
+			const hasNestedReplies = initialComments.some(
+				(comment) => comment.replies && comment.replies.length > 0,
+			);
+
+			if (hasNestedReplies) {
+				console.log("Initial comments have nested structure, flattening...");
+				const flattenedComments = flattenCommentStructure(initialComments);
+				setCommentsData(flattenedComments);
+				setHasInitialized(true);
+			} else {
+				console.log("Initial comments are flat, converting format...");
+				const postCommentsData: PostComment[] = initialComments.map(
+					(comment) => ({
+						id: comment.id,
+						userId: comment.userId,
+						postId: comment.postId,
+						comment: comment.comment,
+						username: comment.commenter?.username || "Unknown User",
+						parentId: comment.parentId,
+						created_at: comment.createdAt,
+						updated_at: comment.updatedAt,
+						commenter: comment.commenter,
+					}),
 				);
-
-				console.log("API response:", response);
-
-				const apiComments = response.comments || [];
-				const enhancedComments = apiComments
-					.map(transformApiComment)
-					.map(enhanceCommentWithProfileData);
-
-				console.log("Enhanced API comments:", enhancedComments);
-
-				if (reset) {
-					setComments(enhancedComments);
-				} else {
-					setComments((prev) => [...prev, ...enhancedComments]);
-				}
-
-				setHasLoadedFromApi(true);
-				setHasMore(response.pagination?.hasNext || false);
-				setPage(reset ? 2 : currentPage + 1);
-			} catch (err) {
-				console.error("Error loading comments:", err);
-				setError(
-					err instanceof Error ? err.message : "Failed to load comments",
-				);
-			} finally {
-				setIsLoading(false);
+				setCommentsData(postCommentsData);
+				setHasInitialized(true);
 			}
-		},
-		[postId, page, hasLoadedFromApi, initialComments.length, sessionUser],
-	);
 
-	// Enhanced add comment with proper profile data
+			// Also load from API in background to ensure we have the latest data
+			// but don't show loading state since we already have data
+			loadCommentsFromApi();
+		} else {
+			console.log("No initial comments, loading from API");
+			loadCommentsFromApi();
+		}
+	}, [
+		isOpen,
+		postId,
+		initialComments,
+		loadCommentsFromApi,
+		flattenCommentStructure,
+	]);
+
+	// Format time ago
+	const formatTimeAgo = useCallback((dateString: string) => {
+		const now = new Date();
+		const date = new Date(dateString);
+		const diffInHours = Math.floor(
+			(now.getTime() - date.getTime()) / (1000 * 60 * 60),
+		);
+
+		if (diffInHours < 1) return "just now";
+		if (diffInHours < 24) return `${diffInHours}h ago`;
+
+		const diffInDays = Math.floor(diffInHours / 24);
+		if (diffInDays < 7) return `${diffInDays}d ago`;
+
+		return date.toLocaleDateString();
+	}, []);
+
+	// Handle adding new comment
 	const handleAddComment = useCallback(async () => {
 		if (!sessionUser || !newComment.trim()) return;
 
@@ -298,8 +395,15 @@ const CommentModal: React.FC<CommentModalProps> = ({
 				postId: postId,
 			});
 
-			const newCommentObj: Comment = {
-				...response.comment,
+			const newCommentData: PostComment = {
+				id: response.comment.id,
+				userId: sessionUser.id,
+				postId: postId,
+				comment: newComment.trim(),
+				username: sessionUser.username,
+				parentId: null,
+				created_at: response.comment.createdAt,
+				updated_at: response.comment.updatedAt,
 				commenter: {
 					id: sessionUser.id,
 					username: sessionUser.username,
@@ -307,10 +411,9 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					lastName: sessionUser.lastName || "",
 					profileImage: sessionUser.profileImage || "/default-avatar.png",
 				},
-				replies: [],
 			};
 
-			setComments((prev) => [newCommentObj, ...prev]);
+			setCommentsData((prev) => [newCommentData, ...prev]);
 			setNewComment("");
 		} catch (error) {
 			console.error("Error adding comment:", error);
@@ -320,7 +423,23 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		}
 	}, [sessionUser, newComment, postId]);
 
-	// Enhanced add reply with proper profile data
+	// Helper to find comment by ID
+	const findCommentById = useCallback(
+		(id: number): Comment | null => {
+			for (const comment of comments) {
+				if (comment.id === id) return comment;
+				if (comment.replies) {
+					for (const reply of comment.replies) {
+						if (reply.id === id) return reply;
+					}
+				}
+			}
+			return null;
+		},
+		[comments],
+	);
+
+	// Handle adding reply
 	const handleAddReply = useCallback(
 		async (parentId: number) => {
 			if (!sessionUser || !replyText.trim()) return;
@@ -337,8 +456,15 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					replyToUsername,
 				});
 
-				const newReply: Comment = {
-					...response.comment,
+				const newReplyData: PostComment = {
+					id: response.comment.id,
+					userId: sessionUser.id,
+					postId: postId,
+					comment: replyText.trim(),
+					username: sessionUser.username,
+					parentId: parentId,
+					created_at: response.comment.createdAt,
+					updated_at: response.comment.updatedAt,
 					commenter: {
 						id: sessionUser.id,
 						username: sessionUser.username,
@@ -346,38 +472,9 @@ const CommentModal: React.FC<CommentModalProps> = ({
 						lastName: sessionUser.lastName || "",
 						profileImage: sessionUser.profileImage || "/default-avatar.png",
 					},
-					replies: [],
 				};
 
-				// Add reply to the correct parent comment
-				setComments((prev) => {
-					return prev.map((comment) => {
-						if (comment.id === parentId) {
-							return {
-								...comment,
-								replies: [...(comment.replies || []), newReply],
-							};
-						}
-						// Check in replies too
-						if (comment.replies) {
-							const updatedReplies = comment.replies.map((reply) => {
-								if (reply.id === parentId) {
-									return {
-										...reply,
-										replies: [...(reply.replies || []), newReply],
-									};
-								}
-								return reply;
-							});
-							return {
-								...comment,
-								replies: updatedReplies,
-							};
-						}
-						return comment;
-					});
-				});
-
+				setCommentsData((prev) => [...prev, newReplyData]);
 				setReplyText("");
 				setReplyToComment(null);
 			} catch (error) {
@@ -387,65 +484,65 @@ const CommentModal: React.FC<CommentModalProps> = ({
 				setIsSubmitting(false);
 			}
 		},
-		[sessionUser, replyText, postId],
+		[sessionUser, replyText, postId, findCommentById],
 	);
 
-	// Helper to find comment by ID
-	const findCommentById = (id: number): Comment | null => {
-		for (const comment of comments) {
-			if (comment.id === id) return comment;
-			if (comment.replies) {
-				for (const reply of comment.replies) {
-					if (reply.id === id) return reply;
-				}
-			}
+	// Handle edit comment
+	const handleEditComment = async (commentId: number, newText: string) => {
+		try {
+			await commentApi.updateComment(commentId, newText);
+			setCommentsData((prev) =>
+				prev.map((comment) =>
+					comment.id === commentId ? { ...comment, comment: newText } : comment,
+				),
+			);
+		} catch (error) {
+			console.error("Error editing comment:", error);
+			throw error;
 		}
-		return null;
 	};
 
-	// Format time ago
-	const formatTimeAgo = (dateString: string) => {
-		const now = new Date();
-		const date = new Date(dateString);
-		const diffInHours = Math.floor(
-			(now.getTime() - date.getTime()) / (1000 * 60 * 60),
-		);
-
-		if (diffInHours < 1) return "just now";
-		if (diffInHours < 24) return `${diffInHours}h ago`;
-
-		const diffInDays = Math.floor(diffInHours / 24);
-		if (diffInDays < 7) return `${diffInDays}d ago`;
-
-		return date.toLocaleDateString();
+	// Handle delete comment
+	const handleDeleteComment = async (commentId: number) => {
+		try {
+			await commentApi.deleteComment(postId, commentId);
+			setCommentsData((prev) =>
+				prev.filter(
+					(comment) =>
+						comment.id !== commentId && comment.parentId !== commentId,
+				),
+			);
+		} catch (error) {
+			console.error("Error deleting comment:", error);
+			throw error;
+		}
 	};
 
 	// Toggle show all replies for a comment
-	const toggleShowAllReplies = (commentId: number) => {
+	const toggleShowAllReplies = useCallback((commentId: number) => {
 		setShowAllReplies((prev) => ({
 			...prev,
 			[commentId]: !prev[commentId],
 		}));
-	};
+	}, []);
 
-	// Handle manual refresh button
+	// Handle manual refresh
 	const handleRefresh = useCallback(() => {
 		console.log("Manual refresh triggered");
-		setHasLoadedFromApi(false);
-		loadComments(true);
-	}, [loadComments]);
+		setHasInitialized(false);
+		loadCommentsFromApi();
+	}, [loadCommentsFromApi]);
 
 	// Handle modal close
 	const handleClose = useCallback(() => {
 		setSearchTerm("");
 		setError(null);
-		setComments([]);
-		setThreaded([]);
-		setHasLoadedFromApi(false);
+		setCommentsData([]);
 		setNewComment("");
 		setReplyToComment(null);
 		setReplyText("");
 		setShowAllReplies({});
+		setHasInitialized(false);
 		onClose();
 	}, [onClose]);
 
@@ -478,8 +575,9 @@ const CommentModal: React.FC<CommentModalProps> = ({
 
 	if (!isOpen) return null;
 
-	const totalComments = comments.length;
-	const filteredComments = threaded.length;
+	const totalComments = commentsData.length;
+	const filteredComments = processedComments.length;
+	const shouldShowLoading = isLoading && !hasInitialized;
 
 	return (
 		<div
@@ -512,7 +610,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 							onClick={handleRefresh}
 							disabled={isLoading}
 							className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-							title="Refresh comments from server"
+							title="Refresh comments"
 						>
 							<RefreshCw
 								size={18}
@@ -584,6 +682,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 										placeholder="Write a comment..."
 										className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none"
 										rows={3}
+										disabled={isSubmitting}
 									/>
 									<button
 										onClick={handleAddComment}
@@ -617,7 +716,14 @@ const CommentModal: React.FC<CommentModalProps> = ({
 						</div>
 					)}
 
-					{threaded.length === 0 && !isLoading ? (
+					{shouldShowLoading ? (
+						<div className="p-8 text-center">
+							<div className="inline-flex items-center gap-2 text-gray-600">
+								<Loader className="animate-spin" size={20} />
+								Loading comments...
+							</div>
+						</div>
+					) : processedComments.length === 0 ? (
 						<div className="p-8 text-center">
 							<div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
 								<MessageCircle className="text-gray-400" size={24} />
@@ -641,11 +747,15 @@ const CommentModal: React.FC<CommentModalProps> = ({
 						</div>
 					) : (
 						<div className="p-4 space-y-6">
-							{threaded.map((comment) => (
-								<ModalCommentThread
+							{processedComments.map((comment) => (
+								<CommentThread
 									key={comment.id}
 									comment={comment}
+									depth={0}
+									maxDepth={5}
 									sessionUser={sessionUser}
+									postUser={undefined}
+									allComments={processedComments}
 									replyToComment={replyToComment}
 									setReplyToComment={setReplyToComment}
 									replyText={replyText}
@@ -655,30 +765,10 @@ const CommentModal: React.FC<CommentModalProps> = ({
 									formatTimeAgo={formatTimeAgo}
 									showAllReplies={showAllReplies}
 									toggleShowAllReplies={toggleShowAllReplies}
+									onEdit={handleEditComment}
+									onDelete={handleDeleteComment}
 								/>
 							))}
-
-							{/* Load more button */}
-							{hasMore && hasLoadedFromApi && !isLoading && (
-								<div className="text-center pt-4">
-									<button
-										onClick={() => loadComments(false)}
-										className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-									>
-										Load more comments
-									</button>
-								</div>
-							)}
-
-							{/* Loading indicator */}
-							{isLoading && (
-								<div className="text-center py-4">
-									<div className="inline-flex items-center gap-2 text-gray-600">
-										<Loader className="animate-spin" size={16} />
-										Loading comments...
-									</div>
-								</div>
-							)}
 						</div>
 					)}
 				</div>
@@ -692,6 +782,9 @@ const CommentModal: React.FC<CommentModalProps> = ({
 								{totalComments}{" "}
 								{totalComments === 1 ? "participant" : "participants"}
 							</span>
+							{/* {hasInitialized && (
+								<span className="text-green-600 text-xs">✓ Loaded</span>
+							)} */}
 						</div>
 
 						{!sessionUser && (
@@ -710,203 +803,6 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					</div>
 				</div>
 			</div>
-		</div>
-	);
-};
-
-// Enhanced Modal Comment Thread Component with better profile image handling
-interface ModalCommentThreadProps {
-	comment: Comment;
-	sessionUser: SessionUser | null;
-	replyToComment: number | null;
-	setReplyToComment: (id: number | null) => void;
-	replyText: string;
-	setReplyText: (text: string) => void;
-	handleAddReply: (parentId: number) => void;
-	isSubmitting: boolean;
-	formatTimeAgo: (date: string) => string;
-	showAllReplies: { [key: number]: boolean };
-	toggleShowAllReplies: (commentId: number) => void;
-	depth?: number;
-}
-
-const ModalCommentThread: React.FC<ModalCommentThreadProps> = ({
-	comment,
-	sessionUser,
-	replyToComment,
-	setReplyToComment,
-	replyText,
-	setReplyText,
-	handleAddReply,
-	isSubmitting,
-	formatTimeAgo,
-	showAllReplies,
-	toggleShowAllReplies,
-	depth = 0,
-}) => {
-	const maxVisibleReplies = 0;
-	const hasReplies = comment.replies && comment.replies.length > 0;
-	const hasMoreReplies =
-		comment.replies && comment.replies.length > maxVisibleReplies;
-	const shouldShowAll = showAllReplies[comment.id];
-	const visibleReplies = shouldShowAll
-		? comment.replies
-		: comment.replies?.slice(0, maxVisibleReplies);
-
-	// Calculate proper indentation based on depth
-	const getIndentationClass = (currentDepth: number) => {
-		if (currentDepth === 0) return "";
-		switch (currentDepth) {
-			case 1:
-				return "ml-12"; // 48px
-			case 2:
-				return "ml-16"; // 64px
-			case 3:
-				return "ml-20"; // 80px
-			case 4:
-				return "ml-24"; // 96px
-			default:
-				return "ml-24"; // Max indentation
-		}
-	};
-
-	return (
-		<div className="space-y-3">
-			{/* Main Comment */}
-			<div
-				className={`flex gap-3 ${depth > 0 ? getIndentationClass(depth) : ""}`}
-			>
-				<Link
-					to={`/users/${comment.commenter?.id || comment.userId}`}
-					className="flex-shrink-0"
-				>
-					<img
-						src={comment.commenter?.profileImage || "/default-avatar.png"}
-						alt={comment.commenter?.username || "User"}
-						className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
-						onError={(e) => {
-							const target = e.target as HTMLImageElement;
-							target.src = "/default-avatar.png";
-						}}
-					/>
-				</Link>
-				<div className="flex-1">
-					<div className="bg-slate-50 rounded-lg p-3">
-						<div className="flex items-center gap-2 mb-1">
-							<Link
-								to={`/users/${comment.commenter?.id || comment.userId}`}
-								className="font-semibold text-slate-900 text-sm hover:text-orange-600 transition-colors"
-							>
-								{comment.commenter?.username || "Unknown User"}
-							</Link>
-							<span className="text-xs text-slate-500">
-								{formatTimeAgo(comment.createdAt)}
-							</span>
-						</div>
-						<p className="text-slate-700 text-sm">{comment.comment}</p>
-					</div>
-					{sessionUser && (
-						<button
-							onClick={() => setReplyToComment(comment.id)}
-							className="flex items-center gap-1 mt-2 text-xs text-slate-500 hover:text-orange-600 transition-colors"
-						>
-							<Reply size={12} />
-							Reply
-						</button>
-					)}
-				</div>
-			</div>
-
-			{/* Reply Form */}
-			{replyToComment === comment.id && sessionUser && (
-				<div className={`flex gap-3 ${getIndentationClass(depth + 1)}`}>
-					<Link to={`/users/${sessionUser.id}`} className="flex-shrink-0">
-						<img
-							src={sessionUser.profileImage || "/default-avatar.png"}
-							alt={sessionUser.username}
-							className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
-							onError={(e) => {
-								const target = e.target as HTMLImageElement;
-								target.src = "/default-avatar.png";
-							}}
-						/>
-					</Link>
-					<div className="flex-1">
-						<div className="relative">
-							<textarea
-								value={replyText}
-								onChange={(e) => setReplyText(e.target.value)}
-								placeholder={`Reply to @${comment.commenter?.username}...`}
-								className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm"
-								rows={2}
-							/>
-							<div className="flex items-center justify-between mt-2">
-								<button
-									onClick={() => {
-										setReplyToComment(null);
-										setReplyText("");
-									}}
-									className="text-xs text-slate-500 hover:text-slate-700"
-								>
-									Cancel
-								</button>
-								<button
-									onClick={() => handleAddReply(comment.id)}
-									disabled={!replyText.trim() || isSubmitting}
-									className="px-3 py-1 bg-orange-500 text-white text-xs rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-								>
-									{isSubmitting ? "Posting..." : "Reply"}
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>
-			)}
-
-			{/* Replies */}
-			{hasReplies && (
-				<div className="space-y-3">
-					{visibleReplies?.map((reply) => (
-						<ModalCommentThread
-							key={reply.id}
-							comment={reply}
-							sessionUser={sessionUser}
-							replyToComment={replyToComment}
-							setReplyToComment={setReplyToComment}
-							replyText={replyText}
-							setReplyText={setReplyText}
-							handleAddReply={handleAddReply}
-							isSubmitting={isSubmitting}
-							formatTimeAgo={formatTimeAgo}
-							showAllReplies={showAllReplies}
-							toggleShowAllReplies={toggleShowAllReplies}
-							depth={depth + 1}
-						/>
-					))}
-
-					{/* Show more/less replies buttons */}
-					{hasMoreReplies && (
-						<div className={getIndentationClass(depth + 1)}>
-							{!shouldShowAll ? (
-								<button
-									onClick={() => toggleShowAllReplies(comment.id)}
-									className="text-sm text-orange-600 hover:text-orange-700 font-medium"
-								>
-									View {comment.replies!.length - maxVisibleReplies} more
-									replies
-								</button>
-							) : (
-								<button
-									onClick={() => toggleShowAllReplies(comment.id)}
-									className="text-sm text-slate-600 hover:text-slate-700 font-medium"
-								>
-									Show less
-								</button>
-							)}
-						</div>
-					)}
-				</div>
-			)}
 		</div>
 	);
 };
