@@ -11,10 +11,10 @@ import {
 	MoreHorizontal,
 	Edit,
 	Trash2,
-	Reply,
 	Send,
 } from "lucide-react";
 import CommentModal from "../../Comments/CommentModal";
+import CommentThread from "../../Comments/CommentThread";
 import { useComments } from "../../../hooks/useComments";
 import { commentApi } from "../../../services/commentApi";
 import { RootState } from "../../../types";
@@ -598,14 +598,18 @@ const PostDetailsWithComments: React.FC = () => {
 								)}
 							</div>
 
-							{/* Display Comments */}
+							{/* Display Comments using enhanced CommentThread */}
 							{comments.length > 0 ? (
 								<div className="space-y-4">
 									{comments.map((comment) => (
-										<CommentThreadComponent
+										<CommentThread
 											key={comment.id}
 											comment={comment}
+											depth={0}
+											maxDepth={5}
 											sessionUser={sessionUser}
+											postUser={post.user}
+											allComments={comments}
 											replyToComment={replyToComment}
 											setReplyToComment={setReplyToComment}
 											replyText={replyText}
@@ -615,8 +619,6 @@ const PostDetailsWithComments: React.FC = () => {
 											formatTimeAgo={formatTimeAgo}
 											showAllReplies={showAllReplies}
 											toggleShowAllReplies={toggleShowAllReplies}
-											postUser={post.user}
-											allComments={comments}
 										/>
 									))}
 								</div>
@@ -643,329 +645,6 @@ const PostDetailsWithComments: React.FC = () => {
 				postId={commentModal.postId || post.id}
 				initialComments={commentModal.comments}
 			/>
-		</div>
-	);
-};
-
-// Comment Thread Component
-interface CommentThreadComponentProps {
-	comment: Comment;
-	sessionUser: SessionUser | null;
-	replyToComment: number | null;
-	setReplyToComment: (id: number | null) => void;
-	replyText: string;
-	setReplyText: (text: string) => void;
-	handleAddReply: (parentId: number) => void;
-	isSubmitting: boolean;
-	formatTimeAgo: (date: string) => string;
-	showAllReplies: { [key: number]: boolean };
-	toggleShowAllReplies: (commentId: number) => void;
-	depth?: number;
-	postUser: PostUser;
-	allComments: Comment[];
-}
-
-const CommentThreadComponent: React.FC<CommentThreadComponentProps> = ({
-	comment,
-	sessionUser,
-	replyToComment,
-	setReplyToComment,
-	replyText,
-	setReplyText,
-	handleAddReply,
-	isSubmitting,
-	formatTimeAgo,
-	showAllReplies,
-	toggleShowAllReplies,
-	depth = 0,
-	postUser,
-	allComments,
-}) => {
-	const maxVisibleReplies = 0;
-	const hasReplies = comment.replies && comment.replies.length > 0;
-	const hasMoreReplies =
-		comment.replies && comment.replies.length > maxVisibleReplies;
-	const shouldShowAll = showAllReplies[comment.id];
-	const visibleReplies = shouldShowAll
-		? comment.replies
-		: comment.replies?.slice(0, maxVisibleReplies);
-
-	// Calculate proper indentation based on depth
-	const getIndentationClass = (currentDepth: number) => {
-		if (currentDepth === 0) return "";
-		switch (currentDepth) {
-			case 1:
-				return "ml-12"; // 48px
-			case 2:
-				return "ml-16"; // 64px
-			case 3:
-				return "ml-20"; // 80px
-			case 4:
-				return "ml-24"; // 96px
-			default:
-				return "ml-24"; // Max indentation
-		}
-	};
-
-	// Helper function to render comments with clickable @ mentions
-	const renderCommentWithMentions = useCallback(
-		(commentText: string) => {
-			// Regex to match @username patterns including hyphens, underscores, and numbers
-			const mentionRegex = /@([\w-]+)/g;
-			const parts = [];
-			let lastIndex = 0;
-			let match;
-
-			while ((match = mentionRegex.exec(commentText)) !== null) {
-				// Add text before the mention
-				if (match.index > lastIndex) {
-					parts.push(commentText.slice(lastIndex, match.index));
-				}
-
-				// Add the clickable mention
-				const username = match[1];
-				// Try to find the user ID for this username from available data
-				let userId = null;
-
-				// Check if it's the session user
-				if (sessionUser && username === sessionUser.username) {
-					userId = sessionUser.id;
-				}
-				// Check if it's the post creator
-				else if (username === postUser.username) {
-					userId = postUser.id;
-				}
-				// Look through comments to find matching username
-				else {
-					const findUserInComments = (
-						commentsList: Comment[],
-					): number | null => {
-						for (const comment of commentsList) {
-							if (comment.commenter?.username === username) {
-								return comment.commenter.id;
-							}
-							if (comment.replies) {
-								const found = findUserInComments(comment.replies);
-								if (found) return found;
-							}
-						}
-						return null;
-					};
-					userId = findUserInComments(allComments);
-				}
-
-				parts.push(
-					<Link
-						key={`mention-${match.index}`}
-						to={`/users/${userId || username}`} // Use user ID if found, fallback to username
-						className="text-orange-600 hover:text-orange-700 font-medium"
-					>
-						@{username}
-					</Link>,
-				);
-
-				lastIndex = match.index + match[0].length;
-			}
-
-			// Add remaining text after the last mention
-			if (lastIndex < commentText.length) {
-				parts.push(commentText.slice(lastIndex));
-			}
-
-			// If no mentions found, return the original text
-			return parts.length === 0 ? commentText : parts;
-		},
-		[postUser.username, postUser.id, allComments, sessionUser],
-	);
-
-	// Stable commenter data with proper fallbacks
-	const commenterData = useMemo(() => {
-		if (comment.commenter) {
-			return {
-				id: comment.commenter.id,
-				username: comment.commenter.username || "Unknown User",
-				firstName: comment.commenter.firstName || "",
-				lastName: comment.commenter.lastName || "",
-				profileImage: comment.commenter.profileImage || "/default-avatar.png",
-			};
-		}
-
-		// Fallback to comment data
-		return {
-			id: comment.userId,
-			username: "Unknown User",
-			firstName: "",
-			lastName: "",
-			profileImage: "/default-avatar.png",
-		};
-	}, [comment.commenter, comment.userId]);
-
-	return (
-		<div className="space-y-3">
-			{/* Main Comment */}
-			<div
-				className={`flex gap-3 ${depth > 0 ? getIndentationClass(depth) : ""}`}
-			>
-				<Link to={`/users/${commenterData.id}`} className="flex-shrink-0">
-					<img
-						src={commenterData.profileImage}
-						alt={commenterData.username}
-						className="w-10 h-10 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
-						onError={(e) => {
-							const target = e.target as HTMLImageElement;
-							if (target.src !== "/default-avatar.png") {
-								target.src = "/default-avatar.png";
-							}
-						}}
-					/>
-				</Link>
-				<div className="flex-1">
-					<div className="bg-slate-50 rounded-lg p-3">
-						<div className="flex items-center gap-2 mb-1">
-							<Link
-								to={`/users/${commenterData.id}`}
-								className="font-semibold text-slate-900 text-sm hover:text-orange-600 transition-colors"
-							>
-								{commenterData.firstName && commenterData.lastName
-									? `${commenterData.firstName} ${commenterData.lastName}`
-									: commenterData.username}
-							</Link>
-							<span className="text-xs text-slate-500">
-								{formatTimeAgo(comment.createdAt)}
-							</span>
-						</div>
-						<div className="text-slate-700 text-sm">
-							{renderCommentWithMentions(comment.comment)}
-						</div>
-					</div>
-					{sessionUser && (
-						<button
-							onClick={() => {
-								setReplyToComment(comment.id);
-								// Pre-populate reply with mention
-								if (!replyText.includes(`@${commenterData.username}`)) {
-									setReplyText(`@${commenterData.username} `);
-								}
-							}}
-							className="flex items-center gap-1 mt-2 text-xs text-slate-500 hover:text-orange-600 transition-colors"
-						>
-							<Reply size={12} />
-							Reply
-						</button>
-					)}
-				</div>
-			</div>
-
-			{/* Reply Form */}
-			{replyToComment === comment.id && sessionUser && (
-				<div className={`flex gap-3 ${getIndentationClass(depth + 1)}`}>
-					<Link to={`/users/${sessionUser.id}`} className="flex-shrink-0">
-						<img
-							src={sessionUser.profileImage || "/default-avatar.png"}
-							alt={sessionUser.username}
-							className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
-							onError={(e) => {
-								const target = e.target as HTMLImageElement;
-								if (target.src !== "/default-avatar.png") {
-									target.src = "/default-avatar.png";
-								}
-							}}
-						/>
-					</Link>
-					<div className="flex-1">
-						<div className="relative">
-							<textarea
-								value={replyText}
-								onChange={(e) => setReplyText(e.target.value)}
-								placeholder={`Reply to @${commenterData.username}...`}
-								className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm"
-								rows={2}
-								onFocus={() => {
-									// Auto-add mention when focusing on reply if not already present
-									if (!replyText.includes(`@${commenterData.username}`)) {
-										setReplyText(`@${commenterData.username} `);
-									}
-								}}
-							/>
-							<div className="flex items-center justify-between mt-2">
-								<button
-									onClick={() => {
-										setReplyToComment(null);
-										setReplyText("");
-									}}
-									className="text-xs text-slate-500 hover:text-slate-700"
-								>
-									Cancel
-								</button>
-								<button
-									onClick={() => {
-										// Ensure mention is present before submitting
-										let finalReplyText = replyText.trim();
-										if (
-											!finalReplyText.includes(`@${commenterData.username}`)
-										) {
-											finalReplyText = `@${commenterData.username} ${finalReplyText}`;
-										}
-										setReplyText(finalReplyText);
-										handleAddReply(comment.id);
-									}}
-									disabled={!replyText.trim() || isSubmitting}
-									className="px-3 py-1 bg-orange-500 text-white text-xs rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-								>
-									{isSubmitting ? "Posting..." : "Reply"}
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>
-			)}
-
-			{/* Replies */}
-			{hasReplies && (
-				<div className="space-y-3">
-					{visibleReplies?.map((reply) => (
-						<CommentThreadComponent
-							key={reply.id}
-							comment={reply}
-							sessionUser={sessionUser}
-							replyToComment={replyToComment}
-							setReplyToComment={setReplyToComment}
-							replyText={replyText}
-							setReplyText={setReplyText}
-							handleAddReply={handleAddReply}
-							isSubmitting={isSubmitting}
-							formatTimeAgo={formatTimeAgo}
-							showAllReplies={showAllReplies}
-							toggleShowAllReplies={toggleShowAllReplies}
-							depth={depth + 1}
-							postUser={postUser}
-							allComments={allComments}
-						/>
-					))}
-
-					{/* Show more/less replies buttons */}
-					{hasMoreReplies && (
-						<div className={getIndentationClass(depth + 1)}>
-							{!shouldShowAll ? (
-								<button
-									onClick={() => toggleShowAllReplies(comment.id)}
-									className="text-sm text-orange-600 hover:text-orange-700 font-medium"
-								>
-									View {comment.replies!.length - maxVisibleReplies} more
-									replies
-								</button>
-							) : (
-								<button
-									onClick={() => toggleShowAllReplies(comment.id)}
-									className="text-sm text-slate-600 hover:text-slate-700 font-medium"
-								>
-									Show less
-								</button>
-							)}
-						</div>
-					)}
-				</div>
-			)}
 		</div>
 	);
 };
