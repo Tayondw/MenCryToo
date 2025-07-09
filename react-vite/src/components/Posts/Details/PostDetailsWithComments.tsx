@@ -2,7 +2,6 @@ import React, { useState, useCallback, useMemo } from "react";
 import { useLoaderData, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
-	Heart,
 	MessageCircle,
 	Share2,
 	ArrowLeft,
@@ -13,9 +12,12 @@ import {
 	Trash2,
 	Send,
 } from "lucide-react";
+import LikeButton from "../../Likes/LikesButton";
+import LikesModal from "../../Likes/LikesModal";
 import CommentModal from "../../Comments/CommentModal";
 import CommentThread from "../../Comments/CommentThread";
 import { useComments } from "../../../hooks/useComments";
+import { useLikes, useLikesModal } from "../../../hooks/useLikes";
 import { commentApi } from "../../../services/commentApi";
 import { RootState } from "../../../types";
 import type { Comment } from "../../../types/comments";
@@ -81,9 +83,16 @@ const PostDetailsWithComments: React.FC = () => {
 		closeModal: closeCommentModal,
 	} = useComments();
 
+	// Likes management
+	const { likeStates, toggleLike, setLikeState, fetchLikeStatus } = useLikes();
+	const {
+		isOpen: isLikesModalOpen,
+		postId: likesModalPostId,
+		openModal: openLikesModal,
+		closeModal: closeLikesModal,
+	} = useLikesModal();
+
 	const [showOptions, setShowOptions] = useState(false);
-	const [isLiked, setIsLiked] = useState(false);
-	const [likeCount, setLikeCount] = useState(post.likes);
 
 	// Inline commenting state
 	const [newComment, setNewComment] = useState("");
@@ -93,6 +102,30 @@ const PostDetailsWithComments: React.FC = () => {
 	const [showAllReplies, setShowAllReplies] = useState<{
 		[key: number]: boolean;
 	}>({});
+
+	// Initialize like state for this post
+	React.useEffect(() => {
+		if (!likeStates.has(post.id)) {
+			setLikeState(post.id, false, post.likes);
+			fetchLikeStatus(post.id);
+		}
+	}, [post.id, post.likes, likeStates, setLikeState, fetchLikeStatus]);
+
+	// Get current like state - memoized to prevent dependency issues
+	const currentLikeState = useMemo(() => {
+		return (
+			likeStates.get(post.id) || {
+				isLiked: false,
+				likeCount: post.likes,
+				isLoading: false,
+			}
+		);
+	}, [likeStates, post.id, post.likes]);
+
+	// Handle likes modal open
+	const handleLikesClick = useCallback(() => {
+		openLikesModal(post.id);
+	}, [openLikesModal, post.id]);
 
 	// Comment organization function with stable user data handling
 	const organizeComments = useCallback(
@@ -255,24 +288,6 @@ const PostDetailsWithComments: React.FC = () => {
 
 		return date.toLocaleDateString();
 	}, []);
-
-	// Handle like/unlike
-	const handleLikeToggle = async () => {
-		if (!sessionUser) {
-			navigate("/login");
-			return;
-		}
-
-		try {
-			setIsLiked(!isLiked);
-			setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
-			// Existing like/unlike API call here
-		} catch (error) {
-			setIsLiked(!isLiked);
-			setLikeCount((prev) => (isLiked ? prev + 1 : prev - 1));
-			console.error("Error toggling like:", error);
-		}
-	};
 
 	// Handle adding new comment
 	const handleAddComment = async () => {
@@ -507,17 +522,17 @@ const PostDetailsWithComments: React.FC = () => {
 						{/* Post Actions */}
 						<div className="flex items-center justify-between border-t border-b border-slate-200 py-4 my-4">
 							<div className="flex items-center gap-6">
-								<button
-									onClick={handleLikeToggle}
-									className={`flex items-center gap-2 ${
-										isLiked
-											? "text-red-500"
-											: "text-slate-500 hover:text-red-500"
-									} transition-colors`}
-								>
-									<Heart size={20} fill={isLiked ? "currentColor" : "none"} />
-									<span className="font-medium">{likeCount}</span>
-								</button>
+								<LikeButton
+									postId={post.id}
+									initialLikeCount={currentLikeState.likeCount}
+									initialIsLiked={currentLikeState.isLiked}
+									onLikeToggle={(postId, isLiked, newCount) => {
+										setLikeState(postId, isLiked, newCount);
+									}}
+									onLikesClick={handleLikesClick}
+									size={20}
+									disabled={currentLikeState.isLoading}
+								/>
 								<button
 									onClick={handleOpenComments}
 									className="flex items-center gap-2 text-slate-500 hover:text-blue-500 transition-colors"
@@ -645,6 +660,16 @@ const PostDetailsWithComments: React.FC = () => {
 				postId={commentModal.postId || post.id}
 				initialComments={commentModal.comments}
 			/>
+
+			{/* Likes Modal */}
+			{isLikesModalOpen && likesModalPostId && (
+				<LikesModal
+					isOpen={isLikesModalOpen}
+					onClose={closeLikesModal}
+					postId={likesModalPostId}
+					initialCount={currentLikeState.likeCount}
+				/>
+			)}
 		</div>
 	);
 };
