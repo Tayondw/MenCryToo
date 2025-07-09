@@ -66,7 +66,7 @@ const CommentForm: React.FC<CommentFormProps> = ({
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
 			e.preventDefault();
-			handleSubmit(e as any);
+			handleSubmit(e);
 		}
 
 		if (e.key === "Escape" && onCancel) {
