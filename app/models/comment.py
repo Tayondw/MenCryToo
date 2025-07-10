@@ -302,7 +302,7 @@ class Comment(db.Model):
         """
         Convert comment to dictionary with like data included
         """
-        # Get like count
+        # Get like count and current user like status
         like_count = len(self.comment_likes) if hasattr(self, "comment_likes") else 0
 
         # Check if current user liked this comment
