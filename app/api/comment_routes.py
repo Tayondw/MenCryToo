@@ -211,32 +211,37 @@ def get_recent_comments():
 @login_required
 def get_post_comments(postId):
     """
-    Get all comments for a post with ALL user data properly loaded
+    Get all comments for a post with like data included by default
     """
     try:
         page = request.args.get("page", 1, type=int)
         per_page = min(request.args.get("per_page", 20, type=int), 50)
         include_replies = request.args.get("include_replies", "true").lower() == "true"
+        include_likes = (
+            request.args.get("include_likes", "true").lower() == "true"
+        )  # Default to true
 
         # Check if post exists
         post = Post.query.get(postId)
         if not post:
             return jsonify({"errors": {"message": "Post not found"}}), 404
 
-        # Load ALL comments with their respective user data
+        # Load comments with like data by default
         comments_query = (
             db.session.query(Comment)
             .options(
-                # Load commenter for EVERY comment
+                # Load commenter data
                 joinedload(Comment.commenter).load_only(
                     "id", "username", "first_name", "last_name", "profile_image_url"
-                )
+                ),
+                # Load like data
+                selectinload(Comment.comment_likes),
             )
             .filter(Comment.post_id == postId)
         )
 
         if include_replies:
-            # Get all comments with their user data
+            # Get all comments with their user and like data
             all_comments = comments_query.order_by(Comment.created_at.desc()).all()
 
             # Organize into hierarchical structure
@@ -271,9 +276,12 @@ def get_post_comments(postId):
             end_idx = start_idx + per_page
             paginated_comments = root_comments[start_idx:end_idx]
 
-            # Convert to dict - using the to_dict method
+            # Convert to dict with like data
             comments_data = [
-                comment.to_dict(include_replies=True) for comment in paginated_comments
+                comment.to_dict_with_likes(
+                    include_replies=True, current_user_id=current_user.id
+                )
+                for comment in paginated_comments
             ]
 
             pagination = {
@@ -286,14 +294,17 @@ def get_post_comments(postId):
             }
 
         else:
-            # Get only root comments with user data
+            # Get only root comments
             root_comments_query = comments_query.filter(Comment.parent_id.is_(None))
             comments = root_comments_query.order_by(Comment.created_at.desc()).paginate(
                 page=page, per_page=per_page, error_out=False
             )
 
-            # Use to_dict method
-            comments_data = [comment.to_dict() for comment in comments.items]
+            # Convert to dict with like data
+            comments_data = [
+                comment.to_dict_with_likes(current_user_id=current_user.id)
+                for comment in comments.items
+            ]
 
             pagination = {
                 "page": page,
@@ -440,7 +451,7 @@ def get_post_comments_with_likes(postId):
 @login_required
 def add_comment(postId):
     """
-    Add a comment to a post (supports both root comments and replies) with user data
+    Add a comment to a post with like data in response
     """
     try:
         # Check if post exists
@@ -453,7 +464,7 @@ def add_comment(postId):
 
         # Get form data
         comment_text = request.form.get("comment", "").strip()
-        parent_id = request.form.get("parent_id")  # For threading
+        parent_id = request.form.get("parent_id")
 
         # Validate comment text
         if not comment_text or len(comment_text) < 1 or len(comment_text) > 500:
@@ -500,20 +511,32 @@ def add_comment(postId):
         db.session.add(comment)
         db.session.commit()
 
-        # Reload with user data
-        comment_with_user = (
+        # Reload with user and like data
+        comment_with_data = (
             db.session.query(Comment)
             .options(
                 joinedload(Comment.commenter).load_only(
                     "id", "username", "first_name", "last_name", "profile_image_url"
-                )
+                ),
+                selectinload(Comment.comment_likes),
             )
             .filter(Comment.id == comment.id)
             .first()
         )
 
-        # Return using to_dict method
-        return jsonify(comment_with_user.to_dict()), 201
+        # Return with like data
+        return (
+            jsonify(
+                {
+                    "comment": comment_with_data.to_dict_with_likes(
+                        current_user_id=current_user.id
+                    ),
+                    "success": True,
+                    "message": "Comment created successfully",
+                }
+            ),
+            201,
+        )
 
     except Exception as e:
         db.session.rollback()
@@ -602,14 +625,17 @@ def toggle_comment_like(commentId):
         # Get updated like count
         like_count = CommentLike.query.filter_by(comment_id=commentId).count()
 
+        # Return the structure that the frontend expects
         return jsonify(
             {
                 "success": True,
                 "action": action,
-                "isLiked": is_liked,
-                "likeCount": like_count,
+                "isLiked": is_liked,  # Frontend expects this field
+                "likeCount": like_count,  # Frontend expects this field
                 "commentId": commentId,
                 "message": f"Comment {action} successfully",
+                # Legacy fields for backward compatibility
+                "liked": is_liked,
             }
         )
 
