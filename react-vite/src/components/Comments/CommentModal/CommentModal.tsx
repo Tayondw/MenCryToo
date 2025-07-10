@@ -440,7 +440,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					lastName: sessionUser.lastName || "",
 					profileImage: sessionUser.profileImage || "/default-avatar.png",
 				},
-				// NEW: Initialize like data
+				// Initialize like data
 				likes: 0,
 				isLiked: false,
 			};
@@ -504,7 +504,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 						lastName: sessionUser.lastName || "",
 						profileImage: sessionUser.profileImage || "/default-avatar.png",
 					},
-					// NEW: Initialize like data
+					// Initialize like data
 					likes: 0,
 					isLiked: false,
 				};
@@ -553,7 +553,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		}
 	};
 
-	// NEW: Handle like toggle
+	// Handle like toggle
 	const handleLikeToggle = useCallback(
 		async (commentId: number, isLiked: boolean, newCount: number) => {
 			// Update local state immediately
@@ -576,12 +576,12 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		[],
 	);
 
-	// NEW: Handle showing likes modal
+	// Handle showing likes modal
 	const handleShowLikes = useCallback((commentId: number) => {
 		setLikesModal({ isOpen: true, commentId });
 	}, []);
 
-	// NEW: Handle closing likes modal
+	// Handle closing likes modal
 	const handleCloseLikesModal = useCallback(() => {
 		setLikesModal({ isOpen: false, commentId: null });
 	}, []);
@@ -837,7 +837,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 										toggleShowAllReplies={toggleShowAllReplies}
 										onEdit={handleEditComment}
 										onDelete={handleDeleteComment}
-										// NEW: Like handlers
+										// Like handlers
 										onLikeToggle={handleLikeToggle}
 										onShowLikes={handleShowLikes}
 									/>
