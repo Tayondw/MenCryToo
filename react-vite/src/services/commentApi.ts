@@ -681,8 +681,8 @@ class CommentAPI {
                   console.error("Error searching comments:", error);
                   throw error;
             }
-      }
-}
+      
+
 // Export singleton instance
 export const commentApi = new CommentAPI();
 export default commentApi;
