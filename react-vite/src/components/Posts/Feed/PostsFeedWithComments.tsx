@@ -24,8 +24,8 @@ import {
 	Users,
 	AlertCircle,
 } from "lucide-react";
-import LikeButton from "../../Likes/LikesButton";
-import LikesModal from "../../Likes/LikesModal";
+import LikeButton from "../../Likes/PostsLikesButton";
+import LikesModal from "../../Likes/PostsLikesModal";
 import CommentModal from "../../Comments/CommentModal";
 import { useComments } from "../../../hooks/useComments";
 import { useLikes, useLikesModal } from "../../../hooks/useLikes";
