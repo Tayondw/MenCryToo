@@ -12,8 +12,8 @@ import {
 	Trash2,
 	Send,
 } from "lucide-react";
-import LikeButton from "../../Likes/LikesButton";
-import LikesModal from "../../Likes/LikesModal";
+import LikeButton from "../../Likes/PostsLikesButton";
+import LikesModal from "../../Likes/PostsLikesModal";
 import CommentModal from "../../Comments/CommentModal";
 import CommentThread from "../../Comments/CommentThread";
 import { useComments } from "../../../hooks/useComments";
