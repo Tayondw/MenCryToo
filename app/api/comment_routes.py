@@ -149,7 +149,7 @@ def edit_comment(commentId):
         return jsonify({"errors": {"message": "Error updating comment"}}), 500
 
 
-# SINGLE LIKE ENDPOINT - FIXED
+# SINGLE LIKE ENDPOINT
 @comment_routes.route("/<int:commentId>/like", methods=["POST"])
 @login_required
 def toggle_comment_like(commentId):
