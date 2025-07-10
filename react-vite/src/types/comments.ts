@@ -18,10 +18,42 @@ export interface Comment {
 	replies?: Comment[];
 	replyCount?: number;
 
+	// Like functionality
+	likes?: number; // Number of likes
+	isLiked?: boolean; // Whether current user liked this comment
+	likedUsers?: CommentLikedUser[]; // Users who liked this comment
+
 	// UI state
 	isEditing?: boolean;
 	showReplies?: boolean;
 	isReplying?: boolean;
+}
+
+// Interface for users who liked a comment
+export interface CommentLikedUser {
+	id: number;
+	username: string;
+	firstName: string;
+	lastName: string;
+	profileImage: string;
+	likedAt: string; // When they liked the comment
+}
+
+// Comment like response from API
+export interface CommentLikeResponse {
+	success: boolean;
+	isLiked: boolean;
+	likeCount: number;
+	commentId: number;
+	message?: string;
+}
+
+// Comment likes list response
+export interface CommentLikesResponse {
+	commentId: number;
+	likes: CommentLikedUser[];
+	comment: string; // Comment text for context
+	total: number;
 }
 
 // Helper type for legacy comment data transformation
@@ -53,6 +85,10 @@ export interface LegacyCommentData {
 		lastName: string;
 		profileImage: string;
 	};
+	// Like data from legacy API
+	likes?: number;
+	isLiked?: boolean;
+	is_liked?: boolean;
 }
 
 export interface CommentFormData {
@@ -81,6 +117,9 @@ export interface CommentActions {
 	toggleReplies: (commentId: number) => void;
 	loadMoreComments: () => Promise<void>;
 	loadReplies: (commentId: number) => Promise<void>;
+	// Like actions
+	toggleCommentLike: (commentId: number) => Promise<void>;
+	getCommentLikes: (commentId: number) => Promise<CommentLikedUser[]>;
 }
 
 export interface CommentThreadProps {
@@ -91,6 +130,13 @@ export interface CommentThreadProps {
 	onEdit: (commentId: number, newText: string) => Promise<void>;
 	onDelete: (commentId: number) => Promise<void>;
 	currentUserId?: number;
+	// Like props
+	onLikeToggle?: (
+		commentId: number,
+		isLiked: boolean,
+		newCount: number,
+	) => void;
+	onShowLikes?: (commentId: number) => void;
 }
 
 export interface CommentFormProps {
@@ -109,6 +155,27 @@ export interface CommentModalProps {
 	onClose: () => void;
 	postId: number;
 	initialComments?: Comment[];
+}
+
+// Comment like button props
+export interface CommentLikeButtonProps {
+	commentId: number;
+	initialLikeCount: number;
+	initialIsLiked?: boolean;
+	onLikeToggle?: (commentId: number, isLiked: boolean, newCount: number) => void;
+	onLikesClick?: (commentId: number) => void;
+	className?: string;
+	showCount?: boolean;
+	size?: number;
+	disabled?: boolean;
+}
+
+// Comment likes modal props
+export interface CommentLikesModalProps {
+	isOpen: boolean;
+	onClose: () => void;
+	commentId: number;
+	initialCount?: number;
 }
 
 // Utility types for API responses
