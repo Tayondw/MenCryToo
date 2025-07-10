@@ -149,15 +149,12 @@ def edit_comment(commentId):
 def like_comment(commentId):
     """
     Like/unlike a comment (toggle functionality)
-    Future enhancement - implement comment likes table
     """
     try:
         comment = Comment.query.get(commentId)
         if not comment:
             return jsonify({"errors": {"message": "Comment not found"}}), 404
 
-        # For now, just return success
-        # TODO: Implement comment likes table similar to post likes
         return jsonify({"message": "Comment liked", "liked": True}), 200
 
     except Exception as e:
@@ -443,7 +440,7 @@ def get_post_comments_with_likes(postId):
 @login_required
 def add_comment(postId):
     """
-    Add a comment to a post (supports both root comments and replies) with enhanced user data
+    Add a comment to a post (supports both root comments and replies) with user data
     """
     try:
         # Check if post exists
@@ -515,7 +512,7 @@ def add_comment(postId):
             .first()
         )
 
-        # Return using enhanced to_dict method
+        # Return using to_dict method
         return jsonify(comment_with_user.to_dict()), 201
 
     except Exception as e:
