@@ -295,3 +295,79 @@ class Comment(db.Model):
         )
 
         return query.all()
+
+    def to_dict_with_likes(
+        self, include_replies=False, max_depth=5, current_depth=0, current_user_id=None
+    ):
+        """
+        Convert comment to dictionary with like data included
+        """
+        # Get like count
+        like_count = len(self.comment_likes) if hasattr(self, "comment_likes") else 0
+
+        # Check if current user liked this comment
+        is_liked = False
+        if current_user_id and hasattr(self, "comment_likes"):
+            is_liked = any(
+                like.user_id == current_user_id for like in self.comment_likes
+            )
+
+        base_dict = {
+            "id": self.id,
+            "userId": self.user_id,
+            "postId": self.post_id,
+            "comment": self.comment,
+            "parentId": self.parent_id,
+            "createdAt": self.created_at.isoformat() if self.created_at else None,
+            "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
+            # Like data
+            "likes": like_count,
+            "isLiked": is_liked,
+        }
+
+        # Include commenter info
+        if self.commenter:
+            base_dict["commenter"] = {
+                "id": self.commenter.id,
+                "username": self.commenter.username,
+                "firstName": self.commenter.first_name or "",
+                "lastName": self.commenter.last_name or "",
+                "profileImage": self.commenter.profile_image_url
+                or "/default-avatar.png",
+            }
+        else:
+            base_dict["commenter"] = {
+                "id": self.user_id,
+                "username": "Unknown User",
+                "firstName": "",
+                "lastName": "",
+                "profileImage": "/default-avatar.png",
+            }
+
+        # Legacy username field
+        base_dict["username"] = base_dict["commenter"]["username"]
+
+        # Include replies if requested and within depth limit
+        if (
+            include_replies
+            and current_depth < max_depth
+            and hasattr(self, "replies")
+            and self.replies
+        ):
+            base_dict["replies"] = [
+                reply.to_dict_with_likes(
+                    include_replies=True,
+                    max_depth=max_depth,
+                    current_depth=current_depth + 1,
+                    current_user_id=current_user_id,
+                )
+                for reply in sorted(self.replies, key=lambda x: x.created_at)
+            ]
+            base_dict["replyCount"] = len(self.replies)
+        else:
+            base_dict["replies"] = []
+            base_dict["replyCount"] = (
+                len(self.replies) if hasattr(self, "replies") and self.replies else 0
+            )
+
+        return base_dict
