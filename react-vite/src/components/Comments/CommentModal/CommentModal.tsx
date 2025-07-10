@@ -84,7 +84,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		[key: number]: boolean;
 	}>({});
 
-	// NEW: Like modal state
+	// Like modal state
 	const [likesModal, setLikesModal] = useState<{
 		isOpen: boolean;
 		commentId: number | null;
@@ -92,6 +92,30 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		isOpen: false,
 		commentId: null,
 	});
+	const [commentLikeStates, setCommentLikeStates] = useState<
+		Map<number, { isLiked: boolean; likeCount: number }>
+	>(new Map());
+
+	useEffect(() => {
+		if (commentsData && commentsData.length > 0) {
+			const likeStatesMap = new Map();
+
+			// Initialize like states for all comments (including nested ones)
+			const initializeLikeStates = (comments: PostComment[]) => {
+				comments.forEach((comment) => {
+					likeStatesMap.set(comment.id, {
+						isLiked: comment.isLiked || false,
+						likeCount: comment.likes || 0,
+					});
+				});
+			};
+
+			initializeLikeStates(commentsData);
+			setCommentLikeStates(likeStatesMap);
+
+			console.log("Initialized comment like states:", likeStatesMap);
+		}
+	}, [commentsData]);
 
 	// Helper function to flatten nested Comment structure to flat PostComment array
 	const flattenCommentStructure = useCallback(
@@ -135,7 +159,8 @@ const CommentModal: React.FC<CommentModalProps> = ({
 
 	const organizeComments = useCallback(
 		(flatComments: PostComment[]): Comment[] => {
-			console.log("Organizing comments - input:", flatComments.length);
+			console.log("Organizing comments - input:", flatComments);
+			console.log("Current like states:", commentLikeStates);
 
 			if (!flatComments || flatComments.length === 0) {
 				return [];
@@ -144,9 +169,9 @@ const CommentModal: React.FC<CommentModalProps> = ({
 			const commentMap = new Map<number, Comment>();
 			const rootComments: Comment[] = [];
 
-			// First pass: create Comment objects with proper commenter data
+			// First pass: create Comment objects with proper commenter data AND like data
 			flatComments.forEach((pc) => {
-				// Handle commenter data with multiple fallback strategies
+				// Handle commenter data (existing logic)
 				let commenterData: Comment["commenter"];
 
 				if (pc.commenter) {
@@ -175,6 +200,20 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					};
 				}
 
+				// Get like state - prioritize our state map, fallback to comment data
+				const likeState = commentLikeStates.get(pc.id);
+				const likes = likeState?.likeCount ?? pc.likes ?? 0;
+				const isLiked = likeState?.isLiked ?? pc.isLiked ?? false;
+
+				console.log("Processing comment like data:", {
+					commentId: pc.id,
+					likeStateFromMap: likeState,
+					commentLikes: pc.likes,
+					commentIsLiked: pc.isLiked,
+					finalLikes: likes,
+					finalIsLiked: isLiked,
+				});
+
 				const comment: Comment = {
 					id: pc.id,
 					userId: pc.userId,
@@ -185,15 +224,15 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					updatedAt: pc.updated_at,
 					commenter: commenterData,
 					replies: [],
-					// NEW: Include like data
-					likes: pc.likes || 0,
-					isLiked: pc.isLiked || false,
+					// Include like data with proper fallbacks
+					likes: likes,
+					isLiked: isLiked,
 				};
 
 				commentMap.set(pc.id, comment);
 			});
 
-			// Second pass: organize into tree structure
+			// Second pass: organize into tree structure (existing logic)
 			flatComments.forEach((pc) => {
 				const comment = commentMap.get(pc.id)!;
 
@@ -205,19 +244,17 @@ const CommentModal: React.FC<CommentModalProps> = ({
 						parent.replies = parent.replies || [];
 						parent.replies.push(comment);
 					} else {
-						// Parent not found, add as root
 						rootComments.push(comment);
 					}
 				}
 			});
 
-			// Sort by creation date (newest first for root, oldest first for replies)
+			// Sort by creation date (existing logic)
 			rootComments.sort(
 				(a, b) =>
 					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
 			);
 
-			// Sort replies chronologically
 			rootComments.forEach((comment) => {
 				if (comment.replies && comment.replies.length > 0) {
 					comment.replies.sort(
@@ -227,19 +264,27 @@ const CommentModal: React.FC<CommentModalProps> = ({
 				}
 			});
 
-			console.log("Organized result:", rootComments.length, "root comments");
+			console.log("Organized result with like data:", rootComments);
 			return rootComments;
 		},
-		[sessionUser],
+		[sessionUser, commentLikeStates], // Include commentLikeStates as dependency
 	);
 
 	// Memoize the organized comments
 	const comments = useMemo(() => {
+		console.log("Recomputing comments with current data:", {
+			commentsDataLength: commentsData?.length || 0,
+			commentLikeStatesSize: commentLikeStates.size,
+		});
+
 		if (commentsData && commentsData.length > 0) {
-			return organizeComments(commentsData);
+			const organized = organizeComments(commentsData);
+			console.log("Memoized comments result:", organized);
+			return organized;
 		}
 		return [];
-	}, [commentsData, organizeComments]);
+	}, [commentsData, organizeComments, commentLikeStates.size]);
+      
 
 	// Process comments for display (search, sort)
 	const processedComments = useMemo(() => {
@@ -396,6 +441,38 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		flattenCommentStructure,
 	]);
 
+	useEffect(() => {
+		if (commentsData && commentsData.length > 0) {
+			console.log("Initializing like states from comments data:", commentsData);
+
+			const likeStatesMap = new Map();
+
+			// Initialize like states for all comments (including nested ones)
+			const initializeLikeStates = (comments: PostComment[]) => {
+				comments.forEach((comment) => {
+					const likes = comment.likes ?? 0;
+					const isLiked = comment.isLiked ?? false;
+
+					likeStatesMap.set(comment.id, {
+						isLiked: isLiked,
+						likeCount: likes,
+					});
+
+					console.log("Initialized like state for comment:", {
+						commentId: comment.id,
+						likes,
+						isLiked,
+					});
+				});
+			};
+
+			initializeLikeStates(commentsData);
+			setCommentLikeStates(likeStatesMap);
+
+			console.log("Final initialized like states:", likeStatesMap);
+		}
+	}, [commentsData]);
+
 	// Format time ago
 	const formatTimeAgo = useCallback((dateString: string) => {
 		const now = new Date();
@@ -440,10 +517,17 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					lastName: sessionUser.lastName || "",
 					profileImage: sessionUser.profileImage || "/default-avatar.png",
 				},
-				// Initialize like data
+				// Initialize like data for new comment
 				likes: 0,
 				isLiked: false,
 			};
+
+			// Initialize like state for the new comment
+			setCommentLikeStates((prev) => {
+				const newMap = new Map(prev);
+				newMap.set(newCommentData.id, { isLiked: false, likeCount: 0 });
+				return newMap;
+			});
 
 			setCommentsData((prev) => [newCommentData, ...prev]);
 			setNewComment("");
@@ -504,10 +588,17 @@ const CommentModal: React.FC<CommentModalProps> = ({
 						lastName: sessionUser.lastName || "",
 						profileImage: sessionUser.profileImage || "/default-avatar.png",
 					},
-					// Initialize like data
+					// Initialize like data for new reply
 					likes: 0,
 					isLiked: false,
 				};
+
+				// Initialize like state for the new reply
+				setCommentLikeStates((prev) => {
+					const newMap = new Map(prev);
+					newMap.set(newReplyData.id, { isLiked: false, likeCount: 0 });
+					return newMap;
+				});
 
 				setCommentsData((prev) => [...prev, newReplyData]);
 				setReplyText("");
@@ -556,25 +647,47 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	// Handle like toggle
 	const handleLikeToggle = useCallback(
 		async (commentId: number, isLiked: boolean, newCount: number) => {
-			// Update local state immediately
-			setCommentsData((prev) =>
-				prev.map((comment) =>
+			console.log("CommentModal handleLikeToggle called:", {
+				commentId,
+				isLiked,
+				newCount,
+			});
+
+			// Validate parameters
+			if (isLiked === undefined || newCount === undefined) {
+				console.error("CommentModal received undefined like data:", {
+					commentId,
+					isLiked,
+					newCount,
+				});
+				return;
+			}
+
+			// Update local like state map first
+			setCommentLikeStates((prev) => {
+				const newMap = new Map(prev);
+				newMap.set(commentId, { isLiked, likeCount: newCount });
+				console.log("Updated comment like states map:", newMap);
+				return newMap;
+			});
+
+			// Update the comment data to persist the like state
+			setCommentsData((prev) => {
+				const updated = prev.map((comment) =>
 					comment.id === commentId
 						? { ...comment, likes: newCount, isLiked: isLiked }
 						: comment,
-				),
-			);
-
-			try {
-				// Call API to persist the like
-				await commentApi.toggleCommentLike(commentId);
-			} catch (error) {
-				console.error("Error syncing like with server:", error);
-				// Could revert the optimistic update here if needed
-			}
+				);
+				console.log("Updated comments data with like state:", updated);
+				return updated;
+			});
 		},
 		[],
 	);
+
+	useEffect(() => {
+		console.log("Comment like states updated:", commentLikeStates);
+	}, [commentLikeStates]);
 
 	// Handle showing likes modal
 	const handleShowLikes = useCallback((commentId: number) => {
@@ -642,11 +755,18 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		};
 	}, [isOpen, handleClose]);
 
+	useEffect(() => {
+		if (isOpen && postId && hasInitialized) {
+			// Clear like states when modal reopens to force fresh fetch
+			setCommentLikeStates(new Map());
+		}
+	}, [isOpen, postId, hasInitialized]);
+
 	if (!isOpen) return null;
 
 	const totalComments = commentsData.length;
 	const filteredComments = processedComments.length;
-	const shouldShowLoading = isLoading && !hasInitialized;
+      const shouldShowLoading = isLoading && !hasInitialized;
 
 	return (
 		<>
