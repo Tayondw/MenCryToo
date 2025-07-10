@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 @login_required
 def get_comment(commentId):
     """
-    Get a specific comment with its commenter info
+    Get a specific comment with its commenter info and like data
     """
     try:
         comment = (
@@ -21,7 +21,8 @@ def get_comment(commentId):
             .options(
                 joinedload(Comment.commenter).load_only(
                     "id", "username", "first_name", "last_name", "profile_image_url"
-                )
+                ),
+                selectinload(Comment.comment_likes),  # Load like data
             )
             .filter(Comment.id == commentId)
             .first()
@@ -30,7 +31,7 @@ def get_comment(commentId):
         if not comment:
             return jsonify({"errors": {"message": "Comment not found"}}), 404
 
-        return jsonify(comment.to_dict())
+        return jsonify(comment.to_dict_with_likes(current_user_id=current_user.id))
     except Exception as e:
         logger.error(f"Error fetching comment {commentId}: {str(e)}")
         return jsonify({"errors": {"message": "Error fetching comment"}}), 500
@@ -331,37 +332,34 @@ def get_post_comments(postId):
 @login_required
 def get_post_comments_with_likes(postId):
     """
-    Get all comments for a post with like data included
+    Get all comments for a post with like data included by default
     """
     try:
         page = request.args.get("page", 1, type=int)
         per_page = min(request.args.get("per_page", 20, type=int), 50)
         include_replies = request.args.get("include_replies", "true").lower() == "true"
-        include_likes = request.args.get("include_likes", "false").lower() == "true"
 
         # Check if post exists
         post = Post.query.get(postId)
         if not post:
             return jsonify({"errors": {"message": "Post not found"}}), 404
 
-        # Load comments with like data
+        # Load comments with like data by default
         comments_query = (
             db.session.query(Comment)
             .options(
                 # Load commenter data
                 joinedload(Comment.commenter).load_only(
                     "id", "username", "first_name", "last_name", "profile_image_url"
-                )
+                ),
+                # Load like data
+                selectinload(Comment.comment_likes),
             )
             .filter(Comment.post_id == postId)
         )
 
-        if include_likes:
-            # Add like count and current user like status
-            comments_query = comments_query.options(selectinload(Comment.comment_likes))
-
         if include_replies:
-            # Get all comments with their user data
+            # Get all comments with their user and like data
             all_comments = comments_query.order_by(Comment.created_at.desc()).all()
 
             # Organize into hierarchical structure
@@ -544,6 +542,103 @@ def add_comment(postId):
         return jsonify({"errors": {"message": "Error creating comment"}}), 500
 
 
+@comment_routes.route("/posts/<int:postId>/comments", methods=["POST"])
+@login_required
+def add_comment_with_likes(postId):
+    """
+    Add a comment to a post with like data in response
+    """
+    try:
+        # Check if post exists
+        post_exists = db.session.execute(
+            text("SELECT 1 FROM posts WHERE id = :post_id"), {"post_id": postId}
+        ).fetchone()
+
+        if not post_exists:
+            return jsonify({"error": "Post not found"}), 404
+
+        # Get form data
+        comment_text = request.form.get("comment", "").strip()
+        parent_id = request.form.get("parent_id")
+
+        # Validate comment text
+        if not comment_text or len(comment_text) < 1 or len(comment_text) > 500:
+            return (
+                jsonify(
+                    {
+                        "errors": {
+                            "comment": "Comment must be between 1 and 500 characters"
+                        }
+                    }
+                ),
+                400,
+            )
+
+        # Validate parent comment if this is a reply
+        if parent_id:
+            try:
+                parent_id = int(parent_id)
+                parent_comment = Comment.query.filter_by(
+                    id=parent_id, post_id=postId
+                ).first()
+
+                if not parent_comment:
+                    return (
+                        jsonify({"errors": {"parent_id": "Parent comment not found"}}),
+                        400,
+                    )
+            except (ValueError, TypeError):
+                return (
+                    jsonify({"errors": {"parent_id": "Invalid parent comment ID"}}),
+                    400,
+                )
+        else:
+            parent_id = None
+
+        # Create comment
+        comment = Comment(
+            post_id=postId,
+            user_id=current_user.id,
+            comment=comment_text,
+            parent_id=parent_id,
+        )
+
+        db.session.add(comment)
+        db.session.commit()
+
+        # Reload with user and like data
+        comment_with_data = (
+            db.session.query(Comment)
+            .options(
+                joinedload(Comment.commenter).load_only(
+                    "id", "username", "first_name", "last_name", "profile_image_url"
+                ),
+                selectinload(Comment.comment_likes),
+            )
+            .filter(Comment.id == comment.id)
+            .first()
+        )
+
+        # Return with like data
+        return (
+            jsonify(
+                {
+                    "comment": comment_with_data.to_dict_with_likes(
+                        current_user_id=current_user.id
+                    ),
+                    "success": True,
+                    "message": "Comment created successfully",
+                }
+            ),
+            201,
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding comment to post {postId}: {str(e)}")
+        return jsonify({"errors": {"message": "Error creating comment"}}), 500
+
+
 @comment_routes.route(
     "/posts/<int:postId>/comments/<int:commentId>", methods=["DELETE"]
 )
@@ -589,6 +684,143 @@ def delete_comment(postId, commentId):
         db.session.rollback()
         logger.error(f"Error deleting comment {commentId}: {str(e)}")
         return jsonify({"errors": {"message": "Error deleting comment"}}), 500
+
+
+@comment_routes.route("/<int:commentId>/like", methods=["POST"])
+@login_required
+def toggle_comment_like_fixed(commentId):
+    """
+    Toggle like on a comment (like if not liked, unlike if already liked)
+    Fixed version with proper database operations
+    """
+    try:
+        # Check if comment exists
+        comment = Comment.query.get(commentId)
+        if not comment:
+            return jsonify({"errors": {"message": "Comment not found"}}), 404
+
+        # Check current like status using the CommentLike model
+        existing_like = CommentLike.query.filter_by(
+            user_id=current_user.id, comment_id=commentId
+        ).first()
+
+        if existing_like:
+            # Unlike the comment
+            db.session.delete(existing_like)
+            action = "unliked"
+            is_liked = False
+        else:
+            # Like the comment
+            new_like = CommentLike(user_id=current_user.id, comment_id=commentId)
+            db.session.add(new_like)
+            action = "liked"
+            is_liked = True
+
+        # Commit the changes
+        db.session.commit()
+
+        # Get updated like count
+        like_count = CommentLike.query.filter_by(comment_id=commentId).count()
+
+        # Return consistent response format
+        return jsonify(
+            {
+                "success": True,
+                "action": action,
+                "isLiked": is_liked,
+                "likeCount": like_count,
+                "commentId": commentId,
+                "message": f"Comment {action} successfully",
+            }
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error toggling like for comment {commentId}: {str(e)}")
+        return jsonify({"errors": {"message": "Error updating like"}}), 500
+
+
+@comment_routes.route("/<int:commentId>/like-status", methods=["GET"])
+@login_required
+def get_comment_like_status_fixed(commentId):
+    """
+    Get like status for current user and total count - Fixed version
+    """
+    try:
+        # Check if comment exists
+        comment = Comment.query.get(commentId)
+        if not comment:
+            return jsonify({"errors": {"message": "Comment not found"}}), 404
+
+        # Check if current user liked this comment
+        is_liked = (
+            CommentLike.query.filter_by(
+                user_id=current_user.id, comment_id=commentId
+            ).first()
+            is not None
+        )
+
+        # Get total like count
+        like_count = CommentLike.query.filter_by(comment_id=commentId).count()
+
+        return jsonify(
+            {"isLiked": is_liked, "likeCount": like_count, "commentId": commentId}
+        )
+
+    except Exception as e:
+        logger.error(f"Error getting like status for comment {commentId}: {str(e)}")
+        return jsonify({"errors": {"message": "Internal server error"}}), 500
+
+
+@comment_routes.route("/<int:commentId>/likes", methods=["GET"])
+@login_required
+def get_comment_likes_fixed(commentId):
+    """
+    Get all users who liked a specific comment - Fixed version
+    """
+    try:
+        # Check if comment exists
+        comment = Comment.query.get(commentId)
+        if not comment:
+            return jsonify({"errors": {"message": "Comment not found"}}), 404
+
+        # Get all users who liked this comment
+        liked_users = (
+            db.session.query(User)
+            .join(CommentLike, User.id == CommentLike.user_id)
+            .filter(CommentLike.comment_id == commentId)
+            .order_by(CommentLike.created_at.desc())
+            .all()
+        )
+
+        # Format response
+        users_data = [
+            {
+                "id": user.id,
+                "username": user.username,
+                "firstName": user.first_name or "",
+                "lastName": user.last_name or "",
+                "profileImage": user.profile_image_url or "/default-avatar.png",
+            }
+            for user in liked_users
+        ]
+
+        return jsonify(
+            {
+                "likes": users_data,
+                "total": len(users_data),
+                "commentId": commentId,
+                "comment": (
+                    comment.comment[:100] + "..."
+                    if len(comment.comment) > 100
+                    else comment.comment
+                ),
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Error getting comment likes {commentId}: {str(e)}")
+        return jsonify({"errors": {"message": "Internal server error"}}), 500
 
 
 @comment_routes.route("/<int:commentId>/like", methods=["POST"])
