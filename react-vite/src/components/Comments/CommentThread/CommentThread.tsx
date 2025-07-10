@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
 	MessageCircle,
@@ -134,6 +134,16 @@ const CommentThread: React.FC<CommentThreadProps> = ({
 	const visibleReplies = shouldShowAll
 		? comment.replies
 		: comment.replies?.slice(0, maxVisibleReplies);
+
+	useEffect(() => {
+		console.log("CommentThread like state initialized:", {
+			commentId: comment.id,
+			commentLikes: comment.likes,
+			commentIsLiked: comment.isLiked,
+			localLikes,
+			localIsLiked,
+		});
+	}, [comment.id, comment.likes, comment.isLiked, localLikes, localIsLiked]);
 
 	// Calculate proper indentation based on depth
 	const getIndentationClass = useCallback((currentDepth: number) => {
@@ -300,21 +310,71 @@ const CommentThread: React.FC<CommentThreadProps> = ({
 		setShowMenu(false);
 	};
 
-	// Handle like toggle with local state management
-	const handleLikeToggle = async (
-		commentId: number,
-		isLiked: boolean,
-		newCount: number,
-	) => {
-		// Update local state immediately for responsiveness
-		setLocalIsLiked(isLiked);
-		setLocalLikes(newCount);
-
-		// Notify parent component
-		if (onLikeToggle) {
-			onLikeToggle(commentId, isLiked, newCount);
+	useEffect(() => {
+		if (comment.likes !== undefined) {
+			console.log("Updating local likes from comment props:", {
+				commentId: comment.id,
+				oldLikes: localLikes,
+				newLikes: comment.likes,
+			});
+			setLocalLikes(comment.likes);
 		}
-	};
+		if (comment.isLiked !== undefined) {
+			console.log("Updating local isLiked from comment props:", {
+				commentId: comment.id,
+				oldIsLiked: localIsLiked,
+				newIsLiked: comment.isLiked,
+			});
+			setLocalIsLiked(comment.isLiked);
+		}
+	}, [comment.likes, comment.isLiked, comment.id, localIsLiked, localLikes]);
+
+	// Handle like toggle with local state management
+	const handleLikeToggle = useCallback(
+		async (commentId: number, isLiked: boolean, newCount: number) => {
+			console.log("CommentThread handleLikeToggle called:", {
+				commentId,
+				isLiked,
+				newCount,
+			});
+
+			// Validate the parameters
+			if (commentId !== comment.id) {
+				console.warn(
+					"CommentThread received like toggle for different comment",
+					{
+						expectedId: comment.id,
+						receivedId: commentId,
+					},
+				);
+				return;
+			}
+
+			if (isLiked === undefined || newCount === undefined) {
+				console.error("CommentThread received undefined like data:", {
+					commentId,
+					isLiked,
+					newCount,
+				});
+				return;
+			}
+
+			// Update local state immediately for responsiveness
+			setLocalIsLiked(isLiked);
+			setLocalLikes(newCount);
+
+			// Notify parent component to sync state across the app
+			if (onLikeToggle) {
+				console.log("CommentThread notifying parent of like toggle:", {
+					commentId,
+					isLiked,
+					newCount,
+				});
+				onLikeToggle(commentId, isLiked, newCount);
+			}
+		},
+		[comment.id, onLikeToggle],
+	);
 
 	// Handle showing likes
 	const handleShowLikes = useCallback(
@@ -353,6 +413,14 @@ const CommentThread: React.FC<CommentThreadProps> = ({
 		}
 		return formatCommentTime(comment.createdAt);
 	};
+
+	console.log("CommentThread render state:", {
+		commentId: comment.id,
+		localLikes,
+		localIsLiked,
+		commentLikes: comment.likes,
+		commentIsLiked: comment.isLiked,
+	});
 
 	return (
 		<div className="space-y-3">
@@ -698,8 +766,8 @@ const CommentThread: React.FC<CommentThreadProps> = ({
 										onEdit={onEdit}
 										onDelete={onDelete}
 										handleAddReply={handleAddReply}
-										onLikeToggle={onLikeToggle}
-										onShowLikes={onShowLikes}
+										onLikeToggle={onLikeToggle} // Critical: pass this down
+										onShowLikes={onShowLikes} // Critical: pass this down
 										formatTimeAgo={formatTimeAgo}
 										currentUserId={currentUserId}
 									/>
