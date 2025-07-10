@@ -3,6 +3,7 @@ from .db import environment, SCHEMA
 from .user import User
 from .attendance import Attendance
 from .comment import Comment
+from .comment_like import CommentLike
 from .event_image import EventImage
 from .event import Event
 from .group import Group
