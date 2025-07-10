@@ -1,6 +1,6 @@
 from flask import Blueprint, request, abort, jsonify
 from flask_login import login_required, current_user
-from app.models import db, User, Post, Likes, Comment
+from app.models import db, User, Post, Likes, Comment, CommentLike
 from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy import and_, desc, func, text
 import logging
@@ -319,6 +319,126 @@ def get_post_comments(postId):
         return jsonify({"errors": {"message": "Error fetching comments"}}), 500
 
 
+@comment_routes.route("/posts/<int:postId>/comments", methods=["GET"])
+@login_required
+def get_post_comments_with_likes(postId):
+    """
+    Get all comments for a post with like data included
+    """
+    try:
+        page = request.args.get("page", 1, type=int)
+        per_page = min(request.args.get("per_page", 20, type=int), 50)
+        include_replies = request.args.get("include_replies", "true").lower() == "true"
+        include_likes = request.args.get("include_likes", "false").lower() == "true"
+
+        # Check if post exists
+        post = Post.query.get(postId)
+        if not post:
+            return jsonify({"errors": {"message": "Post not found"}}), 404
+
+        # Load comments with like data
+        comments_query = (
+            db.session.query(Comment)
+            .options(
+                # Load commenter data
+                joinedload(Comment.commenter).load_only(
+                    "id", "username", "first_name", "last_name", "profile_image_url"
+                )
+            )
+            .filter(Comment.post_id == postId)
+        )
+
+        if include_likes:
+            # Add like count and current user like status
+            comments_query = comments_query.options(selectinload(Comment.comment_likes))
+
+        if include_replies:
+            # Get all comments with their user data
+            all_comments = comments_query.order_by(Comment.created_at.desc()).all()
+
+            # Organize into hierarchical structure
+            comment_dict = {comment.id: comment for comment in all_comments}
+            root_comments = []
+
+            # First pass: identify root comments and attach replies
+            for comment in all_comments:
+                if comment.parent_id is None:
+                    root_comments.append(comment)
+                    comment.replies = []
+                else:
+                    parent = comment_dict.get(comment.parent_id)
+                    if parent:
+                        if not hasattr(parent, "replies"):
+                            parent.replies = []
+                        parent.replies.append(comment)
+
+            # Sort replies chronologically
+            def sort_replies(comment):
+                if hasattr(comment, "replies") and comment.replies:
+                    comment.replies.sort(key=lambda x: x.created_at)
+                    for reply in comment.replies:
+                        sort_replies(reply)
+
+            for comment in root_comments:
+                sort_replies(comment)
+
+            # Apply pagination to root comments
+            total_root = len(root_comments)
+            start_idx = (page - 1) * per_page
+            end_idx = start_idx + per_page
+            paginated_comments = root_comments[start_idx:end_idx]
+
+            # Convert to dict with like data
+            comments_data = [
+                comment.to_dict_with_likes(
+                    include_replies=True, current_user_id=current_user.id
+                )
+                for comment in paginated_comments
+            ]
+
+            pagination = {
+                "page": page,
+                "pages": (total_root + per_page - 1) // per_page,
+                "per_page": per_page,
+                "total": total_root,
+                "has_next": end_idx < total_root,
+                "has_prev": page > 1,
+            }
+
+        else:
+            # Get only root comments
+            root_comments_query = comments_query.filter(Comment.parent_id.is_(None))
+            comments = root_comments_query.order_by(Comment.created_at.desc()).paginate(
+                page=page, per_page=per_page, error_out=False
+            )
+
+            # Convert to dict with like data
+            comments_data = [
+                comment.to_dict_with_likes(current_user_id=current_user.id)
+                for comment in comments.items
+            ]
+
+            pagination = {
+                "page": page,
+                "pages": comments.pages,
+                "per_page": per_page,
+                "total": comments.total,
+                "has_next": comments.has_next,
+                "has_prev": comments.has_prev,
+            }
+
+        return jsonify(
+            {
+                "comments": comments_data,
+                "pagination": pagination,
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Error fetching comments for post {postId}: {str(e)}")
+        return jsonify({"errors": {"message": "Error fetching comments"}}), 500
+
+
 @comment_routes.route("/posts/<int:postId>/comments", methods=["POST"])
 @login_required
 def add_comment(postId):
@@ -449,3 +569,188 @@ def delete_comment(postId, commentId):
         db.session.rollback()
         logger.error(f"Error deleting comment {commentId}: {str(e)}")
         return jsonify({"errors": {"message": "Error deleting comment"}}), 500
+
+
+@comment_routes.route("/<int:commentId>/like", methods=["POST"])
+@login_required
+def toggle_comment_like(commentId):
+    """
+    Toggle like on a comment (like if not liked, unlike if already liked)
+    """
+    try:
+        # Check if comment exists
+        comment = Comment.query.get(commentId)
+        if not comment:
+            return jsonify({"errors": {"message": "Comment not found"}}), 404
+
+        # Check current like status
+        existing_like = CommentLike.query.filter_by(
+            user_id=current_user.id, comment_id=commentId
+        ).first()
+
+        if existing_like:
+            # Unlike the comment
+            db.session.delete(existing_like)
+            action = "unliked"
+            is_liked = False
+        else:
+            # Like the comment
+            new_like = CommentLike(user_id=current_user.id, comment_id=commentId)
+            db.session.add(new_like)
+            action = "liked"
+            is_liked = True
+
+        db.session.commit()
+
+        # Get updated like count
+        like_count = CommentLike.query.filter_by(comment_id=commentId).count()
+
+        return jsonify(
+            {
+                "success": True,
+                "action": action,
+                "isLiked": is_liked,
+                "likeCount": like_count,
+                "commentId": commentId,
+                "message": f"Comment {action} successfully",
+            }
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error toggling like for comment {commentId}: {str(e)}")
+        return jsonify({"errors": {"message": "Error updating like"}}), 500
+
+
+@comment_routes.route("/<int:commentId>/likes", methods=["GET"])
+@login_required
+def get_comment_likes(commentId):
+    """
+    Get all users who liked a specific comment
+    """
+    try:
+        # Check if comment exists
+        comment = Comment.query.get(commentId)
+        if not comment:
+            return jsonify({"errors": {"message": "Comment not found"}}), 404
+
+        # Get all users who liked this comment
+        liked_users = (
+            db.session.query(User)
+            .join(CommentLike, User.id == CommentLike.user_id)
+            .filter(CommentLike.comment_id == commentId)
+            .options(selectinload(User.users_tags).load_only("id", "name"))
+            .order_by(CommentLike.created_at.desc())
+            .all()
+        )
+
+        # Format response
+        users_data = [
+            {
+                "id": user.id,
+                "username": user.username,
+                "firstName": user.first_name or "",
+                "lastName": user.last_name or "",
+                "profileImage": user.profile_image_url or "/default-avatar.png",
+            }
+            for user in liked_users
+        ]
+
+        return jsonify(
+            {
+                "likes": users_data,
+                "total": len(users_data),
+                "commentId": commentId,
+                "comment": (
+                    comment.comment[:100] + "..."
+                    if len(comment.comment) > 100
+                    else comment.comment
+                ),
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Error getting comment likes {commentId}: {str(e)}")
+        return jsonify({"errors": {"message": "Internal server error"}}), 500
+
+
+@comment_routes.route("/<int:commentId>/like-status", methods=["GET"])
+@login_required
+def get_comment_like_status(commentId):
+    """
+    Get like status for current user and total count
+    """
+    try:
+        # Check if comment exists
+        comment = Comment.query.get(commentId)
+        if not comment:
+            return jsonify({"errors": {"message": "Comment not found"}}), 404
+
+        # Check if current user liked this comment
+        is_liked = (
+            CommentLike.query.filter_by(
+                user_id=current_user.id, comment_id=commentId
+            ).first()
+            is not None
+        )
+
+        # Get total like count
+        like_count = CommentLike.query.filter_by(comment_id=commentId).count()
+
+        return jsonify(
+            {"isLiked": is_liked, "likeCount": like_count, "commentId": commentId}
+        )
+
+    except Exception as e:
+        logger.error(f"Error getting like status for comment {commentId}: {str(e)}")
+        return jsonify({"errors": {"message": "Internal server error"}}), 500
+
+
+@comment_routes.route("/batch-like-status", methods=["POST"])
+@login_required
+def get_batch_comment_like_status():
+    """
+    Get like status for multiple comments at once
+    """
+    try:
+        data = request.get_json()
+        comment_ids = data.get("commentIds", [])
+
+        if not comment_ids:
+            return jsonify({"statuses": {}})
+
+        # Get like statuses for all comments
+        like_data = (
+            db.session.query(
+                CommentLike.comment_id,
+                func.count(CommentLike.id).label("like_count"),
+                func.sum(
+                    func.case((CommentLike.user_id == current_user.id, 1), else_=0)
+                ).label("is_liked_by_user"),
+            )
+            .filter(CommentLike.comment_id.in_(comment_ids))
+            .group_by(CommentLike.comment_id)
+            .all()
+        )
+
+        # Format response
+        statuses = {}
+        for comment_id in comment_ids:
+            # Find data for this comment
+            comment_data = next(
+                (item for item in like_data if item.comment_id == comment_id), None
+            )
+
+            if comment_data:
+                statuses[comment_id] = {
+                    "isLiked": bool(comment_data.is_liked_by_user),
+                    "likeCount": comment_data.like_count,
+                }
+            else:
+                statuses[comment_id] = {"isLiked": False, "likeCount": 0}
+
+        return jsonify({"statuses": statuses})
+
+    except Exception as e:
+        logger.error(f"Error getting batch like status: {str(e)}")
+        return jsonify({"errors": {"message": "Internal server error"}}), 500
