@@ -539,10 +539,10 @@ def similar_users_posts_feed():
 @login_required
 def post(postId):
     """
-    Single post view with ALL commenter data properly loaded
+    Single post view with ALL commenter data and LIKE DATA properly loaded
     """
     try:
-        # Load post with ALL comment user data
+        # Load post with ALL comment user data AND like data
         post = (
             db.session.query(Post)
             .options(
@@ -550,12 +550,14 @@ def post(postId):
                 joinedload(Post.user).load_only(
                     "id", "username", "first_name", "last_name", "profile_image_url"
                 ),
-                # Load ALL comments with their respective user data
+                # Load ALL comments with their respective user data AND like data
                 selectinload(Post.post_comments).options(
                     # Load commenter for EVERY comment
                     joinedload(Comment.commenter).load_only(
                         "id", "username", "first_name", "last_name", "profile_image_url"
-                    )
+                    ),
+                    # FIXED: Load like data for comments
+                    selectinload(Comment.comment_likes),
                 ),
             )
             .filter(Post.id == postId)
@@ -574,7 +576,7 @@ def post(postId):
             or 0
         )
 
-        # Build response with PROPER commenter data for ALL comments
+        # Build response with PROPER commenter data AND like data for ALL comments
         post_data = {
             "id": post.id,
             "title": post.title,
@@ -628,6 +630,21 @@ def post(postId):
                             "profileImage": "/default-avatar.png",
                         }
                     ),
+                    # FIXED: Include like data for EVERY comment
+                    "likes": (
+                        len(comment.comment_likes)
+                        if hasattr(comment, "comment_likes") and comment.comment_likes
+                        else 0
+                    ),
+                    "isLiked": any(
+                        like.user_id == current_user.id
+                        for like in (
+                            comment.comment_likes
+                            if hasattr(comment, "comment_likes")
+                            and comment.comment_likes
+                            else []
+                        )
+                    ),
                 }
                 for comment in post.post_comments
             ],
@@ -640,6 +657,113 @@ def post(postId):
     except Exception as e:
         logger.error(f"Error in post {postId}: {str(e)}")
         return jsonify({"errors": {"message": "Internal server error"}}), 500
+
+
+# @post_routes.route("/<int:postId>")
+# @login_required
+# def post(postId):
+#     """
+#     Single post view with ALL commenter data properly loaded
+#     """
+#     try:
+#         # Load post with ALL comment user data
+#         post = (
+#             db.session.query(Post)
+#             .options(
+#                 # Load post user data
+#                 joinedload(Post.user).load_only(
+#                     "id", "username", "first_name", "last_name", "profile_image_url"
+#                 ),
+#                 # Load ALL comments with their respective user data
+#                 selectinload(Post.post_comments).options(
+#                     # Load commenter for EVERY comment
+#                     joinedload(Comment.commenter).load_only(
+#                         "id", "username", "first_name", "last_name", "profile_image_url"
+#                     )
+#                 ),
+#             )
+#             .filter(Post.id == postId)
+#             .first()
+#         )
+
+#         if not post:
+#             return jsonify({"errors": {"message": "Not Found"}}), 404
+
+#         # Get like count
+#         like_count = (
+#             db.session.execute(
+#                 text("SELECT COUNT(*) FROM likes WHERE post_id = :post_id"),
+#                 {"post_id": postId},
+#             ).scalar()
+#             or 0
+#         )
+
+#         # Build response with PROPER commenter data for ALL comments
+#         post_data = {
+#             "id": post.id,
+#             "title": post.title,
+#             "caption": post.caption,
+#             "creator": post.creator,
+#             "image": post.image,
+#             "likes": like_count,
+#             "user": (
+#                 {
+#                     "id": post.user.id,
+#                     "username": post.user.username,
+#                     "firstName": post.user.first_name,
+#                     "lastName": post.user.last_name,
+#                     "profileImage": post.user.profile_image_url,
+#                 }
+#                 if post.user
+#                 else None
+#             ),
+#             "postComments": [
+#                 {
+#                     "id": comment.id,
+#                     "userId": comment.user_id,
+#                     "postId": comment.post_id,
+#                     "comment": comment.comment,
+#                     "username": (
+#                         comment.commenter.username if comment.commenter else "Unknown"
+#                     ),
+#                     "parentId": comment.parent_id,
+#                     "created_at": (
+#                         comment.created_at.isoformat() if comment.created_at else None
+#                     ),
+#                     "updated_at": (
+#                         comment.updated_at.isoformat() if comment.updated_at else None
+#                     ),
+#                     # Include actual commenter data for EVERY comment
+#                     "commenter": (
+#                         {
+#                             "id": comment.commenter.id,
+#                             "username": comment.commenter.username,
+#                             "firstName": comment.commenter.first_name or "",
+#                             "lastName": comment.commenter.last_name or "",
+#                             "profileImage": comment.commenter.profile_image_url
+#                             or "/default-avatar.png",
+#                         }
+#                         if comment.commenter
+#                         else {
+#                             "id": comment.user_id,
+#                             "username": "Unknown User",
+#                             "firstName": "",
+#                             "lastName": "",
+#                             "profileImage": "/default-avatar.png",
+#                         }
+#                     ),
+#                 }
+#                 for comment in post.post_comments
+#             ],
+#             "createdAt": post.created_at.isoformat() if post.created_at else None,
+#             "updatedAt": post.updated_at.isoformat() if post.updated_at else None,
+#         }
+
+#         return jsonify(post_data)
+
+#     except Exception as e:
+#         logger.error(f"Error in post {postId}: {str(e)}")
+#         return jsonify({"errors": {"message": "Internal server error"}}), 500
 
 
 @post_routes.route("/<int:postId>/delete", methods=["DELETE"])
@@ -926,11 +1050,11 @@ def like_post(postId):
 #         result = db.session.execute(
 #             text(
 #                 """
-#                 INSERT INTO likes (user_id, post_id) 
+#                 INSERT INTO likes (user_id, post_id)
 #                 SELECT :user_id, :post_id
 #                 WHERE EXISTS (SELECT 1 FROM posts WHERE id = :post_id)
 #                 AND NOT EXISTS (
-#                     SELECT 1 FROM likes 
+#                     SELECT 1 FROM likes
 #                     WHERE user_id = :user_id AND post_id = :post_id
 #                 )
 #             """
@@ -970,8 +1094,8 @@ def like_post(postId):
 #         result = db.session.execute(
 #             text(
 #                 """
-#                 DELETE FROM likes 
-#                 WHERE user_id = :user_id 
+#                 DELETE FROM likes
+#                 WHERE user_id = :user_id
 #                 AND post_id = :post_id
 #                 AND EXISTS (SELECT 1 FROM posts WHERE id = :post_id)
 #             """
