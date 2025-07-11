@@ -57,7 +57,7 @@ async function checkAuth(): Promise<boolean> {
 
 	const authData = await authResponse.json();
 
-	// FIX: Handle the new response structure correctly
+	// Handle the response structure correctly
 	if (!authData.authenticated || !authData.user) {
 		throw redirect("/login");
 	}
@@ -66,7 +66,7 @@ async function checkAuth(): Promise<boolean> {
 	return true;
 }
 
-// Fetch posts feed data using the new unified approach
+// Fetch posts feed data
 async function fetchFeedData(
 	endpoint: string,
 	page: number,
@@ -102,7 +102,7 @@ async function fetchFeedData(
 	return data;
 }
 
-// New batch loader for optimal performance
+// Batch loader for optimal performance
 async function fetchBatchFeedData(
 	page: number,
 	perPage: number,
@@ -369,7 +369,7 @@ export const postsFeedLoader = async ({
 	}
 };
 
-// Enhanced action handler for posts feed
+// Action handler for posts feed
 export const postsFeedAction = async ({ request }: { request: Request }) => {
 	const formData = await request.formData();
 	const intent = formData.get("intent") as string;
