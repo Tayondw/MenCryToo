@@ -46,6 +46,7 @@ requests = "*"
 rsa = "*"
 bs4 = "*"
 beautifulsoup4 = "*"
+flask-compress = "*"
 
 [dev-packages]
 
