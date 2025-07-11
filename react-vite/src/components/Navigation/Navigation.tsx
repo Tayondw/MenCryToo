@@ -18,8 +18,8 @@ import {
 	Heart,
 	Settings,
 	Calendar,
-      PenTool,
-      StickyNote,
+	PenTool,
+	StickyNote,
 	ChevronDown,
 	type LucideIcon,
 } from "lucide-react";
@@ -29,7 +29,7 @@ import OpenModalMenuItem from "./OpenModalMenuItem/OpenModalMenuItem";
 import LoginFormModal from "../LoginFormModal";
 import Logo from "./Logo";
 
-// Fixed icon type and memoized navigation items
+// Navigation item component
 const NavigationItem = memo(
 	({
 		to,
@@ -79,7 +79,48 @@ const NavigationItem = memo(
 
 NavigationItem.displayName = "NavigationItem";
 
-// Memoized user menu with proper typing
+// Profile image component with error handling
+const ProfileImage = memo(
+	({
+		src,
+		alt,
+		className,
+		fallbackSrc = "/default-avatar.png",
+	}: {
+		src: string;
+		alt: string;
+		className?: string;
+		fallbackSrc?: string;
+	}) => {
+		const [imageSrc, setImageSrc] = useState(src);
+		const [hasError, setHasError] = useState(false);
+
+		useEffect(() => {
+			setImageSrc(src);
+			setHasError(false);
+		}, [src]);
+
+		const handleError = useCallback(() => {
+			if (!hasError && imageSrc !== fallbackSrc) {
+				setHasError(true);
+				setImageSrc(fallbackSrc);
+			}
+		}, [imageSrc, hasError, fallbackSrc]);
+
+		return (
+			<img
+				src={imageSrc}
+				alt={alt}
+				className={className}
+				onError={handleError}
+			/>
+		);
+	},
+);
+
+ProfileImage.displayName = "ProfileImage";
+
+// User menu component
 const UserMenu = memo(
 	({
 		user,
@@ -96,7 +137,7 @@ const UserMenu = memo(
 			return (
 				<div className="pt-4 border-t border-slate-200 space-y-2">
 					<div className="flex items-center space-x-3 px-4 py-3">
-						<img
+						<ProfileImage
 							src={user.profileImage}
 							alt={user.username}
 							className="w-12 h-12 rounded-full object-cover border-2 border-slate-200"
@@ -143,7 +184,7 @@ const UserMenu = memo(
 				{/* User Info Header */}
 				<div className="px-4 py-3 border-b border-slate-100">
 					<div className="flex items-center space-x-3">
-						<img
+						<ProfileImage
 							src={user.profileImage}
 							alt={user.username}
 							className="w-12 h-12 rounded-full object-cover"
@@ -202,9 +243,28 @@ const UserMenu = memo(
 
 UserMenu.displayName = "UserMenu";
 
-// Main Navigation component with proper TypeScript
+// Helper function to safely extract user data
+const extractUserData = (sessionData: any): UserType | null => {
+	if (!sessionData) return null;
+
+	// Handle wrapped response structure
+	if (sessionData.user && sessionData.authenticated) {
+		return sessionData.user;
+	}
+
+	// Handle direct user object
+	if (sessionData.id && sessionData.username) {
+		return sessionData;
+	}
+
+	return null;
+};
+
+// Main Navigation component
 const Navigation: React.FC = memo(() => {
-	const sessionUser = useSelector((state: RootState) => state.session.user);
+	const rawSessionData = useSelector((state: RootState) => state.session.user);
+	const sessionUser = extractUserData(rawSessionData);
+
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -216,7 +276,7 @@ const Navigation: React.FC = memo(() => {
 	const profileRef = useRef<HTMLDivElement>(null);
 	const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-	// Memoized navigation links
+	// Navigation links
 	const navLinks = useMemo(() => {
 		return sessionUser
 			? [
@@ -234,7 +294,7 @@ const Navigation: React.FC = memo(() => {
 			  ];
 	}, [sessionUser]);
 
-	// Memoized callbacks
+	// Event handlers
 	const handleLogout = useCallback(async () => {
 		try {
 			await dispatch(thunkLogout());
@@ -354,7 +414,7 @@ const Navigation: React.FC = memo(() => {
 										className="flex items-center space-x-3 p-2 rounded-lg hover:bg-slate-100 transition-all duration-200 group"
 									>
 										<div className="relative">
-											<img
+											<ProfileImage
 												src={sessionUser.profileImage}
 												alt={sessionUser.username}
 												className="w-8 h-8 lg:w-10 lg:h-10 rounded-full object-cover border-2 border-slate-200 group-hover:border-orange-300 transition-all duration-200"
