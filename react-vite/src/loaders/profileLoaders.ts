@@ -209,7 +209,7 @@ export const profileAction = async ({ request }: { request: Request }) => {
 			if (response.ok) {
 				// Clear the user session by calling logout endpoint
 				await fetch("/api/auth/logout", {
-					method: "POST",
+					method: "GET",
 				});
 
 				// Clear all caches
@@ -265,7 +265,7 @@ export const profileUpdateAction = async ({
 
 			if (response.ok) {
 				await fetch("/api/auth/logout", {
-					method: "POST",
+					method: "GET",
 				});
 
 				// Clear all caches
@@ -415,7 +415,7 @@ export const profileDeleteAction = async ({
 
 		if (response.ok) {
 			await fetch("/api/auth/logout", {
-				method: "POST",
+				method: "GET",
 			});
 
 			// Clear all caches
