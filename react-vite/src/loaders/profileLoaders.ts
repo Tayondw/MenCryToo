@@ -63,20 +63,69 @@ export async function profileLoader({
 
 		const userData = await response.json();
 
-		if (userData.errors) {
+		// Handle the new authentication response structure
+		if (userData.errors || (!userData.authenticated && !userData.id)) {
 			return redirect("/login");
 		}
 
+		// Extract user data from response
+		const user = userData.user || userData;
+
 		// If we have a user ID in params, verify it matches the current user
-		if (params?.id && userData.id.toString() !== params.id) {
+		if (params?.id && user.id.toString() !== params.id) {
 			return redirect("/profile");
 		}
 
-		const result = { user: userData };
+		const result = { user };
 		setCachedData(cacheKey, result);
 		return result;
 	} catch (error) {
 		console.error("Profile loader error:", error);
+		return redirect("/login");
+	}
+}
+
+// Alternative profile loader that uses auth endpoint - BACKUP
+export async function profileLoaderBackup({
+	params,
+}: { params?: { id?: string } } = {}): Promise<{ user: User } | Response> {
+	const cacheKey = "current-user-profile-backup";
+	const cached = getCachedData(cacheKey);
+	if (cached) return cached as { user: User };
+
+	try {
+		// Fallback to main auth endpoint
+		const response = await fetch("/api/auth/", {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+				"Cache-Control": "max-age=120",
+			},
+		});
+
+		if (!response.ok) {
+			return redirect("/login");
+		}
+
+		const authData = await response.json();
+
+		// Handle new response structure
+		if (!authData.authenticated || !authData.user) {
+			return redirect("/login");
+		}
+
+		const user = authData.user;
+
+		// If we have a user ID in params, verify it matches the current user
+		if (params?.id && user.id.toString() !== params.id) {
+			return redirect("/profile");
+		}
+
+		const result = { user };
+		setCachedData(cacheKey, result);
+		return result;
+	} catch (error) {
+		console.error("Profile loader backup error:", error);
 		return redirect("/login");
 	}
 }
