@@ -26,7 +26,7 @@ export const authLoader = async (): Promise<
 
 		const authData = await response.json();
 
-		// FIX: Check if user is authenticated based on NEW response structure
+		// Check if user is authenticated
 		if (authData.authenticated && authData.user) {
 			return { user: authData.user };
 		} else {
@@ -275,7 +275,7 @@ export const loginAction = async ({ request }: { request: Request }) => {
 export const logoutAction = async () => {
 	try {
 		const response = await fetch("/api/auth/logout", {
-			method: "GET", // Changed to GET since your backend uses GET
+			method: "GET",
 		});
 
 		if (response.ok) {
