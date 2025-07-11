@@ -20,20 +20,23 @@ export const homeLoader = async (): Promise<Response> => {
 				},
 			});
 
-			// Only process successful responses
 			if (authResponse.ok) {
 				const contentType = authResponse.headers.get("content-type");
 				if (contentType && contentType.includes("application/json")) {
-					const userData = await authResponse.json();
-					if (!userData.errors) {
-						user = userData;
+					const authData = await authResponse.json();
+					// Check the new response structure
+					if (
+						authData.authenticated &&
+						authData.user &&
+						!authData.user.errors
+					) {
+						user = authData.user;
 					}
 				}
-			} else if (authResponse.status === 401) {
-				// Expected for unauthenticated users - not an error
-				console.log("User not authenticated, loading public data only");
 			} else {
-				console.warn(`Auth check returned status: ${authResponse.status}`);
+				console.log(
+					`Auth check returned status: ${authResponse.status} - loading public data only`,
+				);
 			}
 		} catch (error) {
 			console.log("Auth check failed, loading public data only:", error);
