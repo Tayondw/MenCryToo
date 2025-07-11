@@ -44,10 +44,7 @@ export function clearPostsFeedCache(pattern?: string): void {
 }
 
 // Check authentication helper
-async function checkAuth(): Promise<{
-	id: number;
-	usersTags?: Array<{ id: number; name: string }>;
-}> {
+async function checkAuth(): Promise<boolean> {
 	const authResponse = await fetch("/api/auth/", {
 		headers: {
 			"Cache-Control": "max-age=30",
@@ -59,11 +56,14 @@ async function checkAuth(): Promise<{
 	}
 
 	const authData = await authResponse.json();
-	if (authData.errors) {
+
+	// FIX: Handle the new response structure correctly
+	if (!authData.authenticated || !authData.user) {
 		throw redirect("/login");
 	}
 
-	return authData;
+	// Return the actual user object
+	return true;
 }
 
 // Fetch posts feed data using the new unified approach
@@ -206,14 +206,14 @@ async function fetchFeedStats(): Promise<FeedStats> {
 	}
 }
 
-// Main posts feed loader - enhanced version
+// Main posts feed loader
 export const postsFeedLoader = async ({
 	request,
 }: {
 	request?: Request;
 } = {}): Promise<PostsFeedLoaderData> => {
 	try {
-		// Check authentication
+		// Check authentication - just verify user is logged in
 		await checkAuth();
 
 		// Parse URL parameters
@@ -330,7 +330,13 @@ export const postsFeedLoader = async ({
 	} catch (error) {
 		console.error("Error in postsFeedLoader:", error);
 
-		// Return empty state on error
+		// If auth failed, the error will have already thrown a redirect
+		// Only return empty state for other errors
+		if (error instanceof Response) {
+			throw error; // Re-throw redirects
+		}
+
+		// Return empty state on other errors
 		return {
 			allPosts: [],
 			similarPosts: [],
