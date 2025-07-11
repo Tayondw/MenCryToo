@@ -45,11 +45,11 @@ import {
 } from "../loaders/authLoaders";
 import { userDetailsLoader } from "../loaders/userLoaders";
 import {
-	// profileLoader,
+	profileLoader,
 	profileUpdateAction,
 	profileAction,
 } from "../loaders/profileLoaders";
-// import { profileFeedLoader } from "../loaders/profileFeedLoaders";
+import { profileFeedLoaderDetailed } from "../loaders/profileFeedLoaders";
 import {
 	groupsLoader,
 	groupDetailsLoader,
@@ -65,12 +65,9 @@ import {
 import {
 	postDetailsLoader,
 	postAction,
-	// similarPostsLoader,
+	similarPostsLoader,
 } from "../loaders/postLoaders";
-import {
-      // postsFeedLoader,
-      postsFeedAction
-} from "../loaders/postsFeedLoaders";
+import { postsFeedLoader, postsFeedAction } from "../loaders/postsFeedLoaders";
 import { partnershipActions } from "../loaders/partnershipActions";
 import { contactActions } from "../loaders/contactActions";
 
@@ -158,7 +155,7 @@ export const router = createBrowserRouter([
 			// PROTECTED ROUTES (require auth)
 			{
 				path: "profile",
-				loader: protectedRouteLoader, // Use protectedRouteLoader for auth-required routes
+				loader: profileLoader,
 				element: (
 					<SuspenseWrapper>
 						<PrivateRoute>
@@ -170,7 +167,7 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "posts-feed",
-				loader: protectedRouteLoader,
+				loader: postsFeedLoader,
 				element: (
 					<SuspenseWrapper>
 						<PrivateRoute>
@@ -182,7 +179,7 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "similar-feed",
-				loader: protectedRouteLoader,
+				loader: similarPostsLoader,
 				element: (
 					<SuspenseWrapper>
 						<PrivateRoute>
@@ -194,7 +191,7 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "profile-feed",
-				loader: protectedRouteLoader,
+				loader: profileFeedLoaderDetailed,
 				element: (
 					<SuspenseWrapper>
 						<PrivateRoute>
