@@ -2,13 +2,58 @@ import { redirect, json } from "react-router-dom";
 import { User } from "../types";
 
 // Loader to check authentication and get current user
-export const authLoader = async (): Promise<{ user: User } | Response> => {
+export const authLoader = async (): Promise<
+	{ user: User | null } | Response
+> => {
 	try {
 		const response = await fetch("/api/auth/", {
 			headers: {
 				"Cache-Control": "max-age=30", // Cache for 30 seconds
 			},
 		});
+
+		// Handle 401 as "not authenticated" rather than an error
+		if (response.status === 401) {
+			return { user: null };
+		}
+
+		if (!response.ok) {
+			console.error(`Auth check failed with status: ${response.status}`);
+			return { user: null };
+		}
+
+		const contentType = response.headers.get("content-type");
+		if (!contentType || !contentType.includes("application/json")) {
+			console.error("Expected JSON response but received:", contentType);
+			return { user: null };
+		}
+
+		const user = await response.json();
+		if (user.errors) {
+			return { user: null };
+		}
+
+		return { user };
+	} catch (error) {
+		console.error("Error checking authentication:", error);
+		return { user: null };
+	}
+};
+
+// Loader for protected routes that require authentication
+export const protectedRouteLoader = async (): Promise<
+	{ user: User } | Response
+> => {
+	try {
+		const response = await fetch("/api/auth/", {
+			headers: {
+				"Cache-Control": "max-age=30",
+			},
+		});
+
+		if (response.status === 401) {
+			return redirect("/login");
+		}
 
 		if (!response.ok) {
 			return redirect("/login");
@@ -30,13 +75,6 @@ export const authLoader = async (): Promise<{ user: User } | Response> => {
 		console.error("Error checking authentication:", error);
 		return redirect("/login");
 	}
-};
-
-// Loader for protected routes that require authentication
-export const protectedRouteLoader = async (): Promise<
-	{ user: User } | Response
-> => {
-	return authLoader();
 };
 
 // Signup action to handle form submission
@@ -124,7 +162,7 @@ export const signupAction = async ({ request }: { request: Request }) => {
 
 			// Redirect to home or intended destination
 			const from = url.searchParams.get("from") || "/";
-			return redirect(from);
+			return window.location.href = from;
 		} else {
 			const errorData = await response.json();
 			return json({ errors: errorData }, { status: 400 });
@@ -197,13 +235,13 @@ export const logoutAction = async () => {
 		});
 
 		if (response.ok) {
-			return redirect("/");
+			return window.location.href = "/";
 		} else {
 			throw new Error("Logout failed");
 		}
 	} catch (error) {
 		console.error("Logout error:", error);
 		// Redirect anyway, even if logout fails on server
-		return redirect("/");
+		return window.location.href = "/";
 	}
 };
