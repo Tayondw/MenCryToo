@@ -1,4 +1,7 @@
 import os
+import threading
+import time
+import requests
 from flask import Flask, render_template, request, session, redirect, g
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -268,6 +271,27 @@ try:
     import time
 except ImportError:
     pass
+
+
+def keep_render_alive():
+    """Keep Render service alive by pinging every 14 minutes"""
+    if os.environ.get("FLASK_ENV") == "production":
+        render_url = os.environ.get("RENDER_EXTERNAL_URL")
+        if render_url:
+            while True:
+                try:
+                    time.sleep(14 * 60)  # 14 minutes
+                    requests.get(f"{render_url}/health", timeout=30)
+                    print("Keep-alive ping sent")
+                except Exception as e:
+                    print(f"Keep-alive ping failed: {e}")
+
+
+# Start keep-alive thread in production
+if os.environ.get("FLASK_ENV") == "production":
+    ping_thread = threading.Thread(target=keep_render_alive, daemon=True)
+    ping_thread.start()
+
 
 # import os
 # from flask import Flask, render_template, request, session, redirect, g
