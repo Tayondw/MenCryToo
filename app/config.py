@@ -36,6 +36,20 @@ class Config:
         # Additional Flask optimizations
         SEND_FILE_MAX_AGE_DEFAULT = 31536000  # 1 year cache for static files
 
+        # Compression settings for production
+        COMPRESS_MIMETYPES = [
+            "text/html",
+            "text/css",
+            "text/xml",
+            "application/json",
+            "application/javascript",
+            "application/xml+rss",
+            "application/atom+xml",
+            "image/svg+xml",
+        ]
+        COMPRESS_LEVEL = 6  # Good balance between speed and compression
+        COMPRESS_MIN_SIZE = 500  # Only compress files larger than 500 bytes
+
     elif is_postgresql:
         # Development with PostgreSQL
         SQLALCHEMY_ECHO = True
@@ -68,6 +82,12 @@ class Config:
     # Performance optimizations for all environments
     JSON_SORT_KEYS = False  # Don't sort JSON keys for better performance
     JSONIFY_PRETTYPRINT_REGULAR = False  # Disable pretty printing in production
+
+    # Session configuration
+    SESSION_COOKIE_SECURE = os.environ.get("FLASK_ENV") == "production"
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    PERMANENT_SESSION_LIFETIME = 86400  # 24 hours
 
 
 # import os
