@@ -26,7 +26,7 @@ export const authLoader = async (): Promise<
 
 		const authData = await response.json();
 
-		// Check if user is authenticated based on response structure
+		// FIX: Check if user is authenticated based on NEW response structure
 		if (authData.authenticated && authData.user) {
 			return { user: authData.user };
 		} else {
@@ -61,7 +61,7 @@ export const protectedRouteLoader = async (): Promise<
 
 		const authData = await response.json();
 
-		// Redirect to login if not authenticated
+		// Redirect to login if not authenticated using NEW structure
 		if (!authData.authenticated || !authData.user) {
 			return redirect("/login");
 		}
@@ -69,6 +69,48 @@ export const protectedRouteLoader = async (): Promise<
 		return { user: authData.user };
 	} catch (error) {
 		console.error("Error checking authentication:", error);
+		return redirect("/login");
+	}
+};
+
+// Enhanced protected route loader with better error handling
+export const enhancedProtectedRouteLoader = async (): Promise<
+	{ user: User } | Response
+> => {
+	try {
+		const response = await fetch("/api/auth/", {
+			method: "GET",
+			credentials: "include", // Ensure cookies are sent
+			headers: {
+				"Cache-Control": "max-age=30",
+				"Content-Type": "application/json",
+			},
+		});
+
+		if (!response.ok) {
+			console.log(`Auth failed with status: ${response.status}`);
+			return redirect("/login");
+		}
+
+		const authData = await response.json();
+		console.log("Auth data received:", authData);
+
+		// Handle the new response structure
+		if (!authData.authenticated || !authData.user) {
+			console.log("User not authenticated or missing user data");
+			return redirect("/login");
+		}
+
+		// Ensure user has required properties
+		const user = authData.user;
+		if (!user.id || !user.username) {
+			console.error("User data incomplete:", user);
+			return redirect("/login");
+		}
+
+		return { user };
+	} catch (error) {
+		console.error("Enhanced auth loader error:", error);
 		return redirect("/login");
 	}
 };
@@ -158,7 +200,10 @@ export const signupAction = async ({ request }: { request: Request }) => {
 
 			// Redirect to home or intended destination
 			const from = url.searchParams.get("from") || "/";
-			return window.location.href = from;
+			if (typeof window !== "undefined") {
+				window.location.href = from;
+			}
+                  return window.location.href = from;
 		} else {
 			const errorData = await response.json();
 			return json({ errors: errorData }, { status: 400 });
@@ -200,7 +245,10 @@ export const loginAction = async ({ request }: { request: Request }) => {
 		if (response.ok) {
 			const url = new URL(request.url);
 			const from = url.searchParams.get("from") || "/";
-			return window.location. href = from;
+			if (typeof window !== "undefined") {
+				window.location.href = from;
+			}
+			return redirect(from);
 		} else if (response.status < 500) {
 			const errorData = await response.json();
 			return json({ errors: errorData }, { status: 400 });
@@ -238,6 +286,9 @@ export const logoutAction = async () => {
 	} catch (error) {
 		console.error("Logout error:", error);
 		// Redirect anyway, even if logout fails on server
-		return window.location.href = "/";
+		if (typeof window !== "undefined") {
+			window.location.href = "/";
+		}
+		return redirect("/");
 	}
 };
