@@ -12,11 +12,7 @@ export const authLoader = async (): Promise<
 			},
 		});
 
-		// Handle 401 as "not authenticated" rather than an error
-		if (response.status === 401) {
-			return { user: null };
-		}
-
+		// Always expect 200 from auth endpoint now
 		if (!response.ok) {
 			console.error(`Auth check failed with status: ${response.status}`);
 			return { user: null };
@@ -28,12 +24,14 @@ export const authLoader = async (): Promise<
 			return { user: null };
 		}
 
-		const user = await response.json();
-		if (user.errors) {
+		const authData = await response.json();
+
+		// Check if user is authenticated based on response structure
+		if (authData.authenticated && authData.user) {
+			return { user: authData.user };
+		} else {
 			return { user: null };
 		}
-
-		return { user };
 	} catch (error) {
 		console.error("Error checking authentication:", error);
 		return { user: null };
@@ -51,10 +49,6 @@ export const protectedRouteLoader = async (): Promise<
 			},
 		});
 
-		if (response.status === 401) {
-			return redirect("/login");
-		}
-
 		if (!response.ok) {
 			return redirect("/login");
 		}
@@ -65,12 +59,14 @@ export const protectedRouteLoader = async (): Promise<
 			return redirect("/login");
 		}
 
-		const user = await response.json();
-		if (user.errors) {
+		const authData = await response.json();
+
+		// Redirect to login if not authenticated
+		if (!authData.authenticated || !authData.user) {
 			return redirect("/login");
 		}
 
-		return { user };
+		return { user: authData.user };
 	} catch (error) {
 		console.error("Error checking authentication:", error);
 		return redirect("/login");
@@ -231,11 +227,11 @@ export const loginAction = async ({ request }: { request: Request }) => {
 export const logoutAction = async () => {
 	try {
 		const response = await fetch("/api/auth/logout", {
-			method: "POST",
+			method: "GET", // Changed to GET since your backend uses GET
 		});
 
 		if (response.ok) {
-			return window.location.href = "/";
+			return redirect("/");
 		} else {
 			throw new Error("Logout failed");
 		}
