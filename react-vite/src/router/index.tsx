@@ -43,7 +43,7 @@ import {
 	loginAction,
 	protectedRouteLoader,
 } from "../loaders/authLoaders";
-import { userDetailsLoader } from "../loaders/userLoaders";
+import { userDetailsLoader, publicUserProfileLoader } from "../loaders/userLoaders";
 import {
 	profileLoader,
 	profileUpdateAction,
@@ -145,7 +145,7 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "users/:userId",
-				loader: userDetailsLoader,
+				loader: publicUserProfileLoader,
 				element: (
 					<SuspenseWrapper>
 						<ProfileDetails />
