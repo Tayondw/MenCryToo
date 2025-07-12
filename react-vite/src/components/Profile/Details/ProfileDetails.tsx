@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import React, { useState, useMemo, useCallback } from "react";
+import { Link, useLoaderData } from "react-router-dom";
 import {
 	Heart,
 	MessageCircle,
@@ -18,24 +17,252 @@ import {
 	Eye,
 	UserIcon,
 	ArrowLeft,
+	LucideIcon,
 } from "lucide-react";
 import {
-	RootState,
 	User,
 	Post,
 	Group,
 	Event,
 	Tag as TagInterface,
+	UserComment,
 } from "../../../types";
 import Mail from "../../Mail";
 
+// Define the loader data structure
+interface ProfileDetailsLoaderData {
+	user: User;
+	currentUser: User | null;
+	isOwnProfile: boolean;
+	isAuthenticated: boolean;
+}
+
+// Reusable empty state component with proper icon typing
+interface EmptyStateProps {
+	icon: LucideIcon;
+	title: string;
+	description: string;
+	actionButton?: {
+		to: string;
+		text: string;
+		icon: LucideIcon;
+	};
+}
+
+const EmptyState: React.FC<EmptyStateProps> = ({
+	icon: Icon,
+	title,
+	description,
+	actionButton,
+}) => (
+	<div className="text-center py-16">
+		<div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 max-w-md mx-auto">
+			<div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
+				<Icon className="text-white" size={24} />
+			</div>
+			<h3 className="text-xl font-semibold text-gray-800 mb-2">{title}</h3>
+			<p className="text-gray-600 mb-4">{description}</p>
+			{actionButton && (
+				<Link
+					to={actionButton.to}
+					className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200"
+				>
+					<actionButton.icon size={16} />
+					{actionButton.text}
+				</Link>
+			)}
+		</div>
+	</div>
+);
+
+// Post card component with proper typing
+interface PostCardProps {
+	post: Post;
+	userDetails: User;
+	userComments: UserComment[];
+	formatTimeAgo: (date: string) => string;
+}
+
+const PostCard: React.FC<PostCardProps> = ({
+	post,
+	userDetails,
+	userComments,
+	formatTimeAgo,
+}) => (
+	<article
+		className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col"
+		style={{ minHeight: "500px" }}
+	>
+		{/* Post Header */}
+		<div className="p-4 border-b border-gray-50 flex-shrink-0">
+			<div className="flex items-center gap-3">
+				<img
+					src={userDetails?.profileImage}
+					alt={userDetails?.username}
+					className="w-10 h-10 rounded-full object-cover border-2 border-gray-100 flex-shrink-0"
+				/>
+				<span className="font-semibold text-gray-800 truncate">
+					{userDetails?.username}
+				</span>
+			</div>
+		</div>
+
+		{/* Post Title */}
+		<div className="px-4 py-3 border-b border-gray-50 flex-shrink-0">
+			<h3 className="font-semibold text-gray-800 text-base leading-tight break-words">
+				{post.title}
+			</h3>
+		</div>
+
+		{/* Post Image */}
+		{post.image && (
+			<div className="relative flex-shrink-0">
+				<img
+					src={post.image}
+					alt={post.title}
+					className="w-full h-64 object-cover"
+				/>
+				<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+			</div>
+		)}
+
+		{/* Post Content */}
+		<div className="p-4 flex-1 flex flex-col">
+			<div className="flex items-center gap-6 mb-3">
+				<button className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors duration-200">
+					<Heart size={18} />
+					<span className="text-sm font-medium">{post.likes}</span>
+				</button>
+				<button className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors duration-200">
+					<MessageCircle size={18} />
+					<span className="text-sm font-medium">{userComments.length}</span>
+				</button>
+				<button className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200 ml-auto">
+					<Share2 size={16} />
+				</button>
+				<button className="flex items-center gap-2 text-gray-600 hover:text-yellow-500 transition-colors duration-200">
+					<Bookmark size={16} />
+				</button>
+			</div>
+
+			{/* Caption */}
+			<div className="text-sm text-gray-700 leading-relaxed flex-1">
+				<div className="flex items-start gap-2 flex-wrap">
+					<span className="font-semibold text-gray-800 flex-shrink-0">
+						{userDetails?.username}
+					</span>
+					<span className="text-xs text-gray-500 flex items-center gap-1 flex-shrink-0">
+						<Clock size={12} />
+						{formatTimeAgo(post.updatedAt)}
+					</span>
+					<span className="break-words">{post.caption}</span>
+				</div>
+			</div>
+		</div>
+	</article>
+);
+
+// Group card component
+const GroupCard: React.FC<{ group: Group }> = ({ group }) => (
+	<Link to={`/groups/${group.id}`} className="group block">
+		<article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+			<div className="relative">
+				<img
+					src={group.image}
+					alt={group.name}
+					className="w-full h-48 object-cover"
+				/>
+				<div className="absolute top-4 right-4">
+					<span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-xs font-medium text-gray-700 rounded-full">
+						{group.type}
+					</span>
+				</div>
+			</div>
+			<div className="p-6 flex-1 flex flex-col">
+				<h2 className="text-lg font-bold text-gray-800 mb-2 group-hover:text-orange-600 transition-colors duration-200">
+					{group.name}
+				</h2>
+				<p className="text-gray-600 text-sm mb-4 flex-1 line-clamp-3">
+					{group.about}
+				</p>
+				<div className="flex items-center justify-between text-sm text-gray-500 mt-auto">
+					<div className="flex items-center gap-1">
+						<Users size={14} />
+						<span>{group.numMembers.toLocaleString()} members</span>
+					</div>
+					<div className="flex items-center gap-1">
+						<Calendar size={14} />
+						<span>{group.events?.length || 0} events</span>
+					</div>
+				</div>
+			</div>
+		</article>
+	</Link>
+);
+
+// Event card component
+const EventCard: React.FC<{ event: Event }> = ({ event }) => (
+	<Link to={`/events/${event.id}`} className="group block">
+		<article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+			<div className="relative">
+				<img
+					src={event.image}
+					alt={event.name}
+					className="w-full h-48 object-cover"
+				/>
+				<div className="absolute top-4 right-4">
+					<span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-xs font-medium text-gray-700 rounded-full">
+						{event.type}
+					</span>
+				</div>
+			</div>
+			<div className="p-6 flex-1 flex flex-col">
+				<h2 className="text-lg font-bold text-gray-800 mb-2 group-hover:text-orange-600 transition-colors duration-200">
+					{event.name}
+				</h2>
+				<p className="text-gray-600 text-sm mb-4 flex-1 line-clamp-3">
+					{event.description}
+				</p>
+				<div className="space-y-2 text-sm text-gray-500 mt-auto">
+					<div className="flex items-center gap-2">
+						<Calendar size={14} />
+						<span>{new Date(event.startDate).toLocaleDateString()}</span>
+					</div>
+					<div className="flex items-center justify-between">
+						<div className="flex items-center gap-1">
+							<Users size={14} />
+							<span>
+								{event.numAttendees}/{event.capacity} attending
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</article>
+	</Link>
+);
+
+// Empty state configurations with proper typing
+interface EmptyStateConfig {
+	icon: LucideIcon;
+	title: string;
+	description: string;
+	actionButton?: {
+		to: string;
+		text: string;
+		icon: LucideIcon;
+	};
+}
+
 const ProfileDetails: React.FC = () => {
 	// Get data from React Router loader
-	const userDetails = useLoaderData() as User;
-	const navigate = useNavigate();
-	const sessionUser = useSelector((state: RootState) => state.session.user);
+	const {
+		user: userDetails,
+		isOwnProfile,
+		isAuthenticated,
+	} = useLoaderData() as ProfileDetailsLoaderData;
 
-	// State hooks
+	// State hooks - must be called unconditionally
 	const [activeMainSection, setActiveMainSection] = useState<
 		"posts" | "groups" | "events"
 	>("posts");
@@ -45,14 +272,7 @@ const ProfileDetails: React.FC = () => {
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 	const [searchTerm, setSearchTerm] = useState("");
 
-	// Redirect if not authenticated
-	useEffect(() => {
-		if (!sessionUser) {
-			navigate("/", { replace: true });
-		}
-	}, [sessionUser, navigate]);
-
-	// Memoized user-related values with proper null checks and default arrays
+	// Memoized values - must be called unconditionally
 	const userTags = useMemo(() => userDetails?.usersTags ?? [], [userDetails]);
 	const userPosts = useMemo(() => userDetails?.posts ?? [], [userDetails]);
 	const userGroups = useMemo(() => userDetails?.group ?? [], [userDetails]);
@@ -70,46 +290,46 @@ const ProfileDetails: React.FC = () => {
 	}, [userPosts]);
 
 	// Filter content based on search term
-	const filteredContent = useMemo(() => {
-		if (!searchTerm) {
-			switch (activeMainSection) {
-				case "posts":
-					return sortedUserPosts;
-				case "groups":
-					return userGroups;
-				case "events":
-					return userEvents;
-				default:
-					return [];
-			}
-		}
+	const filteredPosts = useMemo((): Post[] => {
+		if (activeMainSection !== "posts") return [];
+
+		if (!searchTerm) return sortedUserPosts;
 
 		const term = searchTerm.toLowerCase();
-		switch (activeMainSection) {
-			case "posts":
-				return sortedUserPosts.filter(
-					(post) =>
-						post.title.toLowerCase().includes(term) ||
-						post.caption.toLowerCase().includes(term),
-				);
-			case "groups":
-				return userGroups.filter(
-					(group) =>
-						group.name.toLowerCase().includes(term) ||
-						group.about.toLowerCase().includes(term),
-				);
-			case "events":
-				return userEvents.filter(
-					(event) =>
-						event.name.toLowerCase().includes(term) ||
-						event.description.toLowerCase().includes(term),
-				);
-			default:
-				return [];
-		}
-	}, [activeMainSection, searchTerm, sortedUserPosts, userGroups, userEvents]);
+		return sortedUserPosts.filter(
+			(post: Post) =>
+				post.title.toLowerCase().includes(term) ||
+				post.caption.toLowerCase().includes(term),
+		);
+	}, [activeMainSection, searchTerm, sortedUserPosts]);
 
-	// Format time ago helper
+	const filteredGroups = useMemo((): Group[] => {
+		if (activeMainSection !== "groups") return [];
+
+		if (!searchTerm) return userGroups;
+
+		const term = searchTerm.toLowerCase();
+		return userGroups.filter(
+			(group: Group) =>
+				group.name.toLowerCase().includes(term) ||
+				group.about.toLowerCase().includes(term),
+		);
+	}, [activeMainSection, searchTerm, userGroups]);
+
+	const filteredEvents = useMemo((): Event[] => {
+		if (activeMainSection !== "events") return [];
+
+		if (!searchTerm) return userEvents;
+
+		const term = searchTerm.toLowerCase();
+		return userEvents.filter(
+			(event: Event) =>
+				event.name.toLowerCase().includes(term) ||
+				event.description.toLowerCase().includes(term),
+		);
+	}, [activeMainSection, searchTerm, userEvents]);
+
+	// Helper functions
 	const formatTimeAgo = useCallback((dateString: string) => {
 		const now = new Date();
 		const postDate = new Date(dateString);
@@ -119,278 +339,121 @@ const ProfileDetails: React.FC = () => {
 		return `${diffInDays}d ago`;
 	}, []);
 
-	// Get total likes across all posts
-	const getTotalLikes = () => {
+	const getTotalLikes = useCallback(() => {
 		return userPosts.reduce((total, post) => total + (post.likes || 0), 0);
-	};
+	}, [userPosts]);
 
-	// Render content based on active section
-	const renderContent = useCallback(() => {
-		const content = filteredContent;
-
+	// Get current filtered content count for display
+	const getFilteredContentCount = useCallback(() => {
 		switch (activeMainSection) {
 			case "posts":
-				return userPosts.length > 0 ? (
-					<div
-						className={`${
-							viewMode === "grid"
-								? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-6 w-full"
-								: "space-y-6"
-						}`}
-					>
-						{(content as Post[]).map((post: Post) => (
-							<article
+				return filteredPosts.length;
+			case "groups":
+				return filteredGroups.length;
+			case "events":
+				return filteredEvents.length;
+			default:
+				return 0;
+		}
+	}, [
+		activeMainSection,
+		filteredPosts.length,
+		filteredGroups.length,
+		filteredEvents.length,
+	]);
+
+	// Render content
+	const renderContent = useCallback(() => {
+		// Grid/List class helper
+		const getGridClass = () => {
+			if (activeMainSection === "posts") {
+				return viewMode === "grid"
+					? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-6 w-full"
+					: "space-y-6";
+			}
+			return viewMode === "grid"
+				? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+				: "space-y-6";
+		};
+
+		// Empty state configurations with proper typing
+		const emptyStates: Record<"posts" | "groups" | "events", EmptyStateConfig> =
+			{
+				posts: {
+					icon: Grid,
+					title: "No Posts Yet",
+					description: "This user hasn't shared any posts yet.",
+					actionButton: isAuthenticated
+						? {
+								to: "/posts/create",
+								text: "Create Post",
+								icon: Plus,
+						  }
+						: undefined,
+				},
+				groups: {
+					icon: Users,
+					title: "No Groups Yet",
+					description: "This user hasn't joined any groups yet.",
+					actionButton: {
+						to: "/groups",
+						text: "Explore Groups",
+						icon: Users,
+					},
+				},
+				events: {
+					icon: Calendar,
+					title: "No Events Yet",
+					description: "This user isn't attending any events yet.",
+					actionButton: {
+						to: "/events",
+						text: "Explore Events",
+						icon: Calendar,
+					},
+				},
+			};
+
+		// Type-safe rendering based on active section
+		switch (activeMainSection) {
+			case "posts":
+				if (filteredPosts.length === 0) {
+					return <EmptyState {...emptyStates.posts} />;
+				}
+				return (
+					<div className={getGridClass()}>
+						{filteredPosts.map((post: Post) => (
+							<PostCard
 								key={post.id}
-								className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col"
-								style={{ minHeight: "500px" }}
-							>
-								{/* Post Header with User Info */}
-								<div className="p-4 border-b border-gray-50 flex-shrink-0">
-									<div className="flex items-center justify-between gap-3">
-										<div className="flex items-center gap-3 min-w-0 flex-1">
-											<img
-												src={userDetails?.profileImage}
-												alt={userDetails?.username}
-												className="w-10 h-10 rounded-full object-cover border-2 border-gray-100 flex-shrink-0"
-											/>
-											<div className="min-w-0 flex-1">
-												<span className="font-semibold text-gray-800 block truncate">
-													{userDetails?.username}
-												</span>
-											</div>
-										</div>
-									</div>
-								</div>
-
-								{/* Post Title */}
-								<div className="px-4 py-3 border-b border-gray-50 flex-shrink-0">
-									<h3 className="font-semibold text-gray-800 text-base tracking-normal leading-tight break-words">
-										{post.title}
-									</h3>
-								</div>
-
-								{/* Post Image */}
-								{post.image && (
-									<div className="relative flex-shrink-0">
-										<img
-											src={post.image}
-											alt={post.title}
-											className="w-full h-64 object-cover"
-										/>
-										<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-									</div>
-								)}
-
-								{/* Post Content */}
-								<div className="p-4 flex-1 flex flex-col">
-									<div className="flex items-center gap-6 mb-3">
-										<button className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors duration-200">
-											<Heart size={18} />
-											<span className="text-sm font-medium">{post.likes}</span>
-										</button>
-										<button className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors duration-200">
-											<MessageCircle size={18} />
-											<span className="text-sm font-medium">
-												{userComments.length}
-											</span>
-										</button>
-										<button className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200 ml-auto">
-											<Share2 size={16} />
-										</button>
-										<button className="flex items-center gap-2 text-gray-600 hover:text-yellow-500 transition-colors duration-200">
-											<Bookmark size={16} />
-										</button>
-									</div>
-
-									{/* Caption */}
-									<div className="text-sm text-gray-700 leading-relaxed flex-1">
-										<div className="flex items-start gap-2 flex-wrap">
-											<span className="font-semibold text-gray-800 flex-shrink-0">
-												{userDetails?.username}
-											</span>
-											<span className="text-xs text-gray-500 flex self-center items-center gap-1 flex-shrink-0">
-												<Clock size={12} />
-												{formatTimeAgo(post.updatedAt)}
-											</span>
-											<span className="break-words">{post.caption}</span>
-										</div>
-									</div>
-								</div>
-							</article>
+								post={post}
+								userDetails={userDetails}
+								userComments={userComments}
+								formatTimeAgo={formatTimeAgo}
+							/>
 						))}
-					</div>
-				) : (
-					<div className="text-center py-16">
-						<div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 max-w-md mx-auto">
-							<div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
-								<Grid className="text-white" size={24} />
-							</div>
-							<h3 className="text-xl font-semibold text-gray-800 mb-2">
-								No Posts Yet
-							</h3>
-							<p className="text-gray-600 mb-4">
-								Share your first post to get started!
-							</p>
-							<Link
-								to="/posts/create"
-								className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200"
-							>
-								<Plus size={16} />
-								Create Post
-							</Link>
-						</div>
 					</div>
 				);
 
 			case "groups":
-				return userGroups.length > 0 ? (
-					<div
-						className={`${
-							viewMode === "grid"
-								? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-								: "space-y-6"
-						}`}
-					>
-						{(content as Group[]).map((group: Group) => (
-							<Link
-								to={`/groups/${group.id}`}
-								key={group.id}
-								className="group block"
-							>
-								<article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-									<div className="relative">
-										<img
-											src={group.image}
-											alt={group.name}
-											className="w-full h-48 object-cover"
-										/>
-										<div className="absolute top-4 right-4">
-											<span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-xs font-medium text-gray-700 rounded-full">
-												{group.type}
-											</span>
-										</div>
-									</div>
-									<div className="p-6 flex-1 flex flex-col">
-										<h2 className="text-lg font-bold text-gray-800 mb-2 group-hover:text-orange-600 transition-colors duration-200">
-											{group.name}
-										</h2>
-										<p className="text-gray-600 text-sm mb-4 flex-1 line-clamp-3">
-											{group.about}
-										</p>
-										<div className="flex items-center justify-between text-sm text-gray-500 mt-auto">
-											<div className="flex items-center gap-1">
-												<Users size={14} />
-												<span>{group.numMembers.toLocaleString()} members</span>
-											</div>
-											<div className="flex items-center gap-1">
-												<Calendar size={14} />
-												<span>{group.events?.length || 0} events</span>
-											</div>
-										</div>
-									</div>
-								</article>
-							</Link>
+				if (filteredGroups.length === 0) {
+					return <EmptyState {...emptyStates.groups} />;
+				}
+				return (
+					<div className={getGridClass()}>
+						{filteredGroups.map((group: Group) => (
+							<GroupCard key={group.id} group={group} />
 						))}
-					</div>
-				) : (
-					<div className="text-center py-16">
-						<div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 max-w-md mx-auto">
-							<div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
-								<Users className="text-white" size={24} />
-							</div>
-							<h3 className="text-xl font-semibold text-gray-800 mb-2">
-								No Groups Yet
-							</h3>
-							<p className="text-gray-600 mb-4">
-								Join groups to connect with like-minded people!
-							</p>
-							<Link
-								to="/groups"
-								className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200"
-							>
-								<Users size={16} />
-								Explore Groups
-							</Link>
-						</div>
 					</div>
 				);
 
 			case "events":
-				return userEvents.length > 0 ? (
-					<div
-						className={`${
-							viewMode === "grid"
-								? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-								: "space-y-6"
-						}`}
-					>
-						{(content as Event[]).map((event: Event) => (
-							<Link
-								key={event.id}
-								to={`/events/${event.id}`}
-								className="group block"
-							>
-								<article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-									<div className="relative">
-										<img
-											src={event.image}
-											alt={event.name}
-											className="w-full h-48 object-cover"
-										/>
-										<div className="absolute top-4 right-4">
-											<span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-xs font-medium text-gray-700 rounded-full">
-												{event.type}
-											</span>
-										</div>
-									</div>
-									<div className="p-6 flex-1 flex flex-col">
-										<h2 className="text-lg font-bold text-gray-800 mb-2 group-hover:text-orange-600 transition-colors duration-200">
-											{event.name}
-										</h2>
-										<p className="text-gray-600 text-sm mb-4 flex-1 line-clamp-3">
-											{event.description}
-										</p>
-										<div className="space-y-2 text-sm text-gray-500 mt-auto">
-											<div className="flex items-center gap-2">
-												<Calendar size={14} />
-												<span>
-													{new Date(event.startDate).toLocaleDateString()}
-												</span>
-											</div>
-											<div className="flex items-center justify-between">
-												<div className="flex items-center gap-1">
-													<Users size={14} />
-													<span>
-														{event.numAttendees}/{event.capacity} attending
-													</span>
-												</div>
-											</div>
-										</div>
-									</div>
-								</article>
-							</Link>
+				if (filteredEvents.length === 0) {
+					return <EmptyState {...emptyStates.events} />;
+				}
+				return (
+					<div className={getGridClass()}>
+						{filteredEvents.map((event: Event) => (
+							<EventCard key={event.id} event={event} />
 						))}
-					</div>
-				) : (
-					<div className="text-center py-16">
-						<div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 max-w-md mx-auto">
-							<div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
-								<Calendar className="text-white" size={24} />
-							</div>
-							<h3 className="text-xl font-semibold text-gray-800 mb-2">
-								No Events Yet
-							</h3>
-							<p className="text-gray-600 mb-4">
-								Create or join events to get started!
-							</p>
-							<Link
-								to="/events"
-								className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200"
-							>
-								<Calendar size={16} />
-								Explore Events
-							</Link>
-						</div>
 					</div>
 				);
 
@@ -399,71 +462,80 @@ const ProfileDetails: React.FC = () => {
 		}
 	}, [
 		activeMainSection,
-		filteredContent,
 		viewMode,
+		filteredPosts,
+		filteredGroups,
+		filteredEvents,
 		userDetails,
 		userComments,
-		userPosts,
-		userGroups,
-		userEvents,
 		formatTimeAgo,
+		isAuthenticated,
 	]);
 
-	// Render tag content based on active section
+	// Render tag content
 	const renderTagContent = useCallback(() => {
-		switch (activeAsideSection) {
-			case "tags":
-				return userTags.length > 0 ? (
-					<div className="space-y-6">
-						<div className="flex flex-wrap gap-2">
-							{userTags.map((tag: TagInterface) => (
-								<span
-									key={tag.id}
-									className="px-3 py-1 bg-gradient-to-r from-orange-100 to-slate-100 text-gray-700 text-sm font-medium rounded-full border border-gray-200 hover:shadow-sm transition-all duration-200"
-								>
-									{tag.name}
-								</span>
-							))}
-						</div>
+		if (activeAsideSection === "tags") {
+			return userTags.length > 0 ? (
+				<div className="space-y-6">
+					<div className="flex flex-wrap gap-2">
+						{userTags.map((tag: TagInterface) => (
+							<span
+								key={tag.id}
+								className="px-3 py-1 bg-gradient-to-r from-orange-100 to-slate-100 text-gray-700 text-sm font-medium rounded-full border border-gray-200 hover:shadow-sm transition-all duration-200"
+							>
+								{tag.name}
+							</span>
+						))}
 					</div>
-				) : (
-					<div className="space-y-6">
-						<div className="text-center py-4">
-							<div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-								<UserIcon className="text-gray-400" size={20} />
-							</div>
-							<p className="text-gray-500 text-sm mb-4">No tags added yet.</p>
-						</div>
+				</div>
+			) : (
+				<div className="text-center py-4">
+					<div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+						<UserIcon className="text-gray-400" size={20} />
 					</div>
-				);
-
-			case "similar":
-				return (
-					<div className="space-y-6">
-						<div className="text-center">
-							<div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-3">
-								<TrendingUp className="text-white" size={20} />
-							</div>
-							<h3 className="font-semibold text-gray-800 mb-2">
-								Discover Similar Users
-							</h3>
-							<p className="text-gray-600 text-sm mb-4">
-								Find users with similar interests based on your tags
-							</p>
-						</div>
-						<Link to="/profile-feed">
-							<button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200 shadow-md hover:shadow-lg">
-								<Eye size={16} />
-								Find Similar Users
-							</button>
-						</Link>
-					</div>
-				);
-
-			default:
-				return null;
+					<p className="text-gray-500 text-sm">No tags added yet.</p>
+				</div>
+			);
 		}
+
+		return (
+			<div className="space-y-6">
+				<div className="text-center">
+					<div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-3">
+						<TrendingUp className="text-white" size={20} />
+					</div>
+					<h3 className="font-semibold text-gray-800 mb-2">
+						Discover Similar Users
+					</h3>
+					<p className="text-gray-600 text-sm mb-4">
+						Find users with similar interests
+					</p>
+				</div>
+				<Link to="/profile-feed">
+					<button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200 shadow-md hover:shadow-lg">
+						<Eye size={16} />
+						Find Similar Users
+					</button>
+				</Link>
+			</div>
+		);
 	}, [activeAsideSection, userTags]);
+
+	// Early returns after all hooks
+	if (isOwnProfile) {
+		return (
+			<div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-slate-50 flex items-center justify-center">
+				<div className="text-center">
+					<h2 className="text-2xl font-bold text-gray-800 mb-4">
+						Redirecting to your profile...
+					</h2>
+					<Link to="/profile" className="text-orange-600 hover:text-orange-800">
+						Click here if not redirected automatically
+					</Link>
+				</div>
+			</div>
+		);
+	}
 
 	if (!userDetails) {
 		return (
@@ -483,19 +555,38 @@ const ProfileDetails: React.FC = () => {
 				<div className="max-w-7xl mx-auto px-4 py-4">
 					<div className="flex items-center justify-between">
 						<Link
-							to="/similar-feed"
+							to="/profile-feed"
 							className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all duration-200"
 						>
 							<ArrowLeft size={18} />
-							Posts Feed
+							Back to Profiles
 						</Link>
-						<Link
-							to="/posts/create"
-							className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200 shadow-md hover:shadow-lg"
-						>
-							<Plus size={16} />
-							Create Post
-						</Link>
+						<div className="flex items-center gap-3">
+							{isAuthenticated ? (
+								<>
+									<Link
+										to="/profile"
+										className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all duration-200"
+									>
+										My Profile
+									</Link>
+									<Link
+										to="/posts/create"
+										className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200 shadow-md hover:shadow-lg"
+									>
+										<Plus size={16} />
+										Create Post
+									</Link>
+								</>
+							) : (
+								<Link
+									to="/login"
+									className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-slate-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-slate-700 transition-all duration-200 shadow-md hover:shadow-lg"
+								>
+									Sign In
+								</Link>
+							)}
+						</div>
 					</div>
 				</div>
 			</nav>
@@ -519,20 +610,19 @@ const ProfileDetails: React.FC = () => {
 										/>
 									</div>
 
-									<div className="flex-1 mt-4 sm:mt-0">
-										<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
-											<div className="mt-20">
-												<h1 className="text-2xl font-bold text-gray-800">
-													{userDetails.username}
-												</h1>
-												<p className="text-gray-600 mt-1">
-													{userDetails.firstName} {userDetails.lastName}
-												</p>
-												<p className="text-gray-500 text-sm">
-													{userDetails.email}
-												</p>
-											</div>
-										</div>
+									<div className="flex-1 mt-20 sm:mt-0">
+										<h1 className="text-2xl font-bold text-gray-800">
+											{userDetails.username}
+										</h1>
+										<p className="text-gray-600 mt-1">
+											{userDetails.firstName} {userDetails.lastName}
+										</p>
+										<p className="text-gray-500 text-sm">
+											Member since{" "}
+											{new Date(
+												userDetails.createdAt || "",
+											).toLocaleDateString()}
+										</p>
 
 										{userDetails.bio && (
 											<p className="text-gray-700 mt-4 leading-relaxed">
@@ -577,6 +667,7 @@ const ProfileDetails: React.FC = () => {
 							{/* Content Header */}
 							<div className="p-6 border-b border-gray-100">
 								<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+									{/* Section Tabs */}
 									<nav className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
 										{(["posts", "groups", "events"] as const).map((section) => (
 											<button
@@ -599,8 +690,8 @@ const ProfileDetails: React.FC = () => {
 										))}
 									</nav>
 
+									{/* Search and View Controls */}
 									<div className="flex items-center gap-3">
-										{/* Search */}
 										<div className="relative">
 											<Search
 												className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -615,7 +706,6 @@ const ProfileDetails: React.FC = () => {
 											/>
 										</div>
 
-										{/* View Mode Toggle */}
 										<div className="flex bg-gray-100 rounded-lg p-1">
 											<button
 												onClick={() => setViewMode("grid")}
@@ -641,15 +731,14 @@ const ProfileDetails: React.FC = () => {
 									</div>
 								</div>
 
-								{/* Search Results Info */}
 								{searchTerm && (
 									<div className="mt-4 text-sm text-gray-600">
-										Showing {filteredContent.length} results for "{searchTerm}"
+										Showing {getFilteredContentCount()} results for "
+										{searchTerm}"
 									</div>
 								)}
 							</div>
 
-							{/* Content Area */}
 							<div className="p-6">{renderContent()}</div>
 						</section>
 					</main>
@@ -680,7 +769,6 @@ const ProfileDetails: React.FC = () => {
 									Similar
 								</button>
 							</nav>
-
 							{renderTagContent()}
 						</section>
 
@@ -691,38 +779,21 @@ const ProfileDetails: React.FC = () => {
 								User Stats
 							</h3>
 							<div className="space-y-3">
-								<div className="flex items-center justify-between">
-									<span className="text-sm text-gray-600">Total Posts</span>
-									<span className="font-semibold text-gray-800">
-										{userPosts.length}
-									</span>
-								</div>
-								<div className="flex items-center justify-between">
-									<span className="text-sm text-gray-600">Total Likes</span>
-									<span className="font-semibold text-gray-800">
-										{getTotalLikes()}
-									</span>
-								</div>
-								<div className="flex items-center justify-between">
-									<span className="text-sm text-gray-600">Groups Joined</span>
-									<span className="font-semibold text-gray-800">
-										{userGroups.length}
-									</span>
-								</div>
-								<div className="flex items-center justify-between">
-									<span className="text-sm text-gray-600">
-										Events Attending
-									</span>
-									<span className="font-semibold text-gray-800">
-										{userEvents.length}
-									</span>
-								</div>
-								<div className="flex items-center justify-between">
-									<span className="text-sm text-gray-600">Profile Tags</span>
-									<span className="font-semibold text-gray-800">
-										{userTags.length}
-									</span>
-								</div>
+								{[
+									{ label: "Total Posts", value: userPosts.length },
+									{ label: "Total Likes", value: getTotalLikes() },
+									{ label: "Groups Joined", value: userGroups.length },
+									{ label: "Events Attending", value: userEvents.length },
+									{ label: "Profile Tags", value: userTags.length },
+								].map(({ label, value }) => (
+									<div
+										key={label}
+										className="flex items-center justify-between"
+									>
+										<span className="text-sm text-gray-600">{label}</span>
+										<span className="font-semibold text-gray-800">{value}</span>
+									</div>
+								))}
 							</div>
 						</section>
 
@@ -743,14 +814,29 @@ const ProfileDetails: React.FC = () => {
 										</p>
 									</div>
 								</div>
+								{(isAuthenticated || userDetails.email) && (
+									<div className="flex items-start gap-3">
+										<div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+											<Mail />
+										</div>
+										<div>
+											<p className="text-sm text-gray-500">Email</p>
+											<p className="font-medium text-gray-800">
+												{userDetails.email || "Not public"}
+											</p>
+										</div>
+									</div>
+								)}
 								<div className="flex items-start gap-3">
 									<div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-										<Mail />
+										<Calendar size={16} className="text-orange-600" />
 									</div>
 									<div>
-										<p className="text-sm text-gray-500">Email</p>
+										<p className="text-sm text-gray-500">Member Since</p>
 										<p className="font-medium text-gray-800">
-											{userDetails.email}
+											{new Date(
+												userDetails.createdAt || "",
+											).toLocaleDateString()}
 										</p>
 									</div>
 								</div>
@@ -760,7 +846,7 @@ const ProfileDetails: React.FC = () => {
 				</div>
 			</div>
 
-			{/* Mobile Tags Section - Only visible on mobile */}
+			{/* Mobile Tags Section */}
 			<section className="lg:hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-6 max-w-7xl mx-auto mt-8">
 				<div className="mb-4">
 					<h2 className="text-xl font-semibold text-gray-800 mb-1">
