@@ -109,7 +109,7 @@ const PostCard: React.FC<PostCardProps> = ({
 
 		{/* Post Title */}
 		<div className="px-4 py-3 border-b border-gray-50 flex-shrink-0">
-			<h3 className="font-semibold text-gray-800 text-base leading-tight break-words">
+			<h3 className="font-semibold text-gray-800 text-base leading-tight break-words h-10">
 				{post.title}
 			</h3>
 		</div>
@@ -151,7 +151,7 @@ const PostCard: React.FC<PostCardProps> = ({
 					<span className="font-semibold text-gray-800 flex-shrink-0">
 						{userDetails?.username}
 					</span>
-					<span className="text-xs text-gray-500 flex items-center gap-1 flex-shrink-0">
+					<span className="text-xs text-gray-500 flex items-center gap-1 flex-shrink-0 self-center">
 						<Clock size={12} />
 						{formatTimeAgo(post.updatedAt)}
 					</span>
