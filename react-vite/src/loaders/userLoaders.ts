@@ -7,8 +7,8 @@ export const userDetailsLoader = async ({ params }: LoaderFunctionArgs) => {
 
 	if (!userId) {
 		throw new Error("User ID is required");
-      }
-      
+	}
+
 	try {
 		const response = await fetch(`/api/users/${userId}`, {
 			headers: {
@@ -20,14 +20,89 @@ export const userDetailsLoader = async ({ params }: LoaderFunctionArgs) => {
 			if (response.status === 404) {
 				throw new Response("User not found", { status: 404 });
 			}
+			if (response.status === 401) {
+				// Only redirect to login if the API specifically returns 401
+				return redirect("/login");
+			}
 			throw new Error("Failed to fetch user details");
 		}
 
 		const userDetails = await response.json();
-		return userDetails;
+		return { user: userDetails, isOwnProfile: false };
 	} catch (error) {
 		console.error("Error loading user details:", error);
-		return redirect("/");
+		if (error instanceof Response) {
+			throw error; // Re-throw Response objects (like 404)
+		}
+		// For other errors, redirect to users list instead of home
+		return redirect("/profile-feed");
+	}
+};
+
+export const publicUserProfileLoader = async ({
+	params,
+}: LoaderFunctionArgs) => {
+	const { userId } = params;
+
+	if (!userId) {
+		throw new Response("User ID is required", { status: 400 });
+	}
+
+	try {
+		// Check if user is authenticated and if they're viewing their own profile
+		let currentUser = null;
+		let isOwnProfile = false;
+
+		try {
+			const authResponse = await fetch("/api/auth/", {
+				headers: { "Cache-Control": "max-age=30" },
+			});
+
+			if (authResponse.ok) {
+				const authData = await authResponse.json();
+				if (authData.authenticated && authData.user) {
+					currentUser = authData.user;
+					isOwnProfile = authData.user.id.toString() === userId;
+				}
+			}
+		} catch (authError) {
+			// If auth check fails, continue as non-authenticated user
+			console.log("Auth check failed, continuing as public user", authError);
+		}
+
+		// If it's their own profile, redirect to /profile
+		if (isOwnProfile) {
+			return redirect("/profile");
+		}
+
+		// Fetch the target user's profile data
+		const response = await fetch(`/api/users/${userId}`, {
+			headers: {
+				"Cache-Control": "max-age=120",
+			},
+		});
+
+		if (!response.ok) {
+			if (response.status === 404) {
+				throw new Response("User not found", { status: 404 });
+			}
+			throw new Response("Failed to load user profile", { status: 500 });
+		}
+
+		const userData = await response.json();
+
+		return {
+			user: userData,
+			currentUser,
+			isOwnProfile: false,
+			isAuthenticated: !!currentUser,
+		};
+	} catch (error) {
+		console.error("Error loading user profile:", error);
+		if (error instanceof Response) {
+			throw error;
+		}
+		throw new Response("Failed to load user profile", { status: 500 });
 	}
 };
 
