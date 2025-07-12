@@ -297,7 +297,7 @@ class User(db.Model, UserMixin):
             "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
         }
 
-    def to_dict_profile(self):
+    def to_dict_profile(self, posts=None, comments=None):
         """
         Method specifically for profile page.
         Returns all necessary data with efficient structure.
@@ -400,12 +400,20 @@ class User(db.Model, UserMixin):
                     }
                     user_events.append(event_data)
 
-        # Collect user posts with data (recent 20 posts max)
+        # Use provided posts or get from self.posts
         user_posts = []
-        if hasattr(self, "posts") and self.posts:
+        posts_to_process = (
+            posts
+            if posts is not None
+            else (self.posts if hasattr(self, "posts") else [])
+        )
+
+        if posts_to_process:
             # Sort posts by creation date and limit to 20 most recent
             sorted_posts = sorted(
-                self.posts, key=lambda p: p.created_at or datetime.min, reverse=True
+                posts_to_process,
+                key=lambda p: p.created_at or datetime.min,
+                reverse=True,
             )[:20]
 
             for post in sorted_posts:
@@ -437,12 +445,18 @@ class User(db.Model, UserMixin):
                 }
                 user_posts.append(post_data)
 
-        # Collect user comments (recent 10 comments max for performance)
+        # Use provided comments or get from self.user_comments
         user_comments = []
-        if hasattr(self, "user_comments") and self.user_comments:
+        comments_to_process = (
+            comments
+            if comments is not None
+            else (self.user_comments if hasattr(self, "user_comments") else [])
+        )
+
+        if comments_to_process:
             # Sort comments by creation date and limit to 10 most recent
             sorted_comments = sorted(
-                self.user_comments,
+                comments_to_process,
                 key=lambda c: c.created_at or datetime.min,
                 reverse=True,
             )[:10]
