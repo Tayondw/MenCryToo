@@ -3,7 +3,7 @@ import { User } from "../types";
 
 // Loader to check authentication and get current user
 export const authLoader = async (): Promise<
-	{ user: User | null } | Response
+	{ user: User | null; authenticated: boolean } | Response
 > => {
 	try {
 		const response = await fetch("/api/auth/", {
@@ -15,26 +15,25 @@ export const authLoader = async (): Promise<
 		// Always expect 200 from auth endpoint now
 		if (!response.ok) {
 			console.error(`Auth check failed with status: ${response.status}`);
-			return { user: null };
+			return { user: null, authenticated: false };
 		}
 
 		const contentType = response.headers.get("content-type");
 		if (!contentType || !contentType.includes("application/json")) {
 			console.error("Expected JSON response but received:", contentType);
-			return { user: null };
+			return { user: null, authenticated: false };
 		}
 
 		const authData = await response.json();
 
-		// Check if user is authenticated
-		if (authData.authenticated && authData.user) {
-			return { user: authData.user };
-		} else {
-			return { user: null };
-		}
+		// Return the authentication status properly
+		return {
+			user: authData.authenticated ? authData.user : null,
+			authenticated: authData.authenticated || false,
+		};
 	} catch (error) {
 		console.error("Error checking authentication:", error);
-		return { user: null };
+		return { user: null, authenticated: false };
 	}
 };
 
@@ -203,7 +202,7 @@ export const signupAction = async ({ request }: { request: Request }) => {
 			if (typeof window !== "undefined") {
 				window.location.href = from;
 			}
-                  return window.location.href = from;
+			return (window.location.href = from);
 		} else {
 			const errorData = await response.json();
 			return json({ errors: errorData }, { status: 400 });
