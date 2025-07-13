@@ -1,1 +1,1 @@
-export { default } from "./PostsFeedWithComments";
+export { default } from "./PostsFeed";
