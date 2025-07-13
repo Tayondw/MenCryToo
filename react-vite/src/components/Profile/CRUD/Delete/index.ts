@@ -1,2 +1,1 @@
-import DeleteProfile from "./DeleteProfile";
-export default DeleteProfile;
+export { default } from "./DeleteProfile";
