@@ -24,10 +24,10 @@ const ProfileFeed = lazy(
 );
 const Posts = lazy(() => import("../components/Posts"));
 const PostDetailsWithComments = lazy(
-	() => import("../components/Posts/Details/PostDetailsWithComments"),
+	() => import("../components/Posts/Details/PostDetails"),
 );
 const PostsFeedWithComments = lazy(
-	() => import("../components/Posts/Feed/PostsFeedWithComments"),
+	() => import("../components/Posts/Feed/PostsFeed"),
 );
 const CreatePost = lazy(() => import("../components/Posts/CRUD/Create"));
 const UpdatePost = lazy(() => import("../components/Posts/CRUD/Update"));
@@ -43,7 +43,7 @@ import {
 	loginAction,
 	protectedRouteLoader,
 } from "../loaders/authLoaders";
-import { userDetailsLoader, publicUserProfileLoader } from "../loaders/userLoaders";
+import { publicUserProfileLoader } from "../loaders/userLoaders";
 import {
 	profileLoader,
 	profileUpdateAction,
