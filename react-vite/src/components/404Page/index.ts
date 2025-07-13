@@ -1,2 +1,1 @@
-import FourZeroFourPage from "./404Page";
-export default FourZeroFourPage;
+export { default } from "./404Page";
