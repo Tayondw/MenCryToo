@@ -1,2 +1,1 @@
-import UpdateProfile from "./UpdateProfile";
-export default UpdateProfile;
+export { default } from "./UpdateProfile";
