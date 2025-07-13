@@ -247,7 +247,7 @@ const AuthHome: React.FC = () => {
 							Continue your journey toward better mental health
 						</p>
 						<div className="welcome-actions">
-							<Link to="/similar-feed" className="btn-primary">
+							<Link to="/posts-feed" className="btn-primary">
 								<Users size={20} />
 								Connect with Others
 							</Link>
@@ -288,7 +288,7 @@ const AuthHome: React.FC = () => {
 									experiences. Connect, support, and learn from each other's
 									journeys.
 								</p>
-								<Link to="/similar-feed" className="btn-outline-auth">
+								<Link to="/posts-feed" className="btn-outline-auth">
 									Explore Posts
 									<ArrowRight size={16} />
 								</Link>
