@@ -1,2 +1,1 @@
-import Groups from "./Groups";
-export default Groups;
+export { default } from "./Groups";
