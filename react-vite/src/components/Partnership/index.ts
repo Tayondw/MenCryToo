@@ -1,2 +1,1 @@
-import Partnership from "./Partnership";
-export default Partnership;
+export { default } from "./Partnership";
