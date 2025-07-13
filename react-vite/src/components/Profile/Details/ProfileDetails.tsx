@@ -25,7 +25,6 @@ import {
 	Group,
 	Event,
 	Tag as TagInterface,
-	UserComment,
 } from "../../../types";
 import { useComments } from "../../../hooks/useComments";
 import { useLikes, useLikesModal } from "../../../hooks/useLikes";
@@ -83,34 +82,29 @@ const EmptyState: React.FC<EmptyStateProps> = ({
 interface PostCardProps {
 	post: Post;
 	userDetails: User;
-	userComments: UserComment[];
 	formatTimeAgo: (date: string) => string;
-	// Interactive handlers
 	onLikeToggle: (postId: number, isLiked: boolean, newCount: number) => void;
 	onCommentsClick: (postId: number) => void;
 	onPostClick: (postId: number) => void;
-	onLikesClick: (postId: number) => void; // Add this missing prop
-	// Like state
+	onLikesClick: (postId: number) => void;
 	currentLikeState: {
 		isLiked: boolean;
 		likeCount: number;
 		isLoading: boolean;
 	};
-	// Auth state
 	isAuthenticated: boolean;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
 	post,
 	userDetails,
-	userComments,
 	formatTimeAgo,
 	onLikeToggle,
 	onCommentsClick,
 	onPostClick,
 	currentLikeState,
 	isAuthenticated,
-	onLikesClick, // Add this prop
+	onLikesClick,
 }) => (
 	<article
 		className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col"
@@ -187,7 +181,7 @@ const PostCard: React.FC<PostCardProps> = ({
 					className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors duration-200"
 				>
 					<MessageCircle size={18} />
-					<span className="text-sm font-medium">{userComments.length}</span>
+					<span className="text-sm font-medium">{post.comments || 0}</span>
 				</button>
 
 				<button className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200 ml-auto">
@@ -346,10 +340,6 @@ const ProfileDetails: React.FC = () => {
 	const userPosts = useMemo(() => userDetails?.posts ?? [], [userDetails]);
 	const userGroups = useMemo(() => userDetails?.group ?? [], [userDetails]);
 	const userEvents = useMemo(() => userDetails?.events ?? [], [userDetails]);
-	const userComments = useMemo(
-		() => userDetails?.userComments ?? [],
-		[userDetails],
-	);
 
 	const sortedUserPosts = useMemo(() => {
 		return [...userPosts].sort(
@@ -547,7 +537,6 @@ const ProfileDetails: React.FC = () => {
 									key={post.id}
 									post={post}
 									userDetails={userDetails}
-									userComments={userComments}
 									formatTimeAgo={formatTimeAgo}
 									onLikeToggle={handleLikeToggle}
 									onCommentsClick={handleCommentsClick}
@@ -595,7 +584,6 @@ const ProfileDetails: React.FC = () => {
 		filteredGroups,
 		filteredEvents,
 		userDetails,
-		userComments,
 		formatTimeAgo,
 		handleLikeToggle,
 		handleCommentsClick,

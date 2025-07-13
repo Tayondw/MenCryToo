@@ -1,10 +1,11 @@
 from flask import Blueprint, request, abort, redirect, session
-from app.models import User, db, Tag, Event, Attendance, Group, Membership, Post
+from app.models import User, db, Tag, Event, Attendance, Group, Membership, Post, Comment
 from app.forms import LoginForm
 from app.forms import SignUpForm
 from flask_login import current_user, login_user, logout_user, login_required
 from app.aws import get_unique_filename, upload_file_to_s3
 from sqlalchemy.orm import selectinload, joinedload, load_only
+from sqlalchemy import func
 import os
 import pathlib
 import requests
@@ -251,7 +252,7 @@ def get_profile():
                     joinedload(Event.venues).load_only("address", "city", "state"),
                     selectinload(Event.attendances).load_only("id"),  # For count
                 ),
-                # Load recent posts (limited to 20 for performance)
+                # Load posts WITHOUT automatic comment loading to avoid N+1
                 selectinload(User.posts).options(
                     load_only(
                         "id",
@@ -263,7 +264,7 @@ def get_profile():
                         "updated_at",
                     ),
                     selectinload(Post.post_likes).load_only("id"),  # For count
-                    selectinload(Post.post_comments).load_only("id"),  # For count
+                    # Remove automatic comment loading to prevent N+1 queries
                 ),
                 # Load recent comments (limited for performance)
                 selectinload(User.user_comments).load_only(
@@ -281,10 +282,40 @@ def get_profile():
         )
 
         if user:
-            return user.to_dict_profile()
+            # Get comment counts for all user's posts in a single query
+            post_ids = [post.id for post in user.posts]
+            comment_counts = {}
+
+            if post_ids:
+                # Efficient bulk query for comment counts
+                comment_count_results = (
+                    db.session.query(
+                        Comment.post_id, func.count(Comment.id).label("comment_count")
+                    )
+                    .filter(Comment.post_id.in_(post_ids))
+                    .group_by(Comment.post_id)
+                    .all()
+                )
+
+                comment_counts = {
+                    result.post_id: result.comment_count
+                    for result in comment_count_results
+                }
+
+            # Create the profile dict with enhanced post data
+            profile_data = user.to_dict_profile()
+
+            # Enhance posts with comment counts
+            if "posts" in profile_data and profile_data["posts"]:
+                for post_data in profile_data["posts"]:
+                    post_id = post_data.get("id")
+                    if post_id:
+                        # Add the comment count to each post
+                        post_data["comments"] = comment_counts.get(post_id, 0)
+
+            return profile_data
 
     return {"errors": {"message": "Unauthorized"}}, 401
-
 
 @auth_routes.route("/unauthorized")
 def unauthorized():
