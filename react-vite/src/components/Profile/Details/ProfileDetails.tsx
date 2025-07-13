@@ -32,7 +32,6 @@ import { useLikes, useLikesModal } from "../../../hooks/useLikes";
 import LikeButton from "../../Likes/PostsLikesButton";
 import LikesModal from "../../Likes/PostsLikesModal";
 import CommentModal from "../../Comments/CommentModal";
-import HeartFilled from "../../HeartsFilled/HeartFilled";
 import Mail from "../../Mail";
 
 // Define the loader data structure
@@ -90,6 +89,7 @@ interface PostCardProps {
 	onLikeToggle: (postId: number, isLiked: boolean, newCount: number) => void;
 	onCommentsClick: (postId: number) => void;
 	onPostClick: (postId: number) => void;
+	onLikesClick: (postId: number) => void; // Add this missing prop
 	// Like state
 	currentLikeState: {
 		isLiked: boolean;
@@ -110,6 +110,7 @@ const PostCard: React.FC<PostCardProps> = ({
 	onPostClick,
 	currentLikeState,
 	isAuthenticated,
+	onLikesClick, // Add this prop
 }) => (
 	<article
 		className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col"
@@ -164,14 +165,17 @@ const PostCard: React.FC<PostCardProps> = ({
 						initialLikeCount={currentLikeState.likeCount}
 						initialIsLiked={currentLikeState.isLiked}
 						onLikeToggle={onLikeToggle}
-						onLikesClick={() => {}} // Handle in parent if needed
+						onLikesClick={() => onLikesClick(post.id)}
 						size={18}
 						disabled={currentLikeState.isLoading}
 					/>
 				) : (
 					<div className="flex items-center gap-2 text-gray-600">
 						<Heart size={18} />
-						<span className="text-sm font-medium">
+						<span
+							className="text-sm font-medium cursor-pointer hover:text-orange-600 transition-colors"
+							onClick={() => onLikesClick(post.id)}
+						>
 							{currentLikeState.likeCount}
 						</span>
 					</div>
@@ -314,7 +318,7 @@ const ProfileDetails: React.FC = () => {
 	} = useLoaderData() as ProfileDetailsLoaderData;
 
 	// Hook integrations for interactivity
-	const { likeStates, toggleLike, setLikeState, fetchLikeStatus } = useLikes();
+	const { likeStates, setLikeState, fetchLikeStatus } = useLikes();
 	const {
 		isOpen: isLikesModalOpen,
 		postId: likesModalPostId,
@@ -372,11 +376,19 @@ const ProfileDetails: React.FC = () => {
 		[setLikeState],
 	);
 
+	const handleLikesClick = useCallback(
+		(postId: number) => {
+			openLikesModal(postId);
+		},
+		[openLikesModal],
+	);
+
 	const handleCommentsClick = useCallback(
 		(postId: number) => {
 			const post = userPosts.find((p) => p.id === postId);
-			if (post && post.postComments) {
-				openCommentModal(postId, post.postComments);
+
+			if (post) {
+				openCommentModal(postId, []);
 			} else {
 				openCommentModal(postId, []);
 			}
@@ -540,6 +552,7 @@ const ProfileDetails: React.FC = () => {
 									onLikeToggle={handleLikeToggle}
 									onCommentsClick={handleCommentsClick}
 									onPostClick={handlePostClick}
+									onLikesClick={handleLikesClick}
 									currentLikeState={currentLikeState}
 									isAuthenticated={isAuthenticated}
 								/>
@@ -587,6 +600,7 @@ const ProfileDetails: React.FC = () => {
 		handleLikeToggle,
 		handleCommentsClick,
 		handlePostClick,
+		handleLikesClick,
 		likeStates,
 		isAuthenticated,
 	]);
