@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { ModalProvider } from "../context/Modal";
 import { thunkAuthenticate } from "../store/session";
-import Navigation from "../components/Navigation/Navigation";
+import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import ScrollToTop from "../components/ScrollToTop";
 import { AppDispatch } from "../types";
