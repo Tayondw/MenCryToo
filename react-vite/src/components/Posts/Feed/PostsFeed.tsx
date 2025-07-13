@@ -93,7 +93,7 @@ const PostsFeed: React.FC = () => {
 	} = useComments();
 
 	// Likes management
-	const { likeStates, toggleLike, setLikeState, fetchLikeStatus } = useLikes();
+	const { likeStates, setLikeState, fetchLikeStatus } = useLikes();
 	const {
 		isOpen: isLikesModalOpen,
 		postId: likesModalPostId,
