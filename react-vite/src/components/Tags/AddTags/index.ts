@@ -1,2 +1,1 @@
-import AddTags from "./AddTags";
-export default AddTags;
+export { default } from "./AddTags";
