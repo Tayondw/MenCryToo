@@ -1,2 +1,1 @@
-import PostMenu from "./PostMenu";
-export default PostMenu;
+export { default } from "./PostMenu";
