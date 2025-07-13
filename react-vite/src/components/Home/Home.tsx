@@ -1,7 +1,7 @@
 import React from "react";
 import { useLoaderData } from "react-router-dom";
-import AuthHome from "./AuthHome/AuthHome";
-import NotAuthHome from "./NotAuthHome/NotAuthHome";
+import AuthHome from "./AuthHome";
+import NotAuthHome from "./NotAuthHome";
 import { User, Group, Event, Tag } from "../../types";
 
 interface HomeLoaderData {
