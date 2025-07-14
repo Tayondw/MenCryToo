@@ -252,10 +252,6 @@ const Profile: React.FC = () => {
 	const userPosts = useMemo(() => currentUser?.posts ?? [], [currentUser]);
 	const userGroups = useMemo(() => currentUser?.group ?? [], [currentUser]);
 	const userEvents = useMemo(() => currentUser?.events ?? [], [currentUser]);
-	const userComments = useMemo(
-		() => currentUser?.userComments ?? [],
-		[currentUser],
-	);
 
 	const sortedUserPosts = useMemo(() => {
 		return [...userPosts].sort(
@@ -485,7 +481,8 @@ const Profile: React.FC = () => {
 											>
 												<MessageCircle size={18} />
 												<span className="text-sm font-medium">
-													{userComments.length}
+													{post.comments || 0}{" "}
+													{/* Use the post's comment count */}
 												</span>
 											</button>
 
@@ -708,7 +705,6 @@ const Profile: React.FC = () => {
 		filteredContent,
 		viewMode,
 		currentUser,
-		userComments,
 		userPosts,
 		userGroups,
 		userEvents,
