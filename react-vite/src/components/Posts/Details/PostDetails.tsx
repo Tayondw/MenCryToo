@@ -81,8 +81,10 @@ const PostDetails: React.FC = () => {
 		modal: commentModal,
 		openModal: openCommentModal,
 		closeModal: closeCommentModal,
-	} = useComments();
-
+	} = useComments({
+		forceRefreshOnClose: true, // Always refresh post details page
+		refreshDelay: 200, // Slightly longer delay for post details
+	});
 	// Likes management
 	const { likeStates, setLikeState, fetchLikeStatus } = useLikes();
 	const {
@@ -395,15 +397,19 @@ const PostDetails: React.FC = () => {
 	const handleOpenComments = useCallback(() => {
 		console.log("Opening comment modal with organized comments:", comments);
 
-		// Pass the callback to update comment count
+		// Enhanced callback that updates count and triggers refresh
 		const handleCommentsChange = (postId: number, newCount: number) => {
 			console.log(`Comments changed for post ${postId}: ${newCount}`);
 			setCommentCount(newCount);
+
+			// The enhanced hook will automatically handle page refresh
+			// when the modal closes due to forceRefreshOnClose: true
 		};
 
-		// Use the organized comments directly - they already have proper commenter data
+		// Use the organized comments directly
 		openCommentModal(post.id, comments, handleCommentsChange);
 	}, [openCommentModal, post.id, comments]);
+
 
 	// Check if user is post creator
 	const isCreator = sessionUser?.id === post.creator;
@@ -669,6 +675,7 @@ const PostDetails: React.FC = () => {
 				onClose={closeCommentModal}
 				postId={commentModal.postId || post.id}
 				initialComments={commentModal.comments}
+				forceRefreshOnClose={true}
 			/>
 
 			{/* Likes Modal */}
