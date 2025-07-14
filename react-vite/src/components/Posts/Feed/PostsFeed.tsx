@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
 	useLoaderData,
 	Link,
@@ -107,6 +107,11 @@ const PostsFeed: React.FC = () => {
 	const [selectedTags, setSelectedTags] = useState<string[]>([]);
 	const [isRefreshing, setIsRefreshing] = useState(false);
 
+	// Add state to track comment counts for all posts
+	const [postCommentCounts, setPostCommentCounts] = useState<
+		Map<number, number>
+            >(new Map());
+      
 	// Get current tab from URL or default to "all"
 	const activeTab =
 		(searchParams.get("tab") as "all" | "similar") ||
@@ -129,7 +134,7 @@ const PostsFeed: React.FC = () => {
 	}, [activeTab, loaderData]);
 
 	// Initialize like states from loader data
-	React.useEffect(() => {
+	useEffect(() => {
 		activePosts.forEach((post) => {
 			if (!likeStates.has(post.id)) {
 				// We'll need to fetch like status for each post
@@ -140,6 +145,15 @@ const PostsFeed: React.FC = () => {
 			}
 		});
 	}, [activePosts, likeStates, setLikeState, fetchLikeStatus]);
+
+	// Initialize comment counts when posts load
+	useEffect(() => {
+		const counts = new Map<number, number>();
+		activePosts.forEach((post) => {
+			counts.set(post.id, post.comments);
+		});
+		setPostCommentCounts(counts);
+	}, [activePosts]);
 
 	// Filter posts based on search term and selected tags
 	const filteredPosts = useMemo(() => {
@@ -228,15 +242,18 @@ const PostsFeed: React.FC = () => {
 	);
 
 	const handleCommentClick = useCallback(
-		async (
-			postId: number,
-			post: PostWithComments,
-			onCommentChange?: (
-				changeType: "add" | "delete",
-				newCount: number,
-			) => void,
-		) => {
+		async (postId: number, post: PostWithComments) => {
 			console.log("Opening comment modal for post:", postId, post);
+
+			// Callback to update comment count
+			const handleCommentsChange = (postId: number, newCount: number) => {
+				console.log(`Comments changed for post ${postId}: ${newCount}`);
+				setPostCommentCounts((prev) => {
+					const newMap = new Map(prev);
+					newMap.set(postId, newCount);
+					return newMap;
+				});
+			};
 
 			let initialComments: Comment[] = [];
 
@@ -398,8 +415,7 @@ const PostsFeed: React.FC = () => {
 			}
 
 			console.log("Final comments for modal:", initialComments);
-			// Pass the onCommentChange callback to openCommentModal
-			openCommentModal(postId, initialComments, onCommentChange);
+			openCommentModal(postId, initialComments, handleCommentsChange);
 		},
 		[openCommentModal, sessionUser],
 	);
@@ -663,19 +679,26 @@ const PostsFeed: React.FC = () => {
 									: "space-y-6"
 							}
 						>
-							{filteredPosts.map((post) => (
-								<PostCardWithComments
-									key={post.id}
-									post={post}
-									viewMode={viewMode}
-									formatTimeAgo={formatTimeAgo}
-									handleCommentClick={handleCommentClick}
-									handleLikesClick={handleLikesClick}
-									likeState={likeStates.get(post.id)}
-									setLikeState={setLikeState}
-									sessionUser={sessionUser}
-								/>
-							))}
+							{filteredPosts.map((post) => {
+								// Get current comment count from state, fallback to post.comments
+								const currentCommentCount =
+									postCommentCounts.get(post.id) ?? post.comments;
+
+								return (
+									<PostCard
+										key={post.id}
+										post={post}
+										viewMode={viewMode}
+										formatTimeAgo={formatTimeAgo}
+										handleCommentClick={handleCommentClick}
+										handleLikesClick={handleLikesClick}
+										likeState={likeStates.get(post.id)}
+										setLikeState={setLikeState}
+										sessionUser={sessionUser}
+										currentCommentCount={currentCommentCount} // Pass as prop
+									/>
+								);
+							})}
 						</div>
 
 						{/* Pagination */}
@@ -779,6 +802,13 @@ const PostsFeed: React.FC = () => {
 				onClose={closeCommentModal}
 				postId={commentModal.postId || 0}
 				initialComments={commentModal.comments}
+				onCommentsChange={(postId, newCount) => {
+					setPostCommentCounts((prev) => {
+						const newMap = new Map(prev);
+						newMap.set(postId, newCount);
+						return newMap;
+					});
+				}}
 			/>
 
 			{/* Likes Modal */}
@@ -795,7 +825,7 @@ const PostsFeed: React.FC = () => {
 };
 
 // Define proper interface for PostCard props
-interface PostCardWithCommentsProps {
+interface PostCardProps {
 	post: PostWithComments;
 	viewMode: "grid" | "list";
 	formatTimeAgo: (dateString: string) => string;
@@ -804,9 +834,10 @@ interface PostCardWithCommentsProps {
 	likeState?: { isLiked: boolean; likeCount: number; isLoading: boolean };
 	setLikeState: (postId: number, isLiked: boolean, count: number) => void;
 	sessionUser: SessionUser | null;
+	currentCommentCount: number;
 }
 
-const PostCardWithComments: React.FC<PostCardWithCommentsProps> = ({
+const PostCard: React.FC<PostCardProps> = ({
 	post,
 	viewMode,
 	formatTimeAgo,
@@ -814,9 +845,10 @@ const PostCardWithComments: React.FC<PostCardWithCommentsProps> = ({
 	handleLikesClick,
 	likeState,
 	setLikeState,
+	currentCommentCount
 }) => {
-	// Local state for comment count
-	const [localCommentCount, setLocalCommentCount] = useState(post.comments);
+	// Cast post to PostWithComments type for this component
+	const postWithComments = post as PostWithComments;
 
 	// Comment button with better logging
 	const handleCommentButtonClick = () => {
@@ -824,23 +856,9 @@ const PostCardWithComments: React.FC<PostCardWithCommentsProps> = ({
 			"Comment button clicked for post:",
 			post.id,
 			"Post data:",
-			post,
+			postWithComments,
 		);
-
-		// Create callback to handle comment count changes
-		const handleCommentChange = (
-			changeType: "add" | "delete",
-			newCount: number,
-		) => {
-			console.log(
-				`Post ${post.id} comment ${changeType}, new count:`,
-				newCount,
-			);
-			setLocalCommentCount(newCount);
-		};
-
-		// Pass the callback to the parent handler
-		handleCommentClick(post.id, post, handleCommentChange);
+		handleCommentClick(post.id, postWithComments);
 	};
 
 	return (
@@ -922,7 +940,7 @@ const PostCardWithComments: React.FC<PostCardWithCommentsProps> = ({
 								>
 									<MessageCircle size={18} />
 									<span className="text-sm font-medium">
-										{localCommentCount}
+										{currentCommentCount}
 									</span>
 								</button>
 							</div>
@@ -1012,7 +1030,9 @@ const PostCardWithComments: React.FC<PostCardWithCommentsProps> = ({
 									className="flex items-center gap-1 text-slate-500 hover:text-blue-500 transition-colors"
 								>
 									<MessageCircle size={16} />
-									<span className="text-sm font-medium">{post.comments}</span>
+									<span className="text-sm font-medium">
+										{currentCommentCount}
+									</span>
 								</button>
 							</div>
 							<div className="flex items-center gap-2">
