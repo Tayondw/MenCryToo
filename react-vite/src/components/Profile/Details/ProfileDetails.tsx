@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import {
 	Heart,
@@ -87,6 +87,7 @@ interface PostCardProps {
 		isLoading: boolean;
 	};
 	isAuthenticated: boolean;
+	currentCommentCount: number;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -99,112 +100,113 @@ const PostCard: React.FC<PostCardProps> = ({
 	currentLikeState,
 	isAuthenticated,
 	onLikesClick,
+	currentCommentCount,
 }) => (
-	<article
-		className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col"
-		style={{ minHeight: "500px" }}
-	>
-		{/* Post Header */}
-		<div className="p-4 border-b border-gray-50 flex-shrink-0">
-			<div className="flex items-center gap-3">
-				<img
-					src={userDetails?.profileImage}
-					alt={userDetails?.username}
-					className="w-10 h-10 rounded-full object-cover border-2 border-gray-100 flex-shrink-0"
-				/>
-				<span className="font-semibold text-gray-800 truncate">
-					{userDetails?.username}
-				</span>
-			</div>
-		</div>
-
-		{/* Post Title - Clickable */}
-		<div className="px-4 py-3 border-b border-gray-50 flex-shrink-0">
-			<h3
-				className="font-semibold text-gray-800 text-base leading-tight break-words h-10 cursor-pointer hover:text-orange-600 transition-colors"
-				onClick={() => onPostClick(post.id)}
-			>
-				{post.title}
-			</h3>
-		</div>
-
-		{/* Post Image - Also clickable */}
-		{post.image && (
-			<div
-				className="relative flex-shrink-0 cursor-pointer"
-				onClick={() => onPostClick(post.id)}
-			>
-				<img
-					src={post.image}
-					alt={post.title}
-					className="w-full h-64 object-cover"
-				/>
-				<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-			</div>
-		)}
-
-		{/* Post Content */}
-		<div className="p-4 flex-1 flex flex-col">
-			<div className="flex items-center gap-6 mb-3">
-				{/* Like Button */}
-				{isAuthenticated ? (
-					<LikeButton
-						postId={post.id}
-						initialLikeCount={currentLikeState.likeCount}
-						initialIsLiked={currentLikeState.isLiked}
-						onLikeToggle={onLikeToggle}
-						onLikesClick={() => onLikesClick(post.id)}
-						size={18}
-						disabled={currentLikeState.isLoading}
+		<article
+			className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col"
+			style={{ minHeight: "500px" }}
+		>
+			{/* Post Header */}
+			<div className="p-4 border-b border-gray-50 flex-shrink-0">
+				<div className="flex items-center gap-3">
+					<img
+						src={userDetails?.profileImage}
+						alt={userDetails?.username}
+						className="w-10 h-10 rounded-full object-cover border-2 border-gray-100 flex-shrink-0"
 					/>
-				) : (
-					<div className="flex items-center gap-2 text-gray-600">
-						<Heart size={18} />
-						<span
-							className="text-sm font-medium cursor-pointer hover:text-orange-600 transition-colors"
-							onClick={() => onLikesClick(post.id)}
-						>
-							{currentLikeState.likeCount}
-						</span>
-					</div>
-				)}
-
-				{/* Comment Button */}
-				<button
-					onClick={() => {
-						onCommentsClick(post.id);
-					}}
-					className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors duration-200"
-				>
-					<MessageCircle size={18} />
-					<span className="text-sm font-medium">{post.comments || 0}</span>
-				</button>
-
-				<button className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200 ml-auto">
-					<Share2 size={16} />
-				</button>
-				<button className="flex items-center gap-2 text-gray-600 hover:text-yellow-500 transition-colors duration-200">
-					<Bookmark size={16} />
-				</button>
-			</div>
-
-			{/* Caption */}
-			<div className="text-sm text-gray-700 leading-relaxed flex-1">
-				<div className="flex items-start gap-2 flex-wrap">
-					<span className="font-semibold text-gray-800 flex-shrink-0">
+					<span className="font-semibold text-gray-800 truncate">
 						{userDetails?.username}
 					</span>
-					<span className="text-xs text-gray-500 flex items-center gap-1 flex-shrink-0 self-center">
-						<Clock size={12} />
-						{formatTimeAgo(post.updatedAt)}
-					</span>
-					<span className="break-words">{post.caption}</span>
 				</div>
 			</div>
-		</div>
-	</article>
-);
 
+			{/* Post Title - Clickable */}
+			<div className="px-4 py-3 border-b border-gray-50 flex-shrink-0">
+				<h3
+					className="font-semibold text-gray-800 text-base leading-tight break-words h-10 cursor-pointer hover:text-orange-600 transition-colors"
+					onClick={() => onPostClick(post.id)}
+				>
+					{post.title}
+				</h3>
+			</div>
+
+			{/* Post Image - Also clickable */}
+			{post.image && (
+				<div
+					className="relative flex-shrink-0 cursor-pointer"
+					onClick={() => onPostClick(post.id)}
+				>
+					<img
+						src={post.image}
+						alt={post.title}
+						className="w-full h-64 object-cover"
+					/>
+					<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+				</div>
+			)}
+
+			{/* Post Content */}
+			<div className="p-4 flex-1 flex flex-col">
+				<div className="flex items-center gap-6 mb-3">
+					{/* Like Button */}
+					{isAuthenticated ? (
+						<LikeButton
+							postId={post.id}
+							initialLikeCount={currentLikeState.likeCount}
+							initialIsLiked={currentLikeState.isLiked}
+							onLikeToggle={onLikeToggle}
+							onLikesClick={() => onLikesClick(post.id)}
+							size={18}
+							disabled={currentLikeState.isLoading}
+						/>
+					) : (
+						<div className="flex items-center gap-2 text-gray-600">
+							<Heart size={18} />
+							<span
+								className="text-sm font-medium cursor-pointer hover:text-orange-600 transition-colors"
+								onClick={() => onLikesClick(post.id)}
+							>
+								{currentLikeState.likeCount}
+							</span>
+						</div>
+					)}
+
+					{/* Comment Button */}
+					<button
+						onClick={() => {
+							onCommentsClick(post.id);
+						}}
+						className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors duration-200"
+					>
+						<MessageCircle size={18} />
+						<span className="text-sm font-medium">{currentCommentCount}</span>
+					</button>
+
+					<button className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200 ml-auto">
+						<Share2 size={16} />
+					</button>
+					<button className="flex items-center gap-2 text-gray-600 hover:text-yellow-500 transition-colors duration-200">
+						<Bookmark size={16} />
+					</button>
+				</div>
+
+				{/* Caption */}
+				<div className="text-sm text-gray-700 leading-relaxed flex-1">
+					<div className="flex items-start gap-2 flex-wrap">
+						<span className="font-semibold text-gray-800 flex-shrink-0">
+							{userDetails?.username}
+						</span>
+						<span className="text-xs text-gray-500 flex items-center gap-1 flex-shrink-0 self-center">
+							<Clock size={12} />
+							{formatTimeAgo(post.updatedAt)}
+						</span>
+						<span className="break-words">{post.caption}</span>
+					</div>
+				</div>
+			</div>
+		</article>
+);
+      
 // Group card component
 const GroupCard: React.FC<{ group: Group }> = ({ group }) => (
 	<Link to={`/groups/${group.id}`} className="group block">
@@ -331,6 +333,11 @@ const ProfileDetails: React.FC = () => {
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 	const [searchTerm, setSearchTerm] = useState("");
 
+	// Add state to track comment counts for posts
+	const [postCommentCounts, setPostCommentCounts] = useState<
+		Map<number, number>
+	>(new Map());
+
 	// Memoized values - must be called unconditionally
 	const userTags = useMemo(() => userDetails?.usersTags ?? [], [userDetails]);
 	const userPosts = useMemo(() => userDetails?.posts ?? [], [userDetails]);
@@ -345,7 +352,7 @@ const ProfileDetails: React.FC = () => {
 	}, [userPosts]);
 
 	// Initialize like states for all posts
-	React.useEffect(() => {
+	useEffect(() => {
 		userPosts.forEach((post) => {
 			if (!likeStates.has(post.id)) {
 				setLikeState(post.id, false, post.likes);
@@ -353,6 +360,15 @@ const ProfileDetails: React.FC = () => {
 			}
 		});
 	}, [userPosts, likeStates, setLikeState, fetchLikeStatus]);
+
+	// Initialize comment counts when posts load
+	useEffect(() => {
+		const counts = new Map<number, number>();
+		userPosts.forEach((post) => {
+			counts.set(post.id, post.comments || 0);
+		});
+		setPostCommentCounts(counts);
+	}, [userPosts]);
 
 	// Interactive handlers
 	const handleLikeToggle = useCallback(
@@ -373,10 +389,20 @@ const ProfileDetails: React.FC = () => {
 		(postId: number) => {
 			const post = userPosts.find((p) => p.id === postId);
 
+			// Callback to update comment count
+			const handleCommentsChange = (postId: number, newCount: number) => {
+				console.log(`Comments changed for post ${postId}: ${newCount}`);
+				setPostCommentCounts((prev) => {
+					const newMap = new Map(prev);
+					newMap.set(postId, newCount);
+					return newMap;
+				});
+			};
+
 			if (post) {
-				openCommentModal(postId, []);
+				openCommentModal(postId, [], handleCommentsChange);
 			} else {
-				openCommentModal(postId, []);
+				openCommentModal(postId, [], handleCommentsChange);
 			}
 		},
 		[userPosts, openCommentModal],
@@ -528,6 +554,10 @@ const ProfileDetails: React.FC = () => {
 								isLoading: false,
 							};
 
+							// Get current comment count from state, fallback to post.comments
+							const currentCommentCount =
+								postCommentCounts.get(post.id) ?? (post.comments || 0);
+
 							return (
 								<PostCard
 									key={post.id}
@@ -540,6 +570,7 @@ const ProfileDetails: React.FC = () => {
 									onLikesClick={handleLikesClick}
 									currentLikeState={currentLikeState}
 									isAuthenticated={isAuthenticated}
+									currentCommentCount={currentCommentCount} // Pass as prop
 								/>
 							);
 						})}
@@ -586,7 +617,8 @@ const ProfileDetails: React.FC = () => {
 		handlePostClick,
 		handleLikesClick,
 		likeStates,
-		isAuthenticated,
+            isAuthenticated,
+            postCommentCounts
 	]);
 
 	// Render tag content
@@ -1006,6 +1038,13 @@ const ProfileDetails: React.FC = () => {
 				onClose={closeCommentModal}
 				postId={commentModal.postId || 0}
 				initialComments={commentModal.comments}
+				onCommentsChange={(postId, newCount) => {
+					setPostCommentCounts((prev) => {
+						const newMap = new Map(prev);
+						newMap.set(postId, newCount);
+						return newMap;
+					});
+				}}
 			/>
 
 			{isLikesModalOpen && likesModalPostId && (
