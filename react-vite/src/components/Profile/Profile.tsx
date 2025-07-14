@@ -20,7 +20,6 @@ import {
 	Eye,
 	UserIcon,
 } from "lucide-react";
-import { Comment as PostComment } from "../../types/comments";
 import { User, Post, Group, Event, Tag } from "../../types";
 import PostMenu from "../Posts/PostMenu";
 import DeleteProfile from "./CRUD/Delete";
@@ -207,10 +206,6 @@ const mockUser: User = {
 	],
 };
 
-interface PostWithOptionalComments extends Post {
-	postComments?: PostComment[];
-}
-
 const Profile: React.FC = () => {
 	// Get data from React Router loader
 	const loaderData = useLoaderData() as { user: User } | null;
@@ -248,7 +243,10 @@ const Profile: React.FC = () => {
 		modal: commentModal,
 		openModal: openCommentModal,
 		closeModal: closeCommentModal,
-	} = useComments();
+	} = useComments({
+		forceRefreshOnClose: true, // Force refresh to update post comment counts
+		refreshDelay: 100,
+	});
 
 	// Memoized user-related values with proper null checks and default arrays
 	// These MUST be called unconditionally, even if currentUser is null
@@ -348,9 +346,8 @@ const Profile: React.FC = () => {
 	const handleCommentsClick = useCallback(
 		(postId: number) => {
 			const post = userPosts.find((p) => p.id === postId);
-			const postWithComments = post as PostWithOptionalComments | undefined;
 
-			// Callback to update comment count
+			// Enhanced callback with automatic refresh
 			const handleCommentsChange = (postId: number, newCount: number) => {
 				console.log(`Comments changed for post ${postId}: ${newCount}`);
 				setPostCommentCounts((prev) => {
@@ -358,14 +355,12 @@ const Profile: React.FC = () => {
 					newMap.set(postId, newCount);
 					return newMap;
 				});
+				// Page will automatically refresh when modal closes
 			};
 
-			if (postWithComments && postWithComments.postComments) {
-				openCommentModal(
-					postId,
-					postWithComments.postComments,
-					handleCommentsChange,
-				);
+			// Open modal (will trigger refresh on close if comments changed)
+			if (post) {
+				openCommentModal(postId, [], handleCommentsChange);
 			} else {
 				openCommentModal(postId, [], handleCommentsChange);
 			}
@@ -1158,6 +1153,7 @@ const Profile: React.FC = () => {
 				onClose={closeCommentModal}
 				postId={commentModal.postId || 0}
 				initialComments={commentModal.comments}
+				forceRefreshOnClose={true}
 				onCommentsChange={(postId, newCount) => {
 					setPostCommentCounts((prev) => {
 						const newMap = new Map(prev);
