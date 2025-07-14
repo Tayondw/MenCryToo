@@ -708,7 +708,6 @@ const CommentModal: React.FC<CommentModalProps> = ({
 
 	// Handle manual refresh
 	const handleRefresh = useCallback(() => {
-		console.log("Manual refresh triggered");
 		setHasInitialized(false);
 		loadCommentsFromApi();
 	}, [loadCommentsFromApi]);
