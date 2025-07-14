@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { useLoaderData, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
@@ -94,10 +94,10 @@ const PostDetails: React.FC = () => {
 
 	const [showOptions, setShowOptions] = useState(false);
 
-      // Inline commenting state
-      const [localCommentCount, setLocalCommentCount] = useState(
-				post.postComments?.length || 0,
-			);
+	// Inline commenting state
+	const [commentCount, setCommentCount] = useState(
+		post.postComments?.length || 0,
+	);
 	const [newComment, setNewComment] = useState("");
 	const [replyToComment, setReplyToComment] = useState<number | null>(null);
 	const [replyText, setReplyText] = useState("");
@@ -107,7 +107,7 @@ const PostDetails: React.FC = () => {
 	}>({});
 
 	// Initialize like state for this post
-	React.useEffect(() => {
+	useEffect(() => {
 		if (!likeStates.has(post.id)) {
 			setLikeState(post.id, false, post.likes);
 			fetchLikeStatus(post.id);
@@ -395,29 +395,15 @@ const PostDetails: React.FC = () => {
 	const handleOpenComments = useCallback(() => {
 		console.log("Opening comment modal with organized comments:", comments);
 
-		// Create the callback to handle comment count changes
-		const handleCommentChange = (
-			changeType: "add" | "delete",
-			newCount: number,
-		) => {
-			console.log(
-				`Comment ${changeType} detected, updating count to:`,
-				newCount,
-			);
-			setLocalCommentCount(newCount);
-
-			// Also update the post data if needed
-			if (post.postComments) {
-				post.postComments =
-					changeType === "add"
-						? [...post.postComments, {} as any] // Add placeholder
-						: post.postComments.slice(0, newCount); // Remove items
-			}
+		// Pass the callback to update comment count
+		const handleCommentsChange = (postId: number, newCount: number) => {
+			console.log(`Comments changed for post ${postId}: ${newCount}`);
+			setCommentCount(newCount);
 		};
 
-		openCommentModal(post.id, comments, handleCommentChange);
-	}, [openCommentModal, comments, post]);
-      
+		// Use the organized comments directly - they already have proper commenter data
+		openCommentModal(post.id, comments, handleCommentsChange);
+	}, [openCommentModal, post.id, comments]);
 
 	// Check if user is post creator
 	const isCreator = sessionUser?.id === post.creator;
@@ -561,8 +547,9 @@ const PostDetails: React.FC = () => {
 									className="flex items-center gap-2 text-slate-500 hover:text-blue-500 transition-colors"
 								>
 									<MessageCircle size={20} />
-									<span className="text-sm font-medium">
-										{localCommentCount}
+									<span className="font-medium">
+										{commentCount}{" "}
+										{/* Use state instead of post.postComments?.length */}
 									</span>
 								</button>
 							</div>
@@ -624,7 +611,7 @@ const PostDetails: React.FC = () => {
 						<div className="space-y-6">
 							<div className="flex items-center justify-between">
 								<h2 className="text-xl font-semibold text-slate-900">
-									Comments ({post.postComments?.length || 0})
+									Comments ({commentCount}){" "}
 								</h2>
 								{(post.postComments?.length || 0) > 3 && (
 									<button
