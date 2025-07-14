@@ -90,7 +90,10 @@ const PostsFeed: React.FC = () => {
 		modal: commentModal,
 		openModal: openCommentModal,
 		closeModal: closeCommentModal,
-	} = useComments();
+	} = useComments({
+		forceRefreshOnClose: true, // Force refresh on any comment change
+		refreshDelay: 150, // Small delay for better UX
+	});
 
 	// Likes management
 	const { likeStates, setLikeState, fetchLikeStatus } = useLikes();
@@ -243,181 +246,52 @@ const PostsFeed: React.FC = () => {
 
 	const handleCommentClick = useCallback(
 		async (postId: number, post: PostWithComments) => {
-			console.log("Opening comment modal for post:", postId, post);
+			console.log("Opening comment modal for post:", postId);
 
-			// Callback to update comment count
+			// Callback to update comment count with automatic refresh detection
 			const handleCommentsChange = (postId: number, newCount: number) => {
 				console.log(`Comments changed for post ${postId}: ${newCount}`);
 				setPostCommentCounts((prev) => {
 					const newMap = new Map(prev);
+					const oldCount = newMap.get(postId) || 0;
 					newMap.set(postId, newCount);
+
+					// If count changed significantly, we might want to force refresh
+					if (Math.abs(newCount - oldCount) > 0) {
+						console.log("Significant comment count change detected");
+					}
+
 					return newMap;
 				});
 			};
 
+			// Prepare initial comments
 			let initialComments: Comment[] = [];
-
 			if (post.postComments && post.postComments.length > 0) {
-				console.log("Processing post comments:", post.postComments);
-
-				initialComments = post.postComments.map((oldComment: OldComment) => {
-					console.log("Processing comment:", oldComment);
-
-					// Use commenter data from API if available
-					let commenterData = {
+				// Transform existing comments if available
+				initialComments = post.postComments.map((oldComment) => ({
+					id: oldComment.id,
+					userId: oldComment.userId,
+					postId: oldComment.postId,
+					comment: oldComment.comment,
+					parentId: oldComment.parentId,
+					createdAt: oldComment.created_at,
+					updatedAt: oldComment.updated_at,
+					commenter: oldComment.commenter || {
 						id: oldComment.userId,
 						username: oldComment.username || "Unknown User",
 						firstName: "",
 						lastName: "",
 						profileImage: "/default-avatar.png",
-					};
-
-					// Check if API provided commenter data
-					if (oldComment.commenter) {
-						console.log("Using API commenter data:", oldComment.commenter);
-						commenterData = {
-							id: oldComment.commenter.id,
-							username: oldComment.commenter.username,
-							firstName: oldComment.commenter.firstName || "",
-							lastName: oldComment.commenter.lastName || "",
-							profileImage:
-								oldComment.commenter.profileImage || "/default-avatar.png",
-						};
-					}
-					// Fallback to user matching only if API data is missing
-					else {
-						console.log("No API commenter data, using fallback");
-
-						// If this is the current user's comment, use their session data
-						if (sessionUser && oldComment.userId === sessionUser.id) {
-							commenterData = {
-								id: sessionUser.id,
-								username: sessionUser.username,
-								firstName: sessionUser.firstName || "",
-								lastName: sessionUser.lastName || "",
-								profileImage: sessionUser.profileImage || "/default-avatar.png",
-							};
-						}
-						// If it's the post creator, use their data
-						else if (oldComment.userId === post.user.id) {
-							commenterData = {
-								id: post.user.id,
-								username: post.user.username,
-								firstName: post.user.firstName,
-								lastName: post.user.lastName,
-								profileImage: post.user.profileImage,
-							};
-						}
-						// For other users, use whatever data we have
-						else {
-							commenterData = {
-								id: oldComment.userId,
-								username: oldComment.username || "Unknown User",
-								firstName: "",
-								lastName: "",
-								profileImage: "/default-avatar.png",
-							};
-						}
-					}
-
-					const newComment: Comment = {
-						id: oldComment.id,
-						userId: oldComment.userId,
-						postId: oldComment.postId,
-						comment: oldComment.comment,
-						parentId: oldComment.parentId,
-						createdAt: oldComment.created_at,
-						updatedAt: oldComment.updated_at,
-						commenter: commenterData,
-						replies: [],
-					};
-
-					console.log("Transformed comment:", newComment);
-					return newComment;
-				});
-
-				console.log("All transformed comments for modal:", initialComments);
-			} else {
-				// If no postComments, try to fetch them from the API
-				try {
-					const response = await fetch(
-						`/api/comments/posts/${postId}/comments?include_replies=true`,
-						{
-							credentials: "include",
-						},
-					);
-
-					if (response.ok) {
-						const data = await response.json();
-						console.log("Fetched comments from API:", data);
-
-						// The API should now return properly formatted comments with commenter data
-						interface ApiComment {
-							id: number;
-							userId?: number;
-							user_id?: number;
-							postId?: number;
-							post_id?: number;
-							comment: string;
-							parentId?: number | null;
-							parent_id?: number | null;
-							createdAt?: string;
-							created_at?: string;
-							updatedAt?: string;
-							updated_at?: string;
-							commenter?: {
-								id: number;
-								username: string;
-								firstName?: string;
-								first_name?: string;
-								lastName?: string;
-								last_name?: string;
-								profileImage?: string;
-								profile_image_url?: string;
-							};
-							username?: string;
-							firstName?: string;
-							first_name?: string;
-							lastName?: string;
-							last_name?: string;
-							profileImage?: string;
-							profile_image_url?: string;
-						}
-
-						initialComments = (data.comments || []).map(
-							(apiComment: ApiComment) => ({
-								id: apiComment.id,
-								userId: apiComment.userId || apiComment.user_id || 0,
-								postId: apiComment.postId || apiComment.post_id || postId,
-								comment: apiComment.comment,
-								parentId: apiComment.parentId || apiComment.parent_id || null,
-								createdAt: apiComment.createdAt || apiComment.created_at || "",
-								updatedAt: apiComment.updatedAt || apiComment.updated_at || "",
-								// Use commenter data from API response
-								commenter: apiComment.commenter || {
-									id: apiComment.userId || apiComment.user_id || 0,
-									username: apiComment.username || "unknown",
-									firstName:
-										apiComment.firstName || apiComment.first_name || "",
-									lastName: apiComment.lastName || apiComment.last_name || "",
-									profileImage:
-										apiComment.profileImage ||
-										apiComment.profile_image_url ||
-										"/default-avatar.png",
-								},
-								replies: [],
-							}),
-						);
-					}
-				} catch (error) {
-					console.error("Failed to fetch comments for modal:", error);
-				}
+					},
+					replies: [],
+				}));
 			}
 
-			console.log("Final comments for modal:", initialComments);
+			// Open modal with enhanced change tracking
 			openCommentModal(postId, initialComments, handleCommentsChange);
 		},
-		[openCommentModal, sessionUser],
+		[openCommentModal],
 	);
 
 	// Clear filters
@@ -802,6 +676,7 @@ const PostsFeed: React.FC = () => {
 				onClose={closeCommentModal}
 				postId={commentModal.postId || 0}
 				initialComments={commentModal.comments}
+				forceRefreshOnClose={true} // Force page refresh when modal closes
 				onCommentsChange={(postId, newCount) => {
 					setPostCommentCounts((prev) => {
 						const newMap = new Map(prev);
