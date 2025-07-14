@@ -219,7 +219,6 @@ const Profile: React.FC = () => {
 	// Use loader data or fallback to mock data for development
 	const currentUser = loaderData?.user || mockUser;
 
-	// ALL HOOKS MUST BE CALLED UNCONDITIONALLY AT THE TOP LEVEL
 	// State hooks
 	const [activeMainSection, setActiveMainSection] = useState<
 		"posts" | "groups" | "events"
@@ -229,11 +228,13 @@ const Profile: React.FC = () => {
 	>("tags");
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [showAddTagsModal, setShowAddTagsModal] = useState(false);
-	const [postCommentCounts, setPostCommentCounts] = useState<
-		Record<number, number>
-	>({});
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 	const [searchTerm, setSearchTerm] = useState("");
+
+	// Add state to track comment counts for posts
+	const [postCommentCounts, setPostCommentCounts] = useState<
+		Map<number, number>
+	>(new Map());
 
 	// Hook integrations for interactivity
 	const { likeStates, setLikeState, fetchLikeStatus } = useLikes();
@@ -273,13 +274,13 @@ const Profile: React.FC = () => {
 		});
 	}, [userPosts, likeStates, setLikeState, fetchLikeStatus]);
 
-	// Initialize comment counts when posts load:
+	// Initialize comment counts when posts load
 	useEffect(() => {
-		const initialCounts: Record<number, number> = {};
+		const counts = new Map<number, number>();
 		userPosts.forEach((post) => {
-			initialCounts[post.id] = post.comments || 0;
+			counts.set(post.id, post.comments);
 		});
-		setPostCommentCounts(initialCounts);
+		setPostCommentCounts(counts);
 	}, [userPosts]);
 
 	// Filter content based on search term with proper typing
@@ -349,34 +350,29 @@ const Profile: React.FC = () => {
 			const post = userPosts.find((p) => p.id === postId);
 			const postWithComments = post as PostWithOptionalComments | undefined;
 
-			// Create callback to handle comment count changes
-			const handleCommentChange = (
-				changeType: "add" | "delete",
-				newCount: number,
-			) => {
-				console.log(
-					`Post ${postId} comment ${changeType}, new count:`,
-					newCount,
-				);
-				setPostCommentCounts((prev) => ({
-					...prev,
-					[postId]: newCount,
-				}));
+			// Callback to update comment count
+			const handleCommentsChange = (postId: number, newCount: number) => {
+				console.log(`Comments changed for post ${postId}: ${newCount}`);
+				setPostCommentCounts((prev) => {
+					const newMap = new Map(prev);
+					newMap.set(postId, newCount);
+					return newMap;
+				});
 			};
 
 			if (postWithComments && postWithComments.postComments) {
 				openCommentModal(
 					postId,
 					postWithComments.postComments,
-					handleCommentChange,
+					handleCommentsChange,
 				);
 			} else {
-				openCommentModal(postId, [], handleCommentChange);
+				openCommentModal(postId, [], handleCommentsChange);
 			}
 		},
 		[userPosts, openCommentModal],
-      );
-      
+	);
+
 	const handleLikesClick = useCallback(
 		(postId: number) => {
 			openLikesModal(postId);
@@ -438,6 +434,10 @@ const Profile: React.FC = () => {
 								likeCount: post.likes,
 								isLoading: false,
 							};
+
+							// Get current comment count from state, fallback to post.comments
+							const currentCommentCount =
+								postCommentCounts.get(post.id) ?? post.comments;
 
 							return (
 								<article
@@ -512,7 +512,7 @@ const Profile: React.FC = () => {
 											>
 												<MessageCircle size={18} />
 												<span className="text-sm font-medium">
-													{postCommentCounts[post.id] || post.comments || 0}
+													{currentCommentCount}
 												</span>
 											</button>
 
@@ -740,12 +740,12 @@ const Profile: React.FC = () => {
 		userEvents,
 		formatTimeAgo,
 		navigate,
-            likeStates,
-            postCommentCounts,
+		likeStates,
 		handleLikeToggle,
 		handleCommentsClick,
 		handleLikesClick,
 		handlePostClick,
+		postCommentCounts,
 	]);
 
 	const renderTagContent = useCallback(() => {
@@ -1158,6 +1158,13 @@ const Profile: React.FC = () => {
 				onClose={closeCommentModal}
 				postId={commentModal.postId || 0}
 				initialComments={commentModal.comments}
+				onCommentsChange={(postId, newCount) => {
+					setPostCommentCounts((prev) => {
+						const newMap = new Map(prev);
+						newMap.set(postId, newCount);
+						return newMap;
+					});
+				}}
 			/>
 
 			{/* Likes Modal */}
