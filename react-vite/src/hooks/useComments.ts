@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { commentApi } from "../services/commentApi";
 import type {
 	Comment,
@@ -14,10 +14,7 @@ interface UseCommentsOptions {
 
 interface UseCommentsReturn {
 	// State
-	modal: CommentModalState & {
-		// Add parent notification callback to modal state
-		onCommentChange?: (changeType: "add" | "delete", newCount: number) => void;
-	};
+	modal: CommentModalState;
 	comments: Comment[];
 	isLoading: boolean;
 	error: string | null;
@@ -26,7 +23,7 @@ interface UseCommentsReturn {
 	openModal: (
 		postId: number,
 		initialComments?: Comment[],
-		onCommentChange?: (changeType: "add" | "delete", newCount: number) => void,
+		onCommentsChange?: (postId: number, newCount: number) => void,
 	) => void;
 	closeModal: () => void;
 	addComment: (formData: CommentFormData) => Promise<Comment>;
@@ -47,14 +44,7 @@ export const useComments = (
 	const { initialComments = [] } = options;
 
 	// State
-	const [modal, setModal] = useState<
-		CommentModalState & {
-			onCommentChange?: (
-				changeType: "add" | "delete",
-				newCount: number,
-			) => void;
-		}
-	>({
+	const [modal, setModal] = useState<CommentModalState>({
 		isOpen: false,
 		postId: null,
 		comments: initialComments,
@@ -62,7 +52,6 @@ export const useComments = (
 		error: null,
 		page: 1,
 		hasMore: true,
-		onCommentChange: undefined, // Parent notification callback
 	});
 
 	const [comments, setComments] = useState<Comment[]>(initialComments);
@@ -72,12 +61,40 @@ export const useComments = (
 	// Refs for tracking
 	const loadingRef = useRef(false);
 	const currentPostId = useRef<number | null>(null);
+	const onCommentsChangeRef = useRef<
+		((postId: number, newCount: number) => void) | null
+	>(null);
+	const initialCommentCountRef = useRef<number>(0);
 
 	// Clear error
 	const clearError = useCallback(() => {
 		setError(null);
 		setModal((prev) => ({ ...prev, error: null }));
 	}, []);
+
+	// Count comments recursively (including replies)
+	const countCommentsRecursively = useCallback(
+		(commentsList: Comment[]): number => {
+			return commentsList.reduce((total, comment) => {
+				let count = 1; // Count the comment itself
+				if (comment.replies && comment.replies.length > 0) {
+					count += countCommentsRecursively(comment.replies);
+				}
+				return total + count;
+			}, 0);
+		},
+		[],
+	);
+
+	// Track comment count changes
+	useEffect(() => {
+		if (modal.isOpen && modal.postId && onCommentsChangeRef.current) {
+			const currentCount = countCommentsRecursively(modal.comments);
+			if (currentCount !== initialCommentCountRef.current) {
+				onCommentsChangeRef.current(modal.postId, currentCount);
+			}
+		}
+	}, [modal.comments, modal.isOpen, modal.postId, countCommentsRecursively]);
 
 	// Load comments for a post
 	const loadComments = useCallback(
@@ -139,31 +156,29 @@ export const useComments = (
 		}
 	}, [loadComments]);
 
-	// Open modal
+	// Open modal with callback
 	const openModal = useCallback(
 		(
 			postId: number,
 			initialComments?: Comment[],
-			onCommentChange?: (
-				changeType: "add" | "delete",
-				newCount: number,
-			) => void,
+			onCommentsChange?: (postId: number, newCount: number) => void,
 		) => {
-			console.log("Opening comment modal with callback:", !!onCommentChange);
+			const commentsToUse = initialComments || [];
+			initialCommentCountRef.current = countCommentsRecursively(commentsToUse);
+			onCommentsChangeRef.current = onCommentsChange || null;
 
 			setModal((prev) => ({
 				...prev,
 				isOpen: true,
 				postId,
-				comments: initialComments || [],
+				comments: commentsToUse,
 				page: 1,
 				hasMore: true,
 				error: null,
-				onCommentChange, // Store the parent notification callback
 			}));
 
-			if (initialComments) {
-				setComments(initialComments);
+			if (commentsToUse.length > 0) {
+				setComments(commentsToUse);
 			}
 
 			// Auto-load if no initial comments provided
@@ -171,19 +186,30 @@ export const useComments = (
 				loadComments(postId, 1);
 			}
 		},
-		[loadComments],
+		[loadComments, countCommentsRecursively],
 	);
 
 	// Close modal
 	const closeModal = useCallback(() => {
+		// Call the callback one final time before closing if there were changes
+		if (modal.isOpen && modal.postId && onCommentsChangeRef.current) {
+			const finalCount = countCommentsRecursively(modal.comments);
+			if (finalCount !== initialCommentCountRef.current) {
+				onCommentsChangeRef.current(modal.postId, finalCount);
+			}
+		}
+
 		setModal((prev) => ({
 			...prev,
 			isOpen: false,
 			postId: null,
 			error: null,
-			onCommentChange: undefined, // Clear the callback when closing
 		}));
-	}, []);
+
+		// Clear refs
+		onCommentsChangeRef.current = null;
+		initialCommentCountRef.current = 0;
+	}, [modal.isOpen, modal.postId, modal.comments, countCommentsRecursively]);
 
 	// Add comment
 	const addComment = useCallback(
@@ -288,22 +314,8 @@ export const useComments = (
 
 	// Get comment count
 	const getCommentCount = useCallback((): number => {
-		const countReplies = (comment: Comment): number => {
-			let count = 1; // Count the comment itself
-			if (comment.replies) {
-				count += comment.replies.reduce(
-					(acc, reply) => acc + countReplies(reply),
-					0,
-				);
-			}
-			return count;
-		};
-
-		return comments.reduce(
-			(total, comment) => total + countReplies(comment),
-			0,
-		);
-	}, [comments]);
+		return countCommentsRecursively(comments);
+	}, [comments, countCommentsRecursively]);
 
 	// Get comment by ID
 	const getCommentById = useCallback(
@@ -346,5 +358,3 @@ export const useComments = (
 		clearError,
 	};
 };
-
-export default useComments;
