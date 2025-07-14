@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import {
 	MessageCircle,
@@ -229,6 +229,9 @@ const Profile: React.FC = () => {
 	>("tags");
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [showAddTagsModal, setShowAddTagsModal] = useState(false);
+	const [postCommentCounts, setPostCommentCounts] = useState<
+		Record<number, number>
+	>({});
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 	const [searchTerm, setSearchTerm] = useState("");
 
@@ -261,7 +264,7 @@ const Profile: React.FC = () => {
 	}, [userPosts]);
 
 	// Initialize like states for all posts
-	React.useEffect(() => {
+	useEffect(() => {
 		userPosts.forEach((post) => {
 			if (!likeStates.has(post.id)) {
 				setLikeState(post.id, false, post.likes);
@@ -269,6 +272,15 @@ const Profile: React.FC = () => {
 			}
 		});
 	}, [userPosts, likeStates, setLikeState, fetchLikeStatus]);
+
+	// Initialize comment counts when posts load:
+	useEffect(() => {
+		const initialCounts: Record<number, number> = {};
+		userPosts.forEach((post) => {
+			initialCounts[post.id] = post.comments || 0;
+		});
+		setPostCommentCounts(initialCounts);
+	}, [userPosts]);
 
 	// Filter content based on search term with proper typing
 	const filteredContent = useMemo(() => {
@@ -337,15 +349,34 @@ const Profile: React.FC = () => {
 			const post = userPosts.find((p) => p.id === postId);
 			const postWithComments = post as PostWithOptionalComments | undefined;
 
+			// Create callback to handle comment count changes
+			const handleCommentChange = (
+				changeType: "add" | "delete",
+				newCount: number,
+			) => {
+				console.log(
+					`Post ${postId} comment ${changeType}, new count:`,
+					newCount,
+				);
+				setPostCommentCounts((prev) => ({
+					...prev,
+					[postId]: newCount,
+				}));
+			};
+
 			if (postWithComments && postWithComments.postComments) {
-				openCommentModal(postId, postWithComments.postComments);
+				openCommentModal(
+					postId,
+					postWithComments.postComments,
+					handleCommentChange,
+				);
 			} else {
-				openCommentModal(postId, []);
+				openCommentModal(postId, [], handleCommentChange);
 			}
 		},
 		[userPosts, openCommentModal],
-	);      
-
+      );
+      
 	const handleLikesClick = useCallback(
 		(postId: number) => {
 			openLikesModal(postId);
@@ -481,8 +512,7 @@ const Profile: React.FC = () => {
 											>
 												<MessageCircle size={18} />
 												<span className="text-sm font-medium">
-													{post.comments || 0}{" "}
-													{/* Use the post's comment count */}
+													{postCommentCounts[post.id] || post.comments || 0}
 												</span>
 											</button>
 
@@ -710,7 +740,8 @@ const Profile: React.FC = () => {
 		userEvents,
 		formatTimeAgo,
 		navigate,
-		likeStates,
+            likeStates,
+            postCommentCounts,
 		handleLikeToggle,
 		handleCommentsClick,
 		handleLikesClick,
