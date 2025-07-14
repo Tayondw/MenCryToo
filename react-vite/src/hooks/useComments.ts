@@ -14,13 +14,20 @@ interface UseCommentsOptions {
 
 interface UseCommentsReturn {
 	// State
-	modal: CommentModalState;
+	modal: CommentModalState & {
+		// Add parent notification callback to modal state
+		onCommentChange?: (changeType: "add" | "delete", newCount: number) => void;
+	};
 	comments: Comment[];
 	isLoading: boolean;
 	error: string | null;
 
 	// Actions
-	openModal: (postId: number, initialComments?: Comment[]) => void;
+	openModal: (
+		postId: number,
+		initialComments?: Comment[],
+		onCommentChange?: (changeType: "add" | "delete", newCount: number) => void,
+	) => void;
 	closeModal: () => void;
 	addComment: (formData: CommentFormData) => Promise<Comment>;
 	editComment: (commentId: number, newText: string) => Promise<void>;
@@ -40,7 +47,14 @@ export const useComments = (
 	const { initialComments = [] } = options;
 
 	// State
-	const [modal, setModal] = useState<CommentModalState>({
+	const [modal, setModal] = useState<
+		CommentModalState & {
+			onCommentChange?: (
+				changeType: "add" | "delete",
+				newCount: number,
+			) => void;
+		}
+	>({
 		isOpen: false,
 		postId: null,
 		comments: initialComments,
@@ -48,6 +62,7 @@ export const useComments = (
 		error: null,
 		page: 1,
 		hasMore: true,
+		onCommentChange: undefined, // Parent notification callback
 	});
 
 	const [comments, setComments] = useState<Comment[]>(initialComments);
@@ -126,7 +141,16 @@ export const useComments = (
 
 	// Open modal
 	const openModal = useCallback(
-		(postId: number, initialComments?: Comment[]) => {
+		(
+			postId: number,
+			initialComments?: Comment[],
+			onCommentChange?: (
+				changeType: "add" | "delete",
+				newCount: number,
+			) => void,
+		) => {
+			console.log("Opening comment modal with callback:", !!onCommentChange);
+
 			setModal((prev) => ({
 				...prev,
 				isOpen: true,
@@ -135,6 +159,7 @@ export const useComments = (
 				page: 1,
 				hasMore: true,
 				error: null,
+				onCommentChange, // Store the parent notification callback
 			}));
 
 			if (initialComments) {
@@ -156,6 +181,7 @@ export const useComments = (
 			isOpen: false,
 			postId: null,
 			error: null,
+			onCommentChange: undefined, // Clear the callback when closing
 		}));
 	}, []);
 
