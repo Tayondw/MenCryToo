@@ -42,7 +42,6 @@ interface PostComment {
 	parentId: number | null;
 	created_at: string;
 	updated_at: string;
-	// Like data
 	likes?: number;
 	isLiked?: boolean;
 	commenter?: {
@@ -54,11 +53,18 @@ interface PostComment {
 	};
 }
 
-const CommentModal: React.FC<CommentModalProps> = ({
+// Enhanced CommentModalProps with callback for parent notification
+interface EnhancedCommentModalProps extends CommentModalProps {
+	// Callback to notify parent of comment changes
+	onCommentChange?: (changeType: "add" | "delete", newCount: number) => void;
+}
+
+const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 	isOpen,
 	onClose,
 	postId,
 	initialComments = [],
+	onCommentChange, // Parent notification callback
 }) => {
 	const sessionUser = useSelector(
 		(state: RootState) => state.session.user,
@@ -96,6 +102,19 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		Map<number, { isLiked: boolean; likeCount: number }>
 	>(new Map());
 
+	// Helper function to notify parent of comment count changes
+	const notifyParentOfChange = useCallback(
+		(changeType: "add" | "delete", newCount: number) => {
+			if (onCommentChange) {
+				console.log(
+					`Notifying parent: ${changeType} comment, new count: ${newCount}`,
+				);
+				onCommentChange(changeType, newCount);
+			}
+		},
+		[onCommentChange],
+	);
+
 	useEffect(() => {
 		if (commentsData && commentsData.length > 0) {
 			const likeStatesMap = new Map();
@@ -132,7 +151,6 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					created_at: comment.createdAt,
 					updated_at: comment.updatedAt,
 					commenter: comment.commenter,
-					// NEW: Include like data
 					likes: comment.likes || 0,
 					isLiked: comment.isLiked || false,
 				};
@@ -161,7 +179,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 
 			// First pass: create Comment objects with proper commenter data AND like data
 			flatComments.forEach((pc) => {
-				// Handle commenter data (existing logic)
+				// Handle commenter data
 				let commenterData: Comment["commenter"];
 
 				if (pc.commenter) {
@@ -213,7 +231,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 				commentMap.set(pc.id, comment);
 			});
 
-			// Second pass: organize into tree structure (existing logic)
+			// Second pass: organize into tree structure
 			flatComments.forEach((pc) => {
 				const comment = commentMap.get(pc.id)!;
 
@@ -230,7 +248,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 				}
 			});
 
-			// Sort by creation date (existing logic)
+			// Sort by creation date
 			rootComments.sort(
 				(a, b) =>
 					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -381,7 +399,6 @@ const CommentModal: React.FC<CommentModalProps> = ({
 						created_at: comment.createdAt,
 						updated_at: comment.updatedAt,
 						commenter: comment.commenter,
-						// NEW: Include like data
 						likes: comment.likes || 0,
 						isLiked: comment.isLiked || false,
 					}),
@@ -482,7 +499,12 @@ const CommentModal: React.FC<CommentModalProps> = ({
 				return newMap;
 			});
 
-			setCommentsData((prev) => [newCommentData, ...prev]);
+			setCommentsData((prev) => {
+				const newData = [newCommentData, ...prev];
+				// Notify parent of comment addition
+				notifyParentOfChange("add", newData.length);
+				return newData;
+			});
 			setNewComment("");
 		} catch (error) {
 			console.error("Error adding comment:", error);
@@ -490,7 +512,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [sessionUser, newComment, postId]);
+	}, [sessionUser, newComment, postId, notifyParentOfChange]);
 
 	// Helper to find comment by ID
 	const findCommentById = useCallback(
@@ -553,7 +575,12 @@ const CommentModal: React.FC<CommentModalProps> = ({
 					return newMap;
 				});
 
-				setCommentsData((prev) => [...prev, newReplyData]);
+				setCommentsData((prev) => {
+					const newData = [...prev, newReplyData];
+					// Notify parent of comment addition (reply counts as comment)
+					notifyParentOfChange("add", newData.length);
+					return newData;
+				});
 				setReplyText("");
 				setReplyToComment(null);
 			} catch (error) {
@@ -563,7 +590,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 				setIsSubmitting(false);
 			}
 		},
-		[sessionUser, replyText, postId, findCommentById],
+		[sessionUser, replyText, postId, findCommentById, notifyParentOfChange],
 	);
 
 	// Handle edit comment
@@ -585,12 +612,15 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	const handleDeleteComment = async (commentId: number) => {
 		try {
 			await commentApi.deleteComment(postId, commentId);
-			setCommentsData((prev) =>
-				prev.filter(
+			setCommentsData((prev) => {
+				const newData = prev.filter(
 					(comment) =>
 						comment.id !== commentId && comment.parentId !== commentId,
-				),
-			);
+				);
+				// Notify parent of comment deletion
+				notifyParentOfChange("delete", newData.length);
+				return newData;
+			});
 		} catch (error) {
 			console.error("Error deleting comment:", error);
 			throw error;
@@ -708,6 +738,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 	const filteredComments = processedComments.length;
 	const shouldShowLoading = isLoading && !hasInitialized;
 
+	// Rest of the component JSX remains the same...
 	return (
 		<>
 			<div
@@ -935,7 +966,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 				</div>
 			</div>
 
-			{/* NEW: Comment Likes Modal */}
+			{/* Comment Likes Modal */}
 			{likesModal.isOpen && likesModal.commentId && (
 				<CommentLikesModal
 					isOpen={likesModal.isOpen}
