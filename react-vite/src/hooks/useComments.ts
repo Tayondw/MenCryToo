@@ -37,7 +37,7 @@ interface UseCommentsReturn {
 export const useComments = (
 	options: UseCommentsOptions = {},
 ): UseCommentsReturn => {
-	const { initialComments = [], autoLoad = false } = options;
+	const { initialComments = [] } = options;
 
 	// State
 	const [modal, setModal] = useState<CommentModalState>({
@@ -74,7 +74,12 @@ export const useComments = (
 			clearError();
 
 			try {
-				const response = await commentApi.getPostComments(postId, page, 20);
+				const response = await commentApi.getPostComments(postId, {
+					page,
+					perPage: 20,
+					includeReplies: true,
+					includeLikes: false,
+				});
 				const newComments = response.comments || [];
 
 				if (page === 1) {
