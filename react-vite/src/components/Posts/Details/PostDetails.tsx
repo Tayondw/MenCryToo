@@ -94,7 +94,10 @@ const PostDetails: React.FC = () => {
 
 	const [showOptions, setShowOptions] = useState(false);
 
-	// Inline commenting state
+      // Inline commenting state
+      const [localCommentCount, setLocalCommentCount] = useState(
+				post.postComments?.length || 0,
+			);
 	const [newComment, setNewComment] = useState("");
 	const [replyToComment, setReplyToComment] = useState<number | null>(null);
 	const [replyText, setReplyText] = useState("");
@@ -392,9 +395,29 @@ const PostDetails: React.FC = () => {
 	const handleOpenComments = useCallback(() => {
 		console.log("Opening comment modal with organized comments:", comments);
 
-		// Use the organized comments directly - they already have proper commenter data
-		openCommentModal(post.id, comments);
-	}, [openCommentModal, post.id, comments]);
+		// Create the callback to handle comment count changes
+		const handleCommentChange = (
+			changeType: "add" | "delete",
+			newCount: number,
+		) => {
+			console.log(
+				`Comment ${changeType} detected, updating count to:`,
+				newCount,
+			);
+			setLocalCommentCount(newCount);
+
+			// Also update the post data if needed
+			if (post.postComments) {
+				post.postComments =
+					changeType === "add"
+						? [...post.postComments, {} as any] // Add placeholder
+						: post.postComments.slice(0, newCount); // Remove items
+			}
+		};
+
+		openCommentModal(post.id, comments, handleCommentChange);
+	}, [openCommentModal, comments, post]);
+      
 
 	// Check if user is post creator
 	const isCreator = sessionUser?.id === post.creator;
@@ -538,8 +561,8 @@ const PostDetails: React.FC = () => {
 									className="flex items-center gap-2 text-slate-500 hover:text-blue-500 transition-colors"
 								>
 									<MessageCircle size={20} />
-									<span className="font-medium">
-										{post.postComments?.length || 0}
+									<span className="text-sm font-medium">
+										{localCommentCount}
 									</span>
 								</button>
 							</div>
@@ -613,7 +636,7 @@ const PostDetails: React.FC = () => {
 								)}
 							</div>
 
-							{/* Display Comments using enhanced CommentThread */}
+							{/* Display Comments using CommentThread */}
 							{comments.length > 0 ? (
 								<div className="space-y-4">
 									{comments.map((comment) => (
