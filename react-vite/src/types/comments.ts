@@ -155,6 +155,8 @@ export interface CommentModalProps {
 	onClose: () => void;
 	postId: number;
 	initialComments?: Comment[];
+	// callback for when comments change
+	onCommentsChange?: (postId: number, newCommentCount: number) => void;
 }
 
 // Comment like button props
