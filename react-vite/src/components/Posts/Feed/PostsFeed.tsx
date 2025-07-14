@@ -228,7 +228,14 @@ const PostsFeed: React.FC = () => {
 	);
 
 	const handleCommentClick = useCallback(
-		async (postId: number, post: PostWithComments) => {
+		async (
+			postId: number,
+			post: PostWithComments,
+			onCommentChange?: (
+				changeType: "add" | "delete",
+				newCount: number,
+			) => void,
+		) => {
 			console.log("Opening comment modal for post:", postId, post);
 
 			let initialComments: Comment[] = [];
@@ -391,7 +398,8 @@ const PostsFeed: React.FC = () => {
 			}
 
 			console.log("Final comments for modal:", initialComments);
-			openCommentModal(postId, initialComments);
+			// Pass the onCommentChange callback to openCommentModal
+			openCommentModal(postId, initialComments, onCommentChange);
 		},
 		[openCommentModal, sessionUser],
 	);
@@ -807,8 +815,8 @@ const PostCardWithComments: React.FC<PostCardWithCommentsProps> = ({
 	likeState,
 	setLikeState,
 }) => {
-	// Cast post to PostWithComments type for this component
-	const postWithComments = post as PostWithComments;
+	// Local state for comment count
+	const [localCommentCount, setLocalCommentCount] = useState(post.comments);
 
 	// Comment button with better logging
 	const handleCommentButtonClick = () => {
@@ -816,9 +824,23 @@ const PostCardWithComments: React.FC<PostCardWithCommentsProps> = ({
 			"Comment button clicked for post:",
 			post.id,
 			"Post data:",
-			postWithComments,
+			post,
 		);
-		handleCommentClick(post.id, postWithComments);
+
+		// Create callback to handle comment count changes
+		const handleCommentChange = (
+			changeType: "add" | "delete",
+			newCount: number,
+		) => {
+			console.log(
+				`Post ${post.id} comment ${changeType}, new count:`,
+				newCount,
+			);
+			setLocalCommentCount(newCount);
+		};
+
+		// Pass the callback to the parent handler
+		handleCommentClick(post.id, post, handleCommentChange);
 	};
 
 	return (
@@ -899,7 +921,9 @@ const PostCardWithComments: React.FC<PostCardWithCommentsProps> = ({
 									className="flex items-center gap-1 text-slate-500 hover:text-blue-500 transition-colors"
 								>
 									<MessageCircle size={18} />
-									<span className="text-sm font-medium">{post.comments}</span>
+									<span className="text-sm font-medium">
+										{localCommentCount}
+									</span>
 								</button>
 							</div>
 							<div className="flex items-center gap-2">
