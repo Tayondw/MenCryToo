@@ -417,6 +417,8 @@ class User(db.Model, UserMixin):
             )[:20]
 
             for post in sorted_posts:
+                comment_count = len(post.post_comments) if hasattr(post, "post_comments") else 0
+
                 post_data = {
                     "id": post.id,
                     "title": post.title,
@@ -426,9 +428,8 @@ class User(db.Model, UserMixin):
                     "likes": (
                         len(post.post_likes) if hasattr(post, "post_likes") else 0
                     ),
-                    "numComments": (
-                        len(post.post_comments) if hasattr(post, "post_comments") else 0
-                    ),
+                    "comments": comment_count,
+                    "numComments": comment_count,
                     "createdAt": (
                         post.created_at.isoformat() if post.created_at else None
                     ),
