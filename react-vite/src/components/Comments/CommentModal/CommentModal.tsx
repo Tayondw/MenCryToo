@@ -1,3 +1,4 @@
+// Enhanced CommentModal with proper page refresh logic
 import React, {
 	useState,
 	useEffect,
@@ -17,7 +18,7 @@ import {
 	Send,
 } from "lucide-react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { searchComments } from "../../../utils/commentUtils";
 import CommentThread from "../CommentThread";
 import CommentLikesModal from "../../Likes/CommentLikesModal";
@@ -53,10 +54,14 @@ interface PostComment {
 	};
 }
 
-// Enhanced CommentModalProps with callback for parent notification
+// Enhanced CommentModalProps with better callback handling
 interface EnhancedCommentModalProps extends CommentModalProps {
 	// Callback to notify parent of comment changes
 	onCommentChange?: (changeType: "add" | "delete", newCount: number) => void;
+	// Optional: Force page refresh on close
+	forceRefreshOnClose?: boolean;
+	// Optional: Custom close redirect
+	redirectOnClose?: string;
 }
 
 const CommentModal: React.FC<EnhancedCommentModalProps> = ({
@@ -64,12 +69,21 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 	onClose,
 	postId,
 	initialComments = [],
-	onCommentChange, // Parent notification callback
+	onCommentChange,
+	forceRefreshOnClose = false,
+	redirectOnClose,
 }) => {
 	const sessionUser = useSelector(
 		(state: RootState) => state.session.user,
 	) as SessionUser | null;
 	const modalRef = useRef<HTMLDivElement>(null);
+	const location = useLocation();
+	const navigate = useNavigate();
+
+	// Track initial comment count for comparison
+	const initialCommentCountRef = useRef<number>(0);
+	const finalCommentCountRef = useRef<number>(0);
+	const hasChangedRef = useRef<boolean>(false);
 
 	// State management
 	const [commentsData, setCommentsData] = useState<PostComment[]>([]);
@@ -102,9 +116,40 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 		Map<number, { isLiked: boolean; likeCount: number }>
 	>(new Map());
 
+	// Helper function to determine if we should refresh the page
+	const shouldRefreshPage = useCallback(() => {
+		// Always refresh if explicitly requested
+		if (forceRefreshOnClose) return true;
+
+		// Refresh if we're on certain pages and comments changed
+		if (hasChangedRef.current) {
+			const currentPath = location.pathname;
+
+			// Pages that should refresh when comments change
+			const refreshablePages = [
+				"/posts-feed",
+				"/similar-feed",
+				"/profile",
+				"/profile-feed",
+			];
+
+			// Check if current page should refresh
+			const shouldRefresh =
+				refreshablePages.some((page) => currentPath.startsWith(page)) ||
+				currentPath.match(/^\/posts\/\d+$/); // Individual post pages
+
+			return shouldRefresh;
+		}
+
+		return false;
+	}, [forceRefreshOnClose, location.pathname]);
+
 	// Helper function to notify parent of comment count changes
 	const notifyParentOfChange = useCallback(
 		(changeType: "add" | "delete", newCount: number) => {
+			hasChangedRef.current = true;
+			finalCommentCountRef.current = newCount;
+
 			if (onCommentChange) {
 				console.log(
 					`Notifying parent: ${changeType} comment, new count: ${newCount}`,
@@ -115,11 +160,60 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 		[onCommentChange],
 	);
 
+	// Initialize comment count tracking
+	useEffect(() => {
+		if (isOpen && commentsData.length >= 0) {
+			const currentCount = commentsData.length;
+			if (initialCommentCountRef.current === 0) {
+				initialCommentCountRef.current = currentCount;
+			}
+			finalCommentCountRef.current = currentCount;
+		}
+	}, [isOpen, commentsData.length]);
+
+	// Enhanced close handler with refresh logic
+	const handleClose = useCallback(() => {
+		// Call parent's onCommentChange one final time if there were changes
+		if (hasChangedRef.current && onCommentChange) {
+			const finalCount = finalCommentCountRef.current;
+			console.log(`Final comment count on close: ${finalCount}`);
+			onCommentChange(
+				finalCount > initialCommentCountRef.current ? "add" : "delete",
+				finalCount,
+			);
+		}
+
+		// Reset state
+		setSearchTerm("");
+		setError(null);
+		setCommentsData([]);
+		setNewComment("");
+		setReplyToComment(null);
+		setReplyText("");
+		setShowAllReplies({});
+		setHasInitialized(false);
+		setLikesModal({ isOpen: false, commentId: null });
+
+		// Call the original onClose
+		onClose();
+
+		// Handle page refresh or redirect after a short delay to allow state updates
+		setTimeout(() => {
+			if (redirectOnClose) {
+				// Custom redirect
+				navigate(redirectOnClose);
+			} else if (shouldRefreshPage()) {
+				// Force page refresh to update comment counts
+				console.log("Refreshing page to update comment counts");
+				window.location.href = window.location.href;
+			}
+		}, 100);
+	}, [onClose, onCommentChange, shouldRefreshPage, navigate, redirectOnClose]);
+
+	// Rest of your existing useEffect and handler code...
 	useEffect(() => {
 		if (commentsData && commentsData.length > 0) {
 			const likeStatesMap = new Map();
-
-			// Initialize like states for all comments (including nested ones)
 			const initializeLikeStates = (comments: PostComment[]) => {
 				comments.forEach((comment) => {
 					likeStatesMap.set(comment.id, {
@@ -128,7 +222,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 					});
 				});
 			};
-
 			initializeLikeStates(commentsData);
 			setCommentLikeStates(likeStatesMap);
 		}
@@ -140,7 +233,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 			const flattened: PostComment[] = [];
 
 			const processComment = (comment: Comment) => {
-				// Add the main comment
 				const postComment: PostComment = {
 					id: comment.id,
 					userId: comment.userId,
@@ -156,7 +248,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 				};
 				flattened.push(postComment);
 
-				// Process all replies recursively
 				if (comment.replies && comment.replies.length > 0) {
 					comment.replies.forEach(processComment);
 				}
@@ -179,7 +270,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 
 			// First pass: create Comment objects with proper commenter data AND like data
 			flatComments.forEach((pc) => {
-				// Handle commenter data
 				let commenterData: Comment["commenter"];
 
 				if (pc.commenter) {
@@ -208,7 +298,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 					};
 				}
 
-				// Get like state - prioritize our state map, fallback to comment data
 				const likeState = commentLikeStates.get(pc.id);
 				const likes = likeState?.likeCount ?? pc.likes ?? 0;
 				const isLiked = likeState?.isLiked ?? pc.isLiked ?? false;
@@ -223,7 +312,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 					updatedAt: pc.updated_at,
 					commenter: commenterData,
 					replies: [],
-					// Include like data with proper fallbacks
 					likes: likes,
 					isLiked: isLiked,
 				};
@@ -237,10 +325,13 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 
 				if (pc.parentId === null || pc.parentId === undefined) {
 					rootComments.push(comment);
+					comment.replies = [];
 				} else {
 					const parent = commentMap.get(pc.parentId);
 					if (parent) {
-						parent.replies = parent.replies || [];
+						if (!parent.replies) {
+							parent.replies = [];
+						}
 						parent.replies.push(comment);
 					} else {
 						rootComments.push(comment);
@@ -265,7 +356,7 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 
 			return rootComments;
 		},
-		[sessionUser, commentLikeStates], // Include commentLikeStates as dependency
+		[sessionUser, commentLikeStates],
 	);
 
 	// Memoize the organized comments
@@ -294,7 +385,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 						new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
 					);
 				case "popular": {
-					// Sort by likes first, then replies
 					const aLikes = a.likes || 0;
 					const bLikes = b.likes || 0;
 					if (aLikes !== bLikes) return bLikes - aLikes;
@@ -353,7 +443,7 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 		}
 	}, [postId]);
 
-	// Initialize comments when modal opens - IMMEDIATE LOAD
+	// Initialize comments when modal opens
 	useEffect(() => {
 		if (!isOpen || !postId) {
 			// Reset when closed
@@ -366,6 +456,11 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 			setSearchTerm("");
 			setHasInitialized(false);
 			setLikesModal({ isOpen: false, commentId: null });
+
+			// Reset tracking refs
+			initialCommentCountRef.current = 0;
+			finalCommentCountRef.current = 0;
+			hasChangedRef.current = false;
 			return;
 		}
 
@@ -378,7 +473,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 
 		// Try to use initial comments first, but ALWAYS verify with API
 		if (initialComments && initialComments.length > 0) {
-			// Check if initialComments are already in the threaded structure or flat
 			const hasNestedReplies = initialComments.some(
 				(comment) => comment.replies && comment.replies.length > 0,
 			);
@@ -407,8 +501,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 				setHasInitialized(true);
 			}
 
-			// Also load from API in background to ensure we have the latest data
-			// but don't show loading state since we already have data
 			loadCommentsFromApi();
 		} else {
 			loadCommentsFromApi();
@@ -420,28 +512,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 		loadCommentsFromApi,
 		flattenCommentStructure,
 	]);
-
-	useEffect(() => {
-		if (commentsData && commentsData.length > 0) {
-			const likeStatesMap = new Map();
-
-			// Initialize like states for all comments (including nested ones)
-			const initializeLikeStates = (comments: PostComment[]) => {
-				comments.forEach((comment) => {
-					const likes = comment.likes ?? 0;
-					const isLiked = comment.isLiked ?? false;
-
-					likeStatesMap.set(comment.id, {
-						isLiked: isLiked,
-						likeCount: likes,
-					});
-				});
-			};
-
-			initializeLikeStates(commentsData);
-			setCommentLikeStates(likeStatesMap);
-		}
-	}, [commentsData]);
 
 	// Format time ago
 	const formatTimeAgo = useCallback((dateString: string) => {
@@ -487,12 +557,10 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 					lastName: sessionUser.lastName || "",
 					profileImage: sessionUser.profileImage || "/default-avatar.png",
 				},
-				// Initialize like data for new comment
 				likes: 0,
 				isLiked: false,
 			};
 
-			// Initialize like state for the new comment
 			setCommentLikeStates((prev) => {
 				const newMap = new Map(prev);
 				newMap.set(newCommentData.id, { isLiked: false, likeCount: 0 });
@@ -501,7 +569,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 
 			setCommentsData((prev) => {
 				const newData = [newCommentData, ...prev];
-				// Notify parent of comment addition
 				notifyParentOfChange("add", newData.length);
 				return newData;
 			});
@@ -563,12 +630,10 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 						lastName: sessionUser.lastName || "",
 						profileImage: sessionUser.profileImage || "/default-avatar.png",
 					},
-					// Initialize like data for new reply
 					likes: 0,
 					isLiked: false,
 				};
 
-				// Initialize like state for the new reply
 				setCommentLikeStates((prev) => {
 					const newMap = new Map(prev);
 					newMap.set(newReplyData.id, { isLiked: false, likeCount: 0 });
@@ -577,7 +642,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 
 				setCommentsData((prev) => {
 					const newData = [...prev, newReplyData];
-					// Notify parent of comment addition (reply counts as comment)
 					notifyParentOfChange("add", newData.length);
 					return newData;
 				});
@@ -617,7 +681,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 					(comment) =>
 						comment.id !== commentId && comment.parentId !== commentId,
 				);
-				// Notify parent of comment deletion
 				notifyParentOfChange("delete", newData.length);
 				return newData;
 			});
@@ -630,7 +693,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 	// Handle like toggle
 	const handleLikeToggle = useCallback(
 		async (commentId: number, isLiked: boolean, newCount: number) => {
-			// Validate parameters
 			if (isLiked === undefined || newCount === undefined) {
 				console.error("CommentModal received undefined like data:", {
 					commentId,
@@ -640,14 +702,12 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 				return;
 			}
 
-			// Update local like state map first
 			setCommentLikeStates((prev) => {
 				const newMap = new Map(prev);
 				newMap.set(commentId, { isLiked, likeCount: newCount });
 				return newMap;
 			});
 
-			// Update the comment data to persist the like state
 			setCommentsData((prev) => {
 				const updated = prev.map((comment) =>
 					comment.id === commentId
@@ -684,20 +744,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 		loadCommentsFromApi();
 	}, [loadCommentsFromApi]);
 
-	// Handle modal close
-	const handleClose = useCallback(() => {
-		setSearchTerm("");
-		setError(null);
-		setCommentsData([]);
-		setNewComment("");
-		setReplyToComment(null);
-		setReplyText("");
-		setShowAllReplies({});
-		setHasInitialized(false);
-		setLikesModal({ isOpen: false, commentId: null });
-		onClose();
-	}, [onClose]);
-
 	// Handle click outside modal
 	const handleOverlayClick = useCallback(
 		(e: React.MouseEvent) => {
@@ -725,20 +771,13 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 		};
 	}, [isOpen, handleClose]);
 
-	useEffect(() => {
-		if (isOpen && postId && hasInitialized) {
-			// Clear like states when modal reopens to force fresh fetch
-			setCommentLikeStates(new Map());
-		}
-	}, [isOpen, postId, hasInitialized]);
-
 	if (!isOpen) return null;
 
 	const totalComments = commentsData.length;
 	const filteredComments = processedComments.length;
 	const shouldShowLoading = isLoading && !hasInitialized;
 
-	// Rest of the component JSX remains the same...
+	// Rest of your JSX remains the same...
 	return (
 		<>
 			<div
