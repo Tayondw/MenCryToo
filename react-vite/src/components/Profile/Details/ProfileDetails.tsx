@@ -19,13 +19,7 @@ import {
 	ArrowLeft,
 	LucideIcon,
 } from "lucide-react";
-import {
-	User,
-	Post,
-	Group,
-	Event,
-	Tag as TagInterface,
-} from "../../../types";
+import { User, Post, Group, Event, Tag as TagInterface } from "../../../types";
 import { useComments } from "../../../hooks/useComments";
 import { useLikes, useLikesModal } from "../../../hooks/useLikes";
 import LikeButton from "../../Likes/PostsLikesButton";
@@ -177,7 +171,9 @@ const PostCard: React.FC<PostCardProps> = ({
 
 				{/* Comment Button */}
 				<button
-					onClick={() => onCommentsClick(post.id)}
+					onClick={() => {
+						onCommentsClick(post.id);
+					}}
 					className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors duration-200"
 				>
 					<MessageCircle size={18} />
@@ -731,7 +727,7 @@ const ProfileDetails: React.FC = () => {
 										/>
 									</div>
 
-									<div className="flex-1 mt-20 sm:mt-0">
+									<div className="flex-1 mt-20 sm:mt-20">
 										<h1 className="text-2xl font-bold text-gray-800">
 											{userDetails.username}
 										</h1>
