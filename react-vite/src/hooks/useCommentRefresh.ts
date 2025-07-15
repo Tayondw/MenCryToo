@@ -98,7 +98,7 @@ export const useCommentRefresh = (
 				navigate(redirectPath);
 			} else {
 				// Force page refresh
-				window.location.href = window.location.href;
+				window.location.reload();
 			}
 		}, refreshDelay);
 	}, [shouldRefreshPage, onRefresh, redirectPath, navigate, refreshDelay]);
@@ -179,7 +179,7 @@ class CommentStateManager {
 
 		if (shouldRefresh) {
 			setTimeout(() => {
-				window.location.href = window.location.href;
+				window.location.reload();
 			}, 100);
 		}
 	}
