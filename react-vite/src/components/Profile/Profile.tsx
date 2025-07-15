@@ -347,9 +347,8 @@ const Profile: React.FC = () => {
 		(postId: number) => {
 			const post = userPosts.find((p) => p.id === postId);
 
-			// Enhanced callback with automatic refresh
+			// Callback with automatic refresh
 			const handleCommentsChange = (postId: number, newCount: number) => {
-				console.log(`Comments changed for post ${postId}: ${newCount}`);
 				setPostCommentCounts((prev) => {
 					const newMap = new Map(prev);
 					newMap.set(postId, newCount);
