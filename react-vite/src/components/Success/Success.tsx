@@ -94,7 +94,7 @@ const Success: React.FC = () => {
 								href="mailto:support@mencrytoo.org"
 								className="text-orange-600 hover:text-orange-700 font-medium"
 							>
-								support@mencrytoo.org
+								support@mencrytoo.us
 							</a>
 						</p>
 						<div className="flex items-center justify-center gap-6 mt-4">
