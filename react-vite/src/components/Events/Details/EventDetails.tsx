@@ -19,72 +19,7 @@ import {
 	Info,
 } from "lucide-react";
 import { RootState } from "../../../types";
-
-interface EventAttendee {
-	user: {
-		id: number;
-		firstName: string;
-		lastName: string;
-		username: string;
-		email: string;
-		profileImage: string;
-	};
-}
-
-interface EventVenue {
-	id: number;
-	groupId: number;
-	address: string;
-	city: string;
-	state: string;
-	latitude: number;
-	longitude: number;
-}
-
-interface EventGroup {
-	id: number;
-	name: string;
-	about: string;
-	image: string;
-	city: string;
-	state: string;
-	numMembers: number;
-	type: string;
-}
-
-interface EventOrganizer {
-	id: number;
-	firstName: string;
-	lastName: string;
-	username: string;
-	email: string;
-	profileImage: string;
-	bio?: string;
-}
-
-interface EventImage {
-	id: number;
-	eventImage: string;
-	name: string;
-}
-
-interface EventDetails {
-	id: number;
-	name: string;
-	description: string;
-	image: string;
-	type: string;
-	capacity: number;
-	numAttendees: number;
-	startDate: string;
-	endDate: string;
-	groupId: number;
-	organizer: EventOrganizer;
-	attendees: EventAttendee[];
-	venueInfo?: EventVenue;
-	groupInfo: EventGroup;
-	eventImage?: EventImage[];
-}
+import { EventVenue, type EventDetails } from "../../../types/events";
 
 type SectionType = "overview" | "attendees" | "group" | "photos";
 
