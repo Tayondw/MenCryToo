@@ -18,34 +18,11 @@ import {
 	Upload,
 } from "lucide-react";
 import { RootState } from "../../../../types";
-
-interface FormErrors {
-	name?: string;
-	description?: string;
-	type?: string;
-	capacity?: string;
-	startDate?: string;
-	endDate?: string;
-	image?: string;
-}
-
-interface EventDetails {
-	id: number;
-	name: string;
-	description: string;
-	image: string;
-	type: string;
-	capacity: number;
-	startDate: string;
-	endDate: string;
-	groupId: number;
-	organizer: {
-		id: number;
-	};
-}
+import { EventFormErrors } from "../../../../types/errors";
+import { EventDetails } from "../../../../types/events";
 
 const UpdateEvent: React.FC = () => {
-	const errors = useActionData() as FormErrors;
+	const errors = useActionData() as EventFormErrors;
 	const sessionUser = useSelector((state: RootState) => state.session.user);
 	const navigate = useNavigate();
 	const eventDetails = useLoaderData() as EventDetails;
