@@ -385,7 +385,7 @@ const PostsFeed: React.FC = () => {
 								: "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
 						}`}
 					>
-						Similar Users ({loaderData.stats?.similarPosts || 0})
+						Similar Users' Posts ({loaderData.stats?.similarPosts || 0})
 					</button>
 				</div>
 
@@ -773,10 +773,10 @@ const PostCard: React.FC<PostCardProps> = ({
 
 						{/* Post Title & Caption */}
 						<Link to={`/posts/${post.id}`} className="block group">
-							<h3 className="font-bold text-lg text-slate-900 group-hover:text-orange-600 transition-colors mb-2 line-clamp-2">
+							<h3 className="font-bold text-lg h-14 text-slate-900 group-hover:text-orange-600 transition-colors mb-2 line-clamp-2">
 								{post.title}
 							</h3>
-							<p className="text-slate-600 text-sm line-clamp-3 mb-4">
+							<p className="text-slate-600 h-20 text-sm line-clamp-4 mb-4">
 								{post.caption}
 							</p>
 						</Link>
