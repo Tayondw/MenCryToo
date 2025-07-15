@@ -68,8 +68,6 @@ export const useCommentRefresh = (
 	// Handle comment count changes
 	const onCommentChange = useCallback(
 		(changeType: "add" | "delete", newCount: number) => {
-			console.log(`Comment ${changeType}: new count ${newCount}`);
-
 			// Set initial count if not set
 			if (initialCountRef.current === 0) {
 				initialCountRef.current = newCount;
@@ -85,11 +83,8 @@ export const useCommentRefresh = (
 	// Handle modal close with refresh logic
 	const onModalClose = useCallback(() => {
 		if (!shouldRefreshPage()) {
-			console.log("No refresh needed for current page");
 			return;
 		}
-
-		console.log("Refreshing page due to comment changes");
 
 		// Call onRefresh callback if provided
 		if (onRefresh) {
@@ -183,7 +178,6 @@ class CommentStateManager {
 			currentPath.match(/^\/posts\/\d+$/);
 
 		if (shouldRefresh) {
-			console.log("Forcing page refresh due to comment changes");
 			setTimeout(() => {
 				window.location.href = window.location.href;
 			}, 100);
