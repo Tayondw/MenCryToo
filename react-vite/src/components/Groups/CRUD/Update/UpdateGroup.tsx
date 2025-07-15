@@ -19,30 +19,12 @@ import {
 	Check,
 } from "lucide-react";
 import { RootState } from "../../../../types";
-
-interface FormErrors {
-	name?: string;
-	about?: string;
-	type?: string;
-	city?: string;
-	state?: string;
-	image?: string;
-}
-
-interface GroupDetails {
-	id: number;
-	name: string;
-	about: string;
-	type: string;
-	city: string;
-	state: string;
-	image: string;
-	organizerId: number;
-}
+import { UpdateGroupDetails } from "../../../../types/groups";
+import { GroupFormErrors } from "../../../../types/errors";
 
 const UpdateGroup: React.FC = () => {
-	const groupDetails = useLoaderData() as GroupDetails;
-	const errors = useActionData() as FormErrors;
+	const groupDetails = useLoaderData() as UpdateGroupDetails;
+	const errors = useActionData() as GroupFormErrors;
 	const sessionUser = useSelector((state: RootState) => state.session.user);
 	const navigate = useNavigate();
 
