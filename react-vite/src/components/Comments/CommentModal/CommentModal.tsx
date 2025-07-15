@@ -199,7 +199,7 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 				navigate(redirectOnClose);
 			} else if (shouldRefreshPage()) {
 				// Force page refresh to update comment counts
-				window.location.href = window.location.href;
+				window.location.reload();
 			}
 		}, 100);
 	}, [onClose, onCommentChange, shouldRefreshPage, navigate, redirectOnClose]);
