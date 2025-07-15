@@ -132,18 +132,13 @@ const PostDetails: React.FC = () => {
 			const commentMap = new Map<number, Comment>();
 			const rootComments: Comment[] = [];
 
-			console.log("Organizing comments - input:", flatComments);
-
 			// First pass: create Comment objects with ACTUAL commenter data from API
 			flatComments.forEach((pc) => {
-				console.log("Processing comment:", pc);
-
 				// Use the commenter data that comes from the API
 				let commenterData: Comment["commenter"];
 
 				// If the API response includes commenter data, use it directly
 				if (pc.commenter) {
-					console.log("Using API commenter data:", pc.commenter);
 					commenterData = {
 						id: pc.commenter.id,
 						username: pc.commenter.username,
@@ -154,11 +149,6 @@ const PostDetails: React.FC = () => {
 				}
 				// If API commenter data is missing, try to match with known users
 				else {
-					console.log(
-						"API commenter data missing, using fallback for user:",
-						pc.userId,
-					);
-
 					// Check if this is the session user
 					if (sessionUser && pc.userId === sessionUser.id) {
 						commenterData = {
@@ -191,8 +181,6 @@ const PostDetails: React.FC = () => {
 					}
 				}
 
-				console.log("Final commenter data:", commenterData);
-
 				const comment: Comment = {
 					id: pc.id,
 					userId: pc.userId,
@@ -205,7 +193,6 @@ const PostDetails: React.FC = () => {
 					replies: [],
 				};
 
-				console.log("Created comment object:", comment);
 				commentMap.set(pc.id, comment);
 			});
 
@@ -241,7 +228,6 @@ const PostDetails: React.FC = () => {
 				}
 			});
 
-			console.log("Final organized comments:", rootComments);
 			return rootComments;
 		},
 		[
