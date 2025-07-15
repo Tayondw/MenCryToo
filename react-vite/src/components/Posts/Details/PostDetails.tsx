@@ -14,9 +14,7 @@ import {
 } from "lucide-react";
 import LikeButton from "../../Likes/PostsLikesButton";
 import LikesModal from "../../Likes/PostsLikesModal";
-import CommentModal from "../../Comments/CommentModal";
 import CommentThread from "../../Comments/CommentThread";
-import { useComments } from "../../../hooks/useComments";
 import { useLikes, useLikesModal } from "../../../hooks/useLikes";
 import { commentApi } from "../../../services/commentApi";
 import { RootState } from "../../../types";
@@ -76,16 +74,7 @@ const PostDetails: React.FC = () => {
 	) as SessionUser | null;
 	const navigate = useNavigate();
 
-	// Comment modal management
-	const {
-		modal: commentModal,
-		openModal: openCommentModal,
-		closeModal: closeCommentModal,
-	} = useComments({
-		forceRefreshOnClose: true, // Always refresh post details page
-		refreshDelay: 200, // Slightly longer delay for post details
-	});
-	// Likes management
+	// Likes management (keeping this)
 	const { likeStates, setLikeState, fetchLikeStatus } = useLikes();
 	const {
 		isOpen: isLikesModalOpen,
@@ -96,7 +85,7 @@ const PostDetails: React.FC = () => {
 
 	const [showOptions, setShowOptions] = useState(false);
 
-	// Inline commenting state
+	// Inline commenting state (keeping and enhancing this)
 	const [commentCount, setCommentCount] = useState(
 		post.postComments?.length || 0,
 	);
@@ -108,6 +97,11 @@ const PostDetails: React.FC = () => {
 		[key: number]: boolean;
 	}>({});
 
+	// State for the actual comments data
+	const [commentsData, setCommentsData] = useState<PostComment[]>(
+		post.postComments || [],
+	);
+
 	// Initialize like state for this post
 	useEffect(() => {
 		if (!likeStates.has(post.id)) {
@@ -116,7 +110,7 @@ const PostDetails: React.FC = () => {
 		}
 	}, [post.id, post.likes, likeStates, setLikeState, fetchLikeStatus]);
 
-	// Get current like state - memoized to prevent dependency issues
+	// Get current like state
 	const currentLikeState = useMemo(() => {
 		return (
 			likeStates.get(post.id) || {
@@ -223,7 +217,9 @@ const PostDetails: React.FC = () => {
 				} else {
 					const parent = commentMap.get(pc.parentId);
 					if (parent) {
-						parent.replies = parent.replies || [];
+						if (!parent.replies) {
+							parent.replies = [];
+						}
 						parent.replies.push(comment);
 					}
 				}
@@ -260,11 +256,11 @@ const PostDetails: React.FC = () => {
 
 	// Memoize the organized comments to prevent infinite re-renders
 	const comments = useMemo(() => {
-		if (post.postComments && post.postComments.length > 0) {
-			return organizeComments(post.postComments);
+		if (commentsData && commentsData.length > 0) {
+			return organizeComments(commentsData);
 		}
 		return [];
-	}, [post.postComments, organizeComments]);
+	}, [commentsData, organizeComments]);
 
 	// Format date
 	const formatDate = (dateString: string) => {
@@ -305,8 +301,15 @@ const PostDetails: React.FC = () => {
 				postId: post.id,
 			});
 
-			const newCommentObj: Comment = {
-				...response.comment,
+			const newCommentObj: PostComment = {
+				id: response.comment.id,
+				userId: sessionUser.id,
+				postId: post.id,
+				comment: newComment.trim(),
+				username: sessionUser.username,
+				parentId: null,
+				created_at: response.comment.createdAt,
+				updated_at: response.comment.updatedAt,
 				commenter: {
 					id: sessionUser.id,
 					username: sessionUser.username,
@@ -314,25 +317,11 @@ const PostDetails: React.FC = () => {
 					lastName: sessionUser.lastName || "",
 					profileImage: sessionUser.profileImage || "/default-avatar.png",
 				},
-				replies: [],
 			};
 
-			// Add to the existing comments by updating the post data
-			// This will trigger a re-render with the new comment
-			post.postComments = [
-				{
-					id: newCommentObj.id,
-					userId: newCommentObj.userId,
-					postId: newCommentObj.postId,
-					comment: newCommentObj.comment,
-					username: sessionUser.username,
-					parentId: newCommentObj.parentId,
-					created_at: newCommentObj.createdAt,
-					updated_at: newCommentObj.updatedAt,
-				},
-				...post.postComments,
-			];
-
+			// Add to the existing comments data
+			setCommentsData((prev) => [newCommentObj, ...prev]);
+			setCommentCount((prev) => prev + 1);
 			setNewComment("");
 		} catch (error) {
 			console.error("Error adding comment:", error);
@@ -357,8 +346,8 @@ const PostDetails: React.FC = () => {
 				replyToUsername,
 			});
 
-			// Add to post comments data structure
-			const newReplyData = {
+			// Add to comments data structure
+			const newReplyData: PostComment = {
 				id: response.comment.id,
 				userId: sessionUser.id,
 				postId: post.id,
@@ -367,10 +356,17 @@ const PostDetails: React.FC = () => {
 				parentId: parentId,
 				created_at: response.comment.createdAt,
 				updated_at: response.comment.updatedAt,
+				commenter: {
+					id: sessionUser.id,
+					username: sessionUser.username,
+					firstName: sessionUser.firstName || "",
+					lastName: sessionUser.lastName || "",
+					profileImage: sessionUser.profileImage || "/default-avatar.png",
+				},
 			};
 
-			post.postComments = [...post.postComments, newReplyData];
-
+			setCommentsData((prev) => [...prev, newReplyData]);
+			setCommentCount((prev) => prev + 1);
 			setReplyText("");
 			setReplyToComment(null);
 		} catch (error) {
@@ -393,23 +389,38 @@ const PostDetails: React.FC = () => {
 		return null;
 	};
 
-	// Handle comment modal open
-	const handleOpenComments = useCallback(() => {
-		console.log("Opening comment modal with organized comments:", comments);
+	// Handle edit comment
+	const handleEditComment = async (commentId: number, newText: string) => {
+		try {
+			await commentApi.updateComment(commentId, newText);
+			setCommentsData((prev) =>
+				prev.map((comment) =>
+					comment.id === commentId ? { ...comment, comment: newText } : comment,
+				),
+			);
+		} catch (error) {
+			console.error("Error editing comment:", error);
+			throw error;
+		}
+	};
 
-		// Enhanced callback that updates count and triggers refresh
-		const handleCommentsChange = (postId: number, newCount: number) => {
-			console.log(`Comments changed for post ${postId}: ${newCount}`);
-			setCommentCount(newCount);
-
-			// The enhanced hook will automatically handle page refresh
-			// when the modal closes due to forceRefreshOnClose: true
-		};
-
-		// Use the organized comments directly
-		openCommentModal(post.id, comments, handleCommentsChange);
-	}, [openCommentModal, post.id, comments]);
-
+	// Handle delete comment
+	const handleDeleteComment = async (commentId: number) => {
+		try {
+			await commentApi.deleteComment(post.id, commentId);
+			setCommentsData((prev) => {
+				const newData = prev.filter(
+					(comment) =>
+						comment.id !== commentId && comment.parentId !== commentId,
+				);
+				setCommentCount(newData.length);
+				return newData;
+			});
+		} catch (error) {
+			console.error("Error deleting comment:", error);
+			throw error;
+		}
+	};
 
 	// Check if user is post creator
 	const isCreator = sessionUser?.id === post.creator;
@@ -548,16 +559,10 @@ const PostDetails: React.FC = () => {
 									size={20}
 									disabled={currentLikeState.isLoading}
 								/>
-								<button
-									onClick={handleOpenComments}
-									className="flex items-center gap-2 text-slate-500 hover:text-blue-500 transition-colors"
-								>
+								<div className="flex items-center gap-2 text-slate-500">
 									<MessageCircle size={20} />
-									<span className="font-medium">
-										{commentCount}{" "}
-										{/* Use state instead of post.postComments?.length */}
-									</span>
-								</button>
+									<span className="font-medium">{commentCount}</span>
+								</div>
 							</div>
 							<div className="flex items-center gap-3">
 								<button className="text-slate-500 hover:text-orange-500 transition-colors">
@@ -617,16 +622,8 @@ const PostDetails: React.FC = () => {
 						<div className="space-y-6">
 							<div className="flex items-center justify-between">
 								<h2 className="text-xl font-semibold text-slate-900">
-									Comments ({commentCount}){" "}
+									Comments ({commentCount})
 								</h2>
-								{(post.postComments?.length || 0) > 3 && (
-									<button
-										onClick={handleOpenComments}
-										className="text-orange-600 hover:text-orange-700 font-medium text-sm"
-									>
-										View all in modal
-									</button>
-								)}
 							</div>
 
 							{/* Display Comments using CommentThread */}
@@ -650,6 +647,8 @@ const PostDetails: React.FC = () => {
 											formatTimeAgo={formatTimeAgo}
 											showAllReplies={showAllReplies}
 											toggleShowAllReplies={toggleShowAllReplies}
+											onEdit={handleEditComment}
+											onDelete={handleDeleteComment}
 										/>
 									))}
 								</div>
@@ -668,15 +667,6 @@ const PostDetails: React.FC = () => {
 					</div>
 				</div>
 			</div>
-
-			{/* Comment Modal */}
-			<CommentModal
-				isOpen={commentModal.isOpen}
-				onClose={closeCommentModal}
-				postId={commentModal.postId || post.id}
-				initialComments={commentModal.comments}
-				forceRefreshOnClose={true}
-			/>
 
 			{/* Likes Modal */}
 			{isLikesModalOpen && likesModalPostId && (
