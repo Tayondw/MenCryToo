@@ -109,8 +109,6 @@ export const useComments = (
 
 	// Force refresh function
 	const forceRefresh = useCallback(() => {
-		console.log("Forcing page refresh due to comment changes");
-
 		setTimeout(() => {
 			if (redirectOnClose) {
 				navigate(redirectOnClose);
@@ -273,7 +271,6 @@ export const useComments = (
 
 		// Handle page refresh logic
 		if (shouldRefreshPage()) {
-			console.log("Comments changed, refreshing page");
 			forceRefresh();
 		}
 
