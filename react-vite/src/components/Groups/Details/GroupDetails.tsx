@@ -20,63 +20,7 @@ import {
 	Crown,
 } from "lucide-react";
 import { RootState } from "../../../types";
-
-interface GroupMember {
-	id: number | string;
-	userId: number;
-	groupId: number;
-	isOrganizer?: boolean;
-	user: {
-		id: number;
-		firstName: string;
-		lastName: string;
-		username: string;
-		email: string;
-		profileImage: string;
-	};
-}
-
-interface GroupEvent {
-	id: number;
-	name: string;
-	description: string;
-	image: string;
-	startDate: string;
-	endDate: string;
-	venueInfo?: {
-		city: string;
-		state: string;
-	};
-}
-
-interface GroupImage {
-	id: number;
-	groupImage: string;
-	name: string;
-}
-
-interface GroupDetails {
-	id: number;
-	name: string;
-	about: string;
-	image: string;
-	city: string;
-	state: string;
-	type: string;
-	organizerId: number;
-	organizer: {
-		id: number;
-		firstName: string;
-		lastName: string;
-		username: string;
-		email: string;
-		profileImage: string;
-		bio: string;
-	};
-	members: GroupMember[];
-	events: GroupEvent[];
-	groupImage: GroupImage[];
-}
+import { type GroupDetails, GroupMember } from "../../../types/groups";
 
 type SectionType = "overview" | "events" | "members" | "photos";
 
