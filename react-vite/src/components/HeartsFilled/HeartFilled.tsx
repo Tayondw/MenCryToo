@@ -1,10 +1,5 @@
 import React from "react";
-
-interface HeartFilledProps {
-	size?: number;
-	className?: string;
-	color?: string;
-}
+import { HeartFilledProps } from "../../types/hearts";
 
 const HeartFilled: React.FC<HeartFilledProps> = ({
 	size = 24,
