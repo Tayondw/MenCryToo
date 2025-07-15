@@ -14,15 +14,7 @@ import {
 	Tag,
 	AlertTriangle,
 } from "lucide-react";
-
-interface ContactErrors {
-	firstName?: string;
-	lastName?: string;
-	email?: string;
-	phone?: string;
-	subject?: string;
-	message?: string;
-}
+import { ContactErrors } from "../../types/errors";
 
 const Contact: React.FC = () => {
 	const errors = (useActionData() as ContactErrors) || {};
