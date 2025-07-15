@@ -1,21 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { X, Heart, Users, Loader } from "lucide-react";
-
-interface PostsLikedUser {
-	id: number;
-	username: string;
-	firstName: string;
-	lastName: string;
-	profileImage: string;
-}
-
-interface PostsLikesModalProps {
-	isOpen: boolean;
-	onClose: () => void;
-	postId: number;
-	initialCount?: number;
-}
+import { PostsLikedUser, PostsLikesModalProps } from "../../../types/likes";
 
 const PostsLikesModal: React.FC<PostsLikesModalProps> = ({
 	isOpen,
