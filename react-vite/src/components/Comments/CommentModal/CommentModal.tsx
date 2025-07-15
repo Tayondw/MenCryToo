@@ -1,4 +1,3 @@
-// Enhanced CommentModal with proper page refresh logic
 import React, {
 	useState,
 	useEffect,
@@ -151,9 +150,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 			finalCommentCountRef.current = newCount;
 
 			if (onCommentChange) {
-				console.log(
-					`Notifying parent: ${changeType} comment, new count: ${newCount}`,
-				);
 				onCommentChange(changeType, newCount);
 			}
 		},
@@ -176,7 +172,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 		// Call parent's onCommentChange one final time if there were changes
 		if (hasChangedRef.current && onCommentChange) {
 			const finalCount = finalCommentCountRef.current;
-			console.log(`Final comment count on close: ${finalCount}`);
 			onCommentChange(
 				finalCount > initialCommentCountRef.current ? "add" : "delete",
 				finalCount,
@@ -204,13 +199,11 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 				navigate(redirectOnClose);
 			} else if (shouldRefreshPage()) {
 				// Force page refresh to update comment counts
-				console.log("Refreshing page to update comment counts");
 				window.location.href = window.location.href;
 			}
 		}, 100);
 	}, [onClose, onCommentChange, shouldRefreshPage, navigate, redirectOnClose]);
 
-	// Rest of your existing useEffect and handler code...
 	useEffect(() => {
 		if (commentsData && commentsData.length > 0) {
 			const likeStatesMap = new Map();
@@ -777,7 +770,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 	const filteredComments = processedComments.length;
 	const shouldShowLoading = isLoading && !hasInitialized;
 
-	// Rest of your JSX remains the same...
 	return (
 		<>
 			<div
@@ -967,7 +959,6 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 										toggleShowAllReplies={toggleShowAllReplies}
 										onEdit={handleEditComment}
 										onDelete={handleDeleteComment}
-										// Like handlers
 										onLikeToggle={handleLikeToggle}
 										onShowLikes={handleShowLikes}
 									/>
