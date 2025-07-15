@@ -1,4 +1,6 @@
 export * from "./comments";
+import { Group } from "./groups";
+import { Event } from "./events";
 
 // User types
 export interface User {
@@ -34,33 +36,6 @@ export interface Post {
 	createdAt: string;
 	updatedAt: string;
 	user: User;
-}
-
-export interface Group {
-	id: number;
-	name: string;
-	about: string;
-	image: string;
-	city: string;
-	state: string;
-	numMembers: number;
-	events: Event[];
-	type: string;
-	organizerId: number;
-}
-
-export interface Event {
-	id: number;
-	name: string;
-	description: string;
-	image: string;
-	numAttendees: number;
-	capacity: number;
-	type: string;
-	startDate: string;
-	endDate: string;
-	venueInfo: Venue;
-	groupInfo: Group;
 }
 
 export interface Venue {
