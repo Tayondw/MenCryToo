@@ -16,25 +16,16 @@ import {
 	Plus,
 	X,
 } from "lucide-react";
-import { RootState, Event, Group } from "../../types";
-
-interface EventsData {
-	events: Event[];
-}
-
-interface FilterOptions {
-	searchTerm: string;
-	location: string;
-	type: string;
-	timeFilter: "all" | "upcoming" | "past";
-	sortBy: "date" | "name" | "attendees" | "capacity";
-}
+import { RootState } from "../../types";
+import { Group } from "../../types/groups";
+import { Event, EventsData } from "../../types/events";
+import { EventFilterOptions } from "../../types/filters";
 
 const Events: React.FC = () => {
 	const { allEvents } = useLoaderData() as { allEvents: EventsData };
 	const sessionUser = useSelector((state: RootState) => state.session.user);
 
-	const [filters, setFilters] = useState<FilterOptions>({
+	const [filters, setFilters] = useState<EventFilterOptions>({
 		searchTerm: "",
 		location: "",
 		type: "",
@@ -399,7 +390,7 @@ const Events: React.FC = () => {
 		);
 	};
 
-	// Group selection modal - now properly shows organizer vs member groups
+	// Group selection modal
 	const GroupSelectionModal: React.FC = () => (
 		<div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
 			<div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
@@ -676,7 +667,7 @@ const Events: React.FC = () => {
 								onChange={(e) =>
 									setFilters((prev) => ({
 										...prev,
-										timeFilter: e.target.value as FilterOptions["timeFilter"],
+										timeFilter: e.target.value as EventFilterOptions["timeFilter"],
 									}))
 								}
 								className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
@@ -697,7 +688,7 @@ const Events: React.FC = () => {
 								onChange={(e) =>
 									setFilters((prev) => ({
 										...prev,
-										sortBy: e.target.value as FilterOptions["sortBy"],
+										sortBy: e.target.value as EventFilterOptions["sortBy"],
 									}))
 								}
 								className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
