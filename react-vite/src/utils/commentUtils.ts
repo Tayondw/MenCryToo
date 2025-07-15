@@ -36,8 +36,6 @@ export function transformLegacyComment(
 	oldComment: LegacyCommentData,
 	options: CommentTransformOptions = {},
 ): Comment {
-	console.log("Transforming legacy comment:", oldComment);
-
 	// If the comment already has enhanced commenter data, use it
 	if (oldComment.commenter) {
 		return {
@@ -124,7 +122,6 @@ export function transformLegacyComment(
 		replies: [],
 	};
 
-	console.log("Transformed comment:", transformedComment);
 	return transformedComment;
 }
 
@@ -134,8 +131,6 @@ export function transformLegacyComment(
 export function organizeCommentsIntoThreads(
 	flatComments: Comment[],
 ): Comment[] {
-	console.log("Organizing comments into threads:", flatComments);
-
 	const commentMap = new Map<number, Comment>();
 	const rootComments: Comment[] = [];
 
@@ -189,7 +184,6 @@ export function organizeCommentsIntoThreads(
 
 	rootComments.forEach(sortRepliesRecursively);
 
-	console.log("Organized into threads:", rootComments);
 	return rootComments;
 }
 
