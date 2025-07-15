@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import HeartFilled from "../../HeartsFilled";
-
-interface PostsLikeButtonProps {
-	postId: number;
-	initialLikeCount: number;
-	initialIsLiked?: boolean;
-	onLikeToggle?: (postId: number, isLiked: boolean, newCount: number) => void;
-	onLikesClick?: (postId: number) => void;
-	className?: string;
-	showCount?: boolean;
-	size?: number;
-	disabled?: boolean;
-}
+import { PostsLikeButtonProps } from "../../../types/likes";
 
 const PostsLikeButton: React.FC<PostsLikeButtonProps> = ({
 	postId,
