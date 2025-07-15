@@ -13,37 +13,14 @@ import {
 	ArrowLeft
 } from "lucide-react";
 import { RootState } from "../../types";
-
-interface Group {
-	id: number;
-	name: string;
-	about: string;
-	image: string;
-	city: string;
-	state: string;
-	numMembers: number;
-	numEvents: number;
-	// events: Event[];
-	type: string;
-	organizerId?: number;
-}
-
-interface GroupsData {
-	groups: Group[];
-}
-
-interface FilterOptions {
-	searchTerm: string;
-	location: string;
-	type: string;
-	sortBy: "name" | "members" | "events" | "recent";
-}
+import { Group, GroupsData } from "../../types/groups";
+import { GroupFilterOptions } from "../../types/filters";
 
 const Groups: React.FC = () => {
 	const { allGroups } = useLoaderData() as { allGroups: GroupsData };
 	const sessionUser = useSelector((state: RootState) => state.session.user);
 
-	const [filters, setFilters] = useState<FilterOptions>({
+	const [filters, setFilters] = useState<GroupFilterOptions>({
 		searchTerm: "",
 		location: "",
 		type: "",
@@ -321,7 +298,7 @@ const Groups: React.FC = () => {
 								onChange={(e) =>
 									setFilters((prev) => ({
 										...prev,
-										sortBy: e.target.value as FilterOptions["sortBy"],
+										sortBy: e.target.value as GroupFilterOptions["sortBy"],
 									}))
 								}
 								className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
