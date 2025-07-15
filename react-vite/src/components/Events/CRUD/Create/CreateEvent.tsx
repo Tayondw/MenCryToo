@@ -20,26 +20,11 @@ import {
 	CheckCircle,
 } from "lucide-react";
 import { RootState } from "../../../../types";
-
-interface FormErrors {
-	name?: string;
-	description?: string;
-	type?: string;
-	capacity?: string;
-	startDate?: string;
-	endDate?: string;
-	image?: string;
-}
-
-interface GroupDetails {
-	id: number;
-	name: string;
-	image: string;
-	organizerId: number;
-}
+import { EventFormErrors } from "../../../../types/errors";
+import { GroupDetails } from "../../../../types/groups";
 
 const CreateEvent: React.FC = () => {
-	const errors = useActionData() as FormErrors;
+	const errors = useActionData() as EventFormErrors;
 	const sessionUser = useSelector((state: RootState) => state.session.user);
 	const navigate = useNavigate();
 	const navigation = useNavigation();
