@@ -113,7 +113,7 @@ export const useComments = (
 			if (redirectOnClose) {
 				navigate(redirectOnClose);
 			} else {
-				window.location.href = window.location.href;
+				window.location.reload();
 			}
 		}, refreshDelay);
 	}, [navigate, redirectOnClose, refreshDelay]);
