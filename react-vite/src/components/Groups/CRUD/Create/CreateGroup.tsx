@@ -20,19 +20,10 @@ import {
 	AlertCircle,
 } from "lucide-react";
 import { RootState } from "../../../../types";
-
-interface FormErrors {
-	name?: string;
-	about?: string;
-	type?: string;
-	city?: string;
-	state?: string;
-	image?: string;
-	server?: string;
-}
+import { GroupFormErrors } from "../../../../types/errors";
 
 const CreateGroup: React.FC = () => {
-	const errors = useActionData() as { errors?: FormErrors } | FormErrors | null;
+	const errors = useActionData() as { errors?: GroupFormErrors } | GroupFormErrors | null;
 	const sessionUser = useSelector((state: RootState) => state.session.user);
 	const navigate = useNavigate();
 	const navigation = useNavigation();
@@ -60,7 +51,7 @@ const CreateGroup: React.FC = () => {
 			return errors.errors;
 		}
 		// Direct FormErrors object
-		return errors as FormErrors;
+		return errors as GroupFormErrors;
 	}, [errors]);
 
 	const isSubmitting = navigation.state === "submitting";
