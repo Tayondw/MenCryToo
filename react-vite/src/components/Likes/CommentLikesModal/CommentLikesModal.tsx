@@ -1,21 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { X, Heart, Users, Loader, MessageCircle } from "lucide-react";
-
-interface LikedUser {
-	id: number;
-	username: string;
-	firstName: string;
-	lastName: string;
-	profileImage: string;
-}
-
-interface CommentLikesModalProps {
-	isOpen: boolean;
-	onClose: () => void;
-	commentId: number;
-	initialCount?: number;
-}
+import { CommentLikesModalProps, LikedUser } from "../../../types/likes";
 
 const CommentLikesModal: React.FC<CommentLikesModalProps> = ({
 	isOpen,
