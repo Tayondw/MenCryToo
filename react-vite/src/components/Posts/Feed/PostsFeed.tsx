@@ -113,8 +113,8 @@ const PostsFeed: React.FC = () => {
 	// Add state to track comment counts for all posts
 	const [postCommentCounts, setPostCommentCounts] = useState<
 		Map<number, number>
-            >(new Map());
-      
+	>(new Map());
+
 	// Get current tab from URL or default to "all"
 	const activeTab =
 		(searchParams.get("tab") as "all" | "similar") ||
@@ -246,20 +246,12 @@ const PostsFeed: React.FC = () => {
 
 	const handleCommentClick = useCallback(
 		async (postId: number, post: PostWithComments) => {
-			console.log("Opening comment modal for post:", postId);
-
 			// Callback to update comment count with automatic refresh detection
 			const handleCommentsChange = (postId: number, newCount: number) => {
-				console.log(`Comments changed for post ${postId}: ${newCount}`);
 				setPostCommentCounts((prev) => {
 					const newMap = new Map(prev);
-					const oldCount = newMap.get(postId) || 0;
-					newMap.set(postId, newCount);
 
-					// If count changed significantly, we might want to force refresh
-					if (Math.abs(newCount - oldCount) > 0) {
-						console.log("Significant comment count change detected");
-					}
+					newMap.set(postId, newCount);
 
 					return newMap;
 				});
@@ -288,7 +280,7 @@ const PostsFeed: React.FC = () => {
 				}));
 			}
 
-			// Open modal with enhanced change tracking
+			// Open modal with change tracking
 			openCommentModal(postId, initialComments, handleCommentsChange);
 		},
 		[openCommentModal],
@@ -720,19 +712,13 @@ const PostCard: React.FC<PostCardProps> = ({
 	handleLikesClick,
 	likeState,
 	setLikeState,
-	currentCommentCount
+	currentCommentCount,
 }) => {
 	// Cast post to PostWithComments type for this component
 	const postWithComments = post as PostWithComments;
 
 	// Comment button with better logging
 	const handleCommentButtonClick = () => {
-		console.log(
-			"Comment button clicked for post:",
-			post.id,
-			"Post data:",
-			postWithComments,
-		);
 		handleCommentClick(post.id, postWithComments);
 	};
 
