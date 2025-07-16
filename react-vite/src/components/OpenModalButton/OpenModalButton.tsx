@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-
-interface OpenModalButtonProps {
-	buttonText: string;
-	modalComponent?: React.ReactElement;
-	onButtonClick?: () => void;
-	className?: string;
-	style?: React.CSSProperties;
-	children?: React.ReactNode;
-}
+import { OpenModalButtonProps } from "../../types";
 
 const OpenModalButton: React.FC<OpenModalButtonProps> = ({
 	buttonText,
