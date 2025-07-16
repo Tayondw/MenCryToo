@@ -95,27 +95,37 @@ export const eventDetailsLoader = async ({ params }: LoaderFunctionArgs) => {
 export const updateEventLoader = async ({ params }: LoaderFunctionArgs) => {
 	const { groupId, eventId } = params;
 
+	console.log("UpdateEventLoader called with:", { groupId, eventId });
+
 	if (!groupId || !eventId) {
+		console.error("Missing required params:", { groupId, eventId });
 		throw new Response("Group ID and Event ID are required", { status: 400 });
 	}
 
 	try {
 		// First check authentication
+		console.log("Checking authentication...");
 		const authResponse = await fetch("/api/auth/", {
 			headers: { "Cache-Control": "max-age=30" },
 		});
 
 		if (!authResponse.ok) {
+			console.log("Auth failed, redirecting to login");
 			return redirect("/login");
 		}
 
 		const authData = await authResponse.json();
 		if (!authData.authenticated || !authData.user) {
+			console.log("User not authenticated, redirecting to login");
 			return redirect("/login");
 		}
 
+		console.log("User authenticated:", authData.user.id);
+
 		// Then load both event and group data
 		const timestamp = Date.now();
+		console.log("Fetching event and group data...");
+
 		const [eventResponse, groupResponse] = await Promise.all([
 			fetch(`/api/events/${eventId}?_t=${timestamp}`, {
 				credentials: "include",
@@ -136,17 +146,23 @@ export const updateEventLoader = async ({ params }: LoaderFunctionArgs) => {
 		]);
 
 		if (!eventResponse.ok) {
+			console.error("Event fetch failed:", eventResponse.status);
 			if (eventResponse.status === 404) {
-				throw new Response("Event not found", { status: 404 });
+				// Instead of throwing, redirect to events page with error message
+				return redirect("/events?error=event-not-found");
 			}
-			throw new Error(`Failed to fetch event: ${eventResponse.status}`);
+			// For other errors, redirect to the event page
+			return redirect(`/events/${eventId}?error=fetch-failed`);
 		}
 
 		if (!groupResponse.ok) {
+			console.error("Group fetch failed:", groupResponse.status);
 			if (groupResponse.status === 404) {
-				throw new Response("Group not found", { status: 404 });
+				// Redirect to groups page with error message
+				return redirect("/groups?error=group-not-found");
 			}
-			throw new Error(`Failed to fetch group: ${groupResponse.status}`);
+			// For other errors, redirect to the group page
+			return redirect(`/groups/${groupId}?error=fetch-failed`);
 		}
 
 		const [eventDetails, groupDetails] = await Promise.all([
@@ -154,12 +170,21 @@ export const updateEventLoader = async ({ params }: LoaderFunctionArgs) => {
 			groupResponse.json(),
 		]);
 
+		console.log("Data loaded successfully:", {
+			eventId: eventDetails.id,
+			groupId: groupDetails.id,
+			organizerId: groupDetails.organizerId,
+			userId: authData.user.id,
+		});
+
 		// Check if user is the group organizer (who can edit events)
 		if (authData.user.id !== groupDetails.organizerId) {
-			throw new Response("Unauthorized - You must be the group organizer", {
-				status: 403,
-			});
+			console.error("User not authorized - not group organizer");
+			// Instead of throwing, redirect back to event with error
+			return redirect(`/events/${eventId}?error=unauthorized`);
 		}
+
+		console.log("Authorization check passed");
 
 		// Return both event and group data in the format expected by UpdateEvent
 		return {
@@ -169,10 +194,22 @@ export const updateEventLoader = async ({ params }: LoaderFunctionArgs) => {
 		};
 	} catch (error) {
 		console.error("Error loading event for update:", error);
+
+		// Handle different types of errors more gracefully
 		if (error instanceof Response) {
+			// Re-throw Response errors as they're handled by React Router
 			throw error;
 		}
-		throw new Response("Failed to load event", { status: 500 });
+
+		if (error instanceof TypeError && error.message.includes("fetch")) {
+			// Network error - redirect with error message
+			console.error("Network error detected");
+			return redirect(`/events/${eventId}?error=network`);
+		}
+
+		// For any other error, redirect to the event page with a generic error
+		console.error("Unknown error:", error);
+		return redirect(`/events/${eventId}?error=unknown`);
 	}
 };
 
@@ -371,7 +408,7 @@ export const eventFormAction = async ({ request }: { request: Request }) => {
 				}
 
 				const response = await fetch(
-					`/api/groups/${groupId}/events/${eventId}`,
+					`/api/groups/${groupId}/events/${eventId}/edit`,
 					{
 						method: "POST",
 						credentials: "include",
