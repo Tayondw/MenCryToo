@@ -4,47 +4,11 @@ import { commentApi } from "../services/commentApi";
 import type {
 	Comment,
 	CommentFormData,
-	CommentModalState,
+      CommentModalState,
+      UseCommentsOptions,
+      UseCommentsReturn
 } from "../types/comments";
 
-interface UseCommentsOptions {
-	postId?: number;
-	initialComments?: Comment[];
-	autoLoad?: boolean;
-	forceRefreshOnClose?: boolean;
-	redirectOnClose?: string;
-	refreshDelay?: number;
-}
-
-interface UseCommentsReturn {
-	// State
-	modal: CommentModalState;
-	comments: Comment[];
-	isLoading: boolean;
-	error: string | null;
-
-	// Actions
-	openModal: (
-		postId: number,
-		initialComments?: Comment[],
-		onCommentsChange?: (postId: number, newCount: number) => void,
-	) => void;
-	closeModal: () => void;
-	addComment: (formData: CommentFormData) => Promise<Comment>;
-	editComment: (commentId: number, newText: string) => Promise<void>;
-	deleteComment: (commentId: number) => Promise<void>;
-	loadComments: (postId: number, page?: number) => Promise<Comment[]>;
-	refreshComments: () => Promise<void>;
-
-	// Utilities
-	getCommentCount: () => number;
-	getCommentById: (id: number) => Comment | undefined;
-	clearError: () => void;
-
-	// Refresh capabilities
-	forceRefresh: () => void;
-	hasChanges: boolean;
-}
 
 export const useComments = (
 	options: UseCommentsOptions = {},

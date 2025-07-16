@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, X, AtSign } from "lucide-react";
 import { validateComment } from "../../../utils/commentUtils";
-import type { CommentFormProps } from "../../../types/comments";
+import type { CommentFormProps } from "../../../types";
 
 const CommentForm: React.FC<CommentFormProps> = ({
 	postId,

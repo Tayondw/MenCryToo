@@ -1,18 +1,7 @@
 import React, { useState, ReactNode } from "react";
 import { ModalContext } from "../hooks/modalContext";
+import { ModalProviderProps } from "../types";
 import "./Modal.css";
-
-// Define the shape of the modal context
-export interface ModalContextType {
-	modalContent: ReactNode | null; // React component to render inside modal
-	setModalContent: (content: ReactNode | null) => void; // function to set the React component to render inside modal
-	closeModal: () => void; // function to close the modal
-}
-
-// Props interface for ModalProvider component
-interface ModalProviderProps {
-	children: ReactNode;
-}
 
 export const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
 	// State to track what content should be displayed in the modal

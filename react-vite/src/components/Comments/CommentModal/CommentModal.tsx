@@ -22,46 +22,7 @@ import { searchComments } from "../../../utils/commentUtils";
 import CommentThread from "../CommentThread";
 import CommentLikesModal from "../../Likes/CommentLikesModal";
 import { commentApi } from "../../../services/commentApi";
-import type { Comment, CommentModalProps } from "../../../types/comments";
-import type { RootState } from "../../../types";
-
-interface SessionUser {
-	id: number;
-	username: string;
-	firstName?: string;
-	lastName?: string;
-	profileImage: string;
-}
-
-interface PostComment {
-	id: number;
-	userId: number;
-	postId: number;
-	comment: string;
-	username: string;
-	parentId: number | null;
-	created_at: string;
-	updated_at: string;
-	likes?: number;
-	isLiked?: boolean;
-	commenter?: {
-		id: number;
-		username: string;
-		firstName: string;
-		lastName: string;
-		profileImage: string;
-	};
-}
-
-// Enhanced CommentModalProps with better callback handling
-interface EnhancedCommentModalProps extends CommentModalProps {
-	// Callback to notify parent of comment changes
-	onCommentChange?: (changeType: "add" | "delete", newCount: number) => void;
-	// Optional: Force page refresh on close
-	forceRefreshOnClose?: boolean;
-	// Optional: Custom close redirect
-	redirectOnClose?: string;
-}
+import type { RootState, SessionUser, PostComment, Comment, EnhancedCommentModalProps } from "../../../types";
 
 const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 	isOpen,

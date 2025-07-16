@@ -1,27 +1,6 @@
 import { useCallback, useRef, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
-interface CommentRefreshOptions {
-	// Force refresh on any comment change
-	forceRefresh?: boolean;
-	// Custom redirect path on close
-	redirectPath?: string;
-	// Delay before refresh (ms)
-	refreshDelay?: number;
-	// Callback for when refresh happens
-	onRefresh?: () => void;
-}
-
-interface CommentRefreshReturn {
-	// Function to call when comments change
-	onCommentChange: (changeType: "add" | "delete", newCount: number) => void;
-	// Function to call when modal closes (handles refresh logic)
-	onModalClose: () => void;
-	// Whether comments have changed
-	hasChanged: boolean;
-	// Current comment count
-	currentCount: number;
-}
+import { CommentRefreshOptions, CommentRefreshReturn } from "../types";
 
 export const useCommentRefresh = (
 	options: CommentRefreshOptions = {},
