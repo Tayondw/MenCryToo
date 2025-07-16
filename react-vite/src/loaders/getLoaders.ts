@@ -1,12 +1,5 @@
 import { json } from "react-router-dom";
-import { Group, Event, Tag } from "../types";
-
-interface LoaderData {
-	allGroups: Group[];
-	allEvents: Event[];
-	allTags: Tag[];
-	error?: string;
-}
+import { LoaderData } from "../types/home";
 
 export const getLoader = async (): Promise<Response> => {
 	const urls = [`/api/groups`, `/api/events`, `/api/tags`];

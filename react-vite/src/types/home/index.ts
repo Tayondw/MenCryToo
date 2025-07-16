@@ -1,11 +1,15 @@
 import { Group } from "../groups";
 import { Event } from "../events";
-import { User, Tag } from "..";
+import { User } from "../users";
+import { Tag } from "../tags";
 
-export interface HomeLoaderData {
+export interface LoaderData {
 	allGroups: Group[];
 	allEvents: Event[];
 	allTags: Tag[];
-	user: User | null;
 	error?: string;
+}
+
+export interface HomeLoaderData extends LoaderData {
+	user: User | null;
 }

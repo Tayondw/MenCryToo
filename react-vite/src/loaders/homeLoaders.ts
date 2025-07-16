@@ -1,13 +1,5 @@
 import { json } from "react-router-dom";
-import { Group, Event, Tag, User } from "../types";
-
-interface HomeLoaderData {
-	allGroups: Group[];
-	allEvents: Event[];
-	allTags: Tag[];
-	user: User | null;
-	error?: string;
-}
+import { HomeLoaderData } from "../types/home";
 
 export const homeLoader = async (): Promise<Response> => {
 	try {
