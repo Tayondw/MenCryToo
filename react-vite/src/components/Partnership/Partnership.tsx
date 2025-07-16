@@ -14,16 +14,7 @@ import {
 	Heart,
 	Shield,
 } from "lucide-react";
-
-interface PartnershipErrors {
-	firstName?: string;
-	lastName?: string;
-	email?: string;
-	phone?: string;
-	subject?: string;
-	message?: string;
-	backendError?: string;
-}
+import { PartnershipErrors } from "../../types";
 
 const Partnership: React.FC = () => {
 	const errors = (useActionData() as PartnershipErrors) || {};

@@ -1,5 +1,5 @@
 import React from "react";
-import { HeartFilledProps } from "../../types/hearts";
+import { HeartFilledProps } from "../../types";
 
 const HeartFilled: React.FC<HeartFilledProps> = ({
 	size = 24,
