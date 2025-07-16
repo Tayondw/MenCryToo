@@ -55,6 +55,8 @@ import {
 	groupDetailsLoader,
 	groupAction,
 	groupFormAction,
+	updateGroupLoader,
+	createEventLoader,
 } from "./loaders/group/groupLoaders";
 import {
 	eventsLoader,
@@ -216,7 +218,7 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "groups/:groupId/edit",
-				loader: protectedRouteLoader,
+				loader: updateGroupLoader,
 				element: (
 					<SuspenseWrapper>
 						<PrivateRoute>
@@ -228,7 +230,7 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "groups/:groupId/events/new",
-				loader: protectedRouteLoader,
+				loader: createEventLoader,
 				element: (
 					<SuspenseWrapper>
 						<PrivateRoute>
