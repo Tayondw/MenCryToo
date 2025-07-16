@@ -1,9 +1,5 @@
 import React from "react";
-
-interface LogoProps {
-	className?: string;
-	size?: "sm" | "md" | "lg";
-}
+import { LogoProps } from "../../types/navigation";
 
 const Logo: React.FC<LogoProps> = ({ className = "", size = "md" }) => {
 	const sizeClasses = {

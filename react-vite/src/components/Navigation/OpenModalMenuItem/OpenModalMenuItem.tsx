@@ -1,12 +1,6 @@
 import React from "react";
 import { useModal } from "../../../hooks/useModal";
-
-interface OpenModalMenuItemProps {
-	itemText: string;
-	onItemClick?: () => void;
-	modalComponent: React.ReactElement;
-	className?: string;
-}
+import { OpenModalMenuItemProps } from "../../../types";
 
 const OpenModalMenuItem: React.FC<OpenModalMenuItemProps> = ({
 	itemText,
