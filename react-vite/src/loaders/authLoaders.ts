@@ -1,5 +1,5 @@
 import { redirect, json } from "react-router-dom";
-import { User } from "../types";
+import { User } from "../types/users";
 
 // Loader to check authentication and get current user
 export const authLoader = async (): Promise<
@@ -87,16 +87,13 @@ export const enhancedProtectedRouteLoader = async (): Promise<
 		});
 
 		if (!response.ok) {
-			console.log(`Auth failed with status: ${response.status}`);
 			return redirect("/login");
 		}
 
 		const authData = await response.json();
-		console.log("Auth data received:", authData);
 
 		// Handle the new response structure
 		if (!authData.authenticated || !authData.user) {
-			console.log("User not authenticated or missing user data");
 			return redirect("/login");
 		}
 
