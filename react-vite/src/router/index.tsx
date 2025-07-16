@@ -3,6 +3,7 @@ import { lazy } from "react";
 import Layout from "./Layout";
 import PrivateRoute from "../components/PrivateRoute";
 import SuspenseWrapper from "../components/SuspenseWrapper/SuspenseWrapper";
+import { RouteErrorBoundary } from "../components/RouteErrorBoundary/RouteErrorBoundary";
 
 // Lazy loading with better chunking
 const LoginFormPage = lazy(() => import("../components/LoginFormPage"));
@@ -79,15 +80,17 @@ export const router = createBrowserRouter([
 	{
 		path: "/",
 		element: <Layout />,
+		errorElement: <RouteErrorBoundary />, // Add error boundary to root
 		children: [
 			{
-				index: true, // Use index route for home
-				loader: homeLoader, // This handles auth gracefully now
+				index: true,
+				loader: homeLoader,
 				element: (
 					<SuspenseWrapper>
 						<Home />
 					</SuspenseWrapper>
 				),
+				errorElement: <RouteErrorBoundary />,
 			},
 			{
 				path: "login",
@@ -97,6 +100,7 @@ export const router = createBrowserRouter([
 					</SuspenseWrapper>
 				),
 				action: loginAction,
+				errorElement: <RouteErrorBoundary />,
 			},
 			{
 				path: "signup",
@@ -106,6 +110,7 @@ export const router = createBrowserRouter([
 					</SuspenseWrapper>
 				),
 				action: signupAction,
+				errorElement: <RouteErrorBoundary />,
 			},
 			// PUBLIC ROUTES (no auth required)
 			{
@@ -116,6 +121,7 @@ export const router = createBrowserRouter([
 						<Groups />
 					</SuspenseWrapper>
 				),
+				errorElement: <RouteErrorBoundary />,
 			},
 			{
 				path: "groups/:groupId",
@@ -126,6 +132,7 @@ export const router = createBrowserRouter([
 					</SuspenseWrapper>
 				),
 				action: groupAction,
+				errorElement: <RouteErrorBoundary />,
 			},
 			{
 				path: "events",
@@ -135,6 +142,7 @@ export const router = createBrowserRouter([
 						<Events />
 					</SuspenseWrapper>
 				),
+				errorElement: <RouteErrorBoundary />,
 			},
 			{
 				path: "events/:eventId",
@@ -145,6 +153,7 @@ export const router = createBrowserRouter([
 					</SuspenseWrapper>
 				),
 				action: eventAction,
+				errorElement: <RouteErrorBoundary />,
 			},
 			{
 				path: "users/:userId",
@@ -154,6 +163,7 @@ export const router = createBrowserRouter([
 						<ProfileDetails />
 					</SuspenseWrapper>
 				),
+				errorElement: <RouteErrorBoundary />,
 			},
 			// PROTECTED ROUTES (require auth)
 			{
@@ -167,6 +177,7 @@ export const router = createBrowserRouter([
 					</SuspenseWrapper>
 				),
 				action: profileAction,
+				errorElement: <RouteErrorBoundary />,
 			},
 			{
 				path: "posts-feed",
@@ -252,6 +263,7 @@ export const router = createBrowserRouter([
 					</SuspenseWrapper>
 				),
 				action: eventFormAction,
+				errorElement: <RouteErrorBoundary />,
 			},
 			{
 				path: "users/:userId/profile/update",
@@ -338,6 +350,7 @@ export const router = createBrowserRouter([
 				</SuspenseWrapper>
 			</Layout>
 		),
+		errorElement: <RouteErrorBoundary />,
 	},
 ]);
 
