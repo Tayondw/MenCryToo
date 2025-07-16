@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Form, useNavigation, useActionData } from "react-router-dom";
 import { X, Plus, Check } from "lucide-react";
-import { User } from "../../../types";
+import { AddTagsProps } from "../../../types";
 import "./AddTags.css";
-
-interface AddTagsProps {
-	user: User;
-	onClose: () => void;
-}
 
 const AddTags: React.FC<AddTagsProps> = ({ user, onClose }) => {
 	const [selectedTags, setSelectedTags] = useState<string[]>([]);
