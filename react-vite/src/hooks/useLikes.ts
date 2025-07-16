@@ -1,22 +1,5 @@
 import { useState, useCallback } from "react";
-
-interface LikeState {
-	isLiked: boolean;
-	likeCount: number;
-	isLoading: boolean;
-}
-
-interface UseLikesReturn {
-	likeStates: Map<number, LikeState>;
-	toggleLike: (
-		postId: number,
-		currentIsLiked: boolean,
-		currentCount: number,
-	) => Promise<void>;
-	setLikeState: (postId: number, isLiked: boolean, count: number) => void;
-	getLikeState: (postId: number) => LikeState | null;
-	fetchLikeStatus: (postId: number) => Promise<void>;
-}
+import { LikeState, UseLikesReturn, UseLikesModalReturn } from "../types/likes";
 
 // Custom hook for managing likes across multiple posts
 export const useLikes = (): UseLikesReturn => {
@@ -142,14 +125,6 @@ export const useLikes = (): UseLikesReturn => {
 		fetchLikeStatus,
 	};
 };
-
-// Hook for managing the likes modal
-interface UseLikesModalReturn {
-	isOpen: boolean;
-	postId: number | null;
-	openModal: (postId: number) => void;
-	closeModal: () => void;
-}
 
 export const useLikesModal = (): UseLikesModalReturn => {
 	const [isOpen, setIsOpen] = useState(false);

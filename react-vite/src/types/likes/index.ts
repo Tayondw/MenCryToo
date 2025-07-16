@@ -1,3 +1,29 @@
+export interface LikeState {
+      isLiked: boolean;
+      likeCount: number;
+      isLoading: boolean;
+}
+
+export interface UseLikesReturn {
+      likeStates: Map<number, LikeState>;
+      toggleLike: (
+            postId: number,
+            currentIsLiked: boolean,
+            currentCount: number,
+      ) => Promise<void>;
+      setLikeState: (postId: number, isLiked: boolean, count: number) => void;
+      getLikeState: (postId: number) => LikeState | null;
+      fetchLikeStatus: (postId: number) => Promise<void>;
+}
+
+// Hook for managing the likes modal
+export interface UseLikesModalReturn {
+      isOpen: boolean;
+      postId: number | null;
+      openModal: (postId: number) => void;
+      closeModal: () => void;
+}
+
 export interface CommentLikeButtonProps {
       commentId: number;
       initialLikeCount: number;
