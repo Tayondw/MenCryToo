@@ -32,7 +32,6 @@ export const thunkLogin =
 					const authResponse = await fetch("/api/auth/");
 					if (authResponse.ok) {
 						const completeUserData = await authResponse.json();
-						console.log("Login - Complete auth data:", completeUserData);
 
 						// Extract user data from the response structure
 						if (completeUserData.authenticated && completeUserData.user) {
@@ -81,7 +80,6 @@ export const thunkSignup =
 					const authResponse = await fetch("/api/auth/");
 					if (authResponse.ok) {
 						const completeUserData = await authResponse.json();
-						console.log("Signup - Complete auth data:", completeUserData);
 
 						// Extract user data from the response structure
 						if (completeUserData.authenticated && completeUserData.user) {
@@ -137,7 +135,6 @@ export const thunkAuthenticate = (): AppThunk => async (dispatch) => {
 
 		if (response.ok) {
 			const data = await response.json();
-			console.log("thunkAuthenticate - Raw response:", data);
 
 			if (data.errors) {
 				dispatch(removeUser());
@@ -146,35 +143,20 @@ export const thunkAuthenticate = (): AppThunk => async (dispatch) => {
 
 			// Handle the new response structure {user: userData, authenticated: true}
 			if (data.authenticated && data.user) {
-				console.log(
-					"thunkAuthenticate - Extracting user from wrapped response:",
-					data.user,
-				);
 				dispatch(setUser(data.user)); // Extract ONLY the user object
 				return data.user;
 			}
 			// Handle legacy case where response might already be the user object
 			else if (data.id && data.username) {
-				console.log(
-					"thunkAuthenticate - Response is already user object:",
-					data,
-				);
 				dispatch(setUser(data));
 				return data;
 			}
 			// Handle case where user is null/undefined but no errors
 			else {
-				console.log(
-					"thunkAuthenticate - No user data in response, removing user",
-				);
 				dispatch(removeUser());
 				return null;
 			}
 		} else {
-			console.log(
-				"thunkAuthenticate - Response not ok, status:",
-				response.status,
-			);
 			dispatch(removeUser());
 			return null;
 		}
@@ -201,17 +183,11 @@ function sessionReducer(
 ): SessionState {
 	switch (action.type) {
 		case SET_USER:
-			console.log("sessionReducer - Setting user:", action.payload);
-			console.log(
-				"sessionReducer - User profileImage:",
-				action.payload?.profileImage,
-			);
 			return {
 				...state,
 				user: action.payload,
 			};
 		case REMOVE_USER:
-			console.log("sessionReducer - Removing user");
 			return {
 				...state,
 				user: null,
