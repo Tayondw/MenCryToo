@@ -55,7 +55,7 @@ import {
 	groupDetailsLoader,
 	groupAction,
 	groupFormAction,
-} from "./loaders/groupLoaders";
+} from "./loaders/group/groupLoaders";
 import {
 	eventsLoader,
 	eventDetailsLoader,
