@@ -1,19 +1,10 @@
 import { ActionFunctionArgs, json, redirect } from "react-router-dom";
-
-interface FormErrors {
-	email?: string;
-	firstName?: string;
-	lastName?: string;
-	phone?: string;
-	subject?: string;
-	message?: string;
-	backendError?: string;
-}
+import { PartnershipErrors } from "../types/errors";
 
 export const partnershipActions = async ({ request }: ActionFunctionArgs) => {
 	const formData = await request.formData();
 	const intent = formData.get("intent") as string | null;
-	const errors: FormErrors = {};
+	const errors: PartnershipErrors = {};
 
 	if (intent === "create-partnership") {
 		const firstName = formData.get("firstName") as string | null;
@@ -61,7 +52,6 @@ export const partnershipActions = async ({ request }: ActionFunctionArgs) => {
 
 			if (!checkResponse.ok) {
 				const errorData = await checkResponse.json();
-				console.log("Error from backend:", errorData);
 
 				// If it's an email conflict, return that error
 				if (errorData.email) {

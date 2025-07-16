@@ -1,19 +1,10 @@
 import { ActionFunctionArgs, json, redirect } from "react-router-dom";
-
-interface FormErrors {
-	email?: string;
-	firstName?: string;
-	lastName?: string;
-	phone?: string;
-	subject?: string;
-	message?: string;
-	backendError?: string;
-}
+import { ContactErrors } from "../types/errors";
 
 export const contactActions = async ({ request }: ActionFunctionArgs) => {
 	const formData = await request.formData();
 	const intent = formData.get("intent") as string | null;
-	const errors: FormErrors = {};
+	const errors: ContactErrors = {};
 
 	if (intent === "create-contact") {
 		const firstName = formData.get("firstName") as string | null;
