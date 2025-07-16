@@ -15,17 +15,13 @@ import {
 	UserPlus,
 	Sparkles,
 } from "lucide-react";
-import { RootState, User, Tag as TagInterface } from "../../../../types";
-
-interface ProfileFeedData {
-	users_profile: User[];
-}
-
-interface FilterOptions {
-	searchTerm: string;
-	selectedTags: string[];
-	sortBy: "name" | "similarity" | "recent";
-}
+import {
+	RootState,
+	User,
+	Tag as TagInterface,
+	ProfileFeedData,
+	ProfileFilterOptions,
+} from "../../../../types";
 
 const ProfileFeed: React.FC = () => {
 	const loaderData = useLoaderData() as ProfileFeedData;
@@ -33,7 +29,7 @@ const ProfileFeed: React.FC = () => {
 
 	// ALL HOOKS MUST BE CALLED UNCONDITIONALLY AT THE TOP LEVEL
 	// State hooks
-	const [filters, setFilters] = useState<FilterOptions>({
+	const [filters, setFilters] = useState<ProfileFilterOptions>({
 		searchTerm: "",
 		selectedTags: [],
 		sortBy: "similarity",
@@ -411,7 +407,7 @@ const ProfileFeed: React.FC = () => {
 								onChange={(e) =>
 									setFilters((prev) => ({
 										...prev,
-										sortBy: e.target.value as FilterOptions["sortBy"],
+										sortBy: e.target.value as ProfileFilterOptions["sortBy"],
 									}))
 								}
 								className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"

@@ -1,14 +1,8 @@
 import React, { useEffect } from "react";
 import { Form } from "react-router-dom";
 import { X, AlertTriangle, Shield } from "lucide-react";
-import { User } from "../../../../types";
+import { DeleteProfileProps } from "../../../../types";
 import "./DeleteProfile.css";
-
-interface DeleteProfileProps {
-	user: User;
-	onClose: () => void;
-	onConfirm: () => void;
-}
 
 const DeleteProfile: React.FC<DeleteProfileProps> = ({
 	user,
@@ -83,7 +77,6 @@ const DeleteProfile: React.FC<DeleteProfileProps> = ({
 					Cancel
 				</button>
 
-				{/* Use React Router Form to leverage the router action */}
 				<Form
 					method="post"
 					onSubmit={handleSubmit}

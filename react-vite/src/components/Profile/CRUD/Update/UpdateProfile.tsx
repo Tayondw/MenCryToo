@@ -7,25 +7,12 @@ import {
 	useNavigation,
 } from "react-router-dom";
 import { Upload, Eye, EyeOff, ArrowLeft } from "lucide-react";
-import { User } from "../../../../types";
+import { User, SignupFormErrors } from "../../../../types";
 import "./UpdateProfile.css";
-
-interface FormErrors {
-	firstName?: string;
-	lastName?: string;
-	email?: string;
-	username?: string;
-	password?: string;
-	confirmPassword?: string;
-	bio?: string;
-	profileImage?: string;
-	userTags?: string;
-	server?: string;
-}
 
 const UpdateProfile: React.FC = () => {
 	const loaderData = useLoaderData() as { user: User } | null;
-	const actionData = useActionData() as { errors?: FormErrors } | null;
+	const actionData = useActionData() as { errors?: SignupFormErrors } | null;
 	const navigation = useNavigation();
 
 	const sessionUser = loaderData?.user;

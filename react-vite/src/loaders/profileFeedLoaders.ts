@@ -1,14 +1,13 @@
 import { redirect } from "react-router-dom";
-import { User, Tag, ProfilesData } from "../types";
+import { User } from "../types/users";
+import { Tag } from "../types/tags";
+import { ProfileFeedData, ProfileFeedResponse } from "../types/profile";
+import { CacheEntry } from "../types/cache";
 
 // Cache for frequently accessed data
 const cache = new Map();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-interface CacheEntry {
-	data: unknown;
-	timestamp: number;
-}
 
 function getCachedData(key: string): unknown | null {
 	const entry = cache.get(key) as CacheEntry | undefined;
@@ -36,23 +35,12 @@ export function clearCache(pattern?: string): void {
 	}
 }
 
-interface ProfileFeedResponse {
-	users_profile: User[];
-	pagination?: {
-		page: number;
-		pages: number;
-		per_page: number;
-		total: number;
-		has_next: boolean;
-		has_prev: boolean;
-	};
-}
 
 // Profile feed loader with pagination and caching
-export async function profileFeedLoader(): Promise<ProfilesData> {
+export async function profileFeedLoader(): Promise<ProfileFeedData> {
 	const cacheKey = "profile-feed-page-1";
 	const cached = getCachedData(cacheKey);
-	if (cached) return cached as ProfilesData;
+	if (cached) return cached as ProfileFeedData;
 
 	try {
 		// Use pagination and limit data

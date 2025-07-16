@@ -1,14 +1,10 @@
 import { redirect, json } from "react-router-dom";
-import { User } from "../types";
+import { User } from "../types/users";
+import { CacheEntry } from "../types/cache";
 
 // Cache for frequently accessed data
 const cache = new Map();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-interface CacheEntry {
-	data: unknown;
-	timestamp: number;
-}
 
 function getCachedData(key: string): unknown | null {
 	const entry = cache.get(key) as CacheEntry | undefined;
@@ -189,7 +185,7 @@ export async function userProfileLoader({
 	}
 }
 
-// New combined action for profile page (handles add-tags and delete-profile)
+// Profile Page Action (handles add-tags and delete-profile)
 export const profileAction = async ({ request }: { request: Request }) => {
 	const formData = await request.formData();
 	const intent = formData.get("intent");

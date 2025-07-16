@@ -27,8 +27,7 @@ import AddTags from "../Tags/AddTags";
 import LikeButton from "../Likes/PostsLikesButton";
 import LikesModal from "../Likes/PostsLikesModal";
 import CommentModal from "../Comments/CommentModal";
-import { useComments } from "../../hooks/useComments";
-import { useLikes, useLikesModal } from "../../hooks/useLikes";
+import { useComments, useLikes, useLikesModal } from "../../hooks";
 
 // Mock data for demonstration when no backend data is available
 const mockUser: User = {
@@ -104,6 +103,7 @@ const mockUser: User = {
 			city: "San Francisco",
 			state: "CA",
 			numMembers: 1250,
+			numEvents: 1,
 			type: "Support Group",
 			organizerId: 1,
 			events: [],
@@ -117,6 +117,7 @@ const mockUser: User = {
 			city: "Oakland",
 			state: "CA",
 			numMembers: 850,
+			numEvents: 5,
 			type: "Support Group",
 			organizerId: 1,
 			events: [],
