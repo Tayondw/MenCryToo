@@ -132,6 +132,139 @@ export const groupDetailsLoader = async ({ params }: LoaderFunctionArgs) => {
 	}
 };
 
+export const updateGroupLoader = async ({ params }: LoaderFunctionArgs) => {
+	const { groupId } = params;
+
+	if (!groupId) {
+		throw new Response("Group ID is required", { status: 400 });
+	}
+
+	try {
+		// First check authentication
+		const authResponse = await fetch("/api/auth/", {
+			headers: { "Cache-Control": "max-age=30" },
+		});
+
+		if (!authResponse.ok) {
+			return redirect("/login");
+		}
+
+		const authData = await authResponse.json();
+		if (!authData.authenticated || !authData.user) {
+			return redirect("/login");
+		}
+
+		// Then load group data
+		const timestamp = Date.now();
+		const groupResponse = await fetch(
+			`/api/groups/${groupId}?_t=${timestamp}`,
+			{
+				credentials: "include",
+				headers: {
+					"Cache-Control": "no-cache, no-store, must-revalidate",
+					Pragma: "no-cache",
+					Expires: "0",
+				},
+			},
+		);
+
+		if (!groupResponse.ok) {
+			if (groupResponse.status === 404) {
+				throw new Response("Group not found", { status: 404 });
+			}
+			throw new Error(`Failed to fetch group: ${groupResponse.status}`);
+		}
+
+		const groupDetails = await groupResponse.json();
+
+		// Check if user is the organizer
+		if (authData.user.id !== groupDetails.organizerId) {
+			throw new Response("Unauthorized - You must be the group organizer", {
+				status: 403,
+			});
+		}
+
+		// Return both user and group data in the format expected by UpdateGroup
+		return {
+			...groupDetails,
+			user: authData.user,
+		};
+	} catch (error) {
+		console.error("Error loading group for update:", error);
+		if (error instanceof Response) {
+			throw error;
+		}
+		throw new Response("Failed to load group", { status: 500 });
+	}
+};
+
+// New loader for Create Event route
+export const createEventLoader = async ({ params }: LoaderFunctionArgs) => {
+	const { groupId } = params;
+
+	if (!groupId) {
+		throw new Response("Group ID is required", { status: 400 });
+	}
+
+	try {
+		// First check authentication
+		const authResponse = await fetch("/api/auth/", {
+			headers: { "Cache-Control": "max-age=30" },
+		});
+
+		if (!authResponse.ok) {
+			return redirect("/login");
+		}
+
+		const authData = await authResponse.json();
+		if (!authData.authenticated || !authData.user) {
+			return redirect("/login");
+		}
+
+		// Then load group data
+		const timestamp = Date.now();
+		const groupResponse = await fetch(
+			`/api/groups/${groupId}?_t=${timestamp}`,
+			{
+				credentials: "include",
+				headers: {
+					"Cache-Control": "no-cache, no-store, must-revalidate",
+					Pragma: "no-cache",
+					Expires: "0",
+				},
+			},
+		);
+
+		if (!groupResponse.ok) {
+			if (groupResponse.status === 404) {
+				throw new Response("Group not found", { status: 404 });
+			}
+			throw new Error(`Failed to fetch group: ${groupResponse.status}`);
+		}
+
+		const groupDetails = await groupResponse.json();
+
+		// Check if user is the organizer
+		if (authData.user.id !== groupDetails.organizerId) {
+			throw new Response("Unauthorized - You must be the group organizer", {
+				status: 403,
+			});
+		}
+
+		// Return both user and group data in the format expected by CreateEvent
+		return {
+			...groupDetails,
+			user: authData.user,
+		};
+	} catch (error) {
+		console.error("Error loading group for event creation:", error);
+		if (error instanceof Response) {
+			throw error;
+		}
+		throw new Response("Failed to load group", { status: 500 });
+	}
+};
+
 // Group action with proper error handling and redirect logic
 export const groupAction = async ({ request, params }: ActionFunctionArgs) => {
 	const formData = await request.formData();
