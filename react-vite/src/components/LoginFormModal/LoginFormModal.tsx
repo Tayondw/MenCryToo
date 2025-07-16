@@ -3,19 +3,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, X, LogIn, User } from "lucide-react";
 import { thunkLogin } from "../../store/session";
-import { AppDispatch } from "../../types";
+import { AppDispatch, LoginFormModalProps, LoginErrors } from "../../types";
 import { useModal } from "../../hooks/useModal";
-
-interface LoginFormModalProps {
-	navigate?: (path: string) => void;
-	onClose?: () => void;
-}
-
-interface LoginErrors {
-	email?: string;
-	password?: string;
-	server?: string;
-}
 
 const LoginFormModal: React.FC<LoginFormModalProps> = ({
 	navigate: propNavigate,

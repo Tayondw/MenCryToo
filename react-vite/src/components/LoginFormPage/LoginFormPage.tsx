@@ -3,13 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Navigate, useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff, ArrowLeft, LogIn, User, Shield } from "lucide-react";
 import { thunkLogin } from "../../store/session";
-import { RootState, AppDispatch } from "../../types";
-
-interface LoginErrors {
-	email?: string;
-	password?: string;
-	server?: string;
-}
+import { RootState, AppDispatch, LoginErrors } from "../../types";
 
 const LoginFormPage: React.FC = () => {
 	const navigate = useNavigate();
