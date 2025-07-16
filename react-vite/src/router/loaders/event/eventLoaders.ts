@@ -95,8 +95,6 @@ export const eventDetailsLoader = async ({ params }: LoaderFunctionArgs) => {
 export const updateEventLoader = async ({ params }: LoaderFunctionArgs) => {
 	const { groupId, eventId } = params;
 
-	console.log("UpdateEventLoader called with:", { groupId, eventId });
-
 	if (!groupId || !eventId) {
 		console.error("Missing required params:", { groupId, eventId });
 		throw new Response("Group ID and Event ID are required", { status: 400 });
@@ -104,27 +102,21 @@ export const updateEventLoader = async ({ params }: LoaderFunctionArgs) => {
 
 	try {
 		// First check authentication
-		console.log("Checking authentication...");
 		const authResponse = await fetch("/api/auth/", {
 			headers: { "Cache-Control": "max-age=30" },
 		});
 
 		if (!authResponse.ok) {
-			console.log("Auth failed, redirecting to login");
 			return redirect("/login");
 		}
 
 		const authData = await authResponse.json();
 		if (!authData.authenticated || !authData.user) {
-			console.log("User not authenticated, redirecting to login");
 			return redirect("/login");
 		}
 
-		console.log("User authenticated:", authData.user.id);
-
 		// Then load both event and group data
 		const timestamp = Date.now();
-		console.log("Fetching event and group data...");
 
 		const [eventResponse, groupResponse] = await Promise.all([
 			fetch(`/api/events/${eventId}?_t=${timestamp}`, {
@@ -170,21 +162,12 @@ export const updateEventLoader = async ({ params }: LoaderFunctionArgs) => {
 			groupResponse.json(),
 		]);
 
-		console.log("Data loaded successfully:", {
-			eventId: eventDetails.id,
-			groupId: groupDetails.id,
-			organizerId: groupDetails.organizerId,
-			userId: authData.user.id,
-		});
-
 		// Check if user is the group organizer (who can edit events)
 		if (authData.user.id !== groupDetails.organizerId) {
 			console.error("User not authorized - not group organizer");
 			// Instead of throwing, redirect back to event with error
 			return redirect(`/events/${eventId}?error=unauthorized`);
 		}
-
-		console.log("Authorization check passed");
 
 		// Return both event and group data in the format expected by UpdateEvent
 		return {
