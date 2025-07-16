@@ -60,7 +60,7 @@ const EventDetails: React.FC = () => {
 	const sessionUser = useSelector((state: RootState) => state.session.user);
 	const [activeSection, setActiveSection] = useState<SectionType>("overview");
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
-	const [showOrganizerInfo, setShowOrganizerInfo] = useState(false);
+	const [showOrganizerInfo, setShowOrganizerInfo] = useState(false); // eslint-disable-line @typescript-eslint/no-unused-vars
 
 	useEffect(() => {
 		if (!eventDetails?.id) {
@@ -133,6 +133,34 @@ const EventDetails: React.FC = () => {
 				eventId: eventDetails.id,
 			},
 		});
+	};
+
+	const handleEditClick = () => {
+		const editPath = `/groups/${eventDetails.groupId}/events/${eventDetails.id}/edit`;
+
+		// Check if we have all required data
+		if (!eventDetails.groupId || !eventDetails.id) {
+			console.error("Missing required IDs for edit navigation:", {
+				groupId: eventDetails.groupId,
+				eventId: eventDetails.id,
+			});
+			alert(
+				"Error: Missing event or group information. Please refresh the page and try again.",
+			);
+			return;
+		}
+
+		// Check authorization again
+		if (!isOrganizer) {
+			console.error("User is not organizer, should not see edit button");
+			alert("Error: You are not authorized to edit this event.");
+			return;
+		}
+
+		// Add a small delay to see if there are any immediate errors
+		setTimeout(() => {
+			navigate(editPath);
+		}, 100);
 	};
 
 	// Delete Modal Component
@@ -326,11 +354,7 @@ const EventDetails: React.FC = () => {
 											{!isPastEvent && (
 												<>
 													<button
-														onClick={() =>
-															navigate(
-																`/groups/${eventDetails.groupId}/events/${eventDetails.id}/edit`,
-															)
-														}
+														onClick={handleEditClick}
 														className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
 													>
 														<Edit size={16} />
