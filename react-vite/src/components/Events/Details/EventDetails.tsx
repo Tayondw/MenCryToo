@@ -328,7 +328,7 @@ const EventDetails: React.FC = () => {
 													<button
 														onClick={() =>
 															navigate(
-																`/groups/${eventDetails.groupId}/events/${eventDetails.id}`,
+																`/groups/${eventDetails.groupId}/events/${eventDetails.id}/edit`,
 															)
 														}
 														className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
