@@ -92,32 +92,87 @@ export const eventDetailsLoader = async ({ params }: LoaderFunctionArgs) => {
 	}
 };
 
-export const eventUpdateLoader = async ({ params }: LoaderFunctionArgs) => {
+export const updateEventLoader = async ({ params }: LoaderFunctionArgs) => {
 	const { groupId, eventId } = params;
 
 	if (!groupId || !eventId) {
-		throw new Error("Group ID and Event ID are required");
+		throw new Response("Group ID and Event ID are required", { status: 400 });
 	}
 
 	try {
-		const [eventResponse, groupResponse] = await Promise.all([
-			fetch(`/api/events/${eventId}`),
-			fetch(`/api/groups/${groupId}`),
-		]);
+		// First check authentication
+		const authResponse = await fetch("/api/auth/", {
+			headers: { "Cache-Control": "max-age=30" },
+		});
 
-		if (!eventResponse.ok || !groupResponse.ok) {
-			throw new Error("Failed to fetch event or group data");
+		if (!authResponse.ok) {
+			return redirect("/login");
 		}
 
-		const [event, group] = await Promise.all([
+		const authData = await authResponse.json();
+		if (!authData.authenticated || !authData.user) {
+			return redirect("/login");
+		}
+
+		// Then load both event and group data
+		const timestamp = Date.now();
+		const [eventResponse, groupResponse] = await Promise.all([
+			fetch(`/api/events/${eventId}?_t=${timestamp}`, {
+				credentials: "include",
+				headers: {
+					"Cache-Control": "no-cache, no-store, must-revalidate",
+					Pragma: "no-cache",
+					Expires: "0",
+				},
+			}),
+			fetch(`/api/groups/${groupId}?_t=${timestamp}`, {
+				credentials: "include",
+				headers: {
+					"Cache-Control": "no-cache, no-store, must-revalidate",
+					Pragma: "no-cache",
+					Expires: "0",
+				},
+			}),
+		]);
+
+		if (!eventResponse.ok) {
+			if (eventResponse.status === 404) {
+				throw new Response("Event not found", { status: 404 });
+			}
+			throw new Error(`Failed to fetch event: ${eventResponse.status}`);
+		}
+
+		if (!groupResponse.ok) {
+			if (groupResponse.status === 404) {
+				throw new Response("Group not found", { status: 404 });
+			}
+			throw new Error(`Failed to fetch group: ${groupResponse.status}`);
+		}
+
+		const [eventDetails, groupDetails] = await Promise.all([
 			eventResponse.json(),
 			groupResponse.json(),
 		]);
 
-		return { event, group };
+		// Check if user is the group organizer (who can edit events)
+		if (authData.user.id !== groupDetails.organizerId) {
+			throw new Response("Unauthorized - You must be the group organizer", {
+				status: 403,
+			});
+		}
+
+		// Return both event and group data in the format expected by UpdateEvent
+		return {
+			event: eventDetails,
+			group: groupDetails,
+			user: authData.user,
+		};
 	} catch (error) {
-		console.error("Error loading event update data:", error);
-		throw error;
+		console.error("Error loading event for update:", error);
+		if (error instanceof Response) {
+			throw error;
+		}
+		throw new Response("Failed to load event", { status: 500 });
 	}
 };
 
