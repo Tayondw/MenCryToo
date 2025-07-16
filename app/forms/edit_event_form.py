@@ -18,7 +18,7 @@ class EditEventForm(FlaskForm):
     name = StringField(
         "Event Name",
         validators=[
-            DataRequired(),
+            DataRequired(message="Event name is required"),
             Length(
                 min=5, max=50, message="Event name must be between 5 and 50 characters"
             ),
@@ -27,7 +27,7 @@ class EditEventForm(FlaskForm):
     description = TextAreaField(
         "Event description",
         validators=[
-            DataRequired(),
+            DataRequired(message="Description is required"),
             Length(
                 min=50,
                 max=150,
@@ -35,19 +35,31 @@ class EditEventForm(FlaskForm):
             ),
         ],
     )
-    type = SelectField("Event type", validators=[DataRequired()], choices=types)
+    type = SelectField(
+        "Event type",
+        validators=[DataRequired(message="Event type is required")],
+        choices=types,
+    )
     capacity = IntegerField(
-        "Event capacity", validators=[DataRequired(), NumberRange(min=2, max=300)]
+        "Event capacity",
+        validators=[
+            DataRequired(message="Capacity is required"),
+            NumberRange(min=2, max=300),
+        ],
     )
     image = FileField(
         "Event Image File",
         validators=[FileAllowed(list(ALLOWED_EXTENSIONS))],
     )
     startDate = DateTimeLocalField(
-        "start_date", format="%Y-%m-%dT%H:%M", validators=[DataRequired()]
+        "start_date",
+        format="%Y-%m-%dT%H:%M",
+        validators=[DataRequired(message="Start date is required")],
     )
     endDate = DateTimeLocalField(
-        "end_date", format="%Y-%m-%dT%H:%M", validators=[DataRequired()]
+        "end_date",
+        format="%Y-%m-%dT%H:%M",
+        validators=[DataRequired(message="End date is required")],
     )
 
     def validate_date_range(self):
