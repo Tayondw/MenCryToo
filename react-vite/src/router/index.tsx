@@ -57,13 +57,14 @@ import {
 	groupFormAction,
 	updateGroupLoader,
 	createEventLoader,
-} from "./loaders/group/groupLoaders";
+} from "./loaders/group";
 import {
 	eventsLoader,
 	eventDetailsLoader,
 	eventAction,
 	eventFormAction,
-} from "./loaders/eventLoaders";
+	updateEventLoader,
+} from "./loaders/event";
 import {
 	postDetailsLoader,
 	postAction,
@@ -241,8 +242,8 @@ export const router = createBrowserRouter([
 				action: eventFormAction,
 			},
 			{
-				path: "groups/:groupId/events/:eventId",
-				loader: protectedRouteLoader,
+				path: "groups/:groupId/events/:eventId/edit",
+				loader: updateEventLoader,
 				element: (
 					<SuspenseWrapper>
 						<PrivateRoute>
