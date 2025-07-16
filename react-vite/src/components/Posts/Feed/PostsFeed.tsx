@@ -27,57 +27,14 @@ import {
 import LikeButton from "../../Likes/PostsLikesButton";
 import LikesModal from "../../Likes/PostsLikesModal";
 import CommentModal from "../../Comments/CommentModal";
-import { useComments } from "../../../hooks/useComments";
-import { useLikes, useLikesModal } from "../../../hooks/useLikes";
-import { PostsFeedLoaderData } from "../../../loaders/postsFeedLoaders";
-import { SessionUser } from "../../../types/postsFeed";
-import type { Comment } from "../../../types/comments";
-
-interface RootState {
-	session: {
-		user: SessionUser | null;
-	};
-}
-
-// Create a type that represents a post with optional comments array
-interface OldComment {
-	id: number;
-	userId: number;
-	postId: number;
-	comment: string;
-	username: string;
-	parentId: number | null;
-	created_at: string;
-	updated_at: string;
-	commenter?: {
-		id: number;
-		username: string;
-		firstName: string;
-		lastName: string;
-		profileImage: string;
-	};
-}
-
-interface PostWithComments {
-	id: number;
-	title: string;
-	caption: string;
-	image: string;
-	likes: number;
-	creator: number;
-	comments: number; // Count of comments
-	createdAt: string;
-	updatedAt: string;
-	user: {
-		id: number;
-		username: string;
-		firstName: string;
-		lastName: string;
-		profileImage: string;
-	};
-	// Optional array of comment objects in old format
-	postComments?: OldComment[];
-}
+import { useComments, useLikes, useLikesModal } from "../../../hooks";
+import {
+	RootState,
+	PostWithComments,
+	PostFeedCardProps,
+	type Comment,
+	PostsFeedLoaderData,
+} from "../../../types";
 
 const PostsFeed: React.FC = () => {
 	const loaderData = useLoaderData() as PostsFeedLoaderData;
@@ -691,20 +648,7 @@ const PostsFeed: React.FC = () => {
 	);
 };
 
-// Define proper interface for PostCard props
-interface PostCardProps {
-	post: PostWithComments;
-	viewMode: "grid" | "list";
-	formatTimeAgo: (dateString: string) => string;
-	handleCommentClick: (postId: number, post: PostWithComments) => void;
-	handleLikesClick: (postId: number) => void;
-	likeState?: { isLiked: boolean; likeCount: number; isLoading: boolean };
-	setLikeState: (postId: number, isLiked: boolean, count: number) => void;
-	sessionUser: SessionUser | null;
-	currentCommentCount: number;
-}
-
-const PostCard: React.FC<PostCardProps> = ({
+const PostCard: React.FC<PostFeedCardProps> = ({
 	post,
 	viewMode,
 	formatTimeAgo,

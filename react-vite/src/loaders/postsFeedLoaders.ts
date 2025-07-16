@@ -6,7 +6,7 @@ import type {
 	PostsFeedLoaderData,
 	FeedStats,
 	CacheItem,
-} from "../types/postsFeed";
+} from "../types";
 
 // Cache for frequently accessed data
 const cache = new Map<string, CacheItem<unknown>>();
@@ -500,6 +500,3 @@ export const postsFeedErrorBoundary = ({ error }: { error: Error }) => {
 		error: `Error loading posts feed: ${error.message}`,
 	};
 };
-
-// Re-export types for convenience
-export type { PostsFeedLoaderData, FeedPost } from "../types/postsFeed";

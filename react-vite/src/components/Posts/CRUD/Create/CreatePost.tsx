@@ -14,16 +14,10 @@ import {
 	Camera,
 	Upload,
 } from "lucide-react";
-import { RootState } from "../../../../types";
-
-interface PostErrors {
-	title?: string;
-	caption?: string;
-	image?: string;
-}
+import { RootState, PostFormErrors } from "../../../../types";
 
 const CreatePost: React.FC = () => {
-	const errors = useActionData() as PostErrors;
+	const errors = useActionData() as PostFormErrors;
 	const sessionUser = useSelector((state: RootState) => state.session.user);
 	const navigate = useNavigate();
 
@@ -34,7 +28,7 @@ const CreatePost: React.FC = () => {
 	const [previewImage, setPreviewImage] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	// Character limits - UPDATED to match backend validation
+	// Character limits
 	const TITLE_MAX_LENGTH = 25;
 	const CAPTION_MAX_LENGTH = 500;
 	const CAPTION_MIN_LENGTH = 50;
@@ -64,7 +58,6 @@ const CreatePost: React.FC = () => {
 	// Handle form submission
 	const handleSubmit = () => {
 		setIsSubmitting(true);
-		// Form will be handled by React Router action
 	};
 
 	// Calculate if form is valid

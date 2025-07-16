@@ -18,17 +18,11 @@ import {
 	Upload,
 	History,
 } from "lucide-react";
-import { RootState, Post } from "../../../../types";
-
-interface PostErrors {
-	title?: string;
-	caption?: string;
-	image?: string;
-}
+import { RootState, Post, PostFormErrors } from "../../../../types";
 
 const UpdatePost: React.FC = () => {
 	const postDetails = useLoaderData() as Post;
-	const errors = useActionData() as PostErrors;
+	const errors = useActionData() as PostFormErrors;
 	const sessionUser = useSelector((state: RootState) => state.session.user);
       const navigate = useNavigate();
 
@@ -78,7 +72,6 @@ const UpdatePost: React.FC = () => {
 	// Handle form submission
 	const handleSubmit = () => {
 		setIsSubmitting(true);
-		// Form will be handled by React Router action
 	};
 
 	// Calculate if form is valid

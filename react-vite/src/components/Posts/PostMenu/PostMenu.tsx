@@ -1,12 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Edit, Trash2, MoreHorizontal } from "lucide-react";
-import { Post } from "../../../types";
-import DeletePost from "../CRUD/Delete/Delete";
-
-interface PostMenuProps {
-	navigate: (path: string) => void;
-	post: Post;
-}
+import { PostMenuProps } from "../../../types";
+import DeletePost from "../CRUD/Delete/DeletePost";
 
 const PostMenu: React.FC<PostMenuProps> = ({ navigate, post }) => {
 	const [showMenu, setShowMenu] = useState(false);

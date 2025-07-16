@@ -17,55 +17,13 @@ import LikesModal from "../../Likes/PostsLikesModal";
 import CommentThread from "../../Comments/CommentThread";
 import { useLikes, useLikesModal } from "../../../hooks/useLikes";
 import { commentApi } from "../../../services/commentApi";
-import { RootState } from "../../../types";
-import type { Comment } from "../../../types/comments";
-
-interface SessionUser {
-	id: number;
-	username: string;
-	firstName?: string;
-	lastName?: string;
-	profileImage: string;
-}
-
-interface PostComment {
-	id: number;
-	userId: number;
-	postId: number;
-	comment: string;
-	username: string;
-	parentId: number | null;
-	created_at: string;
-	updated_at: string;
-	commenter?: {
-		id: number;
-		username: string;
-		firstName: string;
-		lastName: string;
-		profileImage: string;
-	};
-}
-
-interface PostUser {
-	id: number;
-	username: string;
-	firstName: string;
-	lastName: string;
-	profileImage: string;
-}
-
-interface PostDetails {
-	id: number;
-	title: string;
-	caption: string;
-	creator: number;
-	image: string;
-	likes: number;
-	user: PostUser;
-	postComments: PostComment[];
-	createdAt: string;
-	updatedAt: string;
-}
+import {
+	RootState,
+	SessionUser,
+	type PostDetails,
+	type PostComment,
+	type Comment,
+} from "../../../types";
 
 const PostDetails: React.FC = () => {
 	const post = useLoaderData() as PostDetails;
@@ -74,7 +32,7 @@ const PostDetails: React.FC = () => {
 	) as SessionUser | null;
 	const navigate = useNavigate();
 
-	// Likes management (keeping this)
+	// Likes management
 	const { likeStates, setLikeState, fetchLikeStatus } = useLikes();
 	const {
 		isOpen: isLikesModalOpen,
@@ -85,7 +43,7 @@ const PostDetails: React.FC = () => {
 
 	const [showOptions, setShowOptions] = useState(false);
 
-	// Inline commenting state (keeping and enhancing this)
+	// Inline commenting state
 	const [commentCount, setCommentCount] = useState(
 		post.postComments?.length || 0,
 	);

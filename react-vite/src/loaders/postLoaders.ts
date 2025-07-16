@@ -1,70 +1,9 @@
 import { redirect, json, LoaderFunctionArgs } from "react-router-dom";
+import { FeedPost, PostLoaderResponse, PostApiResponse } from "../types/posts";
+import { FeedUser } from "../types/users";
 
 // Cache for frequently accessed data
 const cache = new Map();
-
-interface PostUser {
-	id: number;
-	username: string;
-	firstName: string;
-	lastName: string;
-	profileImage: string;
-}
-
-interface FeedPost {
-	id: number;
-	title: string;
-	caption: string;
-	creator: number;
-	image: string;
-	likes: number;
-	comments: number;
-	createdAt: string;
-	updatedAt: string;
-	user: PostUser;
-}
-
-interface FeedUser {
-	id: number;
-	username: string;
-	firstName: string;
-	lastName: string;
-	email: string;
-	bio: string;
-	profileImage: string;
-	usersTags: Array<{ id: number; name: string }>;
-	createdAt: string;
-	updatedAt: string;
-	posts: FeedPost[];
-}
-
-interface ApiResponse {
-	posts: FeedPost[];
-	pagination: {
-		page: number;
-		pages: number;
-		per_page: number;
-		total: number;
-		has_next: boolean;
-		has_prev: boolean;
-	};
-	message?: string;
-}
-
-interface LoaderResponse {
-	users_profile: FeedUser[];
-	pagination: {
-		page: number;
-		pages: number;
-		per_page: number;
-		total: number;
-		has_next: boolean;
-		has_prev: boolean;
-	};
-	totalPosts: number;
-	message?: string;
-	error?: string;
-}
 
 export function clearCache(pattern?: string): void {
 	if (pattern) {
@@ -82,7 +21,7 @@ export const similarPostsLoader = async ({
 	request,
 }: {
 	request?: Request;
-} = {}): Promise<LoaderResponse> => {
+} = {}): Promise<PostLoaderResponse> => {
 	try {
 		const authResponse = await fetch("/api/auth/");
 		if (!authResponse.ok) return redirect("/login") as never;
@@ -104,7 +43,7 @@ export const similarPostsLoader = async ({
 			throw new Error(`HTTP ${response.status}`);
 		}
 
-		const data: ApiResponse = await response.json();
+		const data: PostApiResponse = await response.json();
 
 		const postsByUser: Record<number, FeedPost[]> = {};
 		const userInfo: Record<number, Omit<FeedUser, "posts">> = {};
@@ -378,6 +317,3 @@ export const postAction = async ({
 		return json({ error: "Network error. Please try again" }, { status: 500 });
 	}
 };
-
-// Export types
-export type { FeedPost, FeedUser, LoaderResponse };

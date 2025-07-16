@@ -10,44 +10,10 @@ import {
       Plus,
       Clock
 } from "lucide-react";
-import type { LoaderResponse } from "../../loaders/postLoaders";
-
-// Define component types
-interface SessionUser {
-	id: number;
-	username: string;
-	usersTags: Array<{ id: number; name: string }>;
-}
-
-interface RootState {
-	session: {
-		user: SessionUser | null;
-	};
-}
-
-interface PostUser {
-	id: number;
-	username: string;
-	firstName: string;
-	lastName: string;
-	profileImage: string;
-}
-
-interface Post {
-	id: number;
-	title: string;
-	caption: string;
-	creator: number;
-	image: string;
-	likes: number;
-	comments: number;
-	createdAt: string;
-	updatedAt: string;
-	user: PostUser;
-}
+import { RootState, SimilarPost, PostLoaderResponse } from "../../types";
 
 const Posts: React.FC = () => {
-	const loaderData = useLoaderData() as LoaderResponse;
+	const loaderData = useLoaderData() as PostLoaderResponse;
 	const sessionUser = useSelector((state: RootState) => state.session.user);
 
 	const [searchTerm, setSearchTerm] = useState<string>("");
@@ -66,7 +32,7 @@ const Posts: React.FC = () => {
 			return { posts: [] };
 		}
 
-		const allPosts: Post[] = [];
+		const allPosts: SimilarPost[] = [];
 
 		if (allProfiles.users_profile) {
 			allProfiles.users_profile.forEach((user) => {
