@@ -19,9 +19,7 @@ import {
 	Upload,
 	CheckCircle,
 } from "lucide-react";
-import { RootState } from "../../../../types";
-import { EventFormErrors } from "../../../../types/errors";
-import { GroupDetails } from "../../../../types/groups";
+import { RootState, EventFormErrors, GroupDetails } from "../../../../types";
 
 const CreateEvent: React.FC = () => {
 	const errors = useActionData() as EventFormErrors;

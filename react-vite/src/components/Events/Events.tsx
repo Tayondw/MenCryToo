@@ -16,10 +16,7 @@ import {
 	Plus,
 	X,
 } from "lucide-react";
-import { RootState } from "../../types";
-import { Group } from "../../types/groups";
-import { Event, EventsData } from "../../types/events";
-import { EventFilterOptions } from "../../types/filters";
+import { RootState, Group, Event, EventsData, EventFilterOptions } from "../../types";
 
 const Events: React.FC = () => {
 	const { allEvents } = useLoaderData() as { allEvents: EventsData };

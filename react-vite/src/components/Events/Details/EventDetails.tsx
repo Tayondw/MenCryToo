@@ -18,8 +18,7 @@ import {
 	Globe,
 	Info,
 } from "lucide-react";
-import { RootState } from "../../../types";
-import { EventVenue, type EventDetails } from "../../../types/events";
+import { RootState, EventVenue, type EventDetails } from "../../../types";
 
 type SectionType = "overview" | "attendees" | "group" | "photos";
 

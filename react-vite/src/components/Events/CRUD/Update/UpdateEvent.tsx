@@ -17,9 +17,7 @@ import {
 	Save,
 	Upload,
 } from "lucide-react";
-import { RootState } from "../../../../types";
-import { EventFormErrors } from "../../../../types/errors";
-import { EventDetails } from "../../../../types/events";
+import { RootState, EventFormErrors, EventDetails } from "../../../../types";
 
 const UpdateEvent: React.FC = () => {
 	const errors = useActionData() as EventFormErrors;

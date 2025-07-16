@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Form } from "react-router-dom";
 import { X, AlertTriangle, Trash2, Calendar } from "lucide-react";
 import { useModal } from "../../../../hooks/useModal";
-import { DeleteEventProps } from "../../../../types/events";
+import { DeleteEventProps } from "../../../../types";
 
 const DeleteEvent: React.FC<DeleteEventProps> = ({ eventDetails }) => {
 	const { closeModal } = useModal();
