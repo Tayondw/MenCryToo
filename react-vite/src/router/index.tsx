@@ -37,39 +37,39 @@ const Success = lazy(() => import("../components/Success"));
 const FourZeroFourPage = lazy(() => import("../components/404Page"));
 
 // Import loaders and actions
-import { homeLoader } from "../loaders/homeLoaders";
+import { homeLoader } from "./loaders/homeLoaders";
 import {
 	signupAction,
 	loginAction,
 	protectedRouteLoader,
-} from "../loaders/authLoaders";
-import { publicUserProfileLoader } from "../loaders/userLoaders";
+} from "./loaders/authLoaders";
+import { publicUserProfileLoader } from "./loaders/userLoaders";
 import {
 	profileLoader,
 	profileUpdateAction,
 	profileAction,
-} from "../loaders/profileLoaders";
-import { profileFeedLoaderDetailed } from "../loaders/profileFeedLoaders";
+} from "./loaders/profileLoaders";
+import { profileFeedLoaderDetailed } from "./loaders/profileFeedLoaders";
 import {
 	groupsLoader,
 	groupDetailsLoader,
 	groupAction,
 	groupFormAction,
-} from "../loaders/groupLoaders";
+} from "./loaders/groupLoaders";
 import {
 	eventsLoader,
 	eventDetailsLoader,
 	eventAction,
 	eventFormAction,
-} from "../loaders/eventLoaders";
+} from "./loaders/eventLoaders";
 import {
 	postDetailsLoader,
 	postAction,
 	similarPostsLoader,
-} from "../loaders/postLoaders";
-import { postsFeedLoader, postsFeedAction } from "../loaders/postsFeedLoaders";
-import { partnershipActions } from "../loaders/partnershipActions";
-import { contactActions } from "../loaders/contactActions";
+} from "./loaders/postLoaders";
+import { postsFeedLoader, postsFeedAction } from "./loaders/postsFeedLoaders";
+import { partnershipActions } from "./loaders/partnershipActions";
+import { contactActions } from "./loaders/contactActions";
 
 // Router configuration
 export const router = createBrowserRouter([
