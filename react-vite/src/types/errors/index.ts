@@ -1,3 +1,9 @@
+export interface RouteError {
+      status?: number;
+      statusText?: string;
+      message?: string;
+      data?: unknown;
+}
 export interface LoginErrors {
       email?: string;
       password?: string;
