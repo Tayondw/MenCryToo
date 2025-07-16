@@ -21,31 +21,12 @@ import {
 } from "lucide-react";
 import OpenModalMenuItem from "../Navigation/OpenModalMenuItem/OpenModalMenuItem";
 import LoginFormModal from "../LoginFormModal";
-import { RootState } from "../../types";
-
-interface LocationState {
-	from?: string;
-	groupId?: string;
-	eventId?: string;
-}
-
-interface FormErrors {
-	firstName?: string;
-	lastName?: string;
-	email?: string;
-	username?: string;
-	password?: string;
-	confirmPassword?: string;
-	bio?: string;
-	profileImage?: string;
-	userTags?: string;
-	server?: string;
-}
+import { RootState, LocationState, SignupFormErrors } from "../../types";
 
 const SignupFormPage: React.FC = () => {
 	const location = useLocation();
 	const navigation = useNavigation();
-	const actionData = useActionData() as { errors?: FormErrors } | null;
+	const actionData = useActionData() as { errors?: SignupFormErrors } | null;
 	const sessionUser = useSelector((state: RootState) => state.session.user);
 
 	// Form state - only for UI, not submission logic
@@ -133,7 +114,7 @@ const SignupFormPage: React.FC = () => {
 					{/* Overlay for better text readability */}
 					<div className="absolute inset-0 bg-slate-900/60"></div>
 
-					{/* Content - Now with sticky positioning and smooth scroll behavior */}
+					{/* Content */}
 					<div className="fixed top-0 left-0 z-10 w-1/2 h-screen flex flex-col justify-center items-center text-center px-8 overflow-y-auto max-xl:relative max-xl:items-center max-xl:justify-center max-xl:text-center max-xl:left-36 lg:fixed lg:left-0">
 						<div className="max-w-lg space-y-6 transform transition-all duration-300 ease-in-out py-16">
 							<h1 className="text-4xl lg:text-5xl font-bold text-orange-400 drop-shadow-lg animate-pulse">
@@ -148,7 +129,7 @@ const SignupFormPage: React.FC = () => {
 								connection.
 							</p>
 
-							{/* Feature List with enhanced animations */}
+							{/* Feature List */}
 							<div className="space-y-4 text-left">
 								<div className="flex items-center gap-3 transform hover:translate-x-2 transition-transform duration-200">
 									<div className="w-6 h-6 bg-orange-400 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
