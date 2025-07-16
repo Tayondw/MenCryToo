@@ -85,6 +85,31 @@ export interface EventDetails {
       eventImage?: EventImage[];
 }
 
+export interface UpdateEventLoaderData {
+      event: {
+            id: number;
+            name: string;
+            description: string;
+            type: string;
+            capacity: number;
+            image: string;
+            startDate: string;
+            endDate: string;
+            groupId: number;
+      };
+      group: {
+            id: number;
+            name: string;
+            organizerId: number;
+      };
+      user: {
+            id: number;
+            username: string;
+            firstName: string;
+            lastName: string;
+      };
+}
+
 export interface DeleteEventProps {
       eventDetails: {
             id: number;
