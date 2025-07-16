@@ -12,9 +12,7 @@ import {
 	List,
 	ArrowLeft
 } from "lucide-react";
-import { RootState } from "../../types";
-import { Group, GroupsData } from "../../types/groups";
-import { GroupFilterOptions } from "../../types/filters";
+import { RootState, Group, GroupsData, GroupFilterOptions } from "../../types";
 
 const Groups: React.FC = () => {
 	const { allGroups } = useLoaderData() as { allGroups: GroupsData };

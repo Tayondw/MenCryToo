@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Form } from "react-router-dom";
 import { X, AlertTriangle, Trash2 } from "lucide-react";
 import { useModal } from "../../../../hooks/useModal";
-import { DeleteGroupProps } from "../../../../types/groups";
+import { DeleteGroupProps } from "../../../../types";
 
 const DeleteGroup: React.FC<DeleteGroupProps> = ({ groupDetails }) => {
 	const { closeModal } = useModal();

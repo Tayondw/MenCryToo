@@ -19,8 +19,7 @@ import {
 	Check,
 	AlertCircle,
 } from "lucide-react";
-import { RootState } from "../../../../types";
-import { GroupFormErrors } from "../../../../types/errors";
+import { RootState, GroupFormErrors } from "../../../../types";
 
 const CreateGroup: React.FC = () => {
 	const errors = useActionData() as { errors?: GroupFormErrors } | GroupFormErrors | null;

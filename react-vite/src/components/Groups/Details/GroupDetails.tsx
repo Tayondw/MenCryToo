@@ -19,8 +19,7 @@ import {
 	AlertTriangle,
 	Crown,
 } from "lucide-react";
-import { RootState } from "../../../types";
-import { type GroupDetails, GroupMember } from "../../../types/groups";
+import { RootState, type GroupDetails, type GroupMember } from "../../../types";
 
 type SectionType = "overview" | "events" | "members" | "photos";
 

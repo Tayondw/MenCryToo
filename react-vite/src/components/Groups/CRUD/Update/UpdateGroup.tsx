@@ -18,9 +18,7 @@ import {
 	Info,
 	Check,
 } from "lucide-react";
-import { RootState } from "../../../../types";
-import { UpdateGroupDetails } from "../../../../types/groups";
-import { GroupFormErrors } from "../../../../types/errors";
+import { RootState, UpdateGroupDetails, GroupFormErrors } from "../../../../types";
 
 const UpdateGroup: React.FC = () => {
 	const groupDetails = useLoaderData() as UpdateGroupDetails;

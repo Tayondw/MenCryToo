@@ -39,11 +39,8 @@ export interface GroupDetails {
       groupImage: GroupImage[];
 }
 
-export interface GroupMember {
-	id: number | string;
+export interface GroupMemberLoaderData {
 	userId: number;
-	groupId: number;
-	isOrganizer?: boolean;
 	user: {
 		id: number;
 		firstName: string;
@@ -52,6 +49,12 @@ export interface GroupMember {
 		email: string;
 		profileImage: string;
 	};
+}
+
+export interface GroupMember extends GroupMemberLoaderData {
+	id: number | string;
+	groupId: number;
+	isOrganizer?: boolean;
 }
 
 interface GroupEvent {
@@ -71,6 +74,28 @@ interface GroupImage {
 	id: number;
 	groupImage: string;
 	name: string;
+}
+
+interface GroupOrganizer {
+	id: number;
+	firstName: string;
+	lastName: string;
+	username: string;
+	email: string;
+	profileImage: string;
+}
+
+export interface GroupData {
+      id: number;
+      organizer: GroupOrganizer;
+      organizerId: number;
+      members?: GroupMemberLoaderData[];
+      name: string;
+      about: string;
+      type: string;
+      city: string;
+      state: string;
+      image: string;
 }
 
 export interface UpdateGroupDetails {

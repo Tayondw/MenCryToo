@@ -4,40 +4,7 @@ import {
 	LoaderFunctionArgs,
 	ActionFunctionArgs,
 } from "react-router-dom";
-
-interface GroupMember {
-	userId: number;
-	user: {
-		id: number;
-		firstName: string;
-		lastName: string;
-		username: string;
-		email: string;
-		profileImage: string;
-	};
-}
-
-interface GroupOrganizer {
-	id: number;
-	firstName: string;
-	lastName: string;
-	username: string;
-	email: string;
-	profileImage: string;
-}
-
-interface GroupData {
-	id: number;
-	organizer: GroupOrganizer;
-	organizerId: number;
-	members?: GroupMember[];
-	name: string;
-	about: string;
-	type: string;
-	city: string;
-	state: string;
-	image: string;
-}
+import { GroupData, GroupMemberLoaderData } from "../types/groups";
 
 // Add cache busting and proper error handling
 export const groupsLoader = async ({ request }: LoaderFunctionArgs) => {
@@ -135,7 +102,7 @@ export const groupDetailsLoader = async ({ params }: LoaderFunctionArgs) => {
 		if (
 			group.organizer &&
 			!group.members.some(
-				(member: GroupMember) => member.userId === group.organizerId,
+				(member: GroupMemberLoaderData) => member.userId === group.organizerId,
 			)
 		) {
 			const organizerMember = {
