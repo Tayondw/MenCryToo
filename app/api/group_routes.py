@@ -614,6 +614,85 @@ def create_event(groupId):
     return form.errors, 400
 
 
+@group_routes.route("/<int:groupId>/events/<int:eventId>/edit", methods=["POST"])
+@login_required
+def edit_event(groupId, eventId):
+    """
+    Edit/update an existing event
+    """
+    # Get the group first to check authorization
+    group = Group.query.get(groupId)
+    if not group:
+        return {"errors": {"message": "Group not found"}}, 404
+
+    if current_user.id != group.organizer_id:
+        return {"errors": {"message": "Unauthorized"}}, 401
+
+    # Get the event
+    event_to_edit = Event.query.get(eventId)
+    if not event_to_edit:
+        return {"errors": {"message": "Event not found"}}, 404
+
+    # Verify the event belongs to this group
+    if event_to_edit.group_id != groupId:
+        return {"errors": {"message": "Event does not belong to this group"}}, 400
+
+    form = EditEventForm()
+    form["csrf_token"].data = request.cookies["csrf_token"]
+
+    if form.validate_on_submit():
+        try:
+            # Handle image upload if provided
+            image = form.image.data
+            if image and image.filename:
+                try:
+                    image.filename = get_unique_filename(image.filename)
+                    upload = upload_file_to_s3(image)
+                except Exception as e:
+                    return {"message": f"Image upload failed: {str(e)}"}, 500
+
+                if "url" not in upload:
+                    return {"message": "Image upload failed. Please try again."}, 400
+
+                # Remove the old image from S3 if it exists
+                if event_to_edit.image:
+                    remove_file_from_s3(event_to_edit.image)
+
+                event_to_edit.image = upload["url"]
+
+            # Update event fields
+            event_to_edit.name = form.data["name"]
+            event_to_edit.description = form.data["description"]
+            event_to_edit.type = form.data["type"]
+            event_to_edit.capacity = form.data["capacity"]
+            event_to_edit.start_date = form.data["startDate"]
+            event_to_edit.end_date = form.data["endDate"]
+
+            # Commit the changes
+            db.session.commit()
+
+            # Return updated event data
+            return {
+                "event": {
+                    "id": event_to_edit.id,
+                    "name": event_to_edit.name,
+                    "description": event_to_edit.description,
+                    "type": event_to_edit.type,
+                    "capacity": event_to_edit.capacity,
+                    "image": event_to_edit.image,
+                    "startDate": event_to_edit.start_date.isoformat(),
+                    "endDate": event_to_edit.end_date.isoformat(),
+                    "groupId": event_to_edit.group_id,
+                }
+            }, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"Event update failed: {str(e)}"}, 500
+
+    return form.errors, 400
+
+
 # ! GROUP - VENUES (Simplified)
 @group_routes.route("/<int:groupId>/venues", methods=["POST"])
 @login_required
