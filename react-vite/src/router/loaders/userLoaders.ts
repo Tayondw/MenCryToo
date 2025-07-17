@@ -68,7 +68,7 @@ export const publicUserProfileLoader = async ({
 			}
 		} catch (authError) {
 			// If auth check fails, continue as non-authenticated user
-			console.log("Auth check failed, continuing as public user", authError);
+			console.error("Auth check failed, continuing as public user", authError);
 		}
 
 		// If it's their own profile, redirect to /profile
