@@ -154,8 +154,6 @@ export const postAction = async ({
 	const formData = await request.formData();
 	const intent = formData.get("intent") as string;
 
-	console.log("Post action intent:", intent);
-
 	try {
 		switch (intent) {
 			case "create-post": {
