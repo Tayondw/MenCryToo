@@ -53,7 +53,6 @@ export const contactActions = async ({ request }: ActionFunctionArgs) => {
 				return redirect("/success");
 			} else {
 				const errorData = await response.json();
-				console.log("Error from backend:", errorData);
 				return json({
 					backendError: errorData.message || "Something went wrong",
 				});
