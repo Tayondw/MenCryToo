@@ -56,3 +56,13 @@ export interface SessionUser {
 	profileImage: string;
 	usersTags: Array<{ id: number; name: string }>;
 }
+
+export interface SessionDataWrapped {
+	user: User;
+	authenticated: boolean;
+}
+
+export interface SessionDataDirect extends User {
+	id: number;
+	username: string;
+}
