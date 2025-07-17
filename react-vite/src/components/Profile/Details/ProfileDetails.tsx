@@ -348,7 +348,6 @@ const ProfileDetails: React.FC = () => {
 
 			// Callback to update comment count
 			const handleCommentsChange = (postId: number, newCount: number) => {
-				console.log(`Comments changed for post ${postId}: ${newCount}`);
 				setPostCommentCounts((prev) => {
 					const newMap = new Map(prev);
 					newMap.set(postId, newCount);
