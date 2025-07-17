@@ -25,13 +25,9 @@ export const homeLoader = async (): Promise<Response> => {
 						user = authData.user;
 					}
 				}
-			} else {
-				console.log(
-					`Auth check returned status: ${authResponse.status} - loading public data only`,
-				);
 			}
 		} catch (error) {
-			console.log("Auth check failed, loading public data only:", error);
+			console.error("Auth check failed, loading public data only:", error);
 		}
 
 		// Load public data (groups, events, tags) regardless of auth status
