@@ -556,7 +556,7 @@ def post(postId):
                     joinedload(Comment.commenter).load_only(
                         "id", "username", "first_name", "last_name", "profile_image_url"
                     ),
-                    # FIXED: Load like data for comments
+                    # Load like data for comments
                     selectinload(Comment.comment_likes),
                 ),
             )
@@ -630,7 +630,7 @@ def post(postId):
                             "profileImage": "/default-avatar.png",
                         }
                     ),
-                    # FIXED: Include like data for EVERY comment
+                    # Include like data for EVERY comment
                     "likes": (
                         len(comment.comment_likes)
                         if hasattr(comment, "comment_likes") and comment.comment_likes
