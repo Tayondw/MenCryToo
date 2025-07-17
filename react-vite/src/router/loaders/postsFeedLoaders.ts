@@ -447,13 +447,11 @@ export const postsFeedAction = async ({ request }: { request: Request }) => {
 
 // Utility function to prefetch feed data
 export const prefetchFeedData = async (
-	activeTab: "all" | "similar" = "all",
 	page: number = 1,
 	perPage: number = 20,
 ): Promise<void> => {
 	try {
 		await fetchBatchFeedData(page, perPage);
-		console.log(`Prefetched feed data for tab: ${activeTab}, page: ${page}`);
 	} catch (error) {
 		console.warn("Failed to prefetch feed data:", error);
 	}
