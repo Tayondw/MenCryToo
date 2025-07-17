@@ -27,8 +27,7 @@ class CommentLike(db.Model):
         db.Integer, db.ForeignKey(add_prefix_for_prod("comments.id")), nullable=False
     )
     created_at = db.Column(db.DateTime, default=datetime.now)
-
-    # FIXED: Add proper relationships with back_populates
+    
     user = db.relationship("User", backref="user_comment_likes")
     comment = db.relationship("Comment", back_populates="comment_likes")
 
