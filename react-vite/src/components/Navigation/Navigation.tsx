@@ -23,11 +23,24 @@ import {
 	ChevronDown,
 	type LucideIcon,
 } from "lucide-react";
-import { RootState, AppDispatch, User as UserType } from "../../types";
+import {
+	RootState,
+	AppDispatch,
+	User as UserType,
+	SessionDataWrapped,
+	SessionDataDirect,
+} from "../../types";
 import { thunkLogout } from "../../store/session";
 import OpenModalMenuItem from "./OpenModalMenuItem/OpenModalMenuItem";
 import LoginFormModal from "../LoginFormModal";
 import Logo from "./Logo";
+
+type SessionData =
+	| SessionDataWrapped
+	| SessionDataDirect
+	| UserType
+	| null
+	| undefined;
 
 // Navigation item component
 const NavigationItem = memo(
@@ -244,17 +257,29 @@ const UserMenu = memo(
 UserMenu.displayName = "UserMenu";
 
 // Helper function to safely extract user data
-const extractUserData = (sessionData: any): UserType | null => {
+const extractUserData = (sessionData: SessionData): UserType | null => {
 	if (!sessionData) return null;
 
 	// Handle wrapped response structure
-	if (sessionData.user && sessionData.authenticated) {
+	if (
+		typeof sessionData === "object" &&
+		"user" in sessionData &&
+		"authenticated" in sessionData &&
+		sessionData.user &&
+		sessionData.authenticated
+	) {
 		return sessionData.user;
 	}
 
-	// Handle direct user object
-	if (sessionData.id && sessionData.username) {
-		return sessionData;
+	// Handle direct user object - check for required user properties
+	if (
+		typeof sessionData === "object" &&
+		"id" in sessionData &&
+		"username" in sessionData &&
+		typeof sessionData.id === "number" &&
+		typeof sessionData.username === "string"
+	) {
+		return sessionData as UserType;
 	}
 
 	return null;
