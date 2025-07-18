@@ -12,7 +12,7 @@ import {
 import LikeButton from "../../Likes/PostsLikesButton";
 import LikesModal from "../../Likes/PostsLikesModal";
 import CommentThread from "../../Comments/CommentThread";
-import PostMenu from "../PostMenu/PostMenu";
+import PostMenu from "../PostMenu/PostMenu"; // Import the PostMenu component
 import { useLikes, useLikesModal } from "../../../hooks/useLikes";
 import { commentApi } from "../../../services/commentApi";
 import {
@@ -386,25 +386,6 @@ const PostDetails: React.FC = () => {
 							<ArrowLeft size={20} />
 							Back to Posts
 						</Link>
-
-						{/* Show PostMenu only if user is the creator */}
-						{isCreator && (
-							<PostMenu
-								navigate={navigate}
-								post={{
-									id: post.id,
-									title: post.title,
-									caption: post.caption,
-									image: post.image,
-									likes: post.likes,
-									creator: post.creator,
-									comments: commentCount,
-									createdAt: post.createdAt,
-									updatedAt: post.updatedAt,
-									user: post.user,
-								}}
-							/>
-						)}
 					</div>
 				</div>
 			</div>
@@ -413,30 +394,66 @@ const PostDetails: React.FC = () => {
 				<div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
 					{/* Post Header */}
 					<div className="p-6 border-b border-slate-100">
-						<div className="flex items-center gap-4">
-							<Link to={`/users/${post.user.id}`} className="flex-shrink-0">
-								<img
-									src={post.user.profileImage}
-									alt={post.user.username}
-									className="w-12 h-12 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
-									onError={(e) => {
-										const target = e.target as HTMLImageElement;
-										target.src = "/default-avatar.png";
-									}}
-								/>
-							</Link>
-							<div>
-								<Link
-									to={`/users/${post.user.id}`}
-									className="font-semibold text-slate-900 hover:text-orange-600 transition-colors"
-								>
-									{post.user.username}
+						<div className="flex items-center justify-between">
+							<div className="flex items-center gap-4">
+								<Link to={`/users/${post.user.id}`} className="flex-shrink-0">
+									<img
+										src={post.user.profileImage}
+										alt={post.user.username}
+										className="w-12 h-12 rounded-full object-cover border-2 border-slate-200 hover:border-orange-500 transition-colors"
+										onError={(e) => {
+											const target = e.target as HTMLImageElement;
+											target.src = "/default-avatar.png";
+										}}
+									/>
 								</Link>
-								<div className="flex items-center text-sm text-slate-500">
-									<Clock size={14} className="mr-1" />
-									<span>{formatDate(post.createdAt)}</span>
+								<div>
+									<Link
+										to={`/users/${post.user.id}`}
+										className="font-semibold text-slate-900 hover:text-orange-600 transition-colors"
+									>
+										{post.user.username}
+									</Link>
+									<div className="flex items-center text-sm text-slate-500">
+										<Clock size={14} className="mr-1" />
+										<span>{formatDate(post.createdAt)}</span>
+									</div>
 								</div>
 							</div>
+
+							{/* Show PostMenu only if user is the creator */}
+							{isCreator && (
+								<PostMenu
+									navigate={navigate}
+									post={{
+										id: post.id,
+										title: post.title,
+										caption: post.caption,
+										image: post.image,
+										likes: post.likes,
+										creator: post.creator,
+										comments: commentCount,
+										createdAt: post.createdAt,
+										updatedAt: post.updatedAt,
+										user: {
+											id: post.user.id,
+											username: post.user.username,
+											firstName: post.user.firstName,
+											lastName: post.user.lastName,
+											email: "", // Default empty values for missing PostUser properties
+											bio: "",
+											profileImage: post.user.profileImage,
+											usersTags: [],
+											posts: [],
+											group: [],
+											events: [],
+											userComments: [],
+											createdAt: "",
+											updatedAt: "",
+										},
+									}}
+								/>
+							)}
 						</div>
 					</div>
 
