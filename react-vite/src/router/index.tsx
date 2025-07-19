@@ -44,7 +44,7 @@ import {
 	loginAction,
 	protectedRouteLoader,
 } from "./loaders/authLoaders";
-import { publicUserProfileLoader } from "./loaders/userLoaders";
+import { publicUserProfileLoader } from "./loaders/user";
 import {
 	profileLoader,
 	profileUpdateAction,
