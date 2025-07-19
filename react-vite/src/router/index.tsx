@@ -49,8 +49,8 @@ import {
 	profileLoader,
 	profileUpdateAction,
 	profileAction,
+	profileFeedLoaderDetailed,
 } from "./loaders/profile";
-import { profileFeedLoaderDetailed } from "./loaders/profile/profileFeedLoaders";
 import {
 	groupsLoader,
 	groupDetailsLoader,
@@ -70,8 +70,9 @@ import {
 	postDetailsLoader,
 	postAction,
 	similarPostsLoader,
-} from "./loaders/postLoaders";
-import { postsFeedLoader, postsFeedAction } from "./loaders/postsFeedLoaders";
+	postsFeedAction,
+	postsFeedLoader,
+} from "./loaders/post";
 import { partnershipActions } from "./loaders/partnershipActions";
 import { contactActions } from "./loaders/contactActions";
 
