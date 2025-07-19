@@ -80,7 +80,7 @@ export const router = createBrowserRouter([
 	{
 		path: "/",
 		element: <Layout />,
-		errorElement: <RouteErrorBoundary />, // Add error boundary to root
+		errorElement: <RouteErrorBoundary />,
 		children: [
 			{
 				index: true,
@@ -340,7 +340,6 @@ export const router = createBrowserRouter([
 			},
 		],
 	},
-	// Separate 404 route outside of the Layout children
 	{
 		path: "*",
 		element: (
