@@ -73,8 +73,8 @@ import {
 	postsFeedAction,
 	postsFeedLoader,
 } from "./loaders/post";
-import { partnershipActions } from "./loaders/partnershipActions";
-import { contactActions } from "./loaders/contactActions";
+import { partnershipActions } from "./actions/partnership";
+import { contactActions } from "./actions/contact";
 
 // Router configuration
 export const router = createBrowserRouter([
