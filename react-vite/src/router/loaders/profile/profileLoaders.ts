@@ -1,6 +1,6 @@
 import { redirect, json } from "react-router-dom";
-import { User } from "../../types/users";
-import { CacheEntry } from "../../types/cache";
+import { User } from "../../../types/users";
+import { CacheEntry } from "../../../types/cache";
 
 // Cache for frequently accessed data
 const cache = new Map();
