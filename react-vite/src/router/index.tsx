@@ -49,8 +49,8 @@ import {
 	profileLoader,
 	profileUpdateAction,
 	profileAction,
-} from "./loaders/profileLoaders";
-import { profileFeedLoaderDetailed } from "./loaders/profileFeedLoaders";
+} from "./loaders/profile";
+import { profileFeedLoaderDetailed } from "./loaders/profile/profileFeedLoaders";
 import {
 	groupsLoader,
 	groupDetailsLoader,
