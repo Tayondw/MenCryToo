@@ -43,7 +43,7 @@ import {
 	signupAction,
 	loginAction,
 	protectedRouteLoader,
-} from "./loaders/authLoaders";
+} from "./loaders/auth";
 import { publicUserProfileLoader } from "./loaders/user";
 import {
 	profileLoader,
