@@ -38,7 +38,7 @@ const Success = lazy(() => import("../components/Success"));
 const FourZeroFourPage = lazy(() => import("../components/404Page"));
 
 // Import loaders and actions
-import { homeLoader } from "./loaders/homeLoaders";
+import { homeLoader } from "./loaders/home";
 import {
 	signupAction,
 	loginAction,
