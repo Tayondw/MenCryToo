@@ -363,16 +363,26 @@ export const eventFormAction = async ({ request }: { request: Request }) => {
 				});
 
 				if (response.ok) {
-					// Force cache refresh by redirecting with timestamp
-					const timestamp = Date.now();
+					// Get the response data which contains the new event
+					const responseData = await response.json();
+					const newEventId = responseData.event?.id;
 
-					// Use window.location for immediate cache-busting redirect
-					if (typeof window !== "undefined") {
-						window.location.href = `/events?refresh=${timestamp}`;
-						return null;
+					if (newEventId) {
+						// Redirect to the newly created event page
+						if (typeof window !== "undefined") {
+							window.location.href = `/events/${newEventId}`;
+							return null;
+						}
+						return redirect(`/events/${newEventId}`);
+					} else {
+						// Fallback to events list if no event ID is returned
+						const timestamp = Date.now();
+						if (typeof window !== "undefined") {
+							window.location.href = `/events?refresh=${timestamp}`;
+							return null;
+						}
+						return redirect(`/events?refresh=${timestamp}`);
 					}
-
-					return redirect(`/events?refresh=${timestamp}`);
 				} else {
 					const errorData = await response.json();
 					return json({ errors: errorData }, { status: 400 });
