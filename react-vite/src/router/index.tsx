@@ -54,11 +54,10 @@ import {
 import {
 	groupsLoader,
 	groupDetailsLoader,
-	groupAction,
-	groupFormAction,
 	updateGroupLoader,
 	createEventLoader,
 } from "./loaders/group";
+import { groupAction, groupFormAction } from "./actions/group";
 import {
 	eventsLoader,
 	eventDetailsLoader,
