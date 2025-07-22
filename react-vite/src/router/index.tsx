@@ -66,11 +66,10 @@ import {
 import { eventAction, eventFormAction } from "./actions/event";
 import {
 	postDetailsLoader,
-	postAction,
 	similarPostsLoader,
-	postsFeedAction,
 	postsFeedLoader,
 } from "./loaders/post";
+import { postAction, postsFeedAction } from "./actions/post";
 import { partnershipActions } from "./actions/partnership";
 import { contactActions } from "./actions/contact";
 
