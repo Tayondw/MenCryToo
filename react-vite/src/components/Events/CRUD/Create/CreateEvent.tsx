@@ -72,7 +72,8 @@ const CreateEvent: React.FC = () => {
 
 			// Clear form and show success message
 			setTimeout(() => {
-				// Force navigation to events page with cache busting
+				// redirect to the newly created event page
+				// The redirect logic is handled in the eventFormAction
 				const timestamp = Date.now();
 				window.location.href = `/events?created=${timestamp}`;
 			}, 2000);
@@ -151,7 +152,9 @@ const CreateEvent: React.FC = () => {
 						✅ As the organizer, you are automatically attending this event
 					</p>
 				</div>
-				<p className="text-slate-500 text-sm">Redirecting to events page...</p>
+				<p className="text-slate-500 text-sm">
+					Redirecting to your new event...
+				</p>
 			</div>
 		</div>
 	);
