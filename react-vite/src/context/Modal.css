@@ -24,6 +24,7 @@
 
 #modal-content {
 	position: relative;
+      width: 30%;
 	z-index: 1001;
 	max-height: 90vh;
 	overflow-y: auto;
