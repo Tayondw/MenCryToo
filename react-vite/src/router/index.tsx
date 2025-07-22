@@ -62,10 +62,9 @@ import {
 import {
 	eventsLoader,
 	eventDetailsLoader,
-	eventAction,
-	eventFormAction,
 	updateEventLoader,
 } from "./loaders/event";
+import { eventAction, eventFormAction } from "./actions/event";
 import {
 	postDetailsLoader,
 	postAction,
