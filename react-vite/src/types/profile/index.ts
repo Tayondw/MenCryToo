@@ -73,12 +73,6 @@ export interface LikeState {
 	isLoading: boolean;
 }
 
-// Post menu component props interface
-export interface PostMenuProps {
-	post: ProfilePost;
-	navigate: (path: string) => void;
-}
-
 // Main post card props interface
 export interface ProfilePostCardProps {
 	post: ProfilePost;
@@ -91,7 +85,7 @@ export interface ProfilePostCardProps {
 	onPostClick: (postId: number) => void;
 	onLikesClick: (postId: number) => void;
 	navigate: (path: string) => void;
-	PostMenu: React.ComponentType<PostMenuProps>;
+	PostMenu: React.ComponentType<{ post: any; navigate: any }>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 // Group interface
 export interface ProfileGroup {
