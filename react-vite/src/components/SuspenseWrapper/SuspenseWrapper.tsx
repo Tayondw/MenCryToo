@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import PageLoader from "../PageLoader/PageLoader";
+import PageLoader from "../PageLoader";
 import { SuspenseWrapperProps } from "../../types";
 
 const SuspenseWrapper: React.FC<SuspenseWrapperProps> = ({ children }) => (
