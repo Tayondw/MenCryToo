@@ -1,10 +1,8 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import {
-	MessageCircle,
 	Users,
 	Calendar,
-	MapPin,
 	Edit3,
 	Settings,
 	Plus,
@@ -12,19 +10,18 @@ import {
 	List,
 	Search,
 	Trash2,
-	Share2,
-	Bookmark,
 	TrendingUp,
 	Award,
-	Clock,
 	Eye,
 	UserIcon,
 } from "lucide-react";
 import { User, Post, Group, Event, Tag } from "../../types";
+import PostsCard from "../Cards/Profile/PostsCard";
+import GroupsCard from "../Cards/Profile/GroupsCard";
+import EventsCard from "../Cards/Profile/EventsCard";
 import PostMenu from "../Posts/PostMenu";
 import DeleteProfile from "./CRUD/Delete";
 import AddTags from "../Tags/AddTags";
-import LikeButton from "../Likes/PostsLikesButton";
 import LikesModal from "../Likes/PostsLikesModal";
 import CommentModal from "../Comments/CommentModal";
 import { useComments, useLikes, useLikesModal } from "../../hooks";
@@ -430,110 +427,24 @@ const Profile: React.FC = () => {
 								isLoading: false,
 							};
 
-							// Get current comment count from state, fallback to post.comments
 							const currentCommentCount =
 								postCommentCounts.get(post.id) ?? post.comments;
 
 							return (
-								<article
+								<PostsCard
 									key={post.id}
-									className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col"
-									style={{ minHeight: "500px" }}
-								>
-									{/* Post Header with User Info */}
-									<div className="p-4 border-b border-gray-50 flex-shrink-0">
-										<div className="flex items-center justify-between gap-3">
-											<div className="flex items-center gap-3 min-w-0 flex-1">
-												<img
-													src={currentUser?.profileImage}
-													alt={currentUser?.username}
-													className="w-10 h-10 rounded-full object-cover border-2 border-gray-100 flex-shrink-0"
-												/>
-												<div className="min-w-0 flex-1">
-													<span className="font-semibold text-gray-800 block truncate">
-														{currentUser?.username}
-													</span>
-												</div>
-											</div>
-											<div className="flex-shrink-0">
-												<PostMenu post={post} navigate={navigate} />
-											</div>
-										</div>
-									</div>
-
-									{/* Post Title - Make it clickable */}
-									<div className="px-4 py-3 border-b border-gray-50 flex-shrink-0">
-										<h3
-											className="font-semibold text-gray-800 text-sm tracking-wide leading-tight break-words cursor-pointer hover:text-orange-600 transition-colors"
-											onClick={() => handlePostClick(post.id)}
-										>
-											{post.title}
-										</h3>
-									</div>
-
-									{/* Post Image - Make it clickable */}
-									{post.image && (
-										<div
-											className="relative flex-shrink-0 cursor-pointer"
-											onClick={() => handlePostClick(post.id)}
-										>
-											<img
-												src={post.image}
-												alt={post.title}
-												className="w-full h-64 object-cover"
-											/>
-											<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-										</div>
-									)}
-
-									{/* Post Content */}
-									<div className="p-4 flex-1 flex flex-col">
-										<div className="flex items-center gap-6 mb-3">
-											{/* Like Button with proper handlers */}
-											<LikeButton
-												postId={post.id}
-												initialLikeCount={currentLikeState.likeCount}
-												initialIsLiked={currentLikeState.isLiked}
-												onLikeToggle={handleLikeToggle}
-												onLikesClick={() => handleLikesClick(post.id)}
-												size={18}
-												disabled={currentLikeState.isLoading}
-											/>
-
-											{/* Comment Button with proper handler */}
-											<button
-												onClick={() => handleCommentsClick(post.id)}
-												className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors duration-200"
-											>
-												<MessageCircle size={18} />
-												<span className="text-sm font-medium">
-													{currentCommentCount}
-												</span>
-											</button>
-
-											<button className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200 ml-auto">
-												<Share2 size={16} />
-											</button>
-											<button className="flex items-center gap-2 text-gray-600 hover:text-yellow-500 transition-colors duration-200">
-												<Bookmark size={16} />
-											</button>
-										</div>
-
-										{/* Caption */}
-										<div className="text-sm text-gray-700 leading-relaxed flex-1">
-											<div className="flex items-start gap-2 flex-wrap">
-												<span className="font-semibold text-gray-800 flex-shrink-0">
-													{currentUser?.username}
-												</span>
-												<span className="text-xs text-gray-500 flex items-center gap-1 flex-shrink-0 self-center">
-													<Clock size={12} />
-													{formatTimeAgo(post.updatedAt)}
-												</span>
-												<span className="break-words">{post.caption}</span>
-											</div>
-										</div>
-									</div>
-								</article>
+									post={post}
+									currentUser={currentUser}
+									currentLikeState={currentLikeState}
+									currentCommentCount={currentCommentCount}
+									formatTimeAgo={formatTimeAgo}
+									onLikeToggle={handleLikeToggle}
+									onCommentsClick={handleCommentsClick}
+									onPostClick={handlePostClick}
+									onLikesClick={handleLikesClick}
+									navigate={navigate}
+									PostMenu={PostMenu}
+								/>
 							);
 						})}
 					</div>
@@ -570,46 +481,7 @@ const Profile: React.FC = () => {
 						}`}
 					>
 						{(content as Group[]).map((group: Group) => (
-							<Link
-								to={`/groups/${group.id}`}
-								key={group.id}
-								className="group block"
-							>
-								<article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-									<div className="relative">
-										<img
-											src={group.image}
-											alt={group.name}
-											className="w-full h-48 object-cover"
-										/>
-										<div className="absolute top-4 right-4">
-											<span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-xs font-medium text-gray-700 rounded-full">
-												{group.type}
-											</span>
-										</div>
-									</div>
-									<div className="p-6 flex-1 flex flex-col">
-										<h2 className="text-lg font-bold text-gray-800 mb-2 group-hover:text-orange-600 transition-colors duration-200">
-											{group.name}
-										</h2>
-										<p className="text-gray-600 text-sm mb-4 flex-1 line-clamp-3">
-											{group.about}
-										</p>
-										<div className="flex items-center justify-between text-sm text-gray-500 mt-auto">
-											<div className="flex items-center gap-1">
-												<Users size={14} />
-												<span>{group.numMembers.toLocaleString()} members</span>
-											</div>
-											<div className="flex items-center gap-1">
-												<MapPin size={14} />
-												<span>
-													{group.city}, {group.state}
-												</span>
-											</div>
-										</div>
-									</div>
-								</article>
-							</Link>
+							<GroupsCard key={group.id} group={group} />
 						))}
 					</div>
 				) : (
@@ -645,58 +517,7 @@ const Profile: React.FC = () => {
 						}`}
 					>
 						{(content as Event[]).map((event: Event) => (
-							<Link
-								key={event.id}
-								to={`/events/${event.id}`}
-								className="group block"
-							>
-								<article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-									<div className="relative">
-										<img
-											src={event.image}
-											alt={event.name}
-											className="w-full h-48 object-cover"
-										/>
-										<div className="absolute top-4 right-4">
-											<span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-xs font-medium text-gray-700 rounded-full">
-												{event.type}
-											</span>
-										</div>
-									</div>
-									<div className="p-6 flex-1 flex flex-col">
-										<h2 className="text-lg font-bold text-gray-800 mb-2 group-hover:text-orange-600 transition-colors duration-200">
-											{event.name}
-										</h2>
-										<p className="text-gray-600 text-sm mb-4 flex-1 line-clamp-3">
-											{event.description}
-										</p>
-										<div className="space-y-2 text-sm text-gray-500 mt-auto">
-											<div className="flex items-center gap-2">
-												<Calendar size={14} />
-												<span>
-													{new Date(event.startDate).toLocaleDateString()}
-												</span>
-											</div>
-											<div className="flex items-center justify-between">
-												<div className="flex items-center gap-1">
-													<Users size={14} />
-													<span>
-														{event.numAttendees}/{event.capacity} attending
-													</span>
-												</div>
-												{event.venueInfo && (
-													<div className="flex items-center gap-1">
-														<MapPin size={14} />
-														<span>
-															{event.venueInfo.city}, {event.venueInfo.state}
-														</span>
-													</div>
-												)}
-											</div>
-										</div>
-									</div>
-								</article>
-							</Link>
+							<EventsCard key={event.id} event={event} />
 						))}
 					</div>
 				) : (
