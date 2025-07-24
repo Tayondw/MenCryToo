@@ -9,6 +9,7 @@ export * from "./home";
 export * from "./login";
 export * from "./modal";
 export * from "./navigation";
+export * from "./page";
 export * from "./posts";
 export * from "./private";
 export * from "./profile";
