@@ -219,11 +219,11 @@ const Events: React.FC = () => {
 		return (
 			<Link
 				to={`/events/${event.id}`}
-				className={`group block bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-slate-200 hover:border-orange-300 overflow-hidden ${
+				className={`group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-slate-200 hover:border-orange-300 overflow-hidden h-[480px] flex flex-col ${
 					isPast ? "opacity-75" : ""
 				}`}
 			>
-				<div className="relative">
+				<div className="relative flex-shrink-0">
 					{/* Event Image */}
 					<div className="aspect-video w-full bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
 						<img
@@ -246,70 +246,70 @@ const Events: React.FC = () => {
 							{event.numAttendees}/{event.capacity}
 						</div>
 					</div>
+				</div>
 
-					{/* Content */}
-					<div className="p-6">
-						<div className="mb-4">
-							<h3 className="font-bold text-xl text-slate-900 group-hover:text-orange-600 transition-colors mb-2 line-clamp-2">
-								{event.name}
-							</h3>
-							<p className="text-slate-600 text-sm line-clamp-3 leading-relaxed mb-3">
-								{event.description}
+				{/* Content */}
+				<div className="p-6 flex flex-col flex-1">
+					<div className="flex-1">
+						<h3 className="font-bold text-xl text-slate-900 group-hover:text-orange-600 transition-colors mb-2 line-clamp-2 h-[3.5rem]">
+							{event.name}
+						</h3>
+						<p className="text-slate-600 text-sm line-clamp-3 leading-relaxed mb-3 h-[4rem]">
+							{event.description}
+						</p>
+
+						{/* Date and Time */}
+						<div className="flex items-center gap-2 text-slate-500 mb-2">
+							<Calendar size={16} />
+							<span className="text-sm">
+								{formatDateRange(event.startDate, event.endDate)}
+							</span>
+						</div>
+
+						{/* Location */}
+						<div className="flex items-center gap-2 text-slate-500 mb-3">
+							<MapPin size={16} />
+							<span className="text-sm">
+								{event.venueInfo
+									? `${event.venueInfo.city}, ${event.venueInfo.state}`
+									: "Online Event"}
+							</span>
+						</div>
+					</div>
+
+					{/* Group Info */}
+					<div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg mb-4">
+						<img
+							src={event.groupInfo.image}
+							alt={event.groupInfo.name}
+							className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+						/>
+						<div className="flex-1 min-w-0">
+							<p className="font-medium text-slate-900 text-sm truncate">
+								{event.groupInfo.name}
 							</p>
-
-							{/* Date and Time */}
-							<div className="flex items-center gap-2 text-slate-500 mb-2">
-								<Calendar size={16} />
-								<span className="text-sm">
-									{formatDateRange(event.startDate, event.endDate)}
-								</span>
-							</div>
-
-							{/* Location */}
-							<div className="flex items-center gap-2 text-slate-500 mb-3">
-								<MapPin size={16} />
-								<span className="text-sm">
-									{event.venueInfo
-										? `${event.venueInfo.city}, ${event.venueInfo.state}`
-										: "Online Event"}
-								</span>
-							</div>
+							<p className="text-slate-500 text-xs">
+								{event.groupInfo.city}, {event.groupInfo.state}
+							</p>
 						</div>
+					</div>
 
-						{/* Group Info */}
-						<div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg mb-4">
-							<img
-								src={event.groupInfo.image}
-								alt={event.groupInfo.name}
-								className="w-10 h-10 rounded-full object-cover"
-							/>
-							<div className="flex-1 min-w-0">
-								<p className="font-medium text-slate-900 text-sm truncate">
-									{event.groupInfo.name}
-								</p>
-								<p className="text-slate-500 text-xs">
-									{event.groupInfo.city}, {event.groupInfo.state}
-								</p>
-							</div>
+					{/* Stats - Always at bottom */}
+					<div className="flex items-center justify-between text-sm mt-auto">
+						<div className="flex items-center gap-4">
+							<span className="flex items-center gap-1 text-slate-600">
+								<User size={14} />
+								{event.numAttendees} attending
+							</span>
+							<span className="bg-slate-100 text-slate-700 px-2 py-1 rounded-full text-xs font-medium">
+								{event.type}
+							</span>
 						</div>
-
-						{/* Stats */}
-						<div className="flex items-center justify-between text-sm">
-							<div className="flex items-center gap-4">
-								<span className="flex items-center gap-1 text-slate-600">
-									<User size={14} />
-									{event.numAttendees} attending
-								</span>
-								<span className="bg-slate-100 text-slate-700 px-2 py-1 rounded-full text-xs font-medium">
-									{event.type}
-								</span>
-							</div>
-							{!isPast && (
-								<span className="text-green-600 font-medium text-xs">
-									{event.capacity - event.numAttendees} spots left
-								</span>
-							)}
-						</div>
+						{!isPast && (
+							<span className="text-green-600 font-medium text-xs">
+								{event.capacity - event.numAttendees} spots left
+							</span>
+						)}
 					</div>
 				</div>
 			</Link>
