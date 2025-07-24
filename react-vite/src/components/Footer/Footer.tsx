@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
 	const socialLinks = [
 		{
 			name: "Portfolio",
-			href: "https://github.com/Tayondw/Tayondw",
+			href: "https://tayondw.github.io/",
 			icon: FolderOpen,
 			color: "hover:text-purple-400",
 			description: "View my portfolio",
