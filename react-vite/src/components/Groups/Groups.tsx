@@ -92,9 +92,9 @@ const Groups: React.FC = () => {
 	const GroupCard: React.FC<{ group: Group }> = ({ group }) => (
 		<Link
 			to={`/groups/${group.id}`}
-			className="group block bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-slate-200 hover:border-orange-300 overflow-hidden"
+			className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-slate-200 hover:border-orange-300 overflow-hidden h-[410px] flex flex-col w-[300px]"
 		>
-			<div className="relative">
+			<div className="relative flex-shrink-0">
 				{/* Group Image */}
 				<div className="aspect-video w-full bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
 					<img
@@ -108,17 +108,17 @@ const Groups: React.FC = () => {
 						{group.numMembers}
 					</div>
 				</div>
+			</div>
 
-				{/* Content */}
-				<div className="p-6">
-					<div className="mb-4">
-						<h3 className="font-bold text-xl text-slate-900 group-hover:text-orange-600 transition-colors mb-2 line-clamp-2">
-							{group.name}
-						</h3>
-						<p className="text-slate-600 text-sm line-clamp-3 leading-relaxed">
-							{group.about}
-						</p>
-					</div>
+			{/* Content */}
+			<div className="p-6 flex flex-col flex-1">
+				<div className="flex-1">
+					<h3 className="font-bold text-xl text-slate-900 group-hover:text-orange-600 transition-colors mb-2 line-clamp-2 h-[3.5rem]">
+						{group.name}
+					</h3>
+					<p className="text-slate-600 text-sm line-clamp-4 leading-relaxed mb-4 h-[4rem]">
+						{group.about}
+					</p>
 
 					{/* Location */}
 					<div className="flex items-center gap-2 text-slate-500 mb-4">
@@ -127,23 +127,23 @@ const Groups: React.FC = () => {
 							{group.city}, {group.state}
 						</span>
 					</div>
+				</div>
 
-					{/* Stats */}
-					<div className="flex items-center justify-between text-sm">
-						<div className="flex items-center gap-4">
-							<span className="flex items-center gap-1 text-slate-600">
-								<Users size={14} />
-								{group.numMembers} members
-							</span>
-							<span className="flex items-center gap-1 text-slate-600">
-								<Calendar size={14} />
-								{group.numEvents} events
-							</span>
-						</div>
-						<span className="bg-slate-100 text-slate-700 px-2 py-1 rounded-full text-xs font-medium">
-							{group.type}
+				{/* Stats - Always at bottom */}
+				<div className="flex items-center justify-between text-sm mt-auto">
+					<div className="flex items-center gap-4">
+						<span className="flex items-center gap-1 text-slate-600">
+							<Users size={14} />
+							{group.numMembers} members
+						</span>
+						<span className="flex items-center gap-1 text-slate-600">
+							<Calendar size={14} />
+							{group.numEvents} events
 						</span>
 					</div>
+					<span className="bg-slate-100 text-slate-700 px-2 py-1 rounded-full text-xs font-medium">
+						{group.type}
+					</span>
 				</div>
 			</div>
 		</Link>
