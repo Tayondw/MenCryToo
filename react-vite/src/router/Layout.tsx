@@ -6,6 +6,8 @@ import { thunkAuthenticate } from "../store/session";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import ScrollToTop from "../components/ScrollToTop";
+import NavigationLoader from "../components/Navigation/NavigationLoader";
+import PageLoader from "../components/PageLoader";
 import { AppDispatch } from "../types";
 
 // Memoized Layout component
@@ -21,7 +23,10 @@ const Layout = memo(({ children }: { children?: React.ReactNode }) => {
 			} catch (error) {
 				console.error("Authentication failed:", error);
 			} finally {
-				setIsLoaded(true);
+				// Add small delay to prevent loading flash
+				setTimeout(() => {
+					setIsLoaded(true);
+				}, 500);
 			}
 		};
 
@@ -30,19 +35,13 @@ const Layout = memo(({ children }: { children?: React.ReactNode }) => {
 
 	// Show minimal loading state
 	if (!isLoaded) {
-		return (
-			<div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-slate-50 flex items-center justify-center">
-				<div className="text-center">
-					<div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-					<p className="text-slate-600 text-sm">Loading application...</p>
-				</div>
-			</div>
-		);
+		return <PageLoader message="Initializing application..." />;
 	}
 
 	return (
 		<ModalProvider>
 			<Navigation />
+			<NavigationLoader /> {/* route transition loading */}
 			<ScrollToTop />
 			<div className="relative overflow-hidden">
 				<main className="relative">
