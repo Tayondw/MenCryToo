@@ -134,7 +134,7 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 		}
 	}, [isOpen, commentsData.length]);
 
-	// Enhanced close handler with refresh logic
+	// Close handler with refresh logic
 	const handleClose = useCallback(() => {
 		// Call parent's onCommentChange one final time if there were changes
 		if (hasChangedRef.current && onCommentChange) {
@@ -621,7 +621,7 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 		[sessionUser, replyText, postId, findCommentById, notifyParentOfChange],
 	);
 
-	// Enhanced edit comment handler with better error handling
+	// Edit comment handler
 	const handleEditComment = useCallback(
 		async (commentId: number, newText: string) => {
 			setError(null);
@@ -653,7 +653,7 @@ const CommentModal: React.FC<EnhancedCommentModalProps> = ({
 		[],
 	);
 
-	// Enhanced delete comment handler with better error handling
+	// Delete comment handler
 	const handleDeleteComment = useCallback(
 		async (commentId: number) => {
 			setError(null);
