@@ -765,7 +765,7 @@ const CommentThread: React.FC<EnhancedCommentThreadProps> = ({
 							</div>
 						)}
 
-					{/* Nested replies - rest of the component remains unchanged */}
+					{/* Nested replies */}
 					{hasReplies &&
 						(showReplies || isEnhancedMode) &&
 						shouldNestReplies && (
