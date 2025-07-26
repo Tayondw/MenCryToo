@@ -410,7 +410,7 @@ const CommentThread: React.FC<EnhancedCommentThreadProps> = ({
 									{getFormattedTime()}
 								</span>
 
-								{/* Menu button for enhanced mode */}
+								{/* Menu button */}
 								{canModify && (
 									<div className="relative ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
 										<button
@@ -495,7 +495,7 @@ const CommentThread: React.FC<EnhancedCommentThreadProps> = ({
 								</div>
 							)}
 
-							{/* Action buttons for enhanced mode */}
+							{/* Action buttons */}
 							{!isEditing && (
 								<div className="flex items-center gap-4 text-xs text-slate-500">
 									{/* Like Button */}
@@ -522,7 +522,7 @@ const CommentThread: React.FC<EnhancedCommentThreadProps> = ({
 										</button>
 									)}
 
-									{/* Show replies button for enhanced mode */}
+									{/* Show replies button */}
 									{hasReplies && (
 										<button
 											onClick={() => setShowReplies(!showReplies)}
@@ -541,7 +541,7 @@ const CommentThread: React.FC<EnhancedCommentThreadProps> = ({
 							)}
 						</div>
 					) : (
-						// Original mode layout (unchanged)
+						// Original mode layout
 						<>
 							{/* Header */}
 							<div className="flex items-center gap-2 mb-1">
