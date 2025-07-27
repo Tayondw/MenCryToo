@@ -18,8 +18,8 @@ const PostsCard: React.FC<ProfilePostCardProps> = ({
 }) => {
 	// Function to truncate caption and add "...more" if needed
 	const renderCaption = (caption: string, maxLines: number = 3) => {
-		// Rough estimation: ~50 characters per line for 3 lines
-		const maxChars = maxLines * 50;
+		// Rough estimation: ~20 characters per line for 3 lines
+		const maxChars = maxLines * 20;
 
 		if (caption.length <= maxChars) {
 			return <span>{caption}</span>;
@@ -70,7 +70,7 @@ const PostsCard: React.FC<ProfilePostCardProps> = ({
 			{/* Post Title */}
 			<div className="px-4 pb-3">
 				<h3
-					className="text-lg font-bold text-gray-800 leading-tight cursor-pointer hover:text-orange-600 transition-colors duration-200"
+					className="text-lg h-12 font-bold text-gray-800 leading-tight cursor-pointer hover:text-orange-600 transition-colors duration-200 tracking-widest place-content-center"
 					onClick={() => onPostClick(post.id)}
 				>
 					{post.title}
@@ -121,18 +121,23 @@ const PostsCard: React.FC<ProfilePostCardProps> = ({
 					</button>
 				</div>
 
-				<div className="mt-auto">
-					<p className="text-gray-700 text-sm leading-relaxed">
-						<span className="font-medium text-gray-700">
-							{currentUser.username}
-						</span>
-						<span className="mx-2 text-gray-500">•</span>
-						<span className="text-gray-500 text-xs">
-							{formatTimeAgo(post.updatedAt)}
-						</span>
-						<span className="mx-2">•</span>
-						{renderCaption(post.caption)}
-					</p>
+				<div className="mt-auto mb-4">
+					<div className="flex h-10 items-start gap-2 text-gray-700 text-sm leading-relaxed">
+						<div className="flex items-center gap-2 flex-shrink-0">
+							<span className="font-semibold text-gray-700">
+								{currentUser.username}
+							</span>
+							<span className="text-gray-500">•</span>
+							<div className="flex items-center gap-1">
+								<Clock size={12} className="text-gray-500" />
+								<span className="text-gray-500 text-xs">
+									{formatTimeAgo(post.updatedAt)}
+								</span>
+							</div>
+							<span className="text-gray-500">•</span>
+						</div>
+						<div className="flex-1 min-w-0">{renderCaption(post.caption)}</div>
+					</div>
 				</div>
 			</div>
 		</article>
