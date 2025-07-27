@@ -1,5 +1,4 @@
 import { Heart, MessageCircle, Share2, Bookmark, Clock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { PostCardProps } from "../../../../types";
 import LikeButton from "../../../Likes/PostsLikesButton";
 
@@ -15,12 +14,10 @@ const ProfileDetailsPostsCard: React.FC<PostCardProps> = ({
 	onLikesClick,
 	currentCommentCount,
 }) => {
-	const navigate = useNavigate();
-
 	// Function to truncate caption and add "...more" if needed
 	const renderCaption = (caption: string, maxLines: number = 3) => {
-		// Rough estimation: ~50 characters per line for 3 lines
-		const maxChars = maxLines * 50;
+		// Rough estimation: ~20 characters per line for 3 lines
+		const maxChars = maxLines * 20;
 
 		if (caption.length <= maxChars) {
 			return <span>{caption}</span>;
@@ -68,7 +65,7 @@ const ProfileDetailsPostsCard: React.FC<PostCardProps> = ({
 			{/* Post Title */}
 			<div className="px-4 pb-3">
 				<h3
-					className="text-lg font-bold text-gray-800 leading-tight cursor-pointer hover:text-orange-600 transition-colors duration-200"
+					className="text-lg h-12 font-bold text-gray-800 leading-tight cursor-pointer hover:text-orange-600 transition-colors duration-200"
 					onClick={() => onPostClick(post.id)}
 				>
 					{post.title}
@@ -135,17 +132,22 @@ const ProfileDetailsPostsCard: React.FC<PostCardProps> = ({
 
 				{/* Caption */}
 				<div className="mt-auto">
-					<p className="text-gray-700 text-sm leading-relaxed">
-						<span className="font-medium text-gray-700">
-							{userDetails?.username}
-						</span>
-						<span className="mx-2 text-gray-500">•</span>
-						<span className="text-gray-500 text-xs">
-							{formatTimeAgo(post.updatedAt)}
-						</span>
-						<span className="mx-2">•</span>
-						{renderCaption(post.caption)}
-					</p>
+					<div className="flex items-start gap-2 text-gray-700 text-sm leading-relaxed">
+						<div className="flex items-center gap-2 flex-shrink-0">
+							<span className="font-medium text-gray-700">
+								{userDetails?.username}
+							</span>
+							<span className="text-gray-500">•</span>
+							<div className="flex items-center gap-1">
+								<Clock size={12} className="text-gray-500" />
+								<span className="text-gray-500 text-xs">
+									{formatTimeAgo(post.updatedAt)}
+								</span>
+							</div>
+							<span className="text-gray-500">•</span>
+						</div>
+						<div className="flex-1 min-w-0">{renderCaption(post.caption)}</div>
+					</div>
 				</div>
 			</div>
 		</article>
