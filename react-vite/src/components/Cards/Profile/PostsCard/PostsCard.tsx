@@ -16,8 +16,38 @@ const PostsCard: React.FC<ProfilePostCardProps> = ({
 	navigate,
 	PostMenu,
 }) => {
+	// Function to truncate caption and add "...more" if needed
+	const renderCaption = (caption: string, maxLines: number = 3) => {
+		// Rough estimation: ~50 characters per line for 3 lines
+		const maxChars = maxLines * 50;
+
+		if (caption.length <= maxChars) {
+			return <span>{caption}</span>;
+		}
+
+		const truncated = caption.substring(0, maxChars);
+		const lastSpaceIndex = truncated.lastIndexOf(" ");
+		const finalText =
+			lastSpaceIndex > 0 ? truncated.substring(0, lastSpaceIndex) : truncated;
+
+		return (
+			<span>
+				{finalText}
+				<button
+					onClick={(e) => {
+						e.preventDefault();
+						navigate(`/posts/${post.id}`);
+					}}
+					className="text-orange-600 hover:text-orange-700 font-medium ml-1 transition-colors duration-200"
+				>
+					...more
+				</button>
+			</span>
+		);
+	};
+
 	return (
-		<article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300 group">
+		<article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:border-orange-300 transition-all duration-300 group h-full flex flex-col">
 			{/* Post Header */}
 			<div className="flex items-center justify-between p-4 pb-3">
 				<div className="flex items-center gap-3 min-w-0 flex-1">
@@ -63,7 +93,7 @@ const PostsCard: React.FC<ProfilePostCardProps> = ({
 			)}
 
 			{/* Post Content */}
-			<div className="p-4 pt-3">
+			<div className="p-4 pt-3 flex-1 flex flex-col">
 				<div className="flex items-center gap-4 mb-3">
 					<LikeButton
 						postId={post.id}
@@ -91,16 +121,17 @@ const PostsCard: React.FC<ProfilePostCardProps> = ({
 					</button>
 				</div>
 
-				<div className="space-y-2">
-					<div className="flex items-center gap-2 text-xs text-gray-500">
+				<div className="mt-auto">
+					<p className="text-gray-700 text-sm leading-relaxed">
 						<span className="font-medium text-gray-700">
 							{currentUser.username}
 						</span>
-						<Clock size={12} />
-						<span>{formatTimeAgo(post.updatedAt)}</span>
-					</div>
-					<p className="text-gray-700 text-sm leading-relaxed">
-						{post.caption}
+						<span className="mx-2 text-gray-500">•</span>
+						<span className="text-gray-500 text-xs">
+							{formatTimeAgo(post.updatedAt)}
+						</span>
+						<span className="mx-2">•</span>
+						{renderCaption(post.caption)}
 					</p>
 				</div>
 			</div>
