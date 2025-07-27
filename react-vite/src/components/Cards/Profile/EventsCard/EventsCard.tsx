@@ -5,7 +5,7 @@ import { ProfileEventCardProps } from "../../../../types";
 
 const EventsCard: React.FC<ProfileEventCardProps> = ({ event }) => (
 	<Link to={`/events/${event.id}`} className="group block">
-		<article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300">
+		<article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:border-orange-300 transition-all duration-300 h-full flex flex-col">
 			{/* Event Image */}
 			<div className="relative aspect-[4/3] overflow-hidden">
 				<img
@@ -19,16 +19,16 @@ const EventsCard: React.FC<ProfileEventCardProps> = ({ event }) => (
 			</div>
 
 			{/* Event Content */}
-			<div className="p-4">
+			<div className="p-4 flex-1 flex flex-col">
 				<h2 className="text-lg font-bold text-gray-800 mb-2 leading-tight group-hover:text-orange-600 transition-colors duration-200">
 					{event.name}
 				</h2>
-				<p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-2">
+				<p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-2 flex-1">
 					{event.description}
 				</p>
 
 				{/* Event Stats */}
-				<div className="space-y-2">
+				<div className="space-y-2 mt-auto">
 					<div className="flex items-center justify-between text-xs text-gray-500">
 						<div className="flex items-center gap-1">
 							<Calendar size={14} />
