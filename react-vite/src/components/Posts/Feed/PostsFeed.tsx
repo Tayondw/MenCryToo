@@ -4,6 +4,7 @@ import {
 	Link,
 	useSearchParams,
 	useFetcher,
+	useNavigate,
 } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
@@ -658,6 +659,7 @@ const PostCard: React.FC<PostFeedCardProps> = ({
 	setLikeState,
 	currentCommentCount,
 }) => {
+	const navigate = useNavigate();
 	// Cast post to PostWithComments type for this component
 	const postWithComments = post as PostWithComments;
 
@@ -666,15 +668,45 @@ const PostCard: React.FC<PostFeedCardProps> = ({
 		handleCommentClick(post.id, postWithComments);
 	};
 
+	// Function to truncate caption and add "...more" if needed
+	const renderCaption = (caption: string, maxLines: number = 3) => {
+		// Rough estimation: ~50 characters per line for 3 lines
+		const maxChars = maxLines * 49;
+
+		if (caption.length <= maxChars) {
+			return <span>{caption}</span>;
+		}
+
+		const truncated = caption.substring(0, maxChars);
+		const lastSpaceIndex = truncated.lastIndexOf(" ");
+		const finalText =
+			lastSpaceIndex > 0 ? truncated.substring(0, lastSpaceIndex) : truncated;
+
+		return (
+			<span>
+				{finalText}
+				<button
+					onClick={(e) => {
+						e.preventDefault();
+						navigate(`/posts/${post.id}`);
+					}}
+					className="text-orange-600 hover:text-orange-700 font-medium ml-1 transition-colors duration-200"
+				>
+					...more
+				</button>
+			</span>
+		);
+	};
+
 	return (
 		<div
-			className={`bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg transition-all duration-300 ${
+			className={`bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg hover:border-orange-300 transition-all duration-300 ${
 				viewMode === "list" ? "p-6" : ""
-			}`}
+			} ${viewMode === "grid" ? "h-full flex flex-col" : ""}`}
 		>
 			{viewMode === "grid" ? (
 				// Grid View
-				<div>
+				<div className="h-full flex flex-col">
 					{/* Post Image */}
 					<div className="relative">
 						<img
@@ -686,7 +718,7 @@ const PostCard: React.FC<PostFeedCardProps> = ({
 					</div>
 
 					{/* Post Content */}
-					<div className="p-6">
+					<div className="p-6 flex-1 flex flex-col">
 						{/* User Info */}
 						<div className="flex items-center gap-3 mb-4">
 							<Link to={`/users/${post.user.id}`} className="flex-shrink-0">
@@ -717,16 +749,13 @@ const PostCard: React.FC<PostFeedCardProps> = ({
 
 						{/* Post Title & Caption */}
 						<Link to={`/posts/${post.id}`} className="block group">
-							<h3 className="font-bold text-lg h-14 text-slate-900 group-hover:text-orange-600 transition-colors mb-2 line-clamp-2">
+							<h3 className="font-bold text-lg h-14 text-slate-900 group-hover:text-orange-600 transition-colors mb-3 line-clamp-2 tracking-widest">
 								{post.title}
 							</h3>
-							<p className="text-slate-600 h-20 text-sm line-clamp-4 mb-4">
-								{post.caption}
-							</p>
 						</Link>
 
 						{/* Post Actions */}
-						<div className="flex items-center justify-between">
+						<div className="flex items-center justify-between mb-4">
 							<div className="flex items-center gap-4">
 								<LikeButton
 									postId={post.id}
@@ -756,6 +785,15 @@ const PostCard: React.FC<PostFeedCardProps> = ({
 								<button className="text-slate-400 hover:text-green-500 transition-colors">
 									<Share2 size={18} />
 								</button>
+							</div>
+						</div>
+
+						{/* Caption at bottom */}
+						<div className="mt-auto mb-4">
+							<div className="flex h-10 items-start gap-2 text-slate-600 text-sm leading-relaxed">
+								<div className="flex-1 min-w-0">
+									{renderCaption(post.caption)}
+								</div>
 							</div>
 						</div>
 					</div>
@@ -806,18 +844,15 @@ const PostCard: React.FC<PostFeedCardProps> = ({
 							</div>
 						</div>
 
-						{/* Post Title & Caption */}
+						{/* Post Title */}
 						<Link to={`/posts/${post.id}`} className="block group flex-1">
 							<h3 className="font-bold text-lg text-slate-900 group-hover:text-orange-600 transition-colors mb-2">
 								{post.title}
 							</h3>
-							<p className="text-slate-600 text-sm line-clamp-2 mb-4">
-								{post.caption}
-							</p>
 						</Link>
 
 						{/* Post Actions */}
-						<div className="flex items-center justify-between mt-auto">
+						<div className="flex items-center justify-between mb-4">
 							<div className="flex items-center gap-4">
 								<LikeButton
 									postId={post.id}
@@ -847,6 +882,15 @@ const PostCard: React.FC<PostFeedCardProps> = ({
 								<button className="text-slate-400 hover:text-green-500 transition-colors">
 									<Share2 size={16} />
 								</button>
+							</div>
+						</div>
+
+						{/* Caption at bottom */}
+						<div className="mt-auto">
+							<div className="flex items-start gap-2 text-slate-600 text-sm leading-relaxed">
+								<div className="flex-1 min-w-0">
+									{renderCaption(post.caption)}
+								</div>
 							</div>
 						</div>
 					</div>
