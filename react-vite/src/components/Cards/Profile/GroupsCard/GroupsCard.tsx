@@ -20,7 +20,7 @@ const GroupsCard: React.FC<ProfileGroupCardProps> = ({ group }) => (
 
 			{/* Group Content */}
 			<div className="p-4 flex-1 flex flex-col">
-				<h2 className="text-lg font-bold text-gray-800 mb-2 leading-tight group-hover:text-orange-600 transition-colors duration-200">
+				<h2 className="text-lg h-16 place-content-center font-bold text-gray-800 mb-2 leading-tight group-hover:text-orange-600 transition-colors duration-200">
 					{group.name}
 				</h2>
 				<p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-2 flex-1">
