@@ -1,7 +1,6 @@
 import { Heart, MessageCircle, Share2, Bookmark, Clock } from "lucide-react";
 import { PostCardProps } from "../../../../types";
 import LikeButton from "../../../Likes/PostsLikesButton";
-import "../../../Profile/Profile.css";
 
 const ProfileDetailsPostsCard: React.FC<PostCardProps> = ({
 	post,
@@ -15,17 +14,17 @@ const ProfileDetailsPostsCard: React.FC<PostCardProps> = ({
 	onLikesClick,
 	currentCommentCount,
 }) => (
-	<article className="post-card-fixed group">
+	<article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300 group">
 		{/* Post Header */}
-		<div className="post-header-fixed">
-			<div className="post-user-info-fixed">
+		<div className="flex items-center justify-between p-4 pb-3">
+			<div className="flex items-center gap-3 min-w-0 flex-1">
 				<img
 					src={userDetails?.profileImage}
 					alt={userDetails?.username}
-					className="post-avatar-fixed"
+					className="w-10 h-10 rounded-full object-cover border-2 border-gray-100"
 				/>
 				<div className="min-w-0 flex-1">
-					<span className="post-username-fixed block">
+					<span className="font-semibold text-gray-800 text-sm truncate block">
 						{userDetails?.username}
 					</span>
 				</div>
@@ -33,8 +32,11 @@ const ProfileDetailsPostsCard: React.FC<PostCardProps> = ({
 		</div>
 
 		{/* Post Title */}
-		<div className="post-title-section-fixed">
-			<h3 className="post-title-fixed" onClick={() => onPostClick(post.id)}>
+		<div className="px-4 pb-3">
+			<h3
+				className="text-lg font-bold text-gray-800 leading-tight cursor-pointer hover:text-orange-600 transition-colors duration-200"
+				onClick={() => onPostClick(post.id)}
+			>
 				{post.title}
 			</h3>
 		</div>
@@ -42,17 +44,21 @@ const ProfileDetailsPostsCard: React.FC<PostCardProps> = ({
 		{/* Post Image */}
 		{post.image && (
 			<div
-				className="post-image-section-fixed"
+				className="relative aspect-[4/3] overflow-hidden cursor-pointer"
 				onClick={() => onPostClick(post.id)}
 			>
-				<img src={post.image} alt={post.title} className="post-image-fixed" />
+				<img
+					src={post.image}
+					alt={post.title}
+					className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+				/>
 				<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 			</div>
 		)}
 
 		{/* Post Content */}
-		<div className="post-content-fixed">
-			<div className="post-actions-fixed">
+		<div className="p-4 pt-3">
+			<div className="flex items-center gap-4 mb-3">
 				{/* Like Button */}
 				{isAuthenticated ? (
 					<LikeButton
@@ -94,13 +100,15 @@ const ProfileDetailsPostsCard: React.FC<PostCardProps> = ({
 			</div>
 
 			{/* Caption */}
-			<div className="post-caption-fixed">
-				<span className="caption-username-fixed">{userDetails?.username}</span>
-				<span className="caption-time-fixed">
+			<div className="space-y-2">
+				<div className="flex items-center gap-2 text-xs text-gray-500">
+					<span className="font-medium text-gray-700">
+						{userDetails?.username}
+					</span>
 					<Clock size={12} />
-					{formatTimeAgo(post.updatedAt)}
-				</span>
-				<span className="caption-text-fixed">{post.caption}</span>
+					<span>{formatTimeAgo(post.updatedAt)}</span>
+				</div>
+				<p className="text-gray-700 text-sm leading-relaxed">{post.caption}</p>
 			</div>
 		</div>
 	</article>
