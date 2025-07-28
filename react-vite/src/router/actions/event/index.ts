@@ -12,6 +12,14 @@ export const eventAction = async ({
 	const intent = formData.get("intent") as string;
 	const eventId = params.eventId || (formData.get("id") as string);
 
+	// Debug logging
+	console.log("Event Action called:", {
+		intent,
+		eventId,
+		method: request.method,
+		url: request.url,
+	});
+
 	if (!eventId) {
 		return json({ error: "Event ID is required" }, { status: 400 });
 	}
@@ -77,6 +85,99 @@ export const eventAction = async ({
 					return redirect("/events");
 				} else {
 					return json({ error: "Failed to delete event" }, { status: 500 });
+				}
+			}
+			case "add-event-image": {
+				console.log(
+					"Attempting to upload image to:",
+					`/api/events/${eventId}/images`,
+				);
+
+				try {
+					const response = await fetch(`/api/events/${eventId}/images`, {
+						method: "POST",
+						credentials: "include",
+						body: formData,
+					});
+
+					console.log("Upload response status:", response.status);
+
+					if (response.ok) {
+						const result = await response.json();
+						console.log("Upload successful:", result);
+
+						const successData = {
+							success: true,
+							message: "Image uploaded successfully!",
+							image: result.event_image,
+						};
+						console.log("About to return success data:", successData);
+
+						// Make sure we're returning the right format
+						const jsonResponse = json(successData);
+						console.log("Created json response:", jsonResponse);
+						return jsonResponse;
+					} else {
+						console.log(
+							"Upload failed with status:",
+							response.status,
+							response.statusText,
+						);
+						const errorText = await response.text();
+						console.log("Error response text:", errorText);
+
+						return json(
+							{
+								success: false,
+								error: `Upload failed: ${response.status} ${response.statusText}`,
+							},
+							{ status: response.status },
+						);
+					}
+				} catch (fetchError) {
+					console.error("Fetch error during upload:", fetchError);
+					return json(
+						{
+							success: false,
+							error: "Network error during upload",
+						},
+						{ status: 500 },
+					);
+				}
+			}
+
+			case "delete-event-image": {
+				const imageId = formData.get("imageId") as string;
+
+				if (!imageId) {
+					return json(
+						{
+							success: false,
+							error: "Image ID is required",
+						},
+						{ status: 400 },
+					);
+				}
+
+				const response = await fetch(`/api/event-images/${imageId}`, {
+					method: "DELETE",
+					credentials: "include",
+				});
+
+				if (response.ok) {
+					return json({
+						success: true,
+						message: "Image deleted successfully!",
+					});
+				} else {
+					const errorData = await response.json();
+					return json(
+						{
+							success: false,
+							error: errorData.message || "Failed to delete image",
+						},
+						{ status: 400 },
+					);
 				}
 			}
 
