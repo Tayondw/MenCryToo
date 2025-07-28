@@ -70,6 +70,7 @@ import {
 	postsFeedLoader,
 } from "./loaders/post";
 import { postAction, postsFeedAction } from "./actions/post";
+import { groupImageAction, eventImageAction } from "./actions/image";
 import { partnershipActions } from "./actions/partnership";
 import { contactActions } from "./actions/contact";
 
@@ -308,6 +309,39 @@ export const router = createBrowserRouter([
 					</SuspenseWrapper>
 				),
 				action: postAction,
+			},
+			// Group image routes
+			{
+				path: "groups/:groupId/images",
+				action: groupImageAction,
+				errorElement: <RouteErrorBoundary />,
+			},
+			{
+				path: "groups/:groupId/images/:imageId/edit",
+				action: groupImageAction,
+				errorElement: <RouteErrorBoundary />,
+			},
+			{
+				path: "group-images/:imageId",
+				action: groupImageAction,
+				errorElement: <RouteErrorBoundary />,
+			},
+
+			// Event image routes
+			{
+				path: "events/:eventId/images",
+				action: eventImageAction,
+				errorElement: <RouteErrorBoundary />,
+			},
+			{
+				path: "events/:eventId/images/:imageId/edit",
+				action: eventImageAction,
+				errorElement: <RouteErrorBoundary />,
+			},
+			{
+				path: "event-images/:imageId",
+				action: eventImageAction,
+				errorElement: <RouteErrorBoundary />,
 			},
 			// STATIC PAGES
 			{
