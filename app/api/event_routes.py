@@ -343,11 +343,9 @@ def add_event_image(eventId):
 
 @event_routes.route("/<int:eventId>/images/<int:imageId>/edit", methods=["POST"])
 @login_required
-def edit_event_images(eventId, imageId):
-    """
-    Update event image
-    """
-    # Get image and check authorization in one query
+def edit_event_image(eventId, imageId):
+    """Edit/update an event image"""
+    # Get event image and check authorization in one query
     event_image = (
         db.session.query(EventImage)
         .join(Event)
@@ -362,7 +360,7 @@ def edit_event_images(eventId, imageId):
     )
 
     if not event_image:
-        return {"errors": {"message": "Not Found"}}, 404
+        return {"errors": {"message": "Image not found"}}, 404
 
     if current_user.id != event_image.event.groups.organizer_id:
         return {"errors": {"message": "Unauthorized"}}, 401
@@ -371,22 +369,30 @@ def edit_event_images(eventId, imageId):
     form["csrf_token"].data = request.cookies["csrf_token"]
 
     if form.validate_on_submit():
-        edit_event_image = form.data["event_image"]
+        edit_event_image_file = form.data["event_image"]
 
-        if not edit_event_image:
+        if not edit_event_image_file:
             return {"message": "No image provided"}, 400
 
-        edit_event_image.filename = get_unique_filename(edit_event_image.filename)
-        upload = upload_file_to_s3(edit_event_image)
+        try:
+            edit_event_image_file.filename = get_unique_filename(
+                edit_event_image_file.filename
+            )
+            upload = upload_file_to_s3(edit_event_image_file)
 
-        if "url" not in upload:
-            return {"message": "Upload failed"}, 400
+            if "url" not in upload:
+                return {"message": "Upload failed"}, 400
 
-        # Remove the old image from S3
-        remove_file_from_s3(event_image.event_image)
+            # Remove the old image from S3
+            if event_image.event_image:
+                remove_file_from_s3(event_image.event_image)
 
-        event_image.event_image = upload["url"]
-        db.session.commit()
-        return {"event_image": event_image.to_dict()}, 200
+            event_image.event_image = upload["url"]
+            db.session.commit()
+            return {"event_image": event_image.to_dict()}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"Image update failed: {str(e)}"}, 500
 
     return form.errors, 400
