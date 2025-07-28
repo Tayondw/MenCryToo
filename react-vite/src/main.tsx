@@ -10,7 +10,7 @@ import "./index.css";
 // Configure store with performance settings
 const store = configureStore();
 
-// Type declarations for development globals - must be at top level
+// Type declarations for development globals
 declare global {
 	interface Window {
 		store: typeof store;
