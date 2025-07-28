@@ -1,4 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import {
+	useSubmit,
+	useNavigation,
+	useActionData,
+	useRevalidator,
+} from "react-router-dom";
 import {
 	X,
 	Upload,
@@ -8,6 +14,8 @@ import {
 	Plus,
 	Eye,
 	Download,
+	CheckCircle,
+	AlertCircle,
 } from "lucide-react";
 
 interface EventImage {
@@ -26,13 +34,20 @@ interface EventDetails {
 	eventImage: EventImage[];
 }
 
-interface EventImagesManagerProps {
+interface EventImagesProps {
 	eventDetails: EventDetails;
 	currentUserId: number;
 	onClose: () => void;
 }
 
-const EventImages: React.FC<EventImagesManagerProps> = ({
+interface ActionData {
+	success?: boolean;
+	error?: string;
+	message?: string;
+	image?: EventImage;
+}
+
+const EventImages: React.FC<EventImagesProps> = ({
 	eventDetails,
 	currentUserId,
 	onClose,
@@ -40,11 +55,52 @@ const EventImages: React.FC<EventImagesManagerProps> = ({
 	const [selectedImage, setSelectedImage] = useState<File | null>(null);
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 	const [activeTab, setActiveTab] = useState<"upload" | "gallery">("gallery");
-	const [isUploading, setIsUploading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+	const submit = useSubmit();
+	const navigation = useNavigation();
+	const actionData = useActionData() as ActionData;
+	const revalidator = useRevalidator();
+
+	const isUploading =
+		navigation.state === "submitting" &&
+		navigation.formData?.get("intent") === "add-event-image";
+	const isDeleting =
+		navigation.state === "submitting" &&
+		navigation.formData?.get("intent") === "delete-event-image";
 
 	const isOrganizer = eventDetails?.groupInfo?.organizerId === currentUserId;
 	const eventImages = eventDetails?.eventImage || [];
+
+	// Handle action results
+	useEffect(() => {
+		if (actionData) {
+			if (actionData.success) {
+				setSuccessMessage(
+					actionData.message || "Operation completed successfully!",
+				);
+				setError(null);
+
+				// Clear form state on successful upload
+				if (navigation.formData?.get("intent") === "add-event-image") {
+					clearSelection();
+                              setActiveTab("gallery");
+                              
+				}
+                        onClose();
+
+				// Revalidate to get fresh data
+				revalidator.revalidate();
+
+				// Clear success message after 3 seconds
+				setTimeout(() => setSuccessMessage(null), 3000);
+			} else if (actionData.error) {
+				setError(actionData.error);
+				setSuccessMessage(null);
+			}
+		}
+	}, [actionData, navigation.formData, revalidator, onClose]);
 
 	// Handle file selection for upload
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,56 +135,34 @@ const EventImages: React.FC<EventImagesManagerProps> = ({
 		setError(null);
 	};
 
-	const handleUpload = async () => {
+	const handleUpload = () => {
 		if (!selectedImage) return;
-
-		setIsUploading(true);
-		setError(null);
 
 		const formData = new FormData();
 		formData.append("event_image", selectedImage);
 		formData.append("intent", "add-event-image");
-		formData.append("eventId", eventDetails.id.toString());
+		// Don't append eventId - it comes from the URL params
 
-		try {
-			const response = await fetch(`/api/events/${eventDetails.id}/images`, {
-				method: "POST",
-				body: formData,
-				credentials: "include",
-			});
-
-			if (response.ok) {
-				clearSelection();
-				setActiveTab("gallery");
-				window.location.reload(); // Refresh to show new image
-			} else {
-				const errorData = await response.json();
-				setError(errorData.message || "Upload failed. Please try again.");
-			}
-		} catch {
-			setError("Network error. Please try again.");
-		} finally {
-			setIsUploading(false);
-		}
+		// Submit to the specific event details route
+		submit(formData, {
+			method: "post",
+			action: `/events/${eventDetails.id}`,
+			encType: "multipart/form-data",
+		});
 	};
 
-	const handleDelete = async (imageId: number) => {
+	const handleDelete = (imageId: number) => {
 		if (!confirm("Are you sure you want to delete this image?")) return;
 
-		try {
-			const response = await fetch(`/api/event-images/${imageId}`, {
-				method: "DELETE",
-				credentials: "include",
-			});
+		const formData = new FormData();
+		formData.append("intent", "delete-event-image");
+		formData.append("imageId", imageId.toString());
 
-			if (response.ok) {
-				window.location.reload(); // Refresh to remove deleted image
-			} else {
-				setError("Delete failed. Please try again.");
-			}
-		} catch {
-			setError("Network error. Please try again.");
-		}
+		// Submit to the specific event details route
+		submit(formData, {
+			method: "post",
+			action: `/events/${eventDetails.id}`,
+		});
 	};
 
 	return (
@@ -154,6 +188,29 @@ const EventImages: React.FC<EventImagesManagerProps> = ({
 						<X size={20} className="text-slate-500" />
 					</button>
 				</div>
+
+				{/* Success/Error Messages */}
+				{successMessage && (
+					<div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
+						<CheckCircle size={16} className="text-green-600" />
+						<p className="text-green-700 text-sm font-medium">
+							{successMessage}
+						</p>
+					</div>
+				)}
+
+				{error && (
+					<div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+						<AlertCircle size={16} className="text-red-600" />
+						<p className="text-red-700 text-sm font-medium">{error}</p>
+						<button
+							onClick={() => setError(null)}
+							className="ml-auto text-red-600 hover:text-red-800 text-sm underline"
+						>
+							Dismiss
+						</button>
+					</div>
+				)}
 
 				{/* Tabs */}
 				<div className="flex mt-4 space-x-1 bg-slate-100 rounded-lg p-1">
@@ -253,10 +310,15 @@ const EventImages: React.FC<EventImagesManagerProps> = ({
 													{isOrganizer && (
 														<button
 															onClick={() => handleDelete(image.id)}
-															className="bg-red-500/90 backdrop-blur-sm p-2 rounded-full hover:bg-red-500 transition-colors text-white"
+															disabled={isDeleting}
+															className="bg-red-500/90 backdrop-blur-sm p-2 rounded-full hover:bg-red-500 transition-colors text-white disabled:opacity-50"
 															title="Delete image"
 														>
-															<Trash2 size={16} />
+															{isDeleting ? (
+																<div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+															) : (
+																<Trash2 size={16} />
+															)}
 														</button>
 													)}
 												</div>
@@ -290,6 +352,7 @@ const EventImages: React.FC<EventImagesManagerProps> = ({
 											type="button"
 											onClick={clearSelection}
 											className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm p-1 rounded-full hover:bg-white transition-colors"
+											disabled={isUploading}
 										>
 											<X size={16} className="text-slate-700" />
 										</button>
@@ -309,13 +372,18 @@ const EventImages: React.FC<EventImagesManagerProps> = ({
 							) : (
 								<div
 									onClick={() =>
+										!isUploading &&
 										document.getElementById("event-image-upload")?.click()
 									}
-									className="border-2 border-dashed border-slate-300 rounded-lg p-12 text-center cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+									className={`border-2 border-dashed border-slate-300 rounded-lg p-12 text-center transition-all duration-200 ${
+										isUploading
+											? "cursor-not-allowed opacity-50"
+											: "cursor-pointer hover:border-blue-300 hover:bg-blue-50"
+									}`}
 								>
 									<Upload size={48} className="mx-auto text-slate-400 mb-4" />
 									<p className="text-lg font-medium text-slate-700 mb-2">
-										Click to upload an image
+										{isUploading ? "Uploading..." : "Click to upload an image"}
 									</p>
 									<p className="text-sm text-slate-500 mb-4">
 										PNG, JPG, or GIF (max 5MB)
@@ -333,20 +401,8 @@ const EventImages: React.FC<EventImagesManagerProps> = ({
 								accept="image/*"
 								onChange={handleFileChange}
 								className="hidden"
+								disabled={isUploading}
 							/>
-
-							{/* Error Display */}
-							{error && (
-								<div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-									<p className="text-red-700 text-sm font-medium">{error}</p>
-									<button
-										onClick={() => setError(null)}
-										className="mt-2 text-red-600 hover:text-red-800 text-sm underline"
-									>
-										Dismiss
-									</button>
-								</div>
-							)}
 
 							{/* Action Buttons */}
 							<div className="flex gap-3 pt-4 border-t border-slate-200">
