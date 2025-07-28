@@ -14,12 +14,14 @@ import {
 	Edit,
 	Trash2,
 	Building,
-	Globe,
+      Globe,
+      Plus,
 	Info,
 } from "lucide-react";
 import { RootState, EventVenue, type EventDetails } from "../../../types";
 import { useModal } from "../../../hooks/useModal";
 import DeleteEvent from "../CRUD/Delete/DeleteEvent";
+import EventImages from "../../Images/Events";
 
 type SectionType = "overview" | "attendees" | "group" | "photos";
 
@@ -178,6 +180,25 @@ const EventDetails: React.FC = () => {
 					startDate: eventDetails.startDate,
 					description: eventDetails.description,
 				}}
+			/>,
+		);
+	};
+
+	// Handle images button click - opens the EventImages modal
+	const handleImagesClick = () => {
+		setModalContent(
+			<EventImages
+				eventDetails={{
+					id: eventDetails.id,
+					name: eventDetails.name,
+					groupId: eventDetails.groupId,
+					groupInfo: {
+						organizerId: eventDetails.organizer?.id || 0,
+					},
+					eventImage: eventDetails.eventImage || [],
+				}}
+				currentUserId={sessionUser?.id || 0}
+				onClose={() => setModalContent(null)}
 			/>,
 		);
 	};
@@ -537,8 +558,247 @@ const EventDetails: React.FC = () => {
 							</div>
 						)}
 
-						{/* Continue with attendees, group, and photos sections... */}
-						{/* Rest of your existing section content goes here */}
+						{activeSection === "attendees" && (
+							<div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+								<div className="flex items-center justify-between mb-4">
+									<h2 className="text-xl font-semibold text-slate-900">
+										Attendees ({eventDetails.attendees?.length || 0})
+									</h2>
+									{/* Add attend button in attendees section too */}
+									{sessionUser &&
+										!isAttending &&
+										!isOrganizer &&
+										!isPastEvent &&
+										!isFull && (
+											<Form method="post">
+												<input
+													type="hidden"
+													name="intent"
+													value="attend-event"
+												/>
+												<input
+													type="hidden"
+													name="id"
+													value={eventDetails.id}
+												/>
+												<input
+													type="hidden"
+													name="userId"
+													value={sessionUser.id}
+												/>
+												<button
+													type="submit"
+													className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+												>
+													<UserPlus size={16} />
+													Attend Event
+												</button>
+											</Form>
+										)}
+								</div>
+								{!sessionUser ? (
+									<div className="text-center py-8">
+										<Users size={48} className="mx-auto text-slate-300 mb-4" />
+										<p className="text-slate-600 mb-4">
+											You must be logged in to view event attendees.
+										</p>
+										<button
+											onClick={handleSignupRedirect}
+											className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+										>
+											Sign Up to View Attendees
+										</button>
+									</div>
+								) : eventDetails.attendees?.length === 0 ? (
+									<div className="text-center py-8">
+										<Users size={48} className="mx-auto text-slate-300 mb-4" />
+										<p className="text-slate-600 mb-4">
+											No attendees yet. Be the first to join!
+										</p>
+										{!isAttending && !isPastEvent && !isFull && (
+											<Form method="post">
+												<input
+													type="hidden"
+													name="intent"
+													value="attend-event"
+												/>
+												<input
+													type="hidden"
+													name="id"
+													value={eventDetails.id}
+												/>
+												<input
+													type="hidden"
+													name="userId"
+													value={sessionUser.id}
+												/>
+												<button
+													type="submit"
+													className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+												>
+													Attend This Event
+												</button>
+											</Form>
+										)}
+									</div>
+								) : (
+									<div className="grid sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
+										{/* Ensure attendees is properly handled */}
+										{eventDetails.attendees &&
+										eventDetails.attendees.length > 0 ? (
+											eventDetails.attendees.map((attendee) => (
+												<Link
+													key={attendee.user.id}
+													to={`/users/${attendee.user.id}`}
+													className="flex items-center gap-3 p-4 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100"
+												>
+													<img
+														src={attendee.user.profileImage}
+														alt={attendee.user.username}
+														className="w-12 h-12 rounded-full object-cover"
+													/>
+													<div>
+														<h3 className="font-semibold text-slate-900">
+															{attendee.user.firstName} {attendee.user.lastName}
+															{attendee.user.id ===
+																eventDetails.organizer?.id && (
+																<span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+																	Organizer
+																</span>
+															)}
+														</h3>
+														<p className="text-slate-600 text-sm">
+															@{attendee.user.username}
+														</p>
+													</div>
+												</Link>
+											))
+										) : (
+											<div className="text-center py-8">
+												<Users
+													size={48}
+													className="mx-auto text-slate-300 mb-4"
+												/>
+												<p className="text-slate-600">
+													No attendees to display.
+												</p>
+											</div>
+										)}
+									</div>
+								)}
+							</div>
+						)}
+
+						{activeSection === "group" && (
+							<div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+								<h2 className="text-xl font-semibold text-slate-900 mb-4">
+									Hosting Group
+								</h2>
+								{eventDetails.groupInfo ? (
+									<Link
+										to={`/groups/${eventDetails.groupInfo.id}`}
+										className="block p-6 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100"
+									>
+										<div className="flex items-center gap-4 mb-4">
+											<img
+												src={eventDetails.groupInfo.image}
+												alt={eventDetails.groupInfo.name}
+												className="w-16 h-16 rounded-xl object-cover"
+											/>
+											<div>
+												<h3 className="font-semibold text-slate-900 text-lg">
+													{eventDetails.groupInfo.name}
+												</h3>
+												<p className="text-slate-600">
+													{eventDetails.groupInfo.city},{" "}
+													{eventDetails.groupInfo.state}
+												</p>
+											</div>
+										</div>
+										<p className="text-slate-700 mb-4">
+											{eventDetails.groupInfo.about}
+										</p>
+										<div className="flex items-center gap-4 text-sm text-slate-500">
+											<span className="flex items-center gap-1">
+												<Users size={14} />
+												{eventDetails.groupInfo.numMembers} members
+											</span>
+											<span className="bg-slate-100 text-slate-700 px-2 py-1 rounded-full text-xs font-medium">
+												{eventDetails.groupInfo.type}
+											</span>
+										</div>
+									</Link>
+								) : (
+									<p className="text-slate-600">
+										No group information available.
+									</p>
+								)}
+							</div>
+						)}
+
+						{activeSection === "photos" && (
+							<div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+								<div className="flex items-center justify-between mb-4">
+									<h2 className="text-xl font-semibold text-slate-900">
+										Event Photos
+									</h2>
+									<button
+										onClick={handleImagesClick}
+										className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+									>
+										<ImageIcon size={16} />
+										Manage Photos
+									</button>
+								</div>
+
+								{!eventDetails.eventImage ||
+								eventDetails.eventImage.length === 0 ? (
+									<div className="text-center py-12">
+										<div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+											<ImageIcon size={24} className="text-slate-400" />
+										</div>
+										<h3 className="text-lg font-semibold text-slate-900 mb-2">
+											No photos yet
+										</h3>
+										<p className="text-slate-600 mb-4">
+											{isOrganizer
+												? "Upload the first photo to showcase your event!"
+												: "The event organizer hasn't uploaded any photos yet."}
+										</p>
+										{isOrganizer && (
+											<button
+												onClick={handleImagesClick}
+												className="inline-flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors"
+											>
+												<Plus size={18} />
+												Upload First Photo
+											</button>
+										)}
+									</div>
+								) : (
+									<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+										{eventDetails.eventImage.map((image) => (
+											<div
+												key={image.id}
+												className="aspect-square rounded-lg overflow-hidden hover:opacity-90 transition-opacity cursor-pointer group relative"
+												onClick={() => window.open(image.eventImage, "_blank")}
+											>
+												<img
+													src={image.eventImage}
+													alt={`Event photo ${image.id}`}
+													className="w-full h-full object-cover"
+												/>
+												<div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+													<div className="bg-white/90 backdrop-blur-sm p-2 rounded-full">
+														<ImageIcon size={16} className="text-slate-700" />
+													</div>
+												</div>
+											</div>
+										))}
+									</div>
+								)}
+							</div>
+						)}
 					</div>
 
 					{/* Sidebar */}
