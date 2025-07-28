@@ -18,7 +18,8 @@ interface GroupDetails {
 }
 
 interface GroupImagesManagerProps {
-	groupDetails: GroupDetails;
+      groupDetails: GroupDetails;
+      currentUserId: number;
 	onClose: () => void;
 }
 
