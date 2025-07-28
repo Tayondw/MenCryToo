@@ -523,6 +523,58 @@ def add_group_image(groupId):
     return form.errors, 400
 
 
+@group_routes.route("/<int:groupId>/images/<int:imageId>/edit", methods=["POST"])
+@login_required
+def edit_group_image(groupId, imageId):
+    """Edit/update a group image"""
+    # Get group image and check authorization in one query
+    group_image = (
+        db.session.query(GroupImage)
+        .join(Group)
+        .options(joinedload(GroupImage.group).load_only("organizer_id"))
+        .filter(GroupImage.id == imageId, Group.id == groupId)
+        .first()
+    )
+
+    if not group_image:
+        return {"errors": {"message": "Image not found"}}, 404
+
+    if current_user.id != group_image.group.organizer_id:
+        return {"errors": {"message": "Unauthorized"}}, 401
+
+    form = GroupImageForm()
+    form["csrf_token"].data = request.cookies["csrf_token"]
+
+    if form.validate_on_submit():
+        edit_group_image_file = form.data["group_image"]
+
+        if not edit_group_image_file:
+            return {"message": "No image provided"}, 400
+
+        try:
+            edit_group_image_file.filename = get_unique_filename(
+                edit_group_image_file.filename
+            )
+            upload = upload_file_to_s3(edit_group_image_file)
+
+            if "url" not in upload:
+                return {"message": "Upload failed"}, 400
+
+            # Remove the old image from S3
+            if group_image.group_image:
+                remove_file_from_s3(group_image.group_image)
+
+            group_image.group_image = upload["url"]
+            db.session.commit()
+            return {"group_image": group_image.to_dict()}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"Image update failed: {str(e)}"}, 500
+
+    return form.errors, 400
+
+
 # ! GROUP - EVENTS
 @group_routes.route("/<int:groupId>/events/new", methods=["POST"])
 @login_required
