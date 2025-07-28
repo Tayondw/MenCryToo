@@ -19,7 +19,13 @@ export const groupImageAction = async ({
 				const finalGroupId = groupId || groupIdFromForm;
 
 				if (!finalGroupId) {
-					return json({ error: "Group ID is required" }, { status: 400 });
+					return json(
+						{
+							success: false,
+							error: "Group ID is required",
+						},
+						{ status: 400 },
+					);
 				}
 
 				const response = await fetch(`/api/groups/${finalGroupId}/images`, {
@@ -30,11 +36,16 @@ export const groupImageAction = async ({
 
 				if (response.ok) {
 					const result = await response.json();
-					return json({ success: true, image: result.group_image });
+					return json({
+						success: true,
+						message: "Image uploaded successfully!",
+						image: result.group_image,
+					});
 				} else {
 					const errorData = await response.json();
 					return json(
 						{
+							success: false,
 							error: errorData.message || "Failed to upload image",
 						},
 						{ status: 400 },
@@ -46,6 +57,7 @@ export const groupImageAction = async ({
 				if (!groupId || !imageId) {
 					return json(
 						{
+							success: false,
 							error: "Group ID and Image ID are required",
 						},
 						{ status: 400 },
@@ -63,11 +75,16 @@ export const groupImageAction = async ({
 
 				if (response.ok) {
 					const result = await response.json();
-					return json({ success: true, image: result.group_image });
+					return json({
+						success: true,
+						message: "Image updated successfully!",
+						image: result.group_image,
+					});
 				} else {
 					const errorData = await response.json();
 					return json(
 						{
+							success: false,
 							error: errorData.message || "Failed to update image",
 						},
 						{ status: 400 },
@@ -77,7 +94,13 @@ export const groupImageAction = async ({
 
 			case "delete-group-image": {
 				if (!imageId) {
-					return json({ error: "Image ID is required" }, { status: 400 });
+					return json(
+						{
+							success: false,
+							error: "Image ID is required",
+						},
+						{ status: 400 },
+					);
 				}
 
 				const response = await fetch(`/api/group-images/${imageId}`, {
@@ -86,11 +109,15 @@ export const groupImageAction = async ({
 				});
 
 				if (response.ok) {
-					return json({ success: true, message: "Image deleted successfully" });
+					return json({
+						success: true,
+						message: "Image deleted successfully!",
+					});
 				} else {
 					const errorData = await response.json();
 					return json(
 						{
+							success: false,
 							error: errorData.message || "Failed to delete image",
 						},
 						{ status: 400 },
@@ -99,12 +126,19 @@ export const groupImageAction = async ({
 			}
 
 			default:
-				return json({ error: "Invalid action" }, { status: 400 });
+				return json(
+					{
+						success: false,
+						error: "Invalid action",
+					},
+					{ status: 400 },
+				);
 		}
 	} catch (error) {
 		console.error("Error performing group image action:", error);
 		return json(
 			{
+				success: false,
 				error: "Network error. Please try again",
 			},
 			{ status: 500 },
@@ -131,7 +165,13 @@ export const eventImageAction = async ({
 				const finalEventId = eventId || eventIdFromForm;
 
 				if (!finalEventId) {
-					return json({ error: "Event ID is required" }, { status: 400 });
+					return json(
+						{
+							success: false,
+							error: "Event ID is required",
+						},
+						{ status: 400 },
+					);
 				}
 
 				const response = await fetch(`/api/events/${finalEventId}/images`, {
@@ -142,11 +182,16 @@ export const eventImageAction = async ({
 
 				if (response.ok) {
 					const result = await response.json();
-					return json({ success: true, image: result.event_image });
+					return json({
+						success: true,
+						message: "Image uploaded successfully!",
+						image: result.event_image,
+					});
 				} else {
 					const errorData = await response.json();
 					return json(
 						{
+							success: false,
 							error: errorData.message || "Failed to upload image",
 						},
 						{ status: 400 },
@@ -158,6 +203,7 @@ export const eventImageAction = async ({
 				if (!eventId || !imageId) {
 					return json(
 						{
+							success: false,
 							error: "Event ID and Image ID are required",
 						},
 						{ status: 400 },
@@ -175,11 +221,16 @@ export const eventImageAction = async ({
 
 				if (response.ok) {
 					const result = await response.json();
-					return json({ success: true, image: result.event_image });
+					return json({
+						success: true,
+						message: "Image updated successfully!",
+						image: result.event_image,
+					});
 				} else {
 					const errorData = await response.json();
 					return json(
 						{
+							success: false,
 							error: errorData.message || "Failed to update image",
 						},
 						{ status: 400 },
@@ -189,7 +240,13 @@ export const eventImageAction = async ({
 
 			case "delete-event-image": {
 				if (!imageId) {
-					return json({ error: "Image ID is required" }, { status: 400 });
+					return json(
+						{
+							success: false,
+							error: "Image ID is required",
+						},
+						{ status: 400 },
+					);
 				}
 
 				const response = await fetch(`/api/event-images/${imageId}`, {
@@ -198,11 +255,15 @@ export const eventImageAction = async ({
 				});
 
 				if (response.ok) {
-					return json({ success: true, message: "Image deleted successfully" });
+					return json({
+						success: true,
+						message: "Image deleted successfully!",
+					});
 				} else {
 					const errorData = await response.json();
 					return json(
 						{
+							success: false,
 							error: errorData.message || "Failed to delete image",
 						},
 						{ status: 400 },
@@ -211,12 +272,19 @@ export const eventImageAction = async ({
 			}
 
 			default:
-				return json({ error: "Invalid action" }, { status: 400 });
+				return json(
+					{
+						success: false,
+						error: "Invalid action",
+					},
+					{ status: 400 },
+				);
 		}
 	} catch (error) {
 		console.error("Error performing event image action:", error);
 		return json(
 			{
+				success: false,
 				error: "Network error. Please try again",
 			},
 			{ status: 500 },
