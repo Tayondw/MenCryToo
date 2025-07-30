@@ -251,7 +251,7 @@ const Events: React.FC = () => {
 				{/* Content */}
 				<div className="p-6 flex flex-col flex-1">
 					<div className="flex-1">
-						<h3 className="font-bold text-xl text-slate-900 group-hover:text-orange-600 transition-colors mb-2 line-clamp-2 h-[3.5rem]">
+						<h3 className="font-bold text-xl text-slate-900 group-hover:text-orange-600 transition-colors mb-2 line-clamp-2 h-[2rem]">
 							{event.name}
 						</h3>
 						<p className="text-slate-600 text-sm line-clamp-3 leading-relaxed mb-3 h-[4rem]">
