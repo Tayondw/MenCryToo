@@ -12,6 +12,14 @@ export const groupImageAction = async ({
 	const intent = formData.get("intent") as string;
 	const { groupId, imageId } = params;
 
+	console.log("Group Image Action called:", {
+		intent,
+		groupId,
+		imageId,
+		method: request.method,
+		url: request.url,
+	});
+
 	try {
 		switch (intent) {
 			case "add-group-image": {
@@ -28,27 +36,44 @@ export const groupImageAction = async ({
 					);
 				}
 
+				console.log(
+					"Attempting to upload group image to:",
+					`/api/groups/${finalGroupId}/images`,
+				);
+
 				const response = await fetch(`/api/groups/${finalGroupId}/images`, {
 					method: "POST",
 					credentials: "include",
 					body: formData,
 				});
 
+				console.log("Upload response status:", response.status);
+
 				if (response.ok) {
 					const result = await response.json();
+					console.log("Upload successful:", result);
+
 					return json({
 						success: true,
 						message: "Image uploaded successfully!",
 						image: result.group_image,
 					});
 				} else {
-					const errorData = await response.json();
+					console.log(
+						"Upload failed with status:",
+						response.status,
+						response.statusText,
+					);
+					const errorText = await response.text();
+					console.log("Error response text:", errorText);
+
+					const errorData = JSON.parse(errorText);
 					return json(
 						{
 							success: false,
 							error: errorData.message || "Failed to upload image",
 						},
-						{ status: 400 },
+						{ status: response.status },
 					);
 				}
 			}
@@ -63,6 +88,11 @@ export const groupImageAction = async ({
 						{ status: 400 },
 					);
 				}
+
+				console.log(
+					"Attempting to edit group image:",
+					`/api/groups/${groupId}/images/${imageId}/edit`,
+				);
 
 				const response = await fetch(
 					`/api/groups/${groupId}/images/${imageId}/edit`,
@@ -87,13 +117,16 @@ export const groupImageAction = async ({
 							success: false,
 							error: errorData.message || "Failed to update image",
 						},
-						{ status: 400 },
+						{ status: response.status },
 					);
 				}
 			}
 
 			case "delete-group-image": {
-				if (!imageId) {
+				const imageIdFromForm = formData.get("imageId") as string;
+				const finalImageId = imageId || imageIdFromForm;
+
+				if (!finalImageId) {
 					return json(
 						{
 							success: false,
@@ -103,7 +136,12 @@ export const groupImageAction = async ({
 					);
 				}
 
-				const response = await fetch(`/api/group-images/${imageId}`, {
+				console.log(
+					"Attempting to delete group image:",
+					`/api/group-images/${finalImageId}`,
+				);
+
+				const response = await fetch(`/api/group-images/${finalImageId}`, {
 					method: "DELETE",
 					credentials: "include",
 				});
@@ -120,7 +158,7 @@ export const groupImageAction = async ({
 							success: false,
 							error: errorData.message || "Failed to delete image",
 						},
-						{ status: 400 },
+						{ status: response.status },
 					);
 				}
 			}
@@ -158,6 +196,14 @@ export const eventImageAction = async ({
 	const intent = formData.get("intent") as string;
 	const { eventId, imageId } = params;
 
+	console.log("Event Image Action called:", {
+		intent,
+		eventId,
+		imageId,
+		method: request.method,
+		url: request.url,
+	});
+
 	try {
 		switch (intent) {
 			case "add-event-image": {
@@ -174,27 +220,44 @@ export const eventImageAction = async ({
 					);
 				}
 
+				console.log(
+					"Attempting to upload event image to:",
+					`/api/events/${finalEventId}/images`,
+				);
+
 				const response = await fetch(`/api/events/${finalEventId}/images`, {
 					method: "POST",
 					credentials: "include",
 					body: formData,
 				});
 
+				console.log("Upload response status:", response.status);
+
 				if (response.ok) {
 					const result = await response.json();
+					console.log("Upload successful:", result);
+
 					return json({
 						success: true,
 						message: "Image uploaded successfully!",
 						image: result.event_image,
 					});
 				} else {
-					const errorData = await response.json();
+					console.log(
+						"Upload failed with status:",
+						response.status,
+						response.statusText,
+					);
+					const errorText = await response.text();
+					console.log("Error response text:", errorText);
+
+					const errorData = JSON.parse(errorText);
 					return json(
 						{
 							success: false,
 							error: errorData.message || "Failed to upload image",
 						},
-						{ status: 400 },
+						{ status: response.status },
 					);
 				}
 			}
@@ -209,6 +272,11 @@ export const eventImageAction = async ({
 						{ status: 400 },
 					);
 				}
+
+				console.log(
+					"Attempting to edit event image:",
+					`/api/events/${eventId}/images/${imageId}/edit`,
+				);
 
 				const response = await fetch(
 					`/api/events/${eventId}/images/${imageId}/edit`,
@@ -233,13 +301,16 @@ export const eventImageAction = async ({
 							success: false,
 							error: errorData.message || "Failed to update image",
 						},
-						{ status: 400 },
+						{ status: response.status },
 					);
 				}
 			}
 
 			case "delete-event-image": {
-				if (!imageId) {
+				const imageIdFromForm = formData.get("imageId") as string;
+				const finalImageId = imageId || imageIdFromForm;
+
+				if (!finalImageId) {
 					return json(
 						{
 							success: false,
@@ -249,7 +320,12 @@ export const eventImageAction = async ({
 					);
 				}
 
-				const response = await fetch(`/api/event-images/${imageId}`, {
+				console.log(
+					"Attempting to delete event image:",
+					`/api/event-images/${finalImageId}`,
+				);
+
+				const response = await fetch(`/api/event-images/${finalImageId}`, {
 					method: "DELETE",
 					credentials: "include",
 				});
@@ -266,7 +342,7 @@ export const eventImageAction = async ({
 							success: false,
 							error: errorData.message || "Failed to delete image",
 						},
-						{ status: 400 },
+						{ status: response.status },
 					);
 				}
 			}
