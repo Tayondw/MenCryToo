@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Upload, Image, Trash2, Plus, Eye, Download } from "lucide-react";
+import { useFetcher, useActionData } from "react-router-dom";
 
 interface GroupImage {
 	id: number;
@@ -18,23 +19,76 @@ interface GroupDetails {
 }
 
 interface GroupImagesManagerProps {
-      groupDetails: GroupDetails;
-      currentUserId: number;
+	groupDetails: GroupDetails;
+	currentUserId: number;
 	onClose: () => void;
+}
+
+interface ActionData {
+	success?: boolean;
+	error?: string;
+	message?: string;
+	image?: GroupImage;
 }
 
 const GroupImages: React.FC<GroupImagesManagerProps> = ({
 	groupDetails,
+	currentUserId,
 	onClose,
 }) => {
 	const [selectedImage, setSelectedImage] = useState<File | null>(null);
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 	const [activeTab, setActiveTab] = useState<"upload" | "gallery">("gallery");
-	const [isUploading, setIsUploading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-	const isOrganizer = groupDetails?.organizerId === groupDetails?.organizer?.id;
+	const fetcher = useFetcher();
+	const actionData = useActionData() as ActionData;
+
+	const isOrganizer = groupDetails?.organizerId === currentUserId;
 	const groupImages = groupDetails?.groupImage || [];
+	const isUploading = fetcher.state === "submitting";
+
+	// Handle action results
+	useEffect(() => {
+		if (actionData) {
+			if (actionData.success) {
+				setSuccessMessage(actionData.message || "Operation successful!");
+				setError(null);
+				clearSelection();
+                        window.location.reload();
+				setActiveTab("gallery");
+
+				// Refresh the page to show updated images
+				// setTimeout(() => {
+				// }, 0);
+			} else if (actionData.error) {
+				setError(actionData.error);
+				setSuccessMessage(null);
+			}
+		}
+	}, [actionData]);
+
+	// Handle fetcher results for upload operations
+	useEffect(() => {
+		if (fetcher.data) {
+			const data = fetcher.data as ActionData;
+			if (data.success) {
+				setSuccessMessage(data.message || "Operation successful!");
+				setError(null);
+				clearSelection();
+				setActiveTab("gallery");
+
+				// Refresh the page to show updated images
+				setTimeout(() => {
+					window.location.reload();
+				}, 1000);
+			} else if (data.error) {
+				setError(data.error);
+				setSuccessMessage(null);
+			}
+		}
+	}, [fetcher.data]);
 
 	// Handle file selection for upload
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,6 +107,7 @@ const GroupImages: React.FC<GroupImagesManagerProps> = ({
 			}
 
 			setError(null);
+			setSuccessMessage(null);
 			setSelectedImage(file);
 
 			const reader = new FileReader();
@@ -67,59 +122,57 @@ const GroupImages: React.FC<GroupImagesManagerProps> = ({
 		setSelectedImage(null);
 		setPreviewUrl(null);
 		setError(null);
+		setSuccessMessage(null);
 	};
 
-	const handleUpload = async () => {
+	const handleUpload = () => {
 		if (!selectedImage) return;
-
-		setIsUploading(true);
-		setError(null);
 
 		const formData = new FormData();
 		formData.append("group_image", selectedImage);
 		formData.append("intent", "add-group-image");
 		formData.append("groupId", groupDetails.id.toString());
 
-		try {
-			const response = await fetch(`/api/groups/${groupDetails.id}/images`, {
-				method: "POST",
-				body: formData,
-				credentials: "include",
-			});
-
-			if (response.ok) {
-				clearSelection();
-				setActiveTab("gallery");
-				window.location.reload(); // Refresh to show new image
-			} else {
-				const errorData = await response.json();
-				setError(errorData.message || "Upload failed. Please try again.");
-			}
-		} catch {
-			setError("Network error. Please try again.");
-		} finally {
-			setIsUploading(false);
-		}
+		// Submit using fetcher to the group images route
+		fetcher.submit(formData, {
+			method: "post",
+			action: `/groups/${groupDetails.id}/images`,
+			encType: "multipart/form-data",
+		});
 	};
 
-	const handleDelete = async (imageId: number) => {
+	const handleDelete = (imageId: number) => {
 		if (!confirm("Are you sure you want to delete this image?")) return;
 
-		try {
-			const response = await fetch(`/api/group-images/${imageId}`, {
-				method: "DELETE",
-				credentials: "include",
-			});
+		const formData = new FormData();
+		formData.append("intent", "delete-group-image");
+		formData.append("imageId", imageId.toString());
 
-			if (response.ok) {
-				window.location.reload(); // Refresh to remove deleted image
-			} else {
-				setError("Delete failed. Please try again.");
-			}
-		} catch {
-			setError("Network error. Please try again.");
-		}
+		// Submit using fetcher to the group image delete route
+		fetcher.submit(formData, {
+			method: "post",
+			action: `/group-images/${imageId}`,
+		});
 	};
+
+	// Clear messages after a delay
+	useEffect(() => {
+		if (successMessage) {
+			const timer = setTimeout(() => {
+				setSuccessMessage(null);
+			}, 3000);
+			return () => clearTimeout(timer);
+		}
+	}, [successMessage]);
+
+	useEffect(() => {
+		if (error) {
+			const timer = setTimeout(() => {
+				setError(null);
+			}, 5000);
+			return () => clearTimeout(timer);
+		}
+	}, [error]);
 
 	return (
 		<div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col">
@@ -177,6 +230,28 @@ const GroupImages: React.FC<GroupImagesManagerProps> = ({
 					)}
 				</div>
 			</div>
+
+			{/* Success Message */}
+			{successMessage && (
+				<div className="bg-green-50 border-l-4 border-green-400 p-4 mx-6 mt-4 rounded">
+					<p className="text-green-700 text-sm font-medium">{successMessage}</p>
+				</div>
+			)}
+
+			{/* Error Message */}
+			{error && (
+				<div className="bg-red-50 border-l-4 border-red-400 p-4 mx-6 mt-4 rounded">
+					<div className="flex items-center justify-between">
+						<p className="text-red-700 text-sm font-medium">{error}</p>
+						<button
+							onClick={() => setError(null)}
+							className="text-red-600 hover:text-red-800 text-sm underline"
+						>
+							Dismiss
+						</button>
+					</div>
+				</div>
+			)}
 
 			{/* Content */}
 			<div className="flex-1 overflow-y-auto">
@@ -245,6 +320,7 @@ const GroupImages: React.FC<GroupImagesManagerProps> = ({
 															onClick={() => handleDelete(image.id)}
 															className="bg-red-500/90 backdrop-blur-sm p-2 rounded-full hover:bg-red-500 transition-colors text-white"
 															title="Delete image"
+															disabled={fetcher.state === "submitting"}
 														>
 															<Trash2 size={16} />
 														</button>
@@ -280,6 +356,7 @@ const GroupImages: React.FC<GroupImagesManagerProps> = ({
 											type="button"
 											onClick={clearSelection}
 											className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm p-1 rounded-full hover:bg-white transition-colors"
+											disabled={isUploading}
 										>
 											<X size={16} className="text-slate-700" />
 										</button>
@@ -323,20 +400,8 @@ const GroupImages: React.FC<GroupImagesManagerProps> = ({
 								accept="image/*"
 								onChange={handleFileChange}
 								className="hidden"
+								disabled={isUploading}
 							/>
-
-							{/* Error Display */}
-							{error && (
-								<div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-									<p className="text-red-700 text-sm font-medium">{error}</p>
-									<button
-										onClick={() => setError(null)}
-										className="mt-2 text-red-600 hover:text-red-800 text-sm underline"
-									>
-										Dismiss
-									</button>
-								</div>
-							)}
 
 							{/* Action Buttons */}
 							<div className="flex gap-3 pt-4 border-t border-slate-200">
