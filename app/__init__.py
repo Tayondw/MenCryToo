@@ -2,15 +2,16 @@ import os
 import threading
 import time
 import requests
-from flask import Flask, render_template, request, session, redirect, g
+from flask import Flask, render_template, request, session, redirect, g, send_from_directory
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from flask_login import LoginManager
-from flask_compress import Compress  # Add compression
+from flask_compress import Compress
 from werkzeug.middleware.proxy_fix import ProxyFix
 import logging
 from logging.handlers import RotatingFileHandler
+from typing import Optional, Dict, Any, List
 
 # Import models with loading
 from .models import (
@@ -45,6 +46,7 @@ from .api.post_routes import post_routes
 from .api.comment_routes import comment_routes
 from .api.partnership_routes import partnership_routes
 from .api.contact_routes import contact_routes
+from .api.chatbot_routes import chatbot_routes
 from .seeds import seed_commands
 from .config import Config
 
@@ -117,6 +119,7 @@ def create_app(config_class=Config):
     app.register_blueprint(tag_routes, url_prefix="/api/tags")
     app.register_blueprint(partnership_routes, url_prefix="/api/partnerships")
     app.register_blueprint(contact_routes, url_prefix="/api/contact")
+    app.register_blueprint(chatbot_routes, url_prefix="/api/chatbot")
 
     # Performance optimizations
     @app.before_request
@@ -185,17 +188,19 @@ def create_app(config_class=Config):
 
     # API documentation route
     @app.route("/api/docs")
-    def api_help():
+    def api_help() -> Dict[str, List[Any]]:
         """Returns all API routes and their doc strings"""
         acceptable_methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
-        route_list = {}
+        route_list: Dict[str, List[Any]] = {}
 
         for rule in app.url_map.iter_rules():
             if rule.endpoint != "static" and rule.endpoint:
                 try:
+                    # Fix: Handle None case for rule.methods
+                    rule_methods = rule.methods or set()
                     methods = [
                         method
-                        for method in rule.methods
+                        for method in rule_methods
                         if method in acceptable_methods
                     ]
                     doc = (
@@ -216,7 +221,7 @@ def create_app(config_class=Config):
         React app serving with proper caching
         """
         if path == "favicon.ico":
-            response = app.send_from_directory("public", "favicon.ico")
+            response = send_from_directory("public", "favicon.ico")
             response.headers["Cache-Control"] = "public, max-age=86400"  # 1 day
             return response
 
